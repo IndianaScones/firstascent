@@ -25,6 +25,11 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
+<div id="desert_board">
+    <!-- BEGIN tile -->
+        <div id="tile_{X}" class="tile" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
+    <!-- END tile -->
+</div>
 
 This is your game interface. You can edit this HTML in your ".tpl" file.
 

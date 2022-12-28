@@ -43,6 +43,7 @@ class view_firstascent_firstascent extends game_view
         /*********** Place your code below:  ************/
 
 
+
         /*
         
         // Examples: set the value of some element defined in your tpl file like this: {MY_VARIABLE_ELEMENT}
@@ -79,6 +80,24 @@ class view_firstascent_firstascent extends game_view
         
         */
 
+        $desert_coords = array(
+            array(30, 134),  array(30, 194),  array(30, 254),  array(30, 314),  array(30, 374),  array(30, 434), array(30, 494), array(30, 554),
+            array(82, 164),  array(82, 224),  array(82, 284),  array(82, 344),  array(82, 404),  array(82, 464), array(82, 524),
+            array(134, 194), array(134, 254), array(134, 314), array(134, 374), array(134, 434), array(134, 494),
+            array(217, 224), array(217, 284), array(217, 344), array(217, 404), array(217, 464),
+            array(269, 254), array(269, 314), array(269, 374), array(269, 434),
+            array(321, 284), array(321, 404)
+        );
+
+        $this->page->begin_block("firstascent_firstascent", "tile");
+
+        for($i = 0, $j = count($desert_coords); $i < $j; $i++) {
+            $this->page->insert_block("tile", array(
+                'X' => $i,
+                'BOTTOM' => $desert_coords[$i][0],
+                'LEFT' => $desert_coords[$i][1]
+            ) );
+        }
 
 
         /*********** Do not change anything below this line  ************/

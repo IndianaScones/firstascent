@@ -67,6 +67,41 @@
     }
 */
 
+#desert_board {
+    width: 750px;
+    height: 499px;
+    background-image: url('img/desert_board.jpg');
+    background-size: contain;
+    position: relative;
+}
 
+.tile:before {
+    content: " ";
+    width: 0; height: 0;
+    border-bottom: 18px solid #6C6;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    position: absolute;
+    top: -18px;
+}
 
+.tile {
+    bottom: 321px;
+    left: 404px;
+    margin-top: 21px;
+    width: 60px;
+    height: 34px;
+    background-color: #6C6;
+    position: absolute;
+    opacity: .25;
+}
 
+.tile:after {
+    content: "";
+    width: 0;
+    position: absolute;
+    bottom: -17px;
+    border-top: 17px solid #6C6;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+}
