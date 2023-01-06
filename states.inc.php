@@ -73,6 +73,42 @@ $machinestates = array(
     ),
     
 /*
+    SELECT A CHARACTER -> activeplayer
+
+    FINISH PLAYER SETUP -> game
+
+    DRAW INITIAL ASSET CARDS -> activeplayer
+
+    CLIMB PHASE - CHOOSE A PITCH OR REST -> activeplayer
+
+    CLIMB PHASE - USE ASSETS -> activeplayer
+
+    CLIMB PHASE - DRAW A CLIMBING CARD -> activeplayer
+
+    CLIMB PHASE - RISK IT -> activeplayer
+
+    CLIMB PHASE - NEXT PLAYER -> game
+
+    FOLLOW PHASE - TECHNIQUE SYMBOLS -> game
+
+    FOLLOW PHASE - USE A TECHNIQUE TOKEN -> multipleactiveplayer
+
+    FOLLOW PHASE - GAIN PERMANENT ASSETS -> game
+
+    FOLLOW PHASE - FLIP OVER USED ASSETS -> game
+
+    RERACK PHASE - DRAW ASSETS -> activeplayer
+
+    RERACK PHASE - NEXT PLAYER -> game
+
+    ** anytime actions **
+
+    TRADE IN CARDS
+
+    USE SUMMIT BETA TOKEN
+*/
+
+/*
     Examples:
     
     2 => array(

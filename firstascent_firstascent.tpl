@@ -26,9 +26,12 @@
 -->
 
 <div id="desert_board">
-    <!-- BEGIN tile -->
-        <div id="tile_{X}" class="tile" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
-    <!-- END tile -->
+    <!-- BEGIN pitch -->
+        <div id="pitch{X}" class="hex pitch p{PITCH}" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
+    <!-- END pitch -->
+
+    <div id="pitches">
+    </div>
 </div>
 
 This is your game interface. You can edit this HTML in your ".tpl" file.

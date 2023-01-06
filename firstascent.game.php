@@ -33,7 +33,7 @@ class FirstAscent extends Table
         parent::__construct();
         
         self::initGameStateLabels( array( 
-            //    "my_first_global_variable" => 10,
+                "player_count" => 10,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
@@ -81,7 +81,66 @@ class FirstAscent extends Table
 
         // Init global values with their initial values
         //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
-        
+
+        if (count($players) <= 3) {
+            self::setGameStateInitialValue( 'player_count', 1);
+        } else { self::setGameStateInitialValue( 'player_count', 2); }
+
+        // Set up board
+
+        // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
+        $ones = [ [1,3,6,8,11,13], [1,2,3,4,5,6] ];
+        $twos = [ [2,4,7,9,12,15,16,19,21,28,29], [7,8,9,10,11,12,13,14,15,16,17] ];
+        $threes = [ [17,20,23,25], [18,19,20,21] ];
+        $fours = [ [10,14,18,27,30], [22,23,24,25,26] ];
+        $fives = [ [22,24,26,31,32], [27,28,29,30,31,32] ];
+
+        $pitch_order = [];
+
+        if (self::getGameStateValue('player_count') === 1) {
+
+            $pitch_order[5] = 33;
+            for ($i=1; $i<=32; $i++) {
+
+                if (in_array($i, $twos[0])) {
+                    // pick a random pitch from the twos
+                    shuffle($twos[1]);
+                    $pitch_order[$i] = array_pop($twos[1]);
+
+                } else if (in_array($i, $ones[0])) {
+                    shuffle($ones[1]);
+                    $pitch_order[$i] = array_pop($ones[1]);
+
+                } else if (in_array($i, $fours[0])) {
+                    shuffle($fours[1]);
+                    $pitch_order[$i] = array_pop($fours[1]);
+
+                } else if (in_array($i, $fives[0])) {
+                    shuffle($fives[1]);
+                    $pitch_order[$i] = array_pop($fives[1]);
+
+                } else if (in_array($i, $threes[0])) {
+                    shuffle($threes[1]);
+                    $pitch_order[$i] = array_pop($threes[1]);
+                }
+            }
+        }
+
+        // Write pitches into DB
+        $sql = "INSERT INTO board (pitch_location, pitch_id) VALUES ";
+        $sql_values = [];
+        foreach($pitch_order as $location => $pitch) {
+
+            $pitch_location = $location;
+            //$pitch_name = $this->pitches[$pitch]['name'];
+            $pitch_id = $pitch;
+
+            $sql_values[] = "('$pitch_location','$pitch_id')";
+        }
+        $sql .= implode(',', $sql_values);
+        self::DbQuery($sql);
+
+
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
@@ -115,6 +174,7 @@ class FirstAscent extends Table
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
+        $result['player_count'] = $this->getGameStateValue('player_count');
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
@@ -147,7 +207,17 @@ class FirstAscent extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getPitchOrder() {
+        return self::getCollectionFromDb('SELECT pitch_location location, pitch_id id FROM board ORDER BY pitch_location', true);
+    }
 
+    function php_debug() {
+
+        //$pitchO = self::getCollectionFromDb('SELECT pitch_location,pitch_id FROM board ORDER BY pitch_location', true);
+        //$this->dump("getPitchOrder", $pitchO);
+        $this->dump("pitches", array_keys($this->pitches)[3]);
+        //$this->dump("variable", variable);
+    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions

@@ -81,22 +81,41 @@ class view_firstascent_firstascent extends game_view
         */
 
         $desert_coords = array(
-            array(30, 134),  array(30, 194),  array(30, 254),  array(30, 314),  array(30, 374),  array(30, 434), array(30, 494), array(30, 554),
-            array(82, 164),  array(82, 224),  array(82, 284),  array(82, 344),  array(82, 404),  array(82, 464), array(82, 524),
-            array(134, 194), array(134, 254), array(134, 314), array(134, 374), array(134, 434), array(134, 494),
-            array(217, 224), array(217, 284), array(217, 344), array(217, 404), array(217, 464),
-            array(269, 254), array(269, 314), array(269, 374), array(269, 434),
-            array(321, 284), array(321, 404)
-        );
+            array(17.4, 181.2),  array(17.2, 262),  array(17.2, 342.95),  array(17.55, 423.9),  array(17.55, 504.9),  
+                array(17.2, 585.9), array(17.55, 666.9), array(17.35, 747.7),
+            array(87.75, 221.4),  array(87.75, 302.4),  array(87.35, 383.6),  array(87.75, 464.4),  array(87.35, 545.4),  
+                array(87.75, 626.4), array(87.75, 707.4),
+            array(157.8, 262.4), array(157.8, 342.9), array(157.95, 423.9), array(157.8, 504.9), array(157.8, 585.9), 
+                array(157.8, 666.7),
+            array(269.5, 302.55), array(269.5, 383.6), array(269.5, 464.55), array(269.5, 545.4), array(269.5, 626.35),
+            array(339.8, 342.95), array(339.8, 423.9), array(339.8, 504.85), array(339.8, 585.9),
+            array(409.725, 383.6), array(409.725, 545.4)
 
-        $this->page->begin_block("firstascent_firstascent", "tile");
+        );
+        $pitch_order = $this->game->getPitchOrder();
+        $pitches_face_down = [34, 35, 36, 37, 38]; // CSS identifiers
+
+        $this->page->begin_block("firstascent_firstascent", "pitch");
 
         for($i = 0, $j = count($desert_coords); $i < $j; $i++) {
-            $this->page->insert_block("tile", array(
-                'X' => $i,
+            if ($i <= 20 && $i !== 4) {
+
+                $this->page->insert_block("pitch", array(
+                'X' => $i+1,
+                'PITCH' => $pitch_order[$i+1],
                 'BOTTOM' => $desert_coords[$i][0],
                 'LEFT' => $desert_coords[$i][1]
-            ) );
+                ) );
+
+            } else if ($i > 20 && $i !== 4) {
+
+                $this->page->insert_block("pitch", array(
+                'X' => $i+1,
+                'PITCH' => $pitches_face_down[$this->game->pitches[$pitch_order[$i+1]]['value']-1],
+                'BOTTOM' => $desert_coords[$i][0],
+                'LEFT' => $desert_coords[$i][1]
+                ) );
+            }
         }
 
 
