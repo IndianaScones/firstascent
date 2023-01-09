@@ -67,7 +67,7 @@
     }
 */
 
-#desert_board {
+.desert {
     width: 1012.5px; /*750* x 1.35*/
     height: 673.65px; /*499* x 1.35*/
     background-image: url('img/desert_board.jpg');
@@ -75,37 +75,13 @@
     position: relative;
 }
 
-/*
-.hex:before {
-    content: " ";
-    width: 0; height: 0;
-    border-bottom: 18px solid #6C6;
-    border-left: 30px solid transparent;
-    border-right: 30px solid transparent;
-    position: absolute;
-    top: -18px;
+.forest {
+    width: 1012.5px;
+    height: 673.65px;
+    background-image: url('img/forest_board.jpg');
+    background-size: contain;
+    position: relative;
 }
-
-.hex {
-    bottom: 321px;
-    left: 404px;
-    margin-top: 21px;
-    width: 60px;
-    height: 34px;
-    /*background-color: #6C6;*/
-    /*opacity: .25;*//*
-    position: absolute;
-}
-
-.hex:after {
-    content: "";
-    width: 0;
-    position: absolute;
-    bottom: -17px;
-    border-top: 17px solid #6C6;
-    border-left: 30px solid transparent;
-    border-right: 30px solid transparent;
-}*/
 
 .pitch {
     width: 80.4px;

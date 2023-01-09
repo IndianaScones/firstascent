@@ -25,12 +25,13 @@
     Please REMOVE this comment before publishing your game on BGA
 -->
 
-<div id="desert_board">
-    <!-- BEGIN pitch -->
-        <div id="pitch{X}" class="hex pitch p{PITCH}" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
-    <!-- END pitch -->
-
+<div id="board" class="desert forest">
+    
     <div id="pitches">
+        <!-- BEGIN pitch -->
+            <div id="pitch{X}" class="pitch p{PITCH}" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
+        <!-- END pitch -->
+
     </div>
 </div>
 

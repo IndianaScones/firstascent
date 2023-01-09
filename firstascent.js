@@ -57,7 +57,16 @@ function (dojo, declare) {
             }
             
             // TODO: Set up your game interface here, according to "gamedatas"
-            
+
+            if (gamedatas.player_count === '1') {
+                dojo.removeClass('board', 'forest');
+            } else {
+                dojo.removeClass('board', 'desert');
+                dojo.query('#pitches .pitch').style({
+                    'height':'91.5px',
+                    'width':'79.5px',
+                })
+            }
  
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
