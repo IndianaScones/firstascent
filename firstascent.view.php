@@ -80,13 +80,37 @@ class view_firstascent_firstascent extends game_view
         
         */
 
+    // Set up board
+
+        // Set up shared objectives
+
+        $current_shared_objectives = $this->game->getCurrentObjectives();
+        $this->page->begin_block("firstascent_firstascent", "shared_objective");
+
+        if ($this->game->getTileCoords()[0] === 1) { // player count
+            $shared_objectives_coords = [ [18, 362.8], [18, 472.8], [18, 582.7] ]; // Desert board
+        } else {$shared_objectives_coords = [ [19, 361.5], [19, 470.1], [19, 578.7] ];} // Forest board
+        
+        for($i=0, $j = 3; $i < $j; $i++) {
+
+            $this->page->insert_block("shared_objective", array(
+                'id' => $i+1,
+                'soX' => $this->game->shared_objectives[$current_shared_objectives[$i]]['x_y'][0],
+                'soY' => $this->game->shared_objectives[$current_shared_objectives[$i]]['x_y'][1],
+                'TOP' => $shared_objectives_coords[$i][0],
+                'LEFT' => $shared_objectives_coords[$i][1]
+            ) );
+        }
+
+        // Set up tiles
+
         $tile_coords = $this->game->getTileCoords();
         $pitch_order = $this->game->getPitchOrder();
         $pitches_face_down = [34, 35, 36, 37, 38]; // CSS identifiers
 
         $this->page->begin_block("firstascent_firstascent", "pitch");
 
-        if ($tile_coords[0][0] === 1) {
+        if ($tile_coords[0] === 1) {
             $max_coord = 20;
             $skip_coords = [4];
         }

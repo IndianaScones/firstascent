@@ -26,13 +26,21 @@
 -->
 
 <div id="board" class="desert forest">
+
+    <div id="shared_objectives">
+        <!-- BEGIN shared_objective -->
+            <div id="shared_objective{id}" class="shared_objective" style="background-position: -{soX}% -{soY}%; top: {TOP}px; left: {LEFT}px;"></div>
+        <!-- END shared_objective -->
+    </div>
+
+    <div id="the_spread"></div>
     
     <div id="pitches">
         <!-- BEGIN pitch -->
             <div id="pitch{X}" class="pitch p{PITCH}" style="bottom: {BOTTOM}px; left: {LEFT}px;"></div>
         <!-- END pitch -->
-
     </div>
+
 </div>
 
 This is your game interface. You can edit this HTML in your ".tpl" file.
@@ -47,6 +55,10 @@ This is your game interface. You can edit this HTML in your ".tpl" file.
 var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_ID}"></div>';
 
 */
+
+let jstpl_asset_deck='<div id="asset_deck" class="assets deck_back" style="top: ${asset_deckX}px; left: ${asset_deckY}px;"></div>';
+let jstpl_spread_slot='<div id="spread_slot${SLOT_NUM}" class="spread" style="top: ${spreadX}px; left: ${spreadY}px;"></div>';
+let jstpl_asset_card='<div id="asset_card_${CARD_ID}" class="assets" style="background-position: -${acX}% -${acY}%;"></div>';
 
 </script>  
 

@@ -34,12 +34,18 @@ class FirstAscent extends Table
         
         self::initGameStateLabels( array( 
                 "player_count" => 10,
+                "shared_objective_1" => 11,
+                "shared_objective_2" => 12,
+                "shared_objective_3" => 13,
             //    "my_second_global_variable" => 11,
             //      ...
             //    "my_first_game_variant" => 100,
             //    "my_second_game_variant" => 101,
             //      ...
-        ) );        
+        ) );     
+
+        $this->cards_and_tokens = self::getNew('module.common.deck');
+        $this->cards_and_tokens->init('cards_and_tokens');   
 	}
 	
     protected function getGameName( )
@@ -86,7 +92,48 @@ class FirstAscent extends Table
             self::setGameStateInitialValue( 'player_count', 1);
         } else { self::setGameStateInitialValue( 'player_count', 2); }
 
-        // Set up board
+    // Set up cards and tokens
+
+        // add summit beta tokens
+        $summit_beta_tokens = array();
+        for ($i=1; $i<=12; $i++) {
+            $summit_beta_tokens[] = array(
+                'type' => 'summit_beta',
+                'type_arg' => $i,
+                'nbr' => 1,
+            );
+        }
+        $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
+
+        // add asset cards
+        $asset_cards = array();
+        for ($i=1; $i<=37; $i++) {
+            $asset_cards[] = array(
+                'type' => 'asset',
+                'type_arg' => $i,
+                'nbr' => $this->asset_cards[$i]['number_in_deck'],
+            );
+        }
+
+        $this->cards_and_tokens->createCards($asset_cards, 'asset_deck');
+
+        // draw starting spread
+        $this->cards_and_tokens->shuffle('asset_deck');
+        $this->cards_and_tokens->pickCardsForLocation(4, 'asset_deck', 'the_spread');
+
+
+    // Set up board
+
+        // set up shared objectives
+
+        $shared_objectives_ids = range(1,16);
+        shuffle($shared_objectives_ids);
+        $current_objectives = array_slice($shared_objectives_ids, 0, 3);
+        self::setGameStateInitialValue('shared_objective_1', $current_objectives[0]);
+        self::setGameStateInitialValue('shared_objective_2', $current_objectives[1]);
+        self::setGameStateInitialValue('shared_objective_3', $current_objectives[2]);
+
+        // Set up tiles
 
         if (self::getGameStateValue('player_count') === 1) {
 
@@ -164,7 +211,6 @@ class FirstAscent extends Table
         $sql .= implode(',', $sql_values);
         self::DbQuery($sql);
 
-
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
@@ -199,6 +245,15 @@ class FirstAscent extends Table
         $sql = "SELECT player_id id, player_score score FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
         $result['player_count'] = $this->getGameStateValue('player_count');
+
+        // Get materials
+        $result['asset_cards'] = $this->asset_cards;
+        $result['climbing_cards'] = $this->climbing_cards;
+
+        // Get starting Spread
+        $result['spread'] = self::getCollectionFromDb(
+                                "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='the_spread'", true
+        );
   
         // TODO: Gather all information about current game situation (visible by player $current_player_id).
   
@@ -231,10 +286,18 @@ class FirstAscent extends Table
         In this space, you can put any utility methods useful for your game logic
     */
 
+    function getCurrentObjectives() {
+        return [
+            self::getGameStateValue('shared_objective_1'),
+            self::getGameStateValue('shared_objective_2'),
+            self::getGameStateValue('shared_objective_3')
+        ];
+    }
+
     function getTileCoords() {
         if (self::getGameStateValue('player_count') === '1') {
             return [
-        /*player_count*/ [1],
+        /*player_count*/ 1,
 
         /*row 1*/   [ [17.4, 181.2],  [17.2, 262],  [17.2, 342.95],  [17.55, 423.9],  [17.55, 504.9], 
                           [17.2, 585.9], [17.55, 666.9], [17.35, 747.7],
@@ -248,7 +311,7 @@ class FirstAscent extends Table
 
         } else {
             return [
-        /*player_count*/ [2],
+        /*player_count*/ 2,
 
         /*row 1*/   [ [19.25, 105.3],  [19.25, 185.55],  [19.25, 265.55],  [19.25, 345.65],  [19.25, 425.75],
                           [19.25, 505.8], [19.25, 585.8], [19.25, 665.8], [19.25, 745.75], [19.25, 825.65],

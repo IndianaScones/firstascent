@@ -18,7 +18,8 @@
 define([
     "dojo","dojo/_base/declare",
     "ebg/core/gamegui",
-    "ebg/counter"
+    "ebg/counter",
+    "ebg/stock"
 ],
 function (dojo, declare) {
     return declare("bgagame.firstascent", ebg.core.gamegui, {
@@ -62,10 +63,48 @@ function (dojo, declare) {
                 dojo.removeClass('board', 'forest');
             } else {
                 dojo.removeClass('board', 'desert');
-                dojo.query('#pitches .pitch').style({
+                dojo.query('#pitches .pitch').style({ //CHECK TO SEE IF THIS IS NECESSARY
                     'height':'91.5px',
                     'width':'79.5px',
                 })
+            }
+
+            // Set up the spread
+
+            let asset_deck_coords;
+            if (gamedatas.player_count === '1') {asset_deck_coords = [.45, 916.25];}
+            else {asset_deck_coords = [3.9, 910.25];}
+            dojo.place(this.format_block('jstpl_asset_deck', {
+                asset_deckX : asset_deck_coords[0],
+                asset_deckY : asset_deck_coords[1]
+            }), 'board', 2);
+
+            console.log('spread cards = ');
+            console.log(gamedatas.spread);
+            let spread_cards = Object.values(gamedatas.spread);
+            let spread_coords;
+            if (gamedatas.player_count === '1') {
+                spread_coords = [ [89.17, 994.25], [161.5, 994.25], [233.9, 994.25], [306.2, 994.25] ]; // Desert board
+            } else {spread_coords = [ [91.5, 989], [163, 989], [234.25, 989], [305.65, 989] ];} // Forest board
+            for (i=0; i<=3; i++) {
+                dojo.place(this.format_block('jstpl_spread_slot', {
+                    SLOT_NUM : i+1,
+                    spreadX : spread_coords[i][0],
+                    spreadY : spread_coords[i][1]
+                }), 'the_spread');
+            }
+
+            for (card=0; card<=3; card++) {
+
+                let spread_slot = `spread_slot${card+1}`;
+                let cardNum = Number(spread_cards[card]);
+                let x = gamedatas.asset_cards[cardNum]['x_y'][0];
+                let y = gamedatas.asset_cards[cardNum]['x_y'][1];
+                dojo.place(this.format_block('jstpl_asset_card', {
+                    CARD_ID : Object.keys(gamedatas.spread)[card],
+                    acX : x,
+                    acY : y,
+                }), spread_slot);
             }
  
             // Setup game notifications to handle (see "setupNotifications" method below)

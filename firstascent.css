@@ -83,6 +83,52 @@
     position: relative;
 }
 
+.shared_objective {
+    width: 70px;
+    height: 70px;
+    position: absolute;
+    background-image: url('img/summit_objectives.png');
+    background-size: 400% 800%;
+}
+
+/* shared objectives */
+/*.so1 { background-position: -0% -100% }
+.so2 { background-position: -100% -100% }
+.so3 { background-position: -200% -100% }
+.so4 { background-position: -300% -100% }
+.so5 { background-position: -400% -100% }
+.so6 { background-position: -500% -100% }
+.so7 { background-position: -600% -100% }
+.so8 { background-position: -700% -100% }
+.so9 { background-position: -800% -100% }
+.so10 { background-position: -900% -100% }
+.so11 { background-position: -1000% -100% }
+.so12 { background-position: -1100% -100% }
+.so13 { background-position: -1200% -100% }
+.so14 { background-position: -1300% -100% }
+.so15 { background-position: -1400% -100% }
+.so16 { background-position: -1500% -100% }*/
+
+/* asset deck and spread */
+.assets {
+    width: 62px;
+    height: 95px;
+    position: absolute;
+    background-image: url('img/asset_cards.jpg');
+    background-size: 1200% 400%;
+}
+
+.deck_back {
+    transform: rotate(90deg);
+    background-position: 0% 0%;
+}
+
+.spread {
+    position: absolute;
+    transform: rotate(90deg);
+}
+
+/* pitches */
 .pitch {
     width: 80.4px;
     height: 92.7px;
