@@ -63,6 +63,13 @@
     
     */
 
+    public function chooseCharacter() {
+        self::setAjaxMode();
+        $character = self::getArg("character", AT_posint, true);
+        $this->game->chooseCharacter($character);
+        self::ajaxResponse();
+    }
+
   }
   
 

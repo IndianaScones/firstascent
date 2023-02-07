@@ -67,60 +67,88 @@
     }
 */
 
+/* player panels */
+.reference {
+    height: 47.5px;
+    width: 35px;
+    background-image: url('img/reference_objectives.jpg');
+    background-size: 800% 200%;
+    display: inline-block;
+}
+
 .desert {
-    width: 1012.5px; /*750* x 1.35*/
-    height: 673.65px; /*499* x 1.35*/
+    height: 673.65px;
+    width: 1012.5px;
     background-image: url('img/desert_board.jpg');
     background-size: contain;
     position: relative;
 }
 
 .forest {
-    width: 1012.5px;
     height: 673.65px;
+    width: 1012.5px;
     background-image: url('img/forest_board.jpg');
     background-size: contain;
     position: relative;
 }
 
-.shared_objective {
-    width: 70px;
+.summit_beta {
     height: 70px;
+    width: 70px;
     position: absolute;
     background-image: url('img/summit_objectives.png');
     background-size: 400% 800%;
 }
 
-/* shared objectives */
-/*.so1 { background-position: -0% -100% }
-.so2 { background-position: -100% -100% }
-.so3 { background-position: -200% -100% }
-.so4 { background-position: -300% -100% }
-.so5 { background-position: -400% -100% }
-.so6 { background-position: -500% -100% }
-.so7 { background-position: -600% -100% }
-.so8 { background-position: -700% -100% }
-.so9 { background-position: -800% -100% }
-.so10 { background-position: -900% -100% }
-.so11 { background-position: -1000% -100% }
-.so12 { background-position: -1100% -100% }
-.so13 { background-position: -1200% -100% }
-.so14 { background-position: -1300% -100% }
-.so15 { background-position: -1400% -100% }
-.so16 { background-position: -1500% -100% }*/
+.summit_pile_back {
+    background-position: -0% -0%;
+}
+
+/* climbing cards deck */
+.climbing {
+    height: 178.3px;
+    width: 105.5px;
+    position: absolute;
+    background-image: url('img/climbing_cards.jpg');
+    background-size: 1000% 800%;
+}
+
+.climbing_deck_back {
+    transform: rotate(270deg);
+    background-position: -0% -700%;
+}
+
+.shared_objective {
+    height: 70px;
+    width: 70px;
+    position: absolute;
+    background-image: url('img/summit_objectives.png');
+    background-size: 400% 800%;
+}
+
+.personal_objective {
+    height: 190px;
+    width: 124px;
+    position: relative;
+    background-image: url('img/reference_objectives.jpg');
+    background-size: 800% 200%;
+}
+
+.po1 { background-position: -0% -0%; }    /****TEMP****/
+.po2 { background-position: -100% -0%; }
 
 /* asset deck and spread */
 .assets {
-    width: 62px;
     height: 95px;
+    width: 62px;
     position: absolute;
     background-image: url('img/asset_cards.jpg');
     background-size: 1200% 400%;
 }
 
-.deck_back {
+.asset_deck_back {
     transform: rotate(90deg);
-    background-position: 0% 0%;
+    background-position: -0% -0%;
 }
 
 .spread {
@@ -130,59 +158,81 @@
 
 /* pitches */
 .pitch {
-    width: 80.4px;
     height: 92.7px;
+    width: 80.4px;
     position: absolute;
-    background-image: url('img/pitches_cropped.png');
-    background-size: 1100% 400%;
+    background-image: url('img/pitches.png');
+    background-size: 1300% 400%;
 }
 
-/* value 1 pitches */
-.p1 { background-position: -0% -0%; }
-.p2 { background-position: -100% -0%; }
-.p3 { background-position: -200% -0%; }
-.p4 { background-position: -300% -0%; }
-.p5 { background-position: -400% -0%; }
-.p6 { background-position: -500% -0%; }
+/* characters */
+.character {
+    height: 324.375px;
+    width: 313.125px;
+    display: inline-block;
+    background-image: url('img/characters.jpg');
+    background-size: 800% 500%;
+}
 
-/* value 2 pitches */
-.p7 { background-position: -0% -100%; }
-.p8 { background-position: -100% -100%; }
-.p9 { background-position: -200% -100%; }
-.p10 { background-position: -300% -100%; }
-.p11 { background-position: -400% -100%; }
-.p12 { background-position: -500% -100%; }
-.p13 { background-position: -600% -100%; }
-.p14 { background-position: -700% -100%; }
-.p15 { background-position: -800% -100%; }
-.p16 { background-position: -900% -100%; }
-.p17 { background-position: -1000% -100%; }
+.character_select {
+    border-radius: 10px;
+    border: 1px black solid;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+    cursor: pointer;
+    transition: .5s ease;
+}
 
-/* value 3 pitches */
-.p18 { background-position: -0% -200%; }
-.p19 { background-position: -100% -200%; }
-.p20 { background-position: -200% -200%; }
-.p21 { background-position: -300% -200%; }
+.character_select:hover {
+    box-shadow: 0 0 0 10px #000000;
+    transition: .5s ease;
+}
 
-/* value 4 pitches */
-.p22 { background-position: -400% -200%; }
-.p23 { background-position: -500% -200%; }
-.p24 { background-position: -600% -200%; }
-.p25 { background-position: -700% -200%; }
-.p26 { background-position: -800% -200%; }
+#asset_board {
+    height: 324.375px;
+    width: 626.25px;
+    display: inline-block;
+}
 
-/* value 5 pitches */
-.p27 { background-position: -0% -300%; }
-.p28 { background-position: -100% -300%; }
-.p29 { background-position: -200% -300%; }
-.p30 { background-position: -300% -300%; }
-.p31 { background-position: -400% -300%; }
-.p32 { background-position: -500% -300%; }
-/* .p33 is The Trifecta, which is printed on the board
+.asset_board {
+    background-image: url('img/characters.jpg');
+    background-size: 400% 500%;
+}
 
-/* pitch backings */
-.p34 { background-position: -600% -300%; }
-.p35 { background-position: -700% -300%; }
-.p36 { background-position: -800% -300%; }
-.p37 { background-position: -900% -300%; }
-.p38 { background-position: -1000% -300%; }
+/* tooltips */
+.pitch_tt {
+    height: 185.4px;
+    width: 160.8px;
+    position: static;
+}
+
+.shared_objective_tt {
+    height: 140px;
+    width: 140px;
+    position: static;
+}
+
+.assets_tt {
+    height: 190px;
+    width: 124px;
+    position: static;
+}
+
+.reference_tt {
+    height: 356.25px;
+    width: 232.5px;
+    position: static;
+    float: left;
+    margin-right: 5px;
+}
+
+.risk_die {
+    height: 15px;
+    width: 15px;
+    background-image: url('img/risk_die.png');
+    background-size: 300% 100%;
+    position: absolute;
+}
+
+.risk_1 { background-position: -0% -0%; }
+.risk_2 { background-position: -100% -0%; }
+.risk_3 { background-position: -200% -0%; }

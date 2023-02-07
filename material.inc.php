@@ -36,10 +36,10 @@ $this->card_types = array(
 $this->pitches = [
     '1' => [
         'name' => 'dinkus_dog',
-        'description' => clienttranslate("Dinkus Dog"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Dinkus Dog"),
         'value' => 1,
         'type' => 'slab',
+        'type_description' => _("Slab"),
         'shade' => 1,
         'requirements' => [
             'gear' => null,
@@ -51,14 +51,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['southern_rock', 'a_day_at_the_zoo'],
+        'x_y' => [0, 0],
     ],
 
     '2' => [
         'name' => 'rogers_roof',
-        'description' => clienttranslate("Roger's Roof"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Roger's Roof"),
         'value' => 1,
         'type' => 'roof',
+        'type_description' => _("Roof"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -70,14 +71,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['glory_days_of_the_piton', 'social_butterfly', 'call_it_like_you_see_it'],
+        'x_y' => [100, 0],
     ],
 
     '3' => [
         'name' => 'corrugation_corner',
-        'description' => clienttranslate("Corrugation Corner"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Corrugation Corner"),
         'value' => 1,
         'type' => 'corner',
+        'type_description' => _("Corner"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -89,14 +91,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['glory_days_of_the_piton', 'call_it_like_you_see_it'],
+        'x_y' => [200, 0],
     ],
 
     '4' => [
         'name' => 'rebuffats_arete',
-        'description' => clienttranslate("Rebuffat's Arete"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Rebuffat's Arete"),
         'value' => 1,
         'type' => 'arete',
+        'type_description' => _("Arete"),
         'shade' => 1,
         'requirements' => [
             'gear' => 1,
@@ -109,14 +112,15 @@ $this->pitches = [
         ],
         'personal_objectives' => ['glory_days_of_the_piton', 'social_butterfly', 'climb_your_way_out,', 
                                   'call_it_like_you_see_it', 'rocky_mountains_tour'],
+        'x_y' => [300, 0],
     ],
 
     '5' => [
         'name' => 'leap_year_flake',
-        'name' => clienttranslate("Leap Year Flake"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Leap Year Flake"),
         'value' => 1,
         'type' => 'flake',
+        'type_description' => _("Flake"),
         'shade' => 1,
         'requirements' => [
             'gear' => 1,
@@ -128,14 +132,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['national_parks_pass', 'call_it_like_you_see_it', 'desert_days'],
+        'x_y' => [400, 0],
     ],
 
     '6' => [
         'name' => 'half-a-finger',
-        'description' => clienttranslate("Half-a-finger"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Half-a-finger"),
         'value' => 1,
         'type' => 'crack',
+        'type_description' => _("Crack"),
         'shade' => 0,
         'requirements' => [
             'gear' => null,
@@ -147,14 +152,135 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['full_body_workout', 'climb_your_way_out'],
+        'x_y' => [500, 0],
     ],
 
     '7' => [
+        'name' => 'fiddler_on_the_roof',
+        'description' => _("Fiddler on the Roof"),
+        'value' => 1,
+        'type' => 'roof',
+        'type_description' => _("Roof"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => null,
+            'face' => 1,
+            'slab' => null,
+            'any_skill' => 1,
+            'water' => null,
+            'psych' => null,
+        ],
+        'personal_objectives' => ['desert_days', 'call_it_like_you_see_it', 'climb_your_way_out'],
+        'x_y' => [600, 0],
+    ],
+
+    '8' => [
+        'name' => 'edge_of_time',
+        'description' => _("Edge of Time"),
+        'value' => 1,
+        'type' => 'arete',
+        'type_description' => _("Arete"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 1,
+            'crack' => null,
+            'face' => 1,
+            'slab' => null,
+            'any_skill' => 1,
+            'water' => 1,
+            'psych' => null,
+        ],
+        'personal_objectives' => ['sporty_spice', 'rocky_mountains_tour'],
+        'x_y' => [700, 0],
+    ],
+
+    '9' => [
+        'name' => 'chapel_pond_slab',
+        'description' => _("Chapel Pond Slab"),
+        'value' => 1,
+        'type' => 'slab',
+        'type_description' => _("Slab"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => null,
+            'crack' => null,
+            'face' => null,
+            'slab' => 1,
+            'any_skill' => 1,
+            'water' => null,
+            'psych' => 2,
+        ],
+        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton'],
+        'x_y' => [800, 0],
+    ],
+
+    '10' => [
+        'name' => 'old_man',
+        'description' => _("Old Man"),
+        'value' => 1,
+        'type' => 'corner',
+        'type_description' => _("Corner"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => null,
+            'crack' => null,
+            'face' => 1,
+            'slab' => 1,
+            'any_skill' => 1,
+            'water' => null,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['desert_days'],
+        'x_y' => [900, 0],
+    ],
+
+    '11' => [
+        'name' => 'outer_space',
+        'description' => _("Outer Space"),
+        'value' => 1,
+        'type' => 'crack',
+        'type_description' => _("Crack"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => null,
+            'crack' => 1,
+            'face' => null,
+            'slab' => 1,
+            'any_skill' => 1,
+            'water' => null,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['glory_days_of_the_piton'],
+        'x_y' => [1000, 0],
+    ],
+
+    '12' => [
+        'name' => 'the_beast_flake',
+        'description' => _("The Beast Flake"),
+        'value' => 1,
+        'type' => 'flake',
+        'type_description' => _("Flake"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => null,
+            'crack' => null,
+            'face' => 1,
+            'slab' => 2,
+            'any_skill' => 1,
+            'water' => null,
+            'psych' => null,
+        ],
+        'personal_objectives' => ['call_it_like_you_see_it'],
+        'x_y' => [1100, 0],
+    ],
+
+    '13' => [
         'name' => 'bird_cage',
-        'description' => clienttranslate("Bird Cage"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Bird Cage"),
         'value' => 2,
         'type' => 'roof',
+        'type_description' => _("Roof"),
         'shade' => 0,
         'requirements' => [
             'gear' => 1,
@@ -166,14 +292,15 @@ $this->pitches = [
             'psych' => 2,
         ],
         'personal_objectives' => ['a_day_at_the_zoo', 'glory_days_of_the_piton'],
+        'x_y' => [0, 100],
     ],
 
-    '8' => [
+    '14' => [
         'name' => 'bishop_jaggers',
-        'description' => clienttranslate("Bishop Jaggers"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Bishop Jaggers"),
         'value' => 2,
         'type' => 'slab',
+        'type_description' => _("Slab"),
         'shade' => 1,
         'requirements' => [
             'gear' => 1,
@@ -185,14 +312,15 @@ $this->pitches = [
             'psych' => 1,
         ],
         'personal_objectives' => ['glory_days_of_the_piton', 'social_butterfly', 'rocky_mountains_tour'],
+        'x_y' => [100, 100],
     ],
 
-    '9' => [
+    '15' => [
         'name' => 'closer_to_the_heart',
-        'description' => clienttranslate("Closer to the Heart"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Closer to the Heart"),
         'value' => 2,
         'type' => 'slab',
+        'type_description' => _("Slab"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -204,14 +332,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['full_body_workout', 'southern_rock'],
+        'x_y' => [200, 100],
     ],
 
-    '10' => [
+    '16' => [
         'name' => 'irenes_arete',
-        'description' => clienttranslate("Irene's Arete"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Irene's Arete"),
         'value' => 2,
         'type' => 'arete',
+        'type_description' => _("Arete"),
         'shade' => 0,
         'requirements' => [
             'gear' => 1,
@@ -224,14 +353,15 @@ $this->pitches = [
         ],
         'personal_objectives' => ['national_parks_pass', 'social_butterfly', 'glory_days_of_the_piton',
                                   'call_it_like_you_see_it', 'rocky_mountains_tour'],
+        'x_y' => [300, 100],
     ],
 
-    '11' => [
+    '17' => [
         'name' => 'flight_of_the_gumby',
-        'description' => clienttranslate("Flight of the Gumby"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Flight of the Gumby"),
         'value' => 2,
         'type' => 'arete',
+        'type_description' => _("Arete"),
         'shade' => 1,
         'requirements' => [
             'gear' => null,
@@ -244,14 +374,15 @@ $this->pitches = [
         ],
         'personal_objectives' => ['sporty_spice', 'climb_your_way_out', 'southern_rock',
                                   'national_parks_pass'],
+        'x_y' => [400, 100],
     ],
 
-    '12' => [
+    '18' => [
         'name' => 'bee_sting_corner',
-        'description' => clienttranslate("Bee Sting Corner"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Bee Sting Corner"),
         'value' => 2,
         'type' => 'corner',
+        'type_description' => _("Corner"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -263,14 +394,15 @@ $this->pitches = [
             'psych' => 1,
         ],
         'personal_objectives' => ['call_it_like_you_see_it', 'a_day_at_the_zoo', 'southern_rock'],
+        'x_y' => [500, 100],
     ],
 
-    '13' => [
+    '19' => [
         'name' => 'black_snake',
-        'description' => clienttranslate("Black Snake"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Black Snake"),
         'value' => 2,
         'type' => 'corner',
+        'type_description' => _("Corner"),
         'shade' => 1,
         'requirements' => [
             'gear' => 2,
@@ -283,14 +415,15 @@ $this->pitches = [
         ],
         'personal_objectives' => ['rainbow_vibes', 'climb_your_way_out', 'rocky_mountains_tour',
                                   'national_parks_pass', 'a_day_at_the_zoo'],
+        'x_y' => [600, 100],
     ],
 
-    '14' => [
+    '20' => [
         'name' => 'flakes_of_wrath',
-        'description' => clienttranslate("Flakes of Wrath"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Flakes of Wrath"),
         'value' => 2,
         'type' => 'flake',
+        'type_description' => _("Flake"),
         'shade' => 0,
         'requirements' => [
             'gear' => null,
@@ -302,14 +435,15 @@ $this->pitches = [
             'psych' => 2,
         ],
         'personal_objectives' => ['call_it_like_you_see_it', 'desert_days'],
+        'x_y' => [700, 100],
     ],
 
-    '15' => [
+    '21' => [
         'name' => 'the_fickle_finger_of_fate',
-        'description' => clienttranslate("The Fickle Finger of Fate"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("The Fickle Finger of Fate"),
         'value' => 2,
         'type' => 'flake',
+        'type_description' => _("Flake"),
         'shade' => 0,
         'requirements' => [
             'gear' => null,
@@ -321,14 +455,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['full_body_workout'],
+        'x_y' => [800, 100],
     ],
 
-    '16' => [
+    '22' => [
         'name' => 'dr_rubos_wild_ride',
-        'description' => clienttranslate("Dr. Rubo's Wild Ride"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Dr. Rubo's Wild Ride"),
         'value' => 2,
         'type' => 'crack',
+        'type_description' => _("Crack"),
         'shade' => 1,
         'requirements' => [
             'gear' => null,
@@ -340,14 +475,15 @@ $this->pitches = [
             'psych' => 1,
         ],
         'personal_objectives' => ['social_butterfly', 'desert_days'],
+        'x_y' => [900, 100],
     ],
 
-    '17' => [
+    '23' => [
         'name' => 'skull',
-        'description' => clienttranslate("Skull"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Skull"),
         'value' => 2,
         'type' => 'crack',
+        'type_description' => _("Crack"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -359,14 +495,35 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['desert_days', 'full_body_workout'],
+        'x_y' => [1000, 100],
     ],
 
-    '18' => [
+    '24' => [
+        'name' => 'bonnies_roof',
+        'description' => _("Bonnie's Roof"),
+        'value' => 2,
+        'type' => 'roof',
+        'type_description' => _("Roof"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => 1,
+            'face' => null,
+            'slab' => null,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton', 'social_butterfly'],
+        'x_y' => [1100, 100],
+    ],
+
+    '25' => [
         'name' => 'screaming_yellow_zonkers',
-        'description' => clienttranslate("Screaming Yellow Zonkers"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Screaming Yellow Zonkers"),
         'value' => 3,
         'type' => 'slab',
+        'type_description' => _("Slab"),
         'shade' => 1,
         'requirements' => [
             'gear' => 1,
@@ -378,14 +535,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['sporty_spice', 'rainbow_vibes'],
+        'x_y' => [0, 200],
     ],
 
-    '19' => [
+    '26' => [
         'name' => 'the_don_juan_wall',
-        'description' => clienttranslate("The Don Juan Wall"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("The Don Juan Wall"),
         'value' => 3,
         'type' => 'corner',
+        'type_description' => _("Corner"),
         'shade' => 0,
         'requirements' => [
             'gear' => 3,
@@ -397,14 +555,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['social_butterfly'],
+        'x_y' => [100, 200],
     ],
 
-    '20' => [
+    '27' => [
         'name' => 'bloody_fingers',
-        'description' => clienttranslate("Bloody Fingers"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Bloody Fingers"),
         'value' => 3,
         'type' => 'crack',
+        'type_description' => _("Crack"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -416,14 +575,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['full_body_workout'],
+        'x_y' => [200, 200],
     ],
 
-    '21' => [
+    '28' => [
         'name' => 'black_elk',
-        'description' => clienttranslate("Black Elk"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Black Elk"),
         'value' => 3,
         'type' => 'roof',
+        'type_description' => _("Roof"),
         'shade' => 1,
         'requirements' => [
             'gear' => null,
@@ -435,14 +595,15 @@ $this->pitches = [
             'psych' => 2,
         ],
         'personal_objectives' => ['rainbow_vibes', 'a_day_at_the_zoo', 'rocky_mountains_tour'],
+        'x_y' => [300, 200],
     ],
 
-    '22' => [
+    '29' => [
         'name' => 'tierrany',
-        'description' => clienttranslate("Tierrany"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Tierrany"),
         'value' => 4,
         'type' => 'roof',
+        'type_description' => _("Roof"),
         'shade' => 0,
         'requirements' => [
             'gear' => 2,
@@ -454,14 +615,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['sporty_spice', 'southern_rock'],
+        'x_y' => [400, 200],
     ],
 
-    '23' => [
+    '30' => [
         'name' => 'abracadaver',
-        'description' => clienttranslate("Abracadaver"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Abracadaver"),
         'value' => 4,
         'type' => 'crack',
+        'type_description' => _("Crack"),
         'shade' => 1,
         'requirements' => [
             'gear' => 2,
@@ -473,14 +635,15 @@ $this->pitches = [
             'psych' => null,
         ],
         'personal_objectives' => ['desert_days'],
+        'x_y' => [500, 200],
     ],
 
-    '24' => [
+    '31' => [
         'name' => 'bulldog_arete',
-        'description' => clienttranslate("Bulldog Arete"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Bulldog Arete"),
         'value' => 4,
         'type' => 'arete',
+        'type_description' => _("Arete"),
         'shade' => 0,
         'requirements' => [
             'gear' => 1,
@@ -493,14 +656,15 @@ $this->pitches = [
         ],
         'personal_objectives' => ['sporty_spice', 'call_it_like_you_see_it', 'a_day_at_the_zoo',
                                   'rocky_mountains_tour', 'climb_your_way_out'],
+        'x_y' => [600, 200],
     ],
 
-    '25' => [
+    '32' => [
         'name' => 'red_rider',
-        'description' => clienttranslate("Red Rider"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Red Rider"),
         'value' => 4,
         'type' => 'flake',
+        'type_description' => _("Flake"),
         'shade' => 0,
         'requirements' => [
             'gear' => 3,
@@ -512,337 +676,35 @@ $this->pitches = [
             'psych' => 1,
         ],
         'personal_objectives' => ['rainbow_vibes', 'sporty_spice', 'rocky_mountains_tour'],
-    ],
-
-    '26' => [
-        'name' => 'tooth_or_consequences',
-        'description' => clienttranslate("Tooth or Consequences"),
-        'tooltip' => clienttranslate(""),
-        'value' => 4,
-        'type' => 'slab',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => 1,
-            'crack' => 1,
-            'face' => null,
-            'slab' => 2,
-            'any_skill' => null,
-            'water' => 2,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['desert_days', 'full_body_workout'],
-    ],
-
-    '27' => [
-        'name' => 'slab_aptitude_test',
-        'description' => clienttranslate("The S.A.T. (Slab Aptitude Test)"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'slab',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => null,
-            'face' => null,
-            'slab' => 3,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 2,
-        ],
-        'personal_objectives' => ['call_it_like_you_see_it', 'sporty_spice'],
-    ],
-
-    '28' => [
-        'name' => 'desert_gold',
-        'description' => clienttranslate("Desert Gold"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'roof',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 1,
-            'crack' => 2,
-            'face' => 2,
-            'slab' => null,
-            'any_skill' => null,
-            'water' => 2,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['rainbow_vibes', 'desert_days', 'climb_your_way_out'],
-    ],
-
-    '29' => [
-        'name' => 'no_place_like_home',
-        'description' => clienttranslate("No Place Like Home"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'arete',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => null,
-            'face' => 2,
-            'slab' => 1,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 2,
-        ],
-        'personal_objectives' => ['sporty_spice', 'southern_rock', 'climb_your_way_out'],
-    ],
-
-    '30' => [
-        'name' => 'teflon_corner',
-        'description' => clienttranslate("Teflon Corner"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'corner',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => 3,
-            'crack' => 1,
-            'face' => 1,
-            'slab' => 1,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton', 'national_parks_pass'],
-    ],
-
-    '31' => [
-        'name' => 'scarlet_begonias',
-        'description' => clienttranslate("Scarlet Begonias"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'flake',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 1,
-            'crack' => 1,
-            'face' => 3,
-            'slab' => 1,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['rainbow_vibes', 'national_parks_pass', 'desert_days'],
-    ],
-
-    '32' => [
-        'name' => 'belly_full_of_bad_berries',
-        'description' => clienttranslate("Belly Full of Bad Berries"),
-        'tooltip' => clienttranslate(""),
-        'value' => 5,
-        'type' => 'crack',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => 3,
-            'face' => null,
-            'slab' => null,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 2,
-        ],
-        'personal_objectives' => ['desert_days', 'full_body_workout'],
+        'x_y' => [700, 200],
     ],
 
     '33' => [
-        'name' => 'the_trifecta',
-        'description' => clienttranslate("The Trifecta"),
-        'tooltip' => clienttranslate(""),
-        'value' => 3,
-        'type' => 'wild',
-        'shade' => 2,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => 1,
-            'face' => 1,
-            'slab' => 1,
-            'any_skill' => 1,
-            'water' => 1,
-            'psych' => 1,
-        ],
-        'personal_objectives' => [],
-    ],
-
-    '34' => [
-        'name' => 'chapel_pond_slab',
-        'description' => clienttranslate("Chapel Pond Slab"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'slab',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => null,
-            'crack' => null,
-            'face' => null,
-            'slab' => 1,
-            'any_skill' => 1,
-            'water' => null,
-            'psych' => 2,
-        ],
-        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton'],
-    ],
-
-    '35' => [
-        'name' => 'old_man',
-        'description' => clienttranslate("Old Man"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'corner',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => null,
-            'crack' => null,
-            'face' => 1,
-            'slab' => 1,
-            'any_skill' => 1,
-            'water' => null,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['desert_days'],
-    ],
-
-    '36' => [
-        'name' => 'bonnies_roof',
-        'description' => clienttranslate("Bonnie's Roof"),
-        'tooltip' => clienttranslate(""),
-        'value' => 2,
-        'type' => 'roof',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => 1,
-            'face' => null,
-            'slab' => null,
-            'any_skill' => null,
-            'water' => 1,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton', 'social_butterfly'],
-    ],
-
-    '37' => [
-        'name' => 'the_beast_flake',
-        'description' => clienttranslate("The Beast Flake"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'flake',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => null,
-            'crack' => null,
-            'face' => 1,
-            'slab' => 2,
-            'any_skill' => 1,
-            'water' => null,
-            'psych' => null,
-        ],
-        'personal_objectives' => ['call_it_like_you_see_it'],
-    ],
-
-    '38' => [
-        'name' => 'edge_of_time',
-        'description' => clienttranslate("Edge of Time"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'arete',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 1,
-            'crack' => null,
-            'face' => 1,
-            'slab' => null,
-            'any_skill' => 1,
-            'water' => 1,
-            'psych' => null,
-        ],
-        'personal_objectives' => ['sporty_spice', 'rocky_mountains_tour'],
-    ],
-
-    '39' => [
-        'name' => 'outer_space',
-        'description' => clienttranslate("Outer Space"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'crack',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => null,
-            'crack' => 1,
-            'face' => null,
-            'slab' => 1,
-            'any_skill' => 1,
-            'water' => null,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['glory_days_of_the_piton'],
-    ],
-
-    '40' => [
-        'name' => 'psychic_turbulance',
-        'description' => clienttranslate("Psychic Turbulance"),
-        'tooltip' => clienttranslate(""),
+        'name' => 'tooth_or_consequences',
+        'description' => _("Tooth or Consequences"),
         'value' => 4,
-        'type' => 'corner',
-        'shade' => 0,
-        'requirements' => [
-            'gear' => null,
-            'crack' => 3,
-            'face' => 1,
-            'slab' => 2,
-            'any_skill' => null,
-            'water' => null,
-            'psych' => 1,
-        ],
-        'personal_objectives' => ['national_parks_pass'],
-    ],
-
-    '41' => [
-        'name' => 'fiddler_on_the_roof',
-        'description' => clienttranslate("Fiddler on the Roof"),
-        'tooltip' => clienttranslate(""),
-        'value' => 1,
-        'type' => 'roof',
-        'shade' => 1,
-        'requirements' => [
-            'gear' => 2,
-            'crack' => null,
-            'face' => 1,
-            'slab' => null,
-            'any_skill' => 1,
-            'water' => null,
-            'psych' => null,
-        ],
-        'personal_objectives' => ['desert_days', 'call_it_like_you_see_it', 'climb_your_way_out'],
-    ],
-
-    '42' => [
-        'name' => 'heart_of_the_country',
-        'description' => clienttranslate("Heart of the Country"),
-        'tooltip' => clienttranslate(""),
-        'value' => 3,
-        'type' => 'flake',
+        'type' => 'slab',
+        'type_description' => _("Slab"),
         'shade' => 0,
         'requirements' => [
             'gear' => 1,
             'crack' => 1,
             'face' => null,
-            'slab' => 1,
+            'slab' => 2,
             'any_skill' => null,
             'water' => 2,
             'psych' => 1,
         ],
-        'personal_objectives' => ['full_body_workout'],
+        'personal_objectives' => ['desert_days', 'full_body_workout'],
+        'x_y' => [800, 200],
     ],
 
-    '43' => [
+    '34' => [
         'name' => 'lonesome_dove',
-        'description' => clienttranslate("Lonesome Dove"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Lonesome Dove"),
         'value' => 3,
         'type' => 'arete',
+        'type_description' => _("Arete"),
         'shade' => 0,
         'requirements' => [
             'gear' => 1,
@@ -854,6 +716,187 @@ $this->pitches = [
             'psych' => 1,
         ],
         'personal_objectives' => ['sporty_spice', 'a_day_at_the_zoo'],
+        'x_y' => [900, 200],
+    ],
+
+    '35' => [
+        'name' => 'heart_of_the_country',
+        'description' => _("Heart of the Country"),
+        'value' => 3,
+        'type' => 'flake',
+        'type_description' => _("Flake"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => 1,
+            'crack' => 1,
+            'face' => null,
+            'slab' => 1,
+            'any_skill' => null,
+            'water' => 2,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['full_body_workout'],
+        'x_y' => [1000, 200],
+    ],
+
+    '36' => [
+        'name' => 'the_trifecta',
+        'description' => _("The Trifecta"),
+        'value' => 3,
+        'type' => 'wild',
+        'type_description' => _("Wild"),
+        'shade' => 2,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => 1,
+            'face' => 1,
+            'slab' => 1,
+            'any_skill' => 1,
+            'water' => 1,
+            'psych' => 1,
+        ],
+        'personal_objectives' => [],
+        'x_y' => [1100, 200],
+    ],
+
+    '37' => [
+        'name' => 'psychic_turbulance',
+        'description' => _("Psychic Turbulance"),
+        'value' => 4,
+        'type' => 'corner',
+        'type_description' => _("Corner"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => null,
+            'crack' => 3,
+            'face' => 1,
+            'slab' => 2,
+            'any_skill' => null,
+            'water' => null,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['national_parks_pass'],
+        'x_y' => [1200, 200],
+    ],
+
+    '38' => [
+        'name' => 'slab_aptitude_test',
+        'description' => _("The S.A.T. (Slab Aptitude Test)"),
+        'value' => 5,
+        'type' => 'slab',
+        'type_description' => _("Slab"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => null,
+            'face' => null,
+            'slab' => 3,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 2,
+        ],
+        'personal_objectives' => ['call_it_like_you_see_it', 'sporty_spice'],
+        'x_y' => [0, 300],
+    ],
+
+    '39' => [
+        'name' => 'desert_gold',
+        'description' => _("Desert Gold"),
+        'value' => 5,
+        'type' => 'roof',
+        'type_description' => _("Roof"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 1,
+            'crack' => 2,
+            'face' => 2,
+            'slab' => null,
+            'any_skill' => null,
+            'water' => 2,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['rainbow_vibes', 'desert_days', 'climb_your_way_out'],
+        'x_y' => [100, 300],
+    ],
+
+    '40' => [
+        'name' => 'no_place_like_home',
+        'description' => _("No Place Like Home"),
+        'value' => 5,
+        'type' => 'arete',
+        'type_description' => _("Arete"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => null,
+            'face' => 2,
+            'slab' => 1,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 2,
+        ],
+        'personal_objectives' => ['sporty_spice', 'southern_rock', 'climb_your_way_out'],
+        'x_y' => [200, 300],
+    ],
+
+    '41' => [
+        'name' => 'teflon_corner',
+        'description' => _("Teflon Corner"),
+        'value' => 5,
+        'type' => 'corner',
+        'type_description' => _("Corner"),
+        'shade' => 0,
+        'requirements' => [
+            'gear' => 3,
+            'crack' => 1,
+            'face' => 1,
+            'slab' => 1,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['call_it_like_you_see_it', 'glory_days_of_the_piton', 'national_parks_pass'],
+        'x_y' => [300, 300],
+    ],
+
+    '42' => [
+        'name' => 'scarlet_begonias',
+        'description' => _("Scarlet Begonias"),
+        'value' => 5,
+        'type' => 'flake',
+        'type_description' => _("Flake"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 1,
+            'crack' => 1,
+            'face' => 3,
+            'slab' => 1,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 1,
+        ],
+        'personal_objectives' => ['rainbow_vibes', 'national_parks_pass', 'desert_days'],
+        'x_y' => [400, 300],
+    ],
+
+    '43' => [
+        'name' => 'belly_full_of_bad_berries',
+        'description' => _("Belly Full of Bad Berries"),
+        'value' => 5,
+        'type' => 'crack',
+        'type_description' => _("Crack"),
+        'shade' => 1,
+        'requirements' => [
+            'gear' => 2,
+            'crack' => 3,
+            'face' => null,
+            'slab' => null,
+            'any_skill' => null,
+            'water' => 1,
+            'psych' => 2,
+        ],
+        'personal_objectives' => ['desert_days', 'full_body_workout'],
+        'x_y' => [500, 300],
     ],
 
 ];
@@ -861,120 +904,120 @@ $this->pitches = [
 $this->summit_beta_tokens = [
     '1' => [
         'name' => 'rerack',
-        'description' => clienttranslate("Rerack"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Search the discard pile for 2 Asset Cards of your choice"),
+        'description' => _("Rerack"),
+        'effect_string' => _("Search the discard pile for 2 Asset Cards of your choice"),
         'subscript_string' => null,
-        'action' => null //rerack_summit(),
+        'action' => null, //rerack_summit(),
+        'x_y' => [0, 300],
     ],
 
     '2' => [
         'name' => 'borrowed_rack',
-        'description' => clienttranslate("Borrowed Rack"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Use no Gear on a Pitch of your choice"),
-        'subscript_string' => clienttranslate("Free Soloist: no extra Skills needed"), //should be italicized
-        'action' => null //borrowed_rack_summit(),
+        'description' => _("Borrowed Rack"),
+        'effect_string' => _("Use no Gear on a Pitch of your choice"),
+        'subscript_string' => _("Free Soloist: no extra Skills needed"), //should be italicized
+        'action' => null, //borrowed_rack_summit(),
+        'x_y' => [100, 300],
     ],
 
     '3' => [
         'name' => 'jumar',
-        'description' => clienttranslate("Jumar"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Use no Skills on a Pitch another player has climbed"),
+        'description' => _("Jumar"),
+        'effect_string' => _("Use no Skills on a Pitch another player has climbed"),
         'subscript_string' => null,
-        'action' => null //jumar_summit(),
+        'action' => null, //jumar_summit(),
+        'x_y' => [200, 300],
     ],
 
     '4' => [
         'name' => 'energy_drink',
-        'description' => clienttranslate("Energy Drink"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("+1 Psych \n+1 Water"),
+        'description' => _("Energy Drink"),
+        'effect_string' => _("+1 Psych \n+1 Water"),
         'subscript_string' => null,
-        'action' => null //energy_drink_summit(),
+        'action' => null, //energy_drink_summit(),
+        'x_y' => [300, 300],
+
     ],
 
     '5' => [
         'name' => 'extra_water',
-        'description' => clienttranslate("Extra Water"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("No Water needed on a Pitch of your choice"),
+        'description' => _("Extra Water"),
+        'effect_string' => _("No Water needed on a Pitch of your choice"),
         'subscript_string' => null,
-        'action' => null //extra_water_summit(),
+        'action' => null, //extra_water_summit(),
+        'x_y' => [0, 200],
     ],
 
     '6' => [
         'name' => 'new_rubber',
-        'description' => clienttranslate("New Rubber"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Use this Token to count as any one technique symbol"),
+        'description' => _("New Rubber"),
+        'effect_string' => _("Use this Token to count as any one technique symbol"),
         'subscript_string' => null,
-        'action' => null //new_rubber_summit(),
+        'action' => null, //new_rubber_summit(),
+        'x_y' => [100, 200],
     ],
 
     '7' => [
         'name' => 'simul_climb',
-        'description' => clienttranslate("Simul Climb"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Draw 3 Cards from The Spread or Asset Deck"),
+        'description' => _("Simul Climb"),
+        'effect_string' => _("Draw 3 Cards from The Spread or Asset Deck"),
         'subscript_string' => null,
-        'action' => null //simul_summit(),
+        'action' => null, //simul_summit(),
+        'x_y' => [200, 200],
     ],
 
     '8' => [
         'name' => 'guidebook',
-        'description' => clienttranslate("Guidebook"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Use this Token to count as any one Skill"),
+        'description' => _("Guidebook"),
+        'effect_string' => _("Use this Token to count as any one Skill"),
         'subscript_string' => null,
-        'action' => null //guidebook_summit(),
+        'action' => null, //guidebook_summit(),
+        'x_y' => [300, 200],
     ],
 
     '9' => [
         'name' => 'bomber_anchor',
-        'description' => clienttranslate("Bomber Anchor"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Trade in up to 3 Cards from your hand for up to 3 Cards from The Portaledge"),
+        'description' => _("Bomber Anchor"),
+        'effect_string' => _("Trade in up to 3 Cards from your hand for up to 3 Cards from The Portaledge"),
         'subscript_string' => null,
-        'action' => null //bomber_anchor_summit(),
+        'action' => null, //bomber_anchor_summit(),
+        'x_y' => [0, 100],
     ],
 
     '10' => [
         'name' => 'jesus_piece',
-        'description' => clienttranslate("Jesus Piece"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Use this to avoid a negative effect from a Climbing Card"),
+        'description' => _("Jesus Piece"),
+        'effect_string' => _("Use this to avoid a negative effect from a Climbing Card"),
         'subscript_string' => null,
-        'action' => null //jesus_piece_summit(),
+        'action' => null, //jesus_piece_summit(),
+        'x_y' => [100, 100],
     ],
 
     '11' => [
         'name' => 'lucky_chalkbag',
-        'description' => clienttranslate("Lucky Chalkbag"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Reroll the Risk Die"),
+        'description' => _("Lucky Chalkbag"),
+        'effect_string' => _("Reroll the Risk Die"),
         'subscript_string' => null,
-        'action' => null //lucky_chalkbag_summit(),
+        'action' => null, //lucky_chalkbag_summit(),
+        'x_y' => [200, 100],
     ],
 
     '12' => [
         'name' => 'spider_stick',
-        'description' => clienttranslate("Spider Stick"),
-        'tooltip' => clienttranslate(""),
-        'effect_string' => clienttranslate("Gain a 2-Point Token on the next 1- or 2-point Pitch you climb"),
+        'description' => _("Spider Stick"),
+        'effect_string' => _("Gain a 2-Point Token on the next 1- or 2-point Pitch you climb"),
         'subscript_string' => null,
-        'action' => null //spider_stick_summit(),
+        'action' => null, //spider_stick_summit(),
+        'x_y' => [300, 100],
     ],
 ];
 
 $this->shared_objectives = [
     '1' => [
         'name' => 'ridgeline_challenge_north',
-        'description' => clienttranslate("Ridgeline Challenge"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Ridgeline Challenge"),
         'points' => 5,
-        'objective_string' => clienttranslate("Climb at least 4 Pitches of the North Ridge"),
+        'objective_string' => _("Climb at least 4 Pitches <br>of the North Ridge"),
         'subscript_string' => null,
         'action' => null, //ridgeline_challenge_north_objective()
         'x_y' => [0, 400],
@@ -982,10 +1025,9 @@ $this->shared_objectives = [
 
     '2' => [
         'name' => 'ridgeline_challenge_south',
-        'description' => clienttranslate("Ridgeline Challenge"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Ridgeline Challenge"),
         'points' => 5,
-        'objective_string' => clienttranslate("Climb at least 4 Pitches of the South Ridge"),
+        'objective_string' => _("Climb at least 4 Pitches <br>of the South Ridge"),
         'subscript_string' => null,
         'action' => null, //ridgeline_challenge_south_objective(),
         'x_y' => [100, 400],
@@ -993,32 +1035,29 @@ $this->shared_objectives = [
 
     '3' => [
         'name' => 'stay_in_the_shade',
-        'description' => clienttranslate("Stay in the Shade"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Stay in the Shade"),
         'points' => null,
-        'objective_string' => clienttranslate("Gain 1 point for each shaded Pitch you climb"),
-        'subscript_string' => clienttranslate("(dark gray tile)"),
+        'objective_string' => _("Gain 1 point for each <br>shaded Pitch you climb"),
+        'subscript_string' => _("(dark gray tile)"),
         'action' => null, //stay_in_the_shade_objective(),
         'x_y' => [200, 400],
     ],
 
     '4' => [
         'name' => 'stay_in_the_sun',
-        'description' => clienttranslate("Stay in the Sun"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Stay in the Sun"),
         'points' => null,
-        'objective_string' => clienttranslate("Gain 1 point for each sunny Pitch you climb"),
-        'subscript_string' => clienttranslate("(light gray tile)"),
+        'objective_string' => _("Gain 1 point for each <br>sunny Pitch you climb"),
+        'subscript_string' => _("(light gray tile)"),
         'action' => null, //stay_in_the_sun_objective(),
         'x_y' => [300, 400],
     ],
 
     '5' => [
         'name' => 'jolly_jammer',
-        'description' => clienttranslate("Jolly Jammer"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Jolly Jammer"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 CRACK Pitches"),
+        'objective_string' => _("Climb 3 CRACK Pitches"),
         'subscript_string' => null,
         'action' => null, //jolly_jammer_objective(),
         'x_y' => [0, 500],
@@ -1026,10 +1065,9 @@ $this->shared_objectives = [
 
     '6' => [
         'name' => 'smear_campaign',
-        'description' => clienttranslate("Smear Campaign"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Smear Campaign"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 SLAB Pitches"),
+        'objective_string' => _("Climb 3 SLAB Pitches"),
         'subscript_string' => null,
         'action' => null, //smear_campaign_objective(),
         'x_y' => [100, 500],
@@ -1037,10 +1075,9 @@ $this->shared_objectives = [
 
     '7' => [
         'name' => 'star_stemmer',
-        'description' => clienttranslate("Star Stemmer"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Star Stemmer"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 CORNER Pitches"),
+        'objective_string' => _("Climb 3 CORNER Pitches"),
         'subscript_string' => null,
         'action' => null, //star_stemmer_objective(),
         'x_y' => [200, 500],
@@ -1048,10 +1085,9 @@ $this->shared_objectives = [
 
     '8' => [
         'name' => 'exposure_junkie',
-        'description' => clienttranslate("Exposure Junkie"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Exposure Junkie"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 ARETE Pitches"),
+        'objective_string' => _("Climb 3 ARETE Pitches"),
         'subscript_string' => null,
         'action' => null, //exposure_junkie_objective(),
         'x_y' => [300, 500],
@@ -1059,10 +1095,9 @@ $this->shared_objectives = [
 
     '9' => [
         'name' => 'grand_traverse',
-        'description' => clienttranslate("Grand Traverse"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Grand Traverse"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb horizontally across 4 Pitches in a row"),
+        'objective_string' => _("Climb horizontally <br>across 4 Pitches in a <br>row"),
         'subscript_string' => null,
         'action' => null, //grand_traverse_objective(),
         'x_y' => [0, 600],
@@ -1070,10 +1105,9 @@ $this->shared_objectives = [
 
     '10' => [
         'name' => 'all-arounding',
-        'description' => clienttranslate("All-Arounding"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("All-Arounding"),
         'points' => 6,
-        'objective_string' => clienttranslate("Climb every Pitch type:\nArete, Corner,\nSlab, Flake,\nRoof, Crack"),
+        'objective_string' => _("Climb every Pitch type:<br>Arete, Corner, Slab, <br>Flake, Roof, Crack"),
         'subscript_string' => null,
         'action' => null, //all-arounding_objective(),
         'x_y' => [100, 600],
@@ -1081,21 +1115,19 @@ $this->shared_objectives = [
 
     '11' => [
         'name' => 'the_elitist',
-        'description' => clienttranslate("The Elitist"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("The Elitist"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb no 1 point Pitches"),
-        'subscript_string' => clienttranslate("(starting value)"),
+        'objective_string' => _("Climb no 1 point Pitches"),
+        'subscript_string' => _("(starting value)"),
         'action' => null, //the_elitist_objective(),
         'x_y' => [200, 600],
     ],
 
     '12' => [
         'name' => 'a_day_in_the_alpine',
-        'description' => clienttranslate("A Day in the Alpine"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("A Day in the Alpine"),
         'points' => null,
-        'objective_string' => clienttranslate("Gain 1 point for each Pitch on the Headwall you climb"),
+        'objective_string' => _("Gain 1 point for each <br>Pitch on the Headwall <br>you climb"),
         'subscript_string' => null,
         'action' => null, //a_day_in_the_alpine_objective(),
         'x_y' => [300, 600],
@@ -1103,10 +1135,9 @@ $this->shared_objectives = [
 
     '13' => [
         'name' => 'flake_freak',
-        'description' => clienttranslate("Flake Freak"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Flake Freak"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 FLAKE Pitches"),
+        'objective_string' => _("Climb 3 FLAKE Pitches"),
         'subscript_string' => null,
         'action' => null, //flake_freak_objective(),
         'x_y' => [0, 700],
@@ -1114,10 +1145,9 @@ $this->shared_objectives = [
 
     '14' => [
         'name' => 'pull-up_champion',
-        'description' => clienttranslate("Pull-Up Champion"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Pull-Up Champion"),
         'points' => 4,
-        'objective_string' => clienttranslate("Climb 3 ROOF Pitches"),
+        'objective_string' => _("Climb 3 ROOF Pitches"),
         'subscript_string' => null,
         'action' => null, //pull-up_champion_objective(),
         'x_y' => [100, 700],
@@ -1125,10 +1155,9 @@ $this->shared_objectives = [
 
     '15' => [
         'name' => 'stonemaster',
-        'description' => clienttranslate("Stonemaster"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Stonemaster"),
         'points' => 8,
-        'objective_string' => clienttranslate("Earn 2 Permanent Face Skills + 2 Permanent Slab Skills"),
+        'objective_string' => _("Earn 2 Permanent Face <br>Skills + 2 Permanent <br>Slab Skills"),
         'subscript_string' => null,
         'action' => null, //stonemaster_objective(),
         'x_y' => [200, 700],
@@ -1136,10 +1165,9 @@ $this->shared_objectives = [
 
     '16' => [
         'name' => 'off-width_aficionado',
-        'description' => clienttranslate("Off-Width Aficionado"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Off-Width Aficionado"),
         'points' => 8,
-        'objective_string' => clienttranslate("Earn 2 Permanent Crack Skills + 2 Permanent Gear"),
+        'objective_string' => _("Earn 2 Permanent Crack <br>Skills + 2 Permanent <br>Gear"),
         'subscript_string' => null,
         'action' => null, //off-width_aficionado_objective(),
         'x_y' => [300, 700],
@@ -1149,8 +1177,7 @@ $this->shared_objectives = [
 $this->asset_cards = [
     '1' => [
         'name' => 'toe_jam',
-        'description' => clienttranslate("Toe Jam"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Toe Jam"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1164,8 +1191,7 @@ $this->asset_cards = [
 
     '2' => [
         'name' => 'arm_bar',
-        'description' => clienttranslate("Arm Bar"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Arm Bar"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1180,8 +1206,7 @@ $this->asset_cards = [
 
     '3' => [
         'name' => 'hand_jam',
-        'description' => clienttranslate("Hand Jam"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Hand Jam"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1195,8 +1220,7 @@ $this->asset_cards = [
 
     '4' => [
         'name' => 'finger_lock',
-        'description' => clienttranslate("Finger Lock"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Finger Lock"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1210,8 +1234,7 @@ $this->asset_cards = [
 
     '5' => [
         'name' => 'stemming',
-        'description' => clienttranslate("Stemming"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Stemming"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1225,8 +1248,7 @@ $this->asset_cards = [
 
     '6' => [
         'name' => 'chicken_wing',
-        'description' => clienttranslate("Chicken Wing"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Chicken Wing"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => null,
@@ -1240,8 +1262,7 @@ $this->asset_cards = [
 
     '7' => [
         'name' => 'hand-fist_stack',
-        'description' => clienttranslate("Hand-Fist Stack"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Hand-Fist Stack"),
         'skill' => 'crack',
         'techniques' => [
             'precision' => 1,
@@ -1255,8 +1276,7 @@ $this->asset_cards = [
 
     '8' => [
         'name' => 'smear',
-        'description' => clienttranslate("Smear"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Smear"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1270,8 +1290,7 @@ $this->asset_cards = [
 
     '9' => [
         'name' => 'palming',
-        'description' => clienttranslate("Palming"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Palming"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1285,8 +1304,7 @@ $this->asset_cards = [
 
     '10' => [
         'name' => 'sloper',
-        'description' => clienttranslate("Sloper"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Sloper"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1300,8 +1318,7 @@ $this->asset_cards = [
 
     '11' => [
         'name' => 'edge',
-        'description' => clienttranslate("Edge"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Edge"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => 1,
@@ -1315,8 +1332,7 @@ $this->asset_cards = [
 
     '12' => [
         'name' => 'crimp',
-        'description' => clienttranslate("Crimp"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Crimp"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1330,8 +1346,7 @@ $this->asset_cards = [
 
     '13' => [
         'name' => 'hand-foot_match',
-        'description' => clienttranslate("Hand-Foot Match"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Hand-Foot Match"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1345,8 +1360,7 @@ $this->asset_cards = [
 
     '14' => [
         'name' => 'mono_pocket',
-        'description' => clienttranslate("Mono Pocket"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Mono Pocket"),
         'skill' => 'slab',
         'techniques' => [
             'precision' => null,
@@ -1360,8 +1374,7 @@ $this->asset_cards = [
 
     '15' => [
         'name' => 'mantle',
-        'description' => clienttranslate("Mantle"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Mantle"),
         'skill' => 'face',
         'techniques' => [
             'precision' => null,
@@ -1375,8 +1388,7 @@ $this->asset_cards = [
 
     '16' => [
         'name' => 'undercling',
-        'description' => clienttranslate("Undercling"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Undercling"),
         'skill' => 'face',
         'techniques' => [
             'precision' => null,
@@ -1390,9 +1402,8 @@ $this->asset_cards = [
 
     '17' => [
         'name' => 'layback',
-        'description' => clienttranslate("Layback"),
-        'tooltip' => clienttranslate(""),
-        'skill' => 'crack',
+        'description' => _("Layback"),
+        'skill' => 'face',
         'techniques' => [
             'precision' => null,
             'pain_tolerance' => null,
@@ -1405,8 +1416,7 @@ $this->asset_cards = [
 
     '18' => [
         'name' => 'gaston',
-        'description' => clienttranslate("Gaston"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Gaston"),
         'skill' => 'face',
         'techniques' => [
             'precision' => 1,
@@ -1420,8 +1430,7 @@ $this->asset_cards = [
 
     '19' => [
         'name' => 'heel_hook',
-        'description' => clienttranslate("Heel Hook"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Heel Hook"),
         'skill' => 'face',
         'techniques' => [
             'precision' => null,
@@ -1435,8 +1444,7 @@ $this->asset_cards = [
 
     '20' => [
         'name' => 'pinch',
-        'description' => clienttranslate("Pinch"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Pinch"),
         'skill' => 'face',
         'techniques' => [
             'precision' => null,
@@ -1450,8 +1458,7 @@ $this->asset_cards = [
 
     '21' => [
         'name' => 'flag',
-        'description' => clienttranslate("Flag"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Flag"),
         'skill' => 'face',
         'techniques' => [
             'precision' => null,
@@ -1465,8 +1472,7 @@ $this->asset_cards = [
 
     '22' => [
         'name' => 'nuts',
-        'description' => clienttranslate("Nuts"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Nuts"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1474,13 +1480,13 @@ $this->asset_cards = [
             'balance' => null,
             'power' => null,
         ],
-        'number_in_deck' => 2,'x_y' => [0, 200],
+        'number_in_deck' => 2,
+        'x_y' => [0, 200],
     ],
 
     '23' => [
         'name' => 'alpine_draws',
-        'description' => clienttranslate("Alpine Draws"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Alpine Draws"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1494,8 +1500,7 @@ $this->asset_cards = [
 
     '24' => [
         'name' => 'climbing_shoes',
-        'description' => clienttranslate("Climbing Shoes"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Climbing Shoes"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1509,8 +1514,7 @@ $this->asset_cards = [
 
     '25' => [
         'name' => 'tape',
-        'description' => clienttranslate("Tape"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Tape"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1524,8 +1528,7 @@ $this->asset_cards = [
 
     '26' => [
         'name' => 'locker',
-        'description' => clienttranslate("Locker"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Locker"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1539,8 +1542,7 @@ $this->asset_cards = [
 
     '27' => [
         'name' => 'rope',
-        'description' => clienttranslate("Rope"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Rope"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1554,8 +1556,7 @@ $this->asset_cards = [
 
     '28' => [
         'name' => 'long_runner',
-        'description' => clienttranslate("Long Runner"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Long Runner"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1569,8 +1570,7 @@ $this->asset_cards = [
 
     '29' => [
         'name' => 'helmet',
-        'description' => clienttranslate("Helmet"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Helmet"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1584,8 +1584,7 @@ $this->asset_cards = [
 
     '30' => [
         'name' => 'cordelette',
-        'description' => clienttranslate("Cordelette"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Cordelette"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1599,8 +1598,7 @@ $this->asset_cards = [
 
     '31' => [
         'name' => 'pack',
-        'description' => clienttranslate("Pack"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Pack"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1614,8 +1612,7 @@ $this->asset_cards = [
 
     '32' => [
         'name' => 'chalk_bag',
-        'description' => clienttranslate("Chalk Bag"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Chalk Bag"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1629,8 +1626,7 @@ $this->asset_cards = [
 
     '33' => [
         'name' => 'nut_tool',
-        'description' => clienttranslate("Nut Tool"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Nut Tool"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1644,8 +1640,7 @@ $this->asset_cards = [
 
     '34' => [
         'name' => 'cams',
-        'description' => clienttranslate("Cams"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Cams"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1659,8 +1654,7 @@ $this->asset_cards = [
 
     '35' => [
         'name' => 'belay_device',
-        'description' => clienttranslate("Belay Device"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Belay Device"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1674,8 +1668,7 @@ $this->asset_cards = [
 
     '36' => [
         'name' => 'harness',
-        'description' => clienttranslate("Harness"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Harness"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => 1,
@@ -1689,8 +1682,7 @@ $this->asset_cards = [
 
     '37' => [
         'name' => 'quick_draws',
-        'description' => clienttranslate("Quick Draws"),
-        'tooltip' => clienttranslate(""),
+        'description' => _("Quick Draws"),
         'skill' => 'gear',
         'techniques' => [
             'precision' => null,
@@ -1706,1023 +1698,1017 @@ $this->asset_cards = [
 $this->climbing_cards = [
     '1' => [
         'name' => 'heinous_rope_drag',
-        'description' => clienttranslate("Heinous rope drag"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Set up a 3:1 haul and pull with all your might:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Build a mid-pitch anchor:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'description' => _("Heinous rope drag"),
+        'effect_A_flavor' => _("Set up a 3:1 haul and pull with all your might:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _("Build a mid-pitch anchor:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'x_y' => [0, 0],
     ],
 
     '2' => [
         'name' => 'chopped_bolts',
-        'description' => clienttranslate("Chopped bolts"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Which Pitch had its bolts removed?"),
-        'effect_A' => clienttranslate("Choose a Pitch and add 1 {GEAR_ICON} Token to it - any player
-                                       climbing that Pitch will need that additional Asset"),
+        'description' => _("Chopped bolts"),
+        'effect_A_flavor' => _("Which Pitch had its bolts removed?"),
+        'effect_A' => _("Choose a Pitch and add 1 {GEAR_ICON} Token to it - any player
+                         climbing that Pitch will need that additional Asset"),
+        'x_y' => [100, 0],
     ],
 
     '3' => [
         'name' => 'party_above_you_forgot_some_gear',
-        'description' => clienttranslate("Party above you forgot some gear"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Bring it up to them:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Swipe the gear:"),
-        'effect_B' => clienttranslate("Lose 1 Card and take 1 {GEAR_ICON} Card from another player's
-                                       Asset Board, then add it to your Board"),
+        'description' => _("Party above you forgot some gear"),
+        'effect_A_flavor' => _("Bring it up to them:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Swipe the gear:"),
+        'effect_B' => _("Lose 1 Card and take 1 {GEAR_ICON} Card from another player's
+                         Asset Board, then add it to your Board"),
+        'x_y' => [200, 0],
     ],
 
     '4' => [
         'name' => 'techy_face',
-        'description' => clienttranslate("Techy face"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Crimp til you bleed:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Bail and climb the chossy gully:"),
-        'effect_B' => clienttranslate("Lose 1 {FACE_ICON} Card and gain 1 {WATER_ICON}"),
+        'description' => _("Techy face"),
+        'effect_A_flavor' => _("Crimp til you bleed:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'effect_B_flavor' => _("Bail and climb the chossy gully:"),
+        'effect_B' => _("Lose 1 {FACE_ICON} Card and gain 1 {WATER_ICON}"),
+        'x_y' => [300, 0],
     ],
 
     '5' => [
         'name' => 'wild_berries',
-        'description' => clienttranslate("Wild berries!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Are there berry bushes all over the mountain?"),
-        'effect_A' => clienttranslate("All players gain 2 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Are the berry bushes just on this ledge?"),
-        'effect_B' => clienttranslate("You gain 1 {WATER_ICON}"),
+        'description' => _("Wild berries!"),
+        'effect_A_flavor' => _("Are there berry bushes all over the mountain?"),
+        'effect_A' => _("All players gain 2 {WATER_ICON}"),
+        'effect_B_flavor' => _("Are the berry bushes just on this ledge?"),
+        'effect_B' => _("You gain 1 {WATER_ICON}"),
+        'x_y' => [400, 0],
     ],
 
     '6' => [
         'name' => 'sandbagged',
-        'description' => clienttranslate("Sandbagged"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Which Pitch is harder than everyone says it is?"),
-        'effect_A' => clienttranslate("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
+        'description' => _("Sandbagged"),
+        'effect_A_flavor' => _("Which Pitch is harder than everyone says it is?"),
+        'effect_A' => _("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
                                        Pitch - any player climbing that Pitch will need that additional Asset"),
+        'x_y' => [500, 0],
     ],
 
     '7' => [
         'name' => 'splitter',
-        'description' => clienttranslate("Splitter"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Jam the whole way up:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Conserve your toes and find some nubs to use for feet:"),
-        'effect_B' => clienttranslate("Lose 1 {CRACK_ICON} Card and gain 1 {SLAB_ICON} Card"),
+        'description' => _("Splitter"),
+        'effect_A_flavor' => _("Jam the whole way up:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'effect_B_flavor' => _("Conserve your toes and find some nubs to use for feet:"),
+        'effect_B' => _("Lose 1 {CRACK_ICON} Card and gain 1 {SLAB_ICON} Card"),
+        'x_y' => [600, 0],
     ],
 
     '8' => [
         'name' => 'booty',
-        'description' => clienttranslate("Booty!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Take it:"),
-        'effect_A' => clienttranslate("Lose 1 Card from your hand and take 1 {GEAR_ICON} Card from another
+        'description' => _("Booty!"),
+        'effect_A_flavor' => _("Take it:"),
+        'effect_A' => _("Lose 1 Card from your hand and take 1 {GEAR_ICON} Card from another
                                        player's Asset Board, then add it to your Board"),
-        'effect_B_flavor' => clienttranslate("Leave it:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Leave it:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 Summit Beta Token"),
+        'x_y' => [700, 0],
     ],
 
     '9' => [
         'name' => 'benighted',
-        'description' => clienttranslate("Benighted"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Set up a shiver bivy:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Break out the headlamps:"),
-        'effect_B' => clienttranslate("You and another player gain Technique Tokens of your choice
-                                       {POWER_ICON}/{PAIN_TOLERANCE_ICON}/{BALANCE_ICON}/{PRECISION_ICON}"),
+        'description' => _("Benighted"),
+        'effect_A_flavor' => _("Set up a shiver bivy:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Break out the headlamps:"),
+        'effect_B' => _("You and another player gain Technique Tokens of your choice
+                         {POWER_ICON}/{PAIN_TOLERANCE_ICON}/{BALANCE_ICON}/{PRECISION_ICON}"),
+        'x_y' => [800, 0],
     ],
 
     '10' => [
         'name' => 'pocket_bacon',
-        'description' => clienttranslate("Pocket bacon"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Do you have enough to share?"),
-        'effect_A' => clienttranslate("All players gain 2 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Is there only enough for you?"),
-        'effect_B' => clienttranslate("You gain 1 {PSYCH_ICON}"),
+        'description' => _("Pocket bacon"),
+        'effect_A_flavor' => _("Do you have enough to share?"),
+        'effect_A' => _("All players gain 2 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Is there only enough for you?"),
+        'effect_B' => _("You gain 1 {PSYCH_ICON}"),
+        'x_y' => [900, 0],
     ],
 
     '11' => [
         'name' => 'choss_pile',
-        'description' => clienttranslate("Choss pile"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Delicately climb through the choss:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {BALANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Find another way up:"),
-        'effect_B' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
+        'description' => _("Choss pile"),
+        'effect_A_flavor' => _("Delicately climb through the choss:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {BALANCE_ICON} Token"),
+        'effect_B_flavor' => _("Find another way up:"),
+        'effect_B' => _("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
+        'x_y' => [0, 100],
     ],
 
     '12' => [
         'name' => 'tricky_boulder_problem',
-        'description' => clienttranslate("Tricky boulder problem"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Try a heel hook to a sloper:"),
-        'effect_A' => clienttranslate("Lose 2 Cards and gain any Technique Token 
-                                       {POWER_ICON}/{PAIN_TOLERANCE_ICON}/{BALANCE_ICON}/{PRECISION_ICON}"),
-        'effect_B_flavor' => clienttranslate("Dyno up to a chalky jug:"),
-        'effect_B' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
+        'description' => _("Tricky boulder problem"),
+        'effect_A_flavor' => _("Try a heel hook to a sloper:"),
+        'effect_A' => _("Lose 2 Cards and gain any Technique Token 
+                         {POWER_ICON}/{PAIN_TOLERANCE_ICON}/{BALANCE_ICON}/{PRECISION_ICON}"),
+        'effect_B_flavor' => _("Dyno up to a chalky jug:"),
+        'effect_B' => _("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
+        'x_y' => [100, 100],
     ],
 
     '13' => [
         'name' => 'found_a_kneebar_rest',
-        'description' => clienttranslate("Found a kneebar rest"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Take the kneebar and shake it out:"),
-        'effect_A' => clienttranslate("Lose 1 Card and gain 1 {BALANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Skip the kneebar:"),
-        'effect_B' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 Skill Card 
-                                       {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'description' => _("Found a kneebar rest"),
+        'effect_A_flavor' => _("Take the kneebar and shake it out:"),
+        'effect_A' => _("Lose 1 Card and gain 1 {BALANCE_ICON} Token"),
+        'effect_B_flavor' => _("Skip the kneebar:"),
+        'effect_B' => _("Lose 1 {WATER_ICON} and gain 1 Skill Card 
+                         {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'x_y' => [200, 100],
     ],
 
     '14' => [
         'name' => 'rope_sheath_is_cut',
-        'description' => clienttranslate("Rope sheath is cut"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Ask rappellers if you can use their extra rope:"),
-        'effect_A' => clienttranslate("Take 1 {GEAR_ICON} Card from another player's Asset Board and
-                                       add it to your hand"),
-        'effect_B_flavor' => clienttranslate("Cut your rope down and be mindful of its shorter length:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PRECISION_ICON} Token"),
+        'description' => _("Rope sheath is cut"),
+        'effect_A_flavor' => _("Ask rappellers if you can use their extra rope:"),
+        'effect_A' => _("Take 1 {GEAR_ICON} Card from another player's Asset Board and
+                         add it to your hand"),
+        'effect_B_flavor' => _("Cut your rope down and be mindful of its shorter length:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PRECISION_ICON} Token"),
+        'x_y' => [300, 100],
     ],
 
     '15' => [
         'name' => 'too_much_gear',
-        'description' => clienttranslate("Too Much Gear"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Lug that heavy rack up with you:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Offload some gear onto your partner:"),
-        'effect_B' => clienttranslate("All other players gain 1 {GEAR_ICON} Card from The Portaledge"),
+        'description' => _("Too Much Gear"),
+        'effect_A_flavor' => _("Lug that heavy rack up with you:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _("Offload some gear onto your partner:"),
+        'effect_B' => _("All other players gain 1 {GEAR_ICON} Card from The Portaledge"),
+        'x_y' => [400, 100],
     ],
 
     '16' => [
         'name' => 'use_your_partners_rack',
-        'description' => clienttranslate("Use your partner's rack"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Organize their chaotic rack:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {PRECISION_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Go up with it looking like a junk show:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Use your partner's rack"),
+        'effect_A_flavor' => _("Organize their chaotic rack:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {PRECISION_ICON} Token"),
+        'effect_B_flavor' => _("Go up with it looking like a junk show:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [500, 100],
     ],
 
     '17' => [
         'name' => 'painful_hanging_belay',
-        'description' => clienttranslate("Painful hanging belay"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Lead a short pitch to a better belay:"),
-        'effect_A' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Deal with the pain:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'description' => _("Painful hanging belay"),
+        'effect_A_flavor' => _("Lead a short pitch to a better belay:"),
+        'effect_A' => _("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'effect_B_flavor' => _("Deal with the pain:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'x_y' => [600, 100],
     ],
 
     '18' => [
         'name' => 'pumped',
-        'description' => clienttranslate("Pumped!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Push through the pain:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate('Yell "TAKE!" and shake it out:'),
-        'effect_B' => clienttranslate("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} 
-                                       and gain 1 {WATER_ICON}"),
+        'description' => _("Pumped!"),
+        'effect_A_flavor' => _("Push through the pain:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _('Yell "TAKE!" and shake it out:'),
+        'effect_B' => _("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} 
+                         and gain 1 {WATER_ICON}"),
+        'x_y' => [700, 100],
     ],
 
     '19' => [
         'name' => 'hangry_partner',
-        'description' => clienttranslate("Hangry partner"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Lead the next pitch so they can eat lunch:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Give them your granola bar and a pep talk:"),
-        'effect_B' => clienttranslate("Draw 2 Summit Beta Tokens; keep 1 and give the other to another player"),
+        'description' => _("Hangry partner"),
+        'effect_A_flavor' => _("Lead the next pitch so they can eat lunch:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _("Give them your granola bar and a pep talk:"),
+        'effect_B' => _("Draw 2 Summit Beta Tokens; keep 1 and give the other to another player"),
+        'x_y' => [800, 100],
     ],
 
     '20' => [
         'name' => 'desperate_throw',
-        'description' => clienttranslate("Desperate throw"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Commit to the awful sloper:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Go back to the good holds and look for a different way up:"),
-        'effect_B' => clienttranslate("Lose 1 {SLAB_ICON} Card and gain 1 {WATER_ICON}"),
+        'description' => _("Desperate throw"),
+        'effect_A_flavor' => _("Commit to the awful sloper:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _("Go back to the good holds and look for a different way up:"),
+        'effect_B' => _("Lose 1 {SLAB_ICON} Card and gain 1 {WATER_ICON}"),
+        'x_y' => [900, 100],
     ],
 
     '21' => [
         'name' => 'flexing_flake',
-        'description' => clienttranslate("Flexing flake"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Awkwardly stretch around it:"),
-        'effect_A' => clienttranslate("Lose 1 Card and gain 1 {BALANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Gingerly tiptoe up it:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {PRECISION_ICON} Token"),
+        'description' => _("Flexing flake"),
+        'effect_A_flavor' => _("Awkwardly stretch around it:"),
+        'effect_A' => _("Lose 1 Card and gain 1 {BALANCE_ICON} Token"),
+        'effect_B_flavor' => _("Gingerly tiptoe up it:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 {PRECISION_ICON} Token"),'x_y' => [0, 200],
+        'x_y' => [0, 200],
     ],
 
     '22' => [
         'name' => 'scary_run-out_slab',
-        'description' => clienttranslate("Scary run-out slab"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Bail into the vegetated gully:"),
-        'effect_A' => clienttranslate("Lose 1 {SLAB_ICON} Card and gain 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Smear and pray like never before:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Scary run-out slab"),
+        'effect_A_flavor' => _("Bail into the vegetated gully:"),
+        'effect_A' => _("Lose 1 {SLAB_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Smear and pray like never before:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [100, 200],
     ],
 
     '23' => [
         'name' => 'other_partys_rope_gets_stuck',
-        'description' => clienttranslate("Other party's rope gets stuck"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Help them:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Pass them by:"),
-        'effect_B' => clienttranslate("Lose 1 Card and take 1 Card from another player's Asset Board,
-                                       then add it to your hand"),
+        'description' => _("Other party's rope gets stuck"),
+        'effect_A_flavor' => _("Help them:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Pass them by:"),
+        'effect_B' => _("Lose 1 Card and take 1 Card from another player's Asset Board,
+                         then add it to your hand"),
+        'x_y' => [200, 200],
     ],
 
     '24' => [
         'name' => 'gassy_as_heck',
-        'description' => clienttranslate("Gassy as heck"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Scurry up the next pitch to fart in solitude:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Hold it in while your partner racks up:"),
-        'effect_B' => clienttranslate("Gain 1 {PAIN_TOLERANCE_ICON} Token and all other
-                                       players gain 1 {GEAR_ICON} Card"),
+        'description' => _("Gassy as heck"),
+        'effect_A_flavor' => _("Scurry up the next pitch to fart in solitude:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {FACE_ICON} Card"),
+        'effect_B_flavor' => _("Hold it in while your partner racks up:"),
+        'effect_B' => _("Gain 1 {PAIN_TOLERANCE_ICON} Token and all other
+                         players gain 1 {GEAR_ICON} Card"),
+        'x_y' => [300, 200],
     ],
 
     '25' => [
         'name' => 'partner_has_a_meltdown',
-        'description' => clienttranslate("Partner has a meltdown"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Console them:"),
-        'effect_A' => clienttranslate("Give another player 2 Cards and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Tell them to buck up:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and take 1 Card from another player's
-                                       Asset Board, then add it to your hand"),
+        'description' => _("Partner has a meltdown"),
+        'effect_A_flavor' => _("Console them:"),
+        'effect_A' => _("Give another player 2 Cards and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Tell them to buck up:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and take 1 Card from another player's
+                         Asset Board, then add it to your hand"),
+        'x_y' => [400, 200],
     ],
 
     '26' => [
         'name' => 'bad_beta',
-        'description' => clienttranslate("Bad beta"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Post a correction online:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Confront whoever gave you the beta:"),
-        'effect_B' => clienttranslate("Lose 1 Card and take 1 Card from another player's Asset Board,
-                                       then add it to your hand"),
+        'description' => _("Bad beta"),
+        'effect_A_flavor' => _("Post a correction online:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Confront whoever gave you the beta:"),
+        'effect_B' => _("Lose 1 Card and take 1 Card from another player's Asset Board,
+                         then add it to your hand"),
+        'x_y' => [500, 200],
     ],
 
     '27' => [
         'name' => 'prosthesis_starts_to_slip',
-        'description' => clienttranslate("Prosthesis starts to slip"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Keep movements small to stay in control:"),
-        'effect_A' => clienttranslate("Lose 1 {FACE_ICON} Card and gain 1 {PRECISION_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Ignore it and keep climbing with less reliable foot placements:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {FACE_ICON} Card"),
+        'description' => _("Prosthesis starts to slip"),
+        'effect_A_flavor' => _("Keep movements small to stay in control:"),
+        'effect_A' => _("Lose 1 {FACE_ICON} Card and gain 1 {PRECISION_ICON} Token"),
+        'effect_B_flavor' => _("Ignore it and keep climbing with less reliable foot placements:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 {FACE_ICON} Card"),
+        'x_y' => [600, 200],
     ],
 
     '28' => [
         'name' => 'hecked_up_the_sequence',
-        'description' => clienttranslate("Hecked up the sequence"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Try to smear both feet:"),
-        'effect_A' => clienttranslate("Lose 1 {SLAB_ICON} Card and gain 1 {PAIN_TOLERANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Try to mantle:"),
-        'effect_B' => clienttranslate("Add 1 Card from your hand to your Asset Board"),
+        'description' => _("Hecked up the sequence"),
+        'effect_A_flavor' => _("Try to smear both feet:"),
+        'effect_A' => _("Lose 1 {SLAB_ICON} Card and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'effect_B_flavor' => _("Try to mantle:"),
+        'effect_B' => _("Add 1 Card from your hand to your Asset Board"),
+        'x_y' => [700, 200],
     ],
 
     '29' => [
         'name' => 'falling_poop_bag',
-        'description' => clienttranslate("Falling poop bag"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Flatten yourself against the wall and hope you don't get hit:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {BALANCE_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Warn the others below:"),
-        'effect_B' => clienttranslate("All players gain 1 Card from The Portaledge"),
+        'description' => _("Falling poop bag"),
+        'effect_A_flavor' => _("Flatten yourself against the wall and hope you don't get hit:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {BALANCE_ICON} Token"),
+        'effect_B_flavor' => _("Warn the others below:"),
+        'effect_B' => _("All players gain 1 Card from The Portaledge"),
+        'x_y' => [800, 200],
     ],
 
     '30' => [
         'name' => 'blind_placement',
-        'description' => clienttranslate("Blind placement"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Fiddle with the gear:"),
-        'effect_A' => clienttranslate("Put 1 {GEAR_ICON} Card from your hand onto your Asset Board"),
-        'effect_B_flavor' => clienttranslate("Say heck the gear and move on:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
-                                       {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'description' => _("Blind placement"),
+        'effect_A_flavor' => _("Fiddle with the gear:"),
+        'effect_A' => _("Put 1 {GEAR_ICON} Card from your hand onto your Asset Board"),
+        'effect_B_flavor' => _("Say heck the gear and move on:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
+                         {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'x_y' => [900, 200],
     ],
 
     '31' => [
         'name' => 'dropped_a_piece',
-        'description' => clienttranslate("Dropped a piece"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Retrieve it:"),
-        'effect_A' => clienttranslate("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} 
-                                       and gain 1 {GEAR_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Decide you don't need it"),
-        'effect_B' => clienttranslate("Give 1 {GEAR_ICON} Card to another player and draw 1 Card
-                                       from The Portaledge"),
+        'description' => _("Dropped a piece"),
+        'effect_A_flavor' => _("Retrieve it:"),
+        'effect_A' => _("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} 
+                         and gain 1 {GEAR_ICON} Card"),
+        'effect_B_flavor' => _("Decide you don't need it"),
+        'effect_B' => _("Give 1 {GEAR_ICON} Card to another player and draw 1 Card
+                         from The Portaledge"),
+        'x_y' => [0, 300],
     ],
 
     '32' => [
         'name' => 'bat_in_the_crack',
-        'description' => clienttranslate("Bat in the crack!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Layback the crack and hope you don't disturb the bat:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
-        'effect_B_flavor' => clienttranslate("Make noise to shoo it out:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {CRACK_ICON} Card"),
+        'description' => _("Bat in the crack!"),
+        'effect_A_flavor' => _("Layback the crack and hope you don't disturb the bat:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {POWER_ICON} Token"),
+        'effect_B_flavor' => _("Make noise to shoo it out:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 {CRACK_ICON} Card"),
+        'x_y' => [100, 300],
     ],
 
     '33' => [
         'name' => 'peregrine_falcon_delivers_a_water-filled_cactus',
-        'description' => clienttranslate("Peregrine falcon delivers a water-filled cactus"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Is it the juciest cactus ever?"),
-        'effect_A' => clienttranslate("All players gain 2 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Is there only enough for you?"),
-        'effect_B' => clienttranslate("You gain 1 {WATER_ICON}"),
+        'description' => _("Peregrine falcon delivers a water-filled cactus"),
+        'effect_A_flavor' => _("Is it the juciest cactus ever?"),
+        'effect_A' => _("All players gain 2 {WATER_ICON}"),
+        'effect_B_flavor' => _("Is there only enough for you?"),
+        'effect_B' => _("You gain 1 {WATER_ICON}"),
+        'x_y' => [200, 300],
     ],
 
     '34' => [
         'name' => 'spinner',
-        'description' => clienttranslate("Spinner"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Ignore it:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
-        'effect_B_flavor' => clienttranslate("Back it up with some gear:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'description' => _("Spinner"),
+        'effect_A_flavor' => _("Ignore it:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'effect_B_flavor' => _("Back it up with some gear:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'x_y' => [300, 300],
     ],
 
     '35' => [
         'name' => 'off_route',
-        'description' => clienttranslate("Off route"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Go up the featureless slab:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {SLAB_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Go up the lichen-covered corner:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Off route"),
+        'effect_A_flavor' => _("Go up the featureless slab:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {SLAB_ICON} Card"),
+        'effect_B_flavor' => _("Go up the lichen-covered corner:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [400, 300],
     ],
 
     '36' => [
         'name' => 'camera_crew',
-        'description' => clienttranslate("Camera crew"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Which Pitch has a photographer hanging out on it?"),
-        'effect_A' => clienttranslate("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
-                                       Pitch - any player climbing that Pitch will need that additional Asset"),
+        'description' => _("Camera crew"),
+        'effect_A_flavor' => _("Which Pitch has a photographer hanging out on it?"),
+        'effect_A' => _("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
+                         Pitch - any player climbing that Pitch will need that additional Asset"),
+        'x_y' => [500, 300],
     ],
 
     '37' => [
         'name' => 'overcammed_that_jawn',
-        'description' => clienttranslate("Overcammed that jawn"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Waste 15 minutes getting it out:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {GEAR_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Leave it in:"),
-        'effect_B' => clienttranslate("All other players may draw a Card from The Portaledge"),
+        'description' => _("Overcammed that jawn"),
+        'effect_A_flavor' => _("Waste 15 minutes getting it out:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {GEAR_ICON} Card"),
+        'effect_B_flavor' => _("Leave it in:"),
+        'effect_B' => _("All other players may draw a Card from The Portaledge"),
+        'x_y' => [600, 300],
     ],
 
     '38' => [
         'name' => 'wet_rock',
-        'description' => clienttranslate("Wet rock"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Go up the seeping crack:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {CRACK_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Drench your gear on the soggy ledges:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'description' => _("Wet rock"),
+        'effect_A_flavor' => _("Go up the seeping crack:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {CRACK_ICON} Card"),
+        'effect_B_flavor' => _("Drench your gear on the soggy ledges:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'x_y' => [700, 300],
     ],
 
     '39' => [
         'name' => 'who_pooped_on_the_ledge',
-        'description' => clienttranslate("Who pooped on the ledge"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Scooch it into your spare waste bag and wash off the remains:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and draw 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Leave it there and whiff the fumes while you belay:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} Card and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'description' => _("Who pooped on the ledge"),
+        'effect_A_flavor' => _("Scooch it into your spare waste bag and wash off the remains:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and draw 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Leave it there and whiff the fumes while you belay:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} Card and gain 1 {PAIN_TOLERANCE_ICON} Token"),
+        'x_y' => [800, 300],
     ],
 
     '40' => [
         'name' => 'wild_traverse',
-        'description' => clienttranslate("Wild traverse"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Clip a long runner to everything:"),
-        'effect_A' => clienttranslate("Put 1 {GEAR_ICON} Card from your hand onto your Asset Board"),
-        'effect_B_flavor' => clienttranslate("Run it out to avoid rope drag:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
-                                       {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'description' => _("Wild traverse"),
+        'effect_A_flavor' => _("Clip a long runner to everything:"),
+        'effect_A' => _("Put 1 {GEAR_ICON} Card from your hand onto your Asset Board"),
+        'effect_B_flavor' => _("Run it out to avoid rope drag:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
+                         {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'x_y' => [900, 300],
     ],
 
     '41' => [
         'name' => 'falcon_nest',
-        'description' => clienttranslate("Falcon nest"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Which Pitch has a short but difficult detour to avoid the
-                                              nesting area?"),
-        'effect_A' => clienttranslate("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
-                                       Pitch - any player climbing that Pitch will need that additional Asset"),
+        'description' => _("Falcon nest"),
+        'effect_A_flavor' => _("Which Pitch has a short but difficult detour to avoid the
+                                nesting area?"),
+        'effect_A' => _("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
+                         Pitch - any player climbing that Pitch will need that additional Asset"),
+        'x_y' => [0, 400],
     ],
 
     '42' => [
         'name' => 'lucky_flask',
-        'description' => clienttranslate("Lucky flask"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Pass it around:"),
-        'effect_A' => clienttranslate("All players gain 1 {WATER_ICON} and 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Keep it to yourself:"),
-        'effect_B' => clienttranslate("You gain 1 {WATER_ICON}"),
+        'description' => _("Lucky flask"),
+        'effect_A_flavor' => _("Pass it around:"),
+        'effect_A' => _("All players gain 1 {WATER_ICON} and 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Keep it to yourself:"),
+        'effect_B' => _("You gain 1 {WATER_ICON}"),
+        'x_y' => [100, 400],
     ],
 
     '43' => [
         'name' => 'wasp_nest',
-        'description' => clienttranslate("Wasp nest"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Find a way around it:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Keep climbing near it and hope you don't get stung:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
+        'description' => _("Wasp nest"),
+        'effect_A_flavor' => _("Find a way around it:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Keep climbing near it and hope you don't get stung:"),
+        'effect_B' => _("Roll the Risk Die\n
                                        {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
                                        {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [200, 400],
     ],
 
     '44' => [
         'name' => 'second_wind',
-        'description' => clienttranslate("Second wind"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Use your energy to psych everyone up:"),
-        'effect_A' => clienttranslate("All players gain 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Use your energy to send the Pitch:"),
-        'effect_B' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 Card from The Portaledge"),
+        'description' => _("Second wind"),
+        'effect_A_flavor' => _("Use your energy to psych everyone up:"),
+        'effect_A' => _("All players gain 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Use your energy to send the Pitch:"),
+        'effect_B' => _("Lose 1 {WATER_ICON} and gain 1 Card from The Portaledge"),
+        'x_y' => [300, 400],
     ],
 
     '45' => [
         'name' => 'surprise_storm',
-        'description' => clienttranslate("Surprise storm!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Keep climbing in the rain:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
-        'effect_B_flavor' => clienttranslate("Wait it out:"),
-        'effect_B' => clienttranslate("Give another player 2 Cards and gain 1 Summit Beta Token"),
+        'description' => _("Surprise storm!"),
+        'effect_A_flavor' => _("Keep climbing in the rain:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'effect_B_flavor' => _("Wait it out:"),
+        'effect_B' => _("Give another player 2 Cards and gain 1 Summit Beta Token"),
+        'x_y' => [400, 400],
     ],
 
     '46' => [
         'name' => 'surprise_off-width',
-        'description' => clienttranslate("Surprise off-width"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Do you thrash through it:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {CRACK_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Do you pull on gear to get past it:"),
-        'effect_B' => clienttranslate("Lose 1 {CRACK_ICON} Card and gain 1 {GEAR_ICON} Card"),
+        'description' => _("Surprise off-width"),
+        'effect_A_flavor' => _("Do you thrash through it:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {CRACK_ICON} Card"),
+        'effect_B_flavor' => _("Do you pull on gear to get past it:"),
+        'effect_B' => _("Lose 1 {CRACK_ICON} Card and gain 1 {GEAR_ICON} Card"),
+        'x_y' => [500, 400],
     ],
 
     '47' => [
         'name' => 'squirrels_eat_your_snacks',
-        'description' => clienttranslate("Squirrels eat your snacks"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Let them do as they please:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and draw 1 Card from The Portaledge"),
-        'effect_B_flavor' => clienttranslate("Waste time shooing them away:"),
-        'effect_B' => clienttranslate("All other players draw 1 Card from The Portaledge"),
+        'description' => _("Squirrels eat your snacks"),
+        'effect_A_flavor' => _("Let them do as they please:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and draw 1 Card from The Portaledge"),
+        'effect_B_flavor' => _("Waste time shooing them away:"),
+        'effect_B' => _("All other players draw 1 Card from The Portaledge"),
+        'x_y' => [600, 400],
     ],
 
     '48' => [
         'name' => 'big_scary_roof',
-        'description' => clienttranslate("Big scary roof"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Find a bomber jam:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {CRACK_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Inch over the edge on tiny crimps:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {FACE_ICON} Card"),
+        'description' => _("Big scary roof"),
+        'effect_A_flavor' => _("Find a bomber jam:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {CRACK_ICON} Card"),
+        'effect_B_flavor' => _("Inch over the edge on tiny crimps:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {FACE_ICON} Card"),
+        'x_y' => [700, 400],
     ],
 
     '49' => [
         'name' => 'party_on_the_ledge',
-        'description' => clienttranslate("Party on the ledge"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Share the bolted anchors with them:"),
-        'effect_A' => clienttranslate("You and another player lose 1 {PSYCH_ICON} 
-                                       and each gain 1 {GEAR_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Build an anchor around the corner:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'description' => _("Party on the ledge"),
+        'effect_A_flavor' => _("Share the bolted anchors with them:"),
+        'effect_A' => _("You and another player lose 1 {PSYCH_ICON} 
+                         and each gain 1 {GEAR_ICON} Card"),
+        'effect_B_flavor' => _("Build an anchor around the corner:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'x_y' => [800, 400],
     ],
 
     '50' => [
         'name' => 'pee_off_the_ledge',
-        'description' => clienttranslate("Pee off the ledge"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("When you gotta go, you gotta go!"),
-        'effect_A' => clienttranslate("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
-                                       Pitch next to you or below you - any player climbing that Pitch
-                                       will need that additional Asset"),
+        'description' => _("Pee off the ledge"),
+        'effect_A_flavor' => _("When you gotta go, you gotta go!"),
+        'effect_A' => _("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to any
+                         Pitch next to you or below you - any player climbing that Pitch
+                         will need that additional Asset"),
+        'x_y' => [900, 400],
     ],
 
     '51' => [
         'name' => 'powerful_dyno',
-        'description' => clienttranslate("Powerful dyno"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Build a gear nest in case you miss:"),
-        'effect_A' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Go for it!"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from the Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Powerful dyno"),
+        'effect_A_flavor' => _("Build a gear nest in case you miss:"),
+        'effect_A' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Go for it!"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from the Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [0, 500],
     ],
 
     '52' => [
         'name' => 'that_breeze_tho',
-        'description' => clienttranslate("That breeze tho"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Can everyone feel the cool breeze?"),
-        'effect_A' => clienttranslate("All players gain 2 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Is it just you?"),
-        'effect_B' => clienttranslate("You gain 1 {PSYCH_ICON}"),
+        'description' => _("That breeze tho"),
+        'effect_A_flavor' => _("Can everyone feel the cool breeze?"),
+        'effect_A' => _("All players gain 2 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Is it just you?"),
+        'effect_B' => _("You gain 1 {PSYCH_ICON}"),
+        'x_y' => [100, 500],
     ],
 
     '53' => [
         'name' => 'whipper',
-        'description' => clienttranslate("Whipper!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Shoot right back up:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 Skill Card 
-                                       {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
-        'effect_B_flavor' => clienttranslate("Ask your partner to lead it:"),
-        'effect_B' => clienttranslate("Give another player 2 Cards and draw 1 Card from The Portaledge"),
+        'description' => _("Whipper!"),
+        'effect_A_flavor' => _("Shoot right back up:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 Skill Card 
+                         {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'effect_B_flavor' => _("Ask your partner to lead it:"),
+        'effect_B' => _("Give another player 2 Cards and draw 1 Card from The Portaledge"),
+        'x_y' => [200, 500],
     ],
 
     '54' => [
         'name' => 'bring_the_wide_gear',
-        'description' => clienttranslate("Bring the wide gear"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Which Pitch has a wide crack that wasn't marked in
-                                              the guidebook?"),
-        'effect_A' => clienttranslate("Choose a Pitch and add 1 {GEAR_ICON} Token to it - any player
-                                       climbing that Pitch will need that additional Asset"),
+        'description' => _("Bring the wide gear"),
+        'effect_A_flavor' => _("Which Pitch has a wide crack that wasn't marked in
+                                the guidebook?"),
+        'effect_A' => _("Choose a Pitch and add 1 {GEAR_ICON} Token to it - any player
+                         climbing that Pitch will need that additional Asset"),
+        'x_y' => [300, 500],
     ],
 
     '55' => [
         'name' => 'sun_beats_down',
-        'description' => clienttranslate("Sun beats down"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Is it hot as heck today?"),
-        'effect_A' => clienttranslate("Every player on a sunny Pitch (light colored tiles) 
-                                       loses 1 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Is it chilly as heck today?"),
-        'effect_B' => clienttranslate("Every player on a sunny Pitch (light colored tiles)
-                                       gains 1 {PSYCH_ICON}"),
+        'description' => _("Sun beats down"),
+        'effect_A_flavor' => _("Is it hot as heck today?"),
+        'effect_A' => _("Every player on a sunny Pitch (light colored tiles) 
+                         loses 1 {WATER_ICON}"),
+        'effect_B_flavor' => _("Is it chilly as heck today?"),
+        'effect_B' => _("Every player on a sunny Pitch (light colored tiles)
+                         gains 1 {PSYCH_ICON}"),
+        'x_y' => [400, 500],
     ],
 
     '56' => [
         'name' => 'sewed_it_up',
-        'description' => clienttranslate("Sewed it up"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Backclean to retrieve some gear:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {GEAR_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Run it out the top:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'description' => _("Sewed it up"),
+        'effect_A_flavor' => _("Backclean to retrieve some gear:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {GEAR_ICON} Card"),
+        'effect_B_flavor' => _("Run it out the top:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'x_y' => [500, 500],
     ],
 
     '57' => [
         'name' => 'missed_the_belay',
-        'description' => clienttranslate("Missed the belay"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Climb to the bolted anchor section:"),
-        'effect_A' => clienttranslate("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}
-                                       and gain 1 {GEAR_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Build a sketchy anchor where you are:"),
-        'effect_B' => clienttranslate("Lose 1 {GEAR_ICON} Card and draw a Card from The Spread"),
+        'description' => _("Missed the belay"),
+        'effect_A_flavor' => _("Climb to the bolted anchor section:"),
+        'effect_A' => _("Lose 1 Skill Card {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}
+                         and gain 1 {GEAR_ICON} Card"),
+        'effect_B_flavor' => _("Build a sketchy anchor where you are:"),
+        'effect_B' => _("Lose 1 {GEAR_ICON} Card and draw a Card from The Spread"),
+        'x_y' => [600, 500],
     ],
 
     '58' => [
         'name' => 'snake_on_the_ledge',
-        'description' => clienttranslate("Snake on the ledge"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Plug a piece and hang until it slithers away:"),
-        'effect_A' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Quickly scurry around it:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Snake on the ledge"),
+        'effect_A_flavor' => _("Plug a piece and hang until it slithers away:"),
+        'effect_A' => _("Lose 1 {GEAR_ICON} Card and gain 1 {WATER_ICON}"),
+        'effect_B_flavor' => _("Quickly scurry around it:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [700, 500],
     ],
 
     '59' => [
         'name' => 'high_exposure',
-        'description' => clienttranslate("High Exposure"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Frantically place gear to calm your nerves:"),
-        'effect_A' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Sprint up to the belay ledge:"),
-        'effect_B' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {PSYCH_ICON}"),
+        'description' => _("High Exposure"),
+        'effect_A_flavor' => _("Frantically place gear to calm your nerves:"),
+        'effect_A' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Sprint up to the belay ledge:"),
+        'effect_B' => _("Lose 1 {WATER_ICON} and gain 1 {PSYCH_ICON}"),
+        'x_y' => [800, 500],
     ],
 
     '60' => [
         'name' => 'slow_party',
-        'description' => clienttranslate("Slow party"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Confront them and ask if you can go first:"),
-        'effect_A' => clienttranslate("All other players draw 1 Card from The Portaledge"),
-        'effect_B_flavor' => clienttranslate("Patiently wait behind them:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
+        'description' => _("Slow party"),
+        'effect_A_flavor' => _("Confront them and ask if you can go first:"),
+        'effect_A' => _("All other players draw 1 Card from The Portaledge"),
+        'effect_B_flavor' => _("Patiently wait behind them:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 Summit Beta Token"),
+        'x_y' => [900, 500],
     ],
 
     '61' => [
         'name' => 'mountain_goat_blocks_the_route',
-        'description' => clienttranslate("Mountain goat blocks the route"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Climb up a short slab to bypass him:"),
-        'effect_A' => clienttranslate("Lose 1 {WATER_ICON} and gain 1 {SLAB_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Wait for him to move:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {WATER_ICON}"),
+        'description' => _("Mountain goat blocks the route"),
+        'effect_A_flavor' => _("Climb up a short slab to bypass him:"),
+        'effect_A' => _("Lose 1 {WATER_ICON} and gain 1 {SLAB_ICON} Card"),
+        'effect_B_flavor' => _("Wait for him to move:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 {WATER_ICON}"),
+        'x_y' => [0, 600],
     ],
 
     '62' => [
         'name' => 'big_swing_potential',
-        'description' => clienttranslate("Big swing potential"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Sew it up to protect your follower:"),
-        'effect_A' => clienttranslate("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Run it out and hope they don't fall:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Big swing potential"),
+        'effect_A_flavor' => _("Sew it up to protect your follower:"),
+        'effect_A' => _("Lose 1 {GEAR_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Run it out and hope they don't fall:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [100, 600],
     ],
 
     '63' => [
         'name' => 'rockfall',
-        'description' => clienttranslate("Rockfall!"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("A crucial hold broke off!"),
-        'effect_A' => clienttranslate("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to
-                                       any Pitch - any player climbing that Pitch will need
-                                       that additional Asset"),
+        'description' => _("Rockfall!"),
+        'effect_A_flavor' => _("A crucial hold broke off!"),
+        'effect_A' => _("Add 1 Skill Token {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON} to
+                         any Pitch - any player climbing that Pitch will need
+                         that additional Asset"),
+        'x_y' => [200, 600],
     ],
 
     '64' => [
         'name' => 'sucker_holds',
-        'description' => clienttranslate("Sucker holds"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Hang for a bit to figure it out:"),
-        'effect_A' => clienttranslate("Lose 1 {FACE_ICON} Card and gain 1 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Launch into the sequence and hope for the best:"),
-        'effect_B' => clienttranslate("Roll the Risk Die\n
-                                       {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
-                                       {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'description' => _("Sucker holds"),
+        'effect_A_flavor' => _("Hang for a bit to figure it out:"),
+        'effect_A' => _("Lose 1 {FACE_ICON} Card and gain 1 {WATER_ICON}"),
+        'effect_B_flavor' => _("Launch into the sequence and hope for the best:"),
+        'effect_B' => _("Roll the Risk Die\n
+                         {CHECKMARK_ICON}: Gain 3 Cards from The Portaledge\n
+                         {CARDS_ICON}/{CARD_PSYCH_ICON}: Give those Assets to another player"),
+        'x_y' => [300, 600],
     ],
 
     '65' => [
         'name' => 'blown_out_toe',
-        'description' => clienttranslate("Blown out toe"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Ask your partner to wait while you try to repair your shoes:"),
-        'effect_A' => clienttranslate("Give another player 1 Card and gain 1 {WATER_ICON}"),
-        'effect_B_flavor' => clienttranslate("Ignore it and keep climbing:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
-                                       {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'description' => _("Blown out toe"),
+        'effect_A_flavor' => _("Ask your partner to wait while you try to repair your shoes:"),
+        'effect_A' => _("Give another player 1 Card and gain 1 {WATER_ICON}"),
+        'effect_B_flavor' => _("Ignore it and keep climbing:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 Skill Card 
+                         {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}"),
+        'x_y' => [400, 600],
     ],
 
     '66' => [
         'name' => 'awesome_view',
-        'description' => clienttranslate("Awesome view"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Take pictures of everyone else on the mountain:"),
-        'effect_A' => clienttranslate("All players draw 1 Card from The Portaledge"),
-        'effect_B_flavor' => clienttranslate("Climb over to a nice ledge to take in the scenery:"),
-        'effect_B' => clienttranslate("Lose 1 {FACE_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'description' => _("Awesome view"),
+        'effect_A_flavor' => _("Take pictures of everyone else on the mountain:"),
+        'effect_A' => _("All players draw 1 Card from The Portaledge"),
+        'effect_B_flavor' => _("Climb over to a nice ledge to take in the scenery:"),
+        'effect_B' => _("Lose 1 {FACE_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'x_y' => [500, 600],
     ],
 
     '67' => [
         'name' => 'crag_dog',
-        'description' => clienttranslate("Crag dog"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Is he barking non-stop?"),
-        'effect_A' => clienttranslate("All other players lose 1 {PSYCH_ICON}"),
-        'effect_B_flavor' => clienttranslate("Is he well-behaved?"),
-        'effect_B' => clienttranslate("All players gain 2 {PSYCH_ICON}"),
+        'description' => _("Crag dog"),
+        'effect_A_flavor' => _("Is he barking non-stop?"),
+        'effect_A' => _("All other players lose 1 {PSYCH_ICON}"),
+        'effect_B_flavor' => _("Is he well-behaved?"),
+        'effect_B' => _("All players gain 2 {PSYCH_ICON}"),
+        'x_y' => [600, 600],
     ],
 
     '68' => [
         'name' => 'freezing_cold',
-        'description' => clienttranslate("Freezing cold"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Keep climbing and share your hand warmers:"),
-        'effect_A' => clienttranslate("Give another player 2 Cards and draw 2 Cards from The Portaledge"),
-        'effect_B_flavor' => clienttranslate("Warm up on a sunny ledge:"),
-        'effect_B' => clienttranslate("Every player on a sunny Pitch gains 1 {PSYCH_ICON}"),
+        'description' => _("Freezing cold"),
+        'effect_A_flavor' => _("Keep climbing and share your hand warmers:"),
+        'effect_A' => _("Give another player 2 Cards and draw 2 Cards from The Portaledge"),
+        'effect_B_flavor' => _("Warm up on a sunny ledge:"),
+        'effect_B' => _("Every player on a sunny Pitch gains 1 {PSYCH_ICON}"),
+        'x_y' => [700, 600],
     ],
 
     '69' => [
         'name' => 'dropped_phone',
-        'description' => clienttranslate("Dropped phone"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Yell down to the party below and ask them to retrieve it:"),
-        'effect_A' => clienttranslate("Choose another player to gain 1 Summit Beta Token"),
-        'effect_B_flavor' => clienttranslate("Accept your phone's fate and keep climbing:"),
-        'effect_B' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 Card from The Portaledge"),
+        'description' => _("Dropped phone"),
+        'effect_A_flavor' => _("Yell down to the party below and ask them to retrieve it:"),
+        'effect_A' => _("Choose another player to gain 1 Summit Beta Token"),
+        'effect_B_flavor' => _("Accept your phone's fate and keep climbing:"),
+        'effect_B' => _("Lose 1 {PSYCH_ICON} and gain 1 Card from The Portaledge"),
+        'x_y' => [800, 600],
     ],
 
     '70' => [
         'name' => 'elvis_leg',
-        'description' => clienttranslate("Elvis leg"),
-        'tooltip' => clienttranslate(""),
-        'effect_A_flavor' => clienttranslate("Ignore it:"),
-        'effect_A' => clienttranslate("Lose 1 {PSYCH_ICON} and gain 1 {SLAB_ICON} Card"),
-        'effect_B_flavor' => clienttranslate("Shake it out:"),
-        'effect_B' => clienttranslate("Lose 1 {SLAB_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'description' => _("Elvis leg"),
+        'effect_A_flavor' => _("Ignore it:"),
+        'effect_A' => _("Lose 1 {PSYCH_ICON} and gain 1 {SLAB_ICON} Card"),
+        'effect_B_flavor' => _("Shake it out:"),
+        'effect_B' => _("Lose 1 {SLAB_ICON} Card and gain 1 {PSYCH_ICON}"),
+        'x_y' => [900, 600],
     ],
 ];
 
 $this->personal_objectives = [
     '1' => [
         'name' => 'rocky_mountains_tour',
-        'description' => clienttranslate("Rocky Mountains Tour"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches in and around the Rocky Mountains',
+        'description' => _("Rocky Mountains Tour"),
+        'text' => _('Climb 3 Pitches in and around the Rocky Mountains'),
         'score' => 4,
         'pitches' => ['black_elk', 'red_rider', 'rebuffats_arete', 'edge_of_time', 'irenes_arete',
                        'bulldog_arete', 'black_snake', 'bishop_jaggers'],
+        'x_y' => [0, 0],
     ],
 
     '2' => [
         'name' => 'a_day_at_the_zoo',
-        'description' => clienttranslate("A Day at the Zoo"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches with an animal or insect in its name',
+        'description' => _("A Day at the Zoo"),
+        'text' => _('Climb 3 Pitches with an animal or insect in its name'),
         'score' => 4,
         'pitches' => ['bird_cage', 'black_elk', 'lonesome_dove', 'bulldog_arete', 
                       'black_snake', 'bee_sting_corner', 'dinkus_dog'],
+        'x_y' => [100, 0],
     ],
 
     '3' => [
         'name' => 'call_it_like_you_see_it',
-        'description' => clienttranslate("Call it Like You See it"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches with the type of route in its name',
+        'description' => _("Call it Like You See it"),
+        'text' => _('Climb 3 Pitches with the type of route in its name'),
         'score' => 2,
         'pitches' => ['rogers_roof', 'corrugation_corner', 'rebuffats_arete', 'leap_year_flake',
                       'irenes_arete', 'bee_sting_corner', 'flakes_of_wrath', 'bulldog_arete',
                       'slab_aptitude_test', 'teflon_corner'],
+        'x_y' => [200, 0],
     ],
 
     '4' => [
         'name' => 'sporty_spice',
-        'description' => clienttranslate("Sporty Spice"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 sport routes',
+        'description' => _("Sporty Spice"),
+        'text' => _('Climb 3 sport routes'),
         'score' => 3,
         'pitches' => ['tierrany', 'screaming_yellow_zonkers', 'slab_aptitude_test', 'edge_of_time', 
                       'flight_of_the_gumby', 'lonesome_dove', 'bulldog_arete', 'no_place_like_home',
                       'red_rider'],
+        'x_y' => [300, 0],
     ],
 
     '5' => [
         'name' => 'rainbow_vibes',
-        'description' => clienttranslate("Rainbow Vibes"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 pitches with a color in its name',
+        'description' => _("Rainbow Vibes"),
+        'text' => _('Climb 3 pitches with a color in its name'),
         'score' => 5,
         'pitches' => ['black_elk', 'desert_gold', 'red_rider', 'scarlet_begonias', 'black_snake',
                       'screaming_yellow_zonkers'],
+        'x_y' => [400, 0],
     ],
 
     '6' => [
         'name' => 'southern_rock',
-        'description' => clienttranslate("Southern Rock"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches located in Southeastern states',
+        'description' => _("Southern Rock"),
+        'text' => _('Climb 3 Pitches located in Southeastern states'),
         'score' => 5,
         'pitches' => ['tierrany', 'flight_of_the_gumby', 'no_place_like_home', 'bee_sting_corner', 
                       'dinkus_dog', 'closer_to_the_heart'],
+        'x_y' => [500, 0],
     ],
 
     '7' => [
         'name' => 'climb_your_way_out',
-        'description' => clienttranslate("Climb Your Way Out"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches located in a gorge or canyon',
+        'description' => _("Climb Your Way Out"),
+        'text' => _('Climb 3 Pitches located in a gorge or canyon'),
         'score' => 4,
         'pitches' => ['fiddler_on_the_roof', 'desert_gold', 'half-a-finger', 'rebuffats_arete', 
                       'flight_of_the_gumby', 'bulldog_arete', 'no_place_like_home',
                       'black_snake'],
+        'x_y' => [0, 100],
     ],
 
     '8' => [
         'name' => 'desert_days',
-        'description' => clienttranslate("Desert Days"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches located in a desert',
+        'description' => _("Desert Days"),
+        'text' => _('Climb 3 Pitches located in a desert'),
         'score' => 3,
         'pitches' => ['fiddler_on_the_roof', 'desert_gold', 'skull', 'dr_rubos_wild_ride', 
                       'abracadaver', 'belly_full_of_bad_berries', 'tooth_or_consequences', 'old_man',
                       'leap_year_flake', 'flakes_of_wrath', 'scarlet_begonias'],
+        'x_y' => [100, 100],
     ],
 
     '9' => [
         'name' => 'glory_days_of_the_piton',
-        'description' => clienttranslate("Glory Days of the Piton"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches established before 1970',
+        'description' => _("Glory Days of the Piton"),
+        'text' => _('Climb 3 Pitches established before 1970'),
         'score' => 3,
         'pitches' => ['rogers_roof', 'bird_cage', 'bonnies_roof', 'outer_space', 
                       'rebuffats_arete', 'irenes_arete', 'corrugation_corner', 'teflon_corner',
                       'chapel_pond_slab', 'bishop_jaggers'],
+        'x_y' => [200, 100],
     ],
 
     '10' => [
         'name' => 'social_butterfly',
-        'description' => clienttranslate("Social Butterfly"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches with a person in its name',
+        'description' => _("Social Butterfly"),
+        'text' => _('Climb 3 Pitches with a person in its name'),
         'score' => 3,
         'pitches' => ['rogers_roof', 'bonnies_roof', 'rebuffats_arete', 'irenes_arete', 
                       'dr_rubos_wild_ride', 'the_don_juan_wall', 'bishop_jaggers'],
+        'x_y' => [300, 100],
     ],
 
     '11' => [
         'name' => 'full_body_workout',
-        'description' => clienttranslate("Full Body Workout"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches with a body part in its name',
+        'description' => _("Full Body Workout"),
+        'text' => _('Climb 3 Pitches with a body part in its name'),
         'score' => 4,
         'pitches' => ['half-a-finger', 'skull', 'bloody_fingers', 'belly_full_of_bad_berries', 
                       'fickle_finger_of_fate', 'heart_of_the_country', 'closer_to_the_heart',
                       'tooth_or_consequences'],
+        'x_y' => [400, 100],
     ],
 
     '12' => [
         'name' => 'national_parks_pass',
-        'description' => clienttranslate("National Parks Pass"),
-        'tooltip' => clienttranslate(""),
-        'text' => 'Climb 3 Pitches located in a National Park',
+        'description' => _("National Parks Pass"),
+        'text' => _('Climb 3 Pitches located in a National Park'),
         'score' => 4,
         'pitches' => ['leap_year_flake', 'scarlet_begonias', 'irenes_arete', 'flight_of_the_gumby',
                       'black_snake', 'psychic_turbulence', 'teflon_corner'],
+        'x_y' => [500, 100],
     ],
 ];
 
 $this->characters = [
     '1' => [
         'name' => 'rope_gun',
-        'description' => clienttranslate("Rope Gun"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You fly up everything with ease',
-        'effect' => 'You may use 1 less {WATER_ICON} on each Pitch you climb.',
-        'water' => 4,
-        'psych' => 4,
-        'home_crag' => 'Red Rock', //bolded
-        'translation' => 'Newe (Western Shoshone), Nuwuvi (Southern Paiute), and 
-                          Nüwüwü (Chemeheuvi) Ancestral Land', //italicized
+        'description' => _("Rope Gun"),
+        'flavor' => _('You fly up everything with ease'),
+        'effect' => _('You may use 1 less Water on each Pitch you climb.'),
+        'water_psych' => 4,
+        'home_crag' => _('Red Rock'), //bolded
+        'translation' => _('Newe (Western Shoshone), Nuwuvi (Southern Paiute), and 
+                          Nüwüwü (Chemeheuvi) Ancestral Land'), //italicized
+        'x_y' => [0, 300],
+        'ab_x_y' => [200, 100],
     ],
 
     '2' => [
         'name' => 'free_soloist',
-        'description' => clienttranslate("Free Soloist"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You don\'t climb with gear',
-        'effect' => 'for each {GEAR_ICON} that is required for a Pitch, substitute with any
-                     Skill {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}. Gain 1 extra Asset every
-                     time you rest.',
-        'water' => 6,
-        'psych' => 6,
-        'home_crag' => 'Yosemite',
-        'translation' => 'Me-Wuk, Numu (Northern Paiute), and Western Mono/Monache Ancestral Land',
+        'description' => _("Free Soloist"),
+        'flavor' => _('You don\'t climb with gear'),
+        'effect' => _('for each Gear Card that is required for a Pitch, substitute with any
+                     Skill Card. Gain 1 extra Asset every time you rest.'),
+        'water_psych' => 6,
+        'home_crag' => _('Yosemite'),
+        'translation' => _('Me-Wuk, Numu (Northern Paiute), and Western Mono/Monache Ancestral Land'),
+        'x_y' => [100, 300],
+        'ab_x_y' => [300, 100],
     ],
 
     '3' => [
         'name' => 'the_dirtbag',
-        'description' => clienttranslate("The Dirtbag"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You\'ve picked up a lot of booty gear',
-        'effect' => 'on each Pitch, you may substitute 1 {GEAR_ICON} Card for 1 of the
-                     other required Assets {FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}/{WATER_ICON}/{PSYCH_ICON}',
-        'water' => 4,
-        'psych' => 4,
-        'home_crag' => 'Joshua Tree',
-        'translation' => 'Cahuilla, Newe (Western Shoshone), and Yuhaviatam/Maarenga\'yam
-                          (Serrano) Ancestral Land',
+        'description' => _("The Dirtbag"),
+        'flavor' => _('You\'ve picked up a lot of booty gear'),
+        'effect' => _('on each Pitch, you may substitute 1 Gear Card for 1 of the
+                     other required Assets'),
+        'water_psych' => 4,
+        'home_crag' => _('Joshua Tree'),
+        'translation' => _('Cahuilla, Newe (Western Shoshone), and Yuhaviatam/Maarenga\'yam
+                          (Serrano) Ancestral Land'),
+        'x_y' => [200, 300],
+        'ab_x_y' => [0, 100],
     ],
 
     '4' => [
         'name' => 'sendy_jammer',
-        'description' => clienttranslate("Sendy Jammer"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'Desert cracks have trained you well',
-        'effect' => 'all {GEAR_ICON} Cards you play can be counted as any 1 Technique symbol
-                     {PAIN_TOLERANCE_ICON}/{BALANCE_ICON}/{PRECISION_ICON}/{POWER_ICON}',
-        'water' => 5,
-        'psych' => 5,
-        'home_crag' => 'Indian Creek',
-        'translation' => 'Pueblos and Ute Ancestral Land',
+        'description' => _("Sendy Jammer"),
+        'flavor' => _('Desert cracks have trained you well'),
+        'effect' => _('all Gear Cards you play can be counted as any 1 Technique symbol'),
+        'water_psych' => 5,
+        'home_crag' => _('Indian Creek'),
+        'translation' => _('Pueblos and Ute Ancestral Land'),
+        'x_y' => [300, 300],
+        'ab_x_y' => [100, 100],
     ],
 
     '5' => [
         'name' => 'the_overstoker',
-        'description' => clienttranslate("The Overstoker"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'Your enthusiasm for climbing is off the charts!',
-        'effect' => 'on each Pitch, you may substitute 1 {PSYCH_ICON} for 1 of the other
-                     required Assets {GEAR_ICON}/{FACE_ICON}/{CRACK_ICON}/{SLAB_ICON}/{WATER_ICON}',
-        'water' => 6,
-        'psych' => 6,
-        'home_crag' => 'Smith Rock',
-        'translation' => 'Confederated Tribes of Warm Springs and Tenino Ancestral Land',
+        'description' => _("The Overstoker"),
+        'flavor' => _('Your enthusiasm for climbing is off the charts!'),
+        'effect' => _('on each Pitch, you may substitute 1 Psych for 1 of the other required Assets'),
+        'water_psych' => 6,
+        'home_crag' => _('Smith Rock'),
+        'translation' => _('Confederated Tribes of Warm Springs and Tenino Ancestral Land'),
+        'x_y' => [400, 300],
+        'ab_x_y' => [200, 0],
     ],
 
     '6' => [
         'name' => 'young_prodigy',
-        'description' => clienttranslate("Young Prodigy"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You pick up new skills quickly but are still getting used to placing gear',
-        'effect' => 'you need only 3 Cards to earn a Permanent Skill Token, but 5 Cards to
-                     earn a Permanent Gear Token.',
-        'water' => 4,
-        'psych' => 4,
-        'home_crag' => 'Local climbing gym',
+        'description' => _("Young Prodigy"),
+        'flavor' => _('You pick up new skills quickly but are still getting used to placing gear'),
+        'effect' => _('you need only 3 Cards to earn a Permanent Skill Token, but 5 Cards to
+                     earn a Permanent Gear Token.'),
+        'water_psych' => 4,
+        'home_crag' => _('Local climbing gym'),
         'translation' => '',
+        'x_y' => [500, 300],
+        'ab_x_y' => [300, 0],
     ],
 
     '7' => [
         'name' => 'bold_brit',
-        'description' => clienttranslate("Bold Brit"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You take big risks on sketchy gear placements',
-        'effect' => 'use only 1 {GEAR_ICON} Card on each Pitch that requires Gear.',
-        'water' => 5,
-        'psych' => 5,
-        'home_crag' => 'Peak District',
+        'description' => _("Bold Brit"),
+        'flavor' => _('You take big risks on sketchy gear placements'),
+        'effect' => _('use only 1 Gear Card on each Pitch that requires Gear.'),
+        'water_psych' => 5,
+        'home_crag' => _('Peak District'),
         'translation' => '',
+        'x_y' => [600, 300],
+        'ab_x_y' => [0, 0],
     ],
 
     '8' => [
         'name' => 'phil',
-        'description' => clienttranslate("Phil"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You love to push yourself',
-        'effect' => 'you must roll the Risk Die on every Pitch you climb. Start with 
-                     2 Summit Beta Tokens, and gain 1 extra Asset every time you rest.',
-        'water' => 7,
-        'psych' => 7,
-        'home_crag' => 'El Dorado Canyon',
-        'translation' => 'Arapaho, Cheyenne, and Ute Ancestral Land',
+        'description' => _("Phil"),
+        'flavor' => _('You love to push yourself'),
+        'effect' => _('you must roll the Risk Die on every Pitch you climb. Start with 
+                     2 Summit Beta Tokens, and gain 1 extra Asset every time you rest.'),
+        'water_psych' => 7,
+        'home_crag' => _('El Dorado Canyon'),
+        'translation' => _('Arapaho, Cheyenne, and Ute Ancestral Land'),
+        'x_y' => [700, 300],
+        'ab_x_y' => [100, 0],
     ],
 
     '9' => [
         'name' => 'crag_mama',
-        'description' => clienttranslate("Crag Mama"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You have a mother\'s intuition',
-        'effect' => 'You may use 1 fewer Skill {FACE_ICON}/{SLAB_ICON}/{CRACK_ICON} on
-                     all Pitches below The Ledge.',
-        'water' => 4,
-        'psych' => 4,
-        'home_crag' => 'New River Gorge',
-        'translation' => 'Moneton, S\'atsoyaha (Yuchi), and Tutelo Ancestral Land',
+        'description' => _("Crag Mama"),
+        'flavor' => _('You have a mother\'s intuition'),
+        'effect' => _('You may use 1 fewer Skill Card on all Pitches below The Ledge.'),
+        'water_psych' => 4,
+        'home_crag' => _('New River Gorge'),
+        'translation' => _('Moneton, S\'atsoyaha (Yuchi), and Tutelo Ancestral Land'),
+        'x_y' => [0, 400],
+        'ab_x_y' => [200, 200],
     ],
 
     '10' => [
         'name' => 'cool-headed_crimper',
-        'description' => clienttranslate("Cool-Headed Crimper"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You stay cool under pressure, no matter what comes your way.',
-        'effect' => 'After climbing each Pitch, draw 2 Climbing Cards and choose 1
-                     to resolve. Discard the other.',
-        'water' => 6,
-        'psych' => 6,
-        'home_crag' => 'Sedona',
-        'translation' => 'Hohokam, Hopitutskwa, Ndee/Nnēē: (Western Apache), Pueblos,
-                          and Yavapaiv Apache Ancestral Land',
+        'description' => _("Cool-Headed Crimper"),
+        'flavor' => _('You stay cool under pressure, no matter what comes your way.'),
+        'effect' => _('After climbing each Pitch, draw 2 Climbing Cards and choose 1
+                     to resolve. Discard the other.'),
+        'water_psych' => 6,
+        'home_crag' => _('Sedona'),
+        'translation' => _('Hohokam, Hopitutskwa, Ndee/Nnēē: (Western Apache), Pueblos,
+                          and Yavapaiv Apache Ancestral Land'),
+        'x_y' => [100, 400],
+        'ab_x_y' => [300, 200],
     ],
 
     '11' => [
         'name' => 'bionic_woman',
-        'description' => clienttranslate("Bionic Woman"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'As an above-knee amputee, you have to get creative with your technique',
-        'effect' => 'on each Pitch, you may substitute 1 Skill Card {FACE_ICON}/{SLAB_ICON}/{CRACK_ICON}
-                     with a different Skill Card of your choice.',
-        'water' => 4,
-        'psych' => 4,
-        'home_crag' => 'Red River Gorge',
-        'translation' => 'Adena, Cherokee, Hopewell, Osage, S\'atsoyaha (Yuchi), and Shawnee Ancestral Land',
+        'description' => _("Bionic Woman"),
+        'flavor' => _('As an above-knee amputee, you have to get creative with your technique'),
+        'effect' => _('on each Pitch, you may substitute 1 Skill Card with a different Skill Card of your choice.'),
+        'water_psych' => 4,
+        'home_crag' => _('Red River Gorge'),
+        'translation' => _('Adena, Cherokee, Hopewell, Osage, S\'atsoyaha (Yuchi), and Shawnee Ancestral Land'),
+        'x_y' => [200, 400],
+        'ab_x_y' => [0, 200],
     ],
 
     '12' => [
         'name' => 'buff_boulderer',
-        'description' => clienttranslate("Buff Boulderer"),
-        'tooltip' => clienttranslate(""),
-        'flavor' => 'You have no problem with difficult moves',
-        'effect' => 'use 1 fewer Asset {GEAR_ICON}/{FACE_ICON}/{SLAB_ICON}/{CRACK_ICON}/{WATER_ICON}/{PSYCH_ICON}
-                     to climb any 4 Point Pitch, and use 2 fewer Assets to climb any 5 Point Pitch.',
-        'water' => 6,
-        'psych' => 6,
-        'home_crag' => 'Bishop',
-        'translation' => 'Eastern Mono/Monache, Newe (Western Shoshone), and Numu (Northern Paiute) Ancestral Land',
+        'description' => _("Buff Boulderer"),
+        'flavor' => _('You have no problem with difficult moves'),
+        'effect' => _('use 1 fewer Asset to climb any 4 Point Pitch, and use 2 fewer Assets to climb any 5 Point Pitch.'),
+        'water_psych' => 6,
+        'home_crag' => _('Bishop'),
+        'translation' => _('Eastern Mono/Monache, Newe (Western Shoshone), and Numu (Northern Paiute) Ancestral Land'),
+        'x_y' => [300, 400],
+        'ab_x_y' => [100, 200],
     ],
 ];

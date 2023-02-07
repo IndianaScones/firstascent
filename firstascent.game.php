@@ -18,10 +18,13 @@
 
 
 require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
+require_once('modules/Utils.php');
 
 
 class FirstAscent extends Table
 {
+    use UtilTrait;
+
 	function __construct( )
 	{
         // Your global variables labels:
@@ -94,6 +97,18 @@ class FirstAscent extends Table
 
     // Set up cards and tokens
 
+        // add climbing cards
+        $climbing_cards = array();
+        for ($i=1; $i<=70; $i++) {
+            $climbing_cards[] = array(
+                'type' => 'climbing',
+                'type_arg' => $i,
+                'nbr' => 1,
+            );
+        }
+        $this->cards_and_tokens->createCards($climbing_cards, 'climbing_deck');
+        $this->cards_and_tokens->shuffle('climbing_deck');
+
         // add summit beta tokens
         $summit_beta_tokens = array();
         for ($i=1; $i<=12; $i++) {
@@ -104,6 +119,7 @@ class FirstAscent extends Table
             );
         }
         $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
+        $this->cards_and_tokens->shuffle('summit_beta_supply');
 
         // add asset cards
         $asset_cards = array();
@@ -117,8 +133,39 @@ class FirstAscent extends Table
 
         $this->cards_and_tokens->createCards($asset_cards, 'asset_deck');
 
-        // draw starting spread
+        // create portaledge
         $this->cards_and_tokens->shuffle('asset_deck');
+        $asset_deck = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
+
+        function sortGear($asset) { if ($asset['card_type_arg'] >= 22) {return true;} }
+        function sortFace($asset) { if ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21) {return true;} }
+        function sortCrack($asset) { if ($asset['card_type_arg'] <= 7) {return true;} }
+        function sortSlab($asset) { if ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14) {return true;} }
+
+        $gear_assets = array_filter($asset_deck, 'sortGear');
+        $face_assets = array_filter($asset_deck, 'sortFace');
+        $crack_assets = array_filter($asset_deck, 'sortCrack');
+        $slab_assets = array_filter($asset_deck, 'sortSlab');
+
+        $gear_to_ledge = array_slice($gear_assets, 0, 7);
+        $face_to_ledge = array_slice($face_assets, 0, 7);
+        $crack_to_ledge = array_slice($crack_assets, 0, 7);
+        $slab_to_ledge = array_slice($slab_assets, 0, 7);
+
+        for ($i=0; $i<=6; $i++) {
+            $this->cards_and_tokens->moveCard($gear_to_ledge[$i]['card_id'], 'portaGear', $i);
+        }
+        for ($i=0; $i<=6; $i++) {
+            $this->cards_and_tokens->moveCard($face_to_ledge[$i]['card_id'], 'portaFace', $i);
+        }
+        for ($i=0; $i<=6; $i++) {
+            $this->cards_and_tokens->moveCard($crack_to_ledge[$i]['card_id'], 'portaCrack', $i);
+        }
+        for ($i=0; $i<=6; $i++) {
+            $this->cards_and_tokens->moveCard($slab_to_ledge[$i]['card_id'], 'portaSlab', $i);
+        }
+
+        // draw starting spread
         $this->cards_and_tokens->pickCardsForLocation(4, 'asset_deck', 'the_spread');
 
 
@@ -139,36 +186,36 @@ class FirstAscent extends Table
 
             // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
             $ones = [ [1,3,6,8,11,13], [1,2,3,4,5,6] ];
-            $twos = [ [2,4,7,9,12,15,16,19,21,28,29], [7,8,9,10,11,12,13,14,15,16,17] ];
-            $threes = [ [17,20,23,25], [18,19,20,21] ];
-            $fours = [ [10,14,18,27,30], [22,23,24,25,26] ];
-            $fives = [ [22,24,26,31,32], [27,28,29,30,31,32] ];
+            $twos = [ [2,4,7,9,12,15,16,19,21,28,29], [13,14,15,16,17,18,19,20,21,22,23] ];
+            $threes = [ [17,20,23,25], [25,26,27,28] ];
+            $fours = [ [10,14,18,27,30], [29,30,31,32,33] ];
+            $fives = [ [22,24,26,31,32], [38,39,40,41,42,43] ];
 
             $pitch_order = [];
-            $pitch_order[5] = 33;
+            $pitch_order[5] = 36;
             $tiles_number = 32;
 
         } else if (self::getGameStateValue('player_count') === 2) {
 
-            // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
+            // var is point value of a tile, [0] array is tile locations on the forest board and [1] is css identifiers
             $ones = [ [5,8,13,17,19,26], [1,2,3,4,5,6] ];
-            $twos = [ [2,4,9,14,16,20,23,27,36,37,39], [7,8,9,10,11,12,13,14,15,16,17] ];
-            $threes = [ [28,30,32,34], [18,19,20,21] ];
-            $fours = [ [12,24,35,38,40], [22,23,24,25,26] ];
-            $fives = [ [29,31,33,41,42,43], [27,28,29,30,31,32] ];
+            $twos = [ [2,4,9,14,16,20,23,27,36,37,39], [13,14,15,16,17,18,19,20,21,22,23] ];
+            $threes = [ [28,30,32,34], [25,26,27,28] ];
+            $fours = [ [12,24,35,38,40], [29,30,31,32,33] ];
+            $fives = [ [29,31,33,41,42,43], [38,39,40,41,42,43] ];
 
             $pitch_order = [];
-            $pitch_order[1] = 34;
-            $pitch_order[3] = 35;
-            $pitch_order[6] = 33;
-            $pitch_order[7] = 36;
-            $pitch_order[10] = 37;
-            $pitch_order[11] = 38;
-            $pitch_order[15] = 39;
-            $pitch_order[18] = 40;
-            $pitch_order[21] = 41;
-            $pitch_order[22] = 42;
-            $pitch_order[25] = 43;
+            $pitch_order[1] = 9;
+            $pitch_order[3] = 10;
+            $pitch_order[6] = 36;
+            $pitch_order[7] = 24;
+            $pitch_order[10] = 12;
+            $pitch_order[11] = 8;
+            $pitch_order[15] = 11;
+            $pitch_order[18] = 37;
+            $pitch_order[21] = 7;
+            $pitch_order[22] = 35;
+            $pitch_order[25] = 34;
             $tiles_number = 43;
         }
 
@@ -211,6 +258,20 @@ class FirstAscent extends Table
         $sql .= implode(',', $sql_values);
         self::DbQuery($sql);
 
+        // Create character pool
+        $character_count = count($players) +1;
+        $character_pool = [ [1,2], [3,4], [5,6], [7,8], [9,10], [11,12] ];
+        shuffle($character_pool);
+        $available_characters = [];
+        for ($i=1; $i<=$character_count; $i++) {
+            $current_board = array_pop($character_pool);
+            shuffle($current_board);
+            $current_character = array_pop($current_board);
+            $available_characters[] = $current_character;
+        }
+        $this->setGlobalVariable('available_characters', $available_characters);
+
+
         // Init game statistics
         // (note: statistics used in this file must be defined in your stats.inc.php file)
         //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
@@ -242,13 +303,21 @@ class FirstAscent extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score FROM player ";
+        $sql = "SELECT player_id id, player_score score, `character` FROM player ";
         $result['players'] = self::getCollectionFromDb( $sql );
         $result['player_count'] = $this->getGameStateValue('player_count');
 
+        // FOR DEBUGGING THROUGH JAVASCRIPT
+
+        
         // Get materials
+        $result['pitches'] = $this->pitches;
         $result['asset_cards'] = $this->asset_cards;
         $result['climbing_cards'] = $this->climbing_cards;
+        $result['shared_objectives'] = $this->shared_objectives;
+        $result['current_objectives'] = $this->getCurrentObjectives();
+        $result['characters'] = $this->characters;
+        $result['available_characters'] = $this->getGlobalVariable('available_characters');
 
         // Get starting Spread
         $result['spread'] = self::getCollectionFromDb(
@@ -277,67 +346,6 @@ class FirstAscent extends Table
         return 0;
     }
 
-
-//////////////////////////////////////////////////////////////////////////////
-//////////// Utility functions
-////////////    
-
-    /*
-        In this space, you can put any utility methods useful for your game logic
-    */
-
-    function getCurrentObjectives() {
-        return [
-            self::getGameStateValue('shared_objective_1'),
-            self::getGameStateValue('shared_objective_2'),
-            self::getGameStateValue('shared_objective_3')
-        ];
-    }
-
-    function getTileCoords() {
-        if (self::getGameStateValue('player_count') === '1') {
-            return [
-        /*player_count*/ 1,
-
-        /*row 1*/   [ [17.4, 181.2],  [17.2, 262],  [17.2, 342.95],  [17.55, 423.9],  [17.55, 504.9], 
-                          [17.2, 585.9], [17.55, 666.9], [17.35, 747.7],
-        /*row 2*/     [87.75, 221.4],  [87.75, 302.4],  [87.35, 383.6],  [87.75, 464.4],  [87.35, 545.4], [87.75, 626.4], 
-                          [87.75, 707.4],
-        /*row 3*/     [157.8, 262.4], [157.8, 342.9], [157.95, 423.9], [157.8, 504.9], [157.8, 585.9], [157.8, 666.7],
-        /*row 4*/     [269.5, 302.55], [269.5, 383.6], [269.5, 464.55], [269.5, 545.4], [269.5, 626.35],
-        /*row 5*/     [339.8, 342.95], [339.8, 423.9], [339.8, 504.85], [339.8, 585.9],
-        /*row 6*/     [409.725, 383.6], [409.725, 545.4] ]
-            ];
-
-        } else {
-            return [
-        /*player_count*/ 2,
-
-        /*row 1*/   [ [19.25, 105.3],  [19.25, 185.55],  [19.25, 265.55],  [19.25, 345.65],  [19.25, 425.75],
-                          [19.25, 505.8], [19.25, 585.8], [19.25, 665.8], [19.25, 745.75], [19.25, 825.65],
-        /*row 2*/   [88.75, 145.5],  [88.75, 225.68],  [88.75, 305.55],  [88.75, 385.55],  [88.75, 465.6],  
-                          [88.75, 545.7], [88.75, 625.85], [88.75, 705.8], [88.75, 785.95],
-        /*row 3*/   [158.1, 185.5], [158.1, 265.5], [158.1, 345.5], [158.4, 425.65], [158.3, 505.65], 
-                          [158.1, 585.8], [158.3, 665.7], [158.3, 745.7],
-        /*row 4*/   [268.75, 225.45], [268.75, 305.45], [268.75, 385.55], [268.75, 465.55], [268.75, 545.7],
-                          [268.75, 625.7], [268.75, 705.7],
-        /*row 5*/   [338, 265.4], [338.15, 345.5], [338.15, 425.5], [338.15, 505.5], [338.15, 585.5],
-                          [338.15, 665.5],
-        /*row 6*/   [407.5, 305.45], [407.5, 465.65], [407.5, 625.59] ]
-            ];
-        }
-    }
-
-    function getPitchOrder() {
-        return self::getCollectionFromDb('SELECT pitch_location location, pitch_id id FROM board ORDER BY pitch_location', true);
-    }
-
-    function php_debug() {
-
-        $this->dump("player_count", self::getGameStateValue('player_count'));
-        $this->dump("getTileCoords", $this->getTileCoords());
-        //$this->dump("variable", variable);
-    }
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Player actions
@@ -374,6 +382,31 @@ class FirstAscent extends Table
     
     */
 
+    function chooseCharacter($character) {
+        self::checkAction('chooseCharacter');
+        $player_id = self::getActivePlayerId();
+
+        $remaining_characters = $this->getGlobalVariable('available_characters');
+        if (($key = array_search($character, $remaining_characters)) !== false) {
+            unset($remaining_characters[$key]);
+        }
+        $this->setGlobalVariable('available_characters', array_values($remaining_characters));
+
+        self::DbQuery("UPDATE player SET `character`='$character' WHERE player_id='$player_id'");
+        self::notifyAllPlayers( "chooseCharacter", clienttranslate('${player_name} chooses ${character}'), array(
+            'player_name' => self::getActivePlayerName(),
+            'player_id' => $player_id,
+            'character' => $this->characters[$character]['description'],
+            'character_div' => "character_{$character}",
+            'character_num' => $character
+        ));
+        $this->gamestate->nextState('chooseCharacter');
+    }
+
+    function placeholder() {
+        self::checkAction('placeholder'); 
+    }
+
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -384,6 +417,7 @@ class FirstAscent extends Table
         These methods function is to return some additional information that is specific to the current
         game state.
     */
+
 
     /*
     
@@ -410,7 +444,17 @@ class FirstAscent extends Table
         Here, you can create methods defined as "game state actions" (see "action" property in states.inc.php).
         The action method of state X is called everytime the current game state is set to X.
     */
-    
+
+    function stNextCharacterSelect() {
+        $player_id = self::activeNextPlayer();
+        self::giveExtraTime($player_id);
+        if (count($this->getGlobalVariable('available_characters')) > 1) {
+            $this->gamestate->nextState('nextSelection');
+        } else {
+            $this->gamestate->nextState('finishSetup');
+        }
+    }
+
     /*
     
     Example for game state "MyGameState":
