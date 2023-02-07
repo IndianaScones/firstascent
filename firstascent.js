@@ -153,7 +153,6 @@ function (dojo, declare) {
             for (let i=1; i<=player_count; i++) {
                 let current_player_id = Object.keys(gamedatas.players)[i-1];
                 let current_player = gamedatas.players[`${current_player_id}`];
-
                 if (current_player_id == this.player_id && current_player.character) {
                     dojo.place(this.format_block('jstpl_character_area', {
                         player : current_player_id,
@@ -167,9 +166,16 @@ function (dojo, declare) {
                         color : current_player.color,
                         player_name : current_player.name,
                     }), 'character_wrap');
-                dojo.style(`character_area_${current_player.name}`, 'margin-top', '35px');
                 }
             }
+            if ($('character_wrap').children.length > 1) {
+                    dojo.query('.character_area').forEach((element) => {
+                        let parent = element.parentNode;
+                        if (element != parent.firstElementChild) {
+                            dojo.style(element, 'margin-top', '35px');
+                        }
+                    });
+                }
 
             // character selection
             if (gamedatas.available_characters.length > 1) {

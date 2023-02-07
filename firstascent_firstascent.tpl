@@ -72,8 +72,9 @@ var jstpl_some_game_item='<div class="my_game_item" id="my_game_item_${MY_ITEM_I
 
 */
 
-let jstpl_character_area='<div id="player_${player}" style="position: relative; height: 324.275px; width: 313.125px; left: \
-    10px; margin-top: 5px;"><h3 id="character_area_${player_name}" style="color: #${color};">${player_name}</h3></div>';
+let jstpl_character_area='<div id="player_${player}" class="character_area" style="position: relative; height: 324.275px; \
+    width: 313.125px; left: 0px; margin-top: 10px;"><h3 id="character_area_${player_name}" style="color: \
+    #${color};">${player_name}</h3></div>';
 let jstpl_character='<div id="character_${type}" class="character ${extra_class}" style="background-position: -${charX}% \
     -${charY}%; ${extra_style}"></div>';
 let jstpl_asset_board='<div id="asset_board" class="asset_board" style="background-position: -${abX}% -${abY}%; \
