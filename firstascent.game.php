@@ -9,11 +9,6 @@
   * -----
   * 
   * firstascent.game.php
-  *
-  * This is the main file for your game logic.
-  *
-  * In this PHP file, you are going to defines the rules of the game.
-  *
   */
 
 
@@ -36,17 +31,10 @@ class FirstAscent extends Table
         parent::__construct();
         
         self::initGameStateLabels( array( 
-                "player_count" => 10,
-                "shared_objective_1" => 11,
-                "shared_objective_2" => 12,
-                "shared_objective_3" => 13,
-            //    "my_second_global_variable" => 11,
-            //      ...
-            //    "my_first_game_variant" => 100,
-            //    "my_second_game_variant" => 101,
-            //      ...
+                // "variable" => 11,
         ) );     
 
+        // init deck for transient assets
         $this->cards_and_tokens = self::getNew('module.common.deck');
         $this->cards_and_tokens->init('cards_and_tokens');   
 	}
@@ -91,9 +79,10 @@ class FirstAscent extends Table
         // Init global values with their initial values
         //self::setGameStateInitialValue( 'my_first_global_variable', 0 );
 
-        if (count($players) <= 3) {
-            self::setGameStateInitialValue( 'player_count', 1);
-        } else { self::setGameStateInitialValue( 'player_count', 2); }
+        // Init game statistics
+        // (note: statistics used in this file must be defined in your stats.inc.php file)
+        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
+        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
 
     // Set up cards and tokens
 
@@ -175,14 +164,12 @@ class FirstAscent extends Table
 
         $shared_objectives_ids = range(1,16);
         shuffle($shared_objectives_ids);
-        $current_objectives = array_slice($shared_objectives_ids, 0, 3);
-        self::setGameStateInitialValue('shared_objective_1', $current_objectives[0]);
-        self::setGameStateInitialValue('shared_objective_2', $current_objectives[1]);
-        self::setGameStateInitialValue('shared_objective_3', $current_objectives[2]);
+        $current_shared_objectives = array_slice($shared_objectives_ids, 0, 3);
+        $this->setGlobalVariable('current_shared_objectives', $current_shared_objectives);
 
         // Set up tiles
 
-        if (self::getGameStateValue('player_count') === 1) {
+        if ($this->getPlayersNumber() <= 3) {
 
             // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
             $ones = [ [1,3,6,8,11,13], [1,2,3,4,5,6] ];
@@ -191,11 +178,12 @@ class FirstAscent extends Table
             $fours = [ [10,14,18,27,30], [29,30,31,32,33] ];
             $fives = [ [22,24,26,31,32], [38,39,40,41,42,43] ];
 
+            // pitch order contains tiles that are printed on the board
             $pitch_order = [];
             $pitch_order[5] = 36;
             $tiles_number = 32;
 
-        } else if (self::getGameStateValue('player_count') === 2) {
+        } else {
 
             // var is point value of a tile, [0] array is tile locations on the forest board and [1] is css identifiers
             $ones = [ [5,8,13,17,19,26], [1,2,3,4,5,6] ];
@@ -204,6 +192,7 @@ class FirstAscent extends Table
             $fours = [ [12,24,35,38,40], [29,30,31,32,33] ];
             $fives = [ [29,31,33,41,42,43], [38,39,40,41,42,43] ];
 
+            // pitch order contains tiles that are printed on the board
             $pitch_order = [];
             $pitch_order[1] = 9;
             $pitch_order[3] = 10;
@@ -245,6 +234,7 @@ class FirstAscent extends Table
         }
 
         // Write pitches into DB
+
         $sql = "INSERT INTO board (pitch_location, pitch_id) VALUES ";
         $sql_values = [];
         foreach($pitch_order as $location => $pitch) {
@@ -258,7 +248,9 @@ class FirstAscent extends Table
         $sql .= implode(',', $sql_values);
         self::DbQuery($sql);
 
+
         // Create character pool
+
         $character_count = count($players) +1;
         $character_pool = [ [1,2], [3,4], [5,6], [7,8], [9,10], [11,12] ];
         shuffle($character_pool);
@@ -271,17 +263,27 @@ class FirstAscent extends Table
         }
         $this->setGlobalVariable('available_characters', $available_characters);
 
+        // Create personal objective pile
+        $personal_objective_deck = range(1, 12);
+        shuffle($personal_objective_deck);
+        $this->setGlobalVariable('personal_objective_deck', $personal_objective_deck);
+        $this->setGlobalVariable('personal_objectives', []);
 
-        // Init game statistics
-        // (note: statistics used in this file must be defined in your stats.inc.php file)
-        //self::initStat( 'table', 'table_teststat1', 0 );    // Init a table statistics
-        //self::initStat( 'player', 'player_teststat1', 0 );  // Init a player statistics (for all players)
+        // Create water and psych db containers
+        $this->setGlobalVariable('water', []);
+        $this->setGlobalVariable('psych', []);
 
-        // TODO: setup the initial game situation here
-       
+        // Track drawing assets during setup
+        $this->setGlobalVariable('draw_step', 1);
+        $this->setGlobalVariable('x_cards', 5);
 
-        // Activate first player (which is in general a good idea :) )
+        // Activate first player
         $this->activeNextPlayer();
+
+        /**** FOR TESTING ****/
+        foreach ($players as $player_id => $player) {
+            $this->cards_and_tokens->pickCardsForLocation(3, 'asset_deck', $player_id);
+        }
 
         /************ End of the game initialization *****/
     }
@@ -303,9 +305,8 @@ class FirstAscent extends Table
     
         // Get information about players
         // Note: you can retrieve some extra field you added for "player" table in "dbmodel.sql" if you need it.
-        $sql = "SELECT player_id id, player_score score, `character` FROM player ";
-        $result['players'] = self::getCollectionFromDb( $sql );
-        $result['player_count'] = $this->getGameStateValue('player_count');
+        $sql = "SELECT player_id id, player_score score, `character`, player_no turn_order FROM player ";
+        $result['players'] = self::getCollectionFromDB( $sql );
 
         // FOR DEBUGGING THROUGH JAVASCRIPT
 
@@ -314,18 +315,35 @@ class FirstAscent extends Table
         $result['pitches'] = $this->pitches;
         $result['asset_cards'] = $this->asset_cards;
         $result['climbing_cards'] = $this->climbing_cards;
+        $result['summit_beta_tokens'] = $this->summit_beta_tokens;
         $result['shared_objectives'] = $this->shared_objectives;
-        $result['current_objectives'] = $this->getCurrentObjectives();
+        $result['current_shared_objectives'] = $this->getGlobalVariable('current_shared_objectives');
         $result['characters'] = $this->characters;
         $result['available_characters'] = $this->getGlobalVariable('available_characters');
+        $result['personal_objectives'] = $this->personal_objectives;
+        $result['current_personal_objectives'] = $this->getGlobalVariable('personal_objectives');
+        $result['water'] = $this->getGlobalVariable('water', true);
+        $result['psych'] = $this->getGlobalVariable('psych', true);
 
         // Get starting Spread
-        $result['spread'] = self::getCollectionFromDb(
+        $result['spread'] = self::getCollectionFromDB(
                                 "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='the_spread'", true
         );
-  
-        // TODO: Gather all information about current game situation (visible by player $current_player_id).
-  
+
+        // Get cards in each players' hands
+        foreach ($result['players'] as $player) {
+            $player_id = $player['id'];
+            $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset' AND card_location='$player_id'";
+            $result["{$player['id']}_hand_assets"] = self::getCollectionFromDb($sql, true);
+        }
+
+        // Get token in each players' hands
+        foreach ($result['players'] as $player) {
+            $player_id = $player['id'];
+            $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='summit_beta' AND card_location='$player_id'";
+            $result["{$player['id']}_hand_tokens"] = self::getCollectionFromDb($sql, true);
+        }
+
         return $result;
     }
 
@@ -356,55 +374,105 @@ class FirstAscent extends Table
         (note: each method below must match an input method in firstascent.action.php)
     */
 
-    /*
-    
-    Example:
-
-    function playCard( $card_id )
-    {
-        // Check that this is the player's turn and that it is a "possible action" at this game state (see states.inc.php)
-        self::checkAction( 'playCard' ); 
-        
+    function confirmCharacter($character) {
+        self::checkAction('confirmCharacter');
         $player_id = self::getActivePlayerId();
-        
-        // Add your game logic to play a card there 
-        ...
-        
-        // Notify all players about the card played
-        self::notifyAllPlayers( "cardPlayed", clienttranslate( '${player_name} plays ${card_name}' ), array(
-            'player_id' => $player_id,
-            'player_name' => self::getActivePlayerName(),
-            'card_name' => $card_name,
-            'card_id' => $card_id
-        ) );
-          
-    }
-    
-    */
+        $character_color = $this->characters[$character]['color'];
 
-    function chooseCharacter($character) {
-        self::checkAction('chooseCharacter');
-        $player_id = self::getActivePlayerId();
-
+        // remove the chosen character from available_characters
         $remaining_characters = $this->getGlobalVariable('available_characters');
         if (($key = array_search($character, $remaining_characters)) !== false) {
             unset($remaining_characters[$key]);
         }
         $this->setGlobalVariable('available_characters', array_values($remaining_characters));
 
-        self::DbQuery("UPDATE player SET `character`='$character' WHERE player_id='$player_id'");
-        self::notifyAllPlayers( "chooseCharacter", clienttranslate('${player_name} chooses ${character}'), array(
+        self::DbQuery("UPDATE player SET `character`='$character', player_color='$character_color' WHERE player_id='$player_id'");
+        self::reloadPlayersBasicInfos();
+
+        // deal 2 personal objectives
+        $personal_objective_deck = $this->getGlobalVariable('personal_objective_deck');
+        $current_personal_objectives = [
+                                            array_pop($personal_objective_deck),
+                                            array_pop($personal_objective_deck),
+                                       ];
+        $this->setGlobalVariable('personal_objective_deck', $personal_objective_deck);
+        $personal_objectives = $this->getGlobalVariable('personal_objectives', true);
+        $personal_objectives[$player_id] = $current_personal_objectives;
+        $this->setGlobalVariable('personal_objectives', $personal_objectives);
+
+        // initialize water and psych
+        $starting_value = $this->characters[$character]['water_psych'];
+        $water = $this->getGlobalVariable('water', true);
+        $water[$player_id] = $starting_value;
+        $this->setGlobalVariable('water', $water);
+        $psych = $this->getGlobalVariable('psych', true);
+        $psych[$player_id] = $starting_value;
+        $this->setGlobalVariable('psych', $psych);
+
+        self::notifyAllPlayers("confirmCharacter", clienttranslate('${player_name} chooses ${character}'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'character' => $this->characters[$character]['description'],
             'character_div' => "character_{$character}",
             'character_num' => $character
         ));
-        $this->gamestate->nextState('chooseCharacter');
+        self::notifyPlayer($player_id, "dealPersonalObjectives", "", array(
+            'current_personal_objectives' => $current_personal_objectives
+        ));
+
+        $this->gamestate->nextState('confirmCharacter');
     }
 
-    function placeholder() {
-        self::checkAction('placeholder'); 
+
+    function confirmAssets($deck_assets, $spread_assets) {
+        self::checkAction('confirmAssets');
+        $player_id = self::getActivePlayerId();
+        $deck_assets = intval($deck_assets);
+        if ($spread_assets) {
+            $spread_assets_db = self::getCollectionFromDB("SELECT card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $spread_assets)).")");
+            $spread_card_types = array_keys($spread_assets_db);
+
+            // Move selected spread cards to hand
+            $this->cards_and_tokens->moveCards($spread_assets, $player_id);
+            $spread_assets_for_log = '';
+            for ($i=1; $i<=count($spread_assets); $i++) {
+                $asset_title = $this->asset_cards[$spread_card_types[$i-1]]['description'];
+                if ($i === 1) { $spread_assets_for_log .= $asset_title; }
+                elseif ($i === count($spread_assets)) { $spread_assets_for_log .= ", and {$asset_title}"; }
+                else { $spread_assets_for_log .= ', ' . $asset_title; }
+            }
+        } else { $spread_assets_for_log = 'nothing'; }
+
+        // Move selected deck cards to hand
+        $deck_assets_arr = $this->cards_and_tokens->pickCardsForLocation($deck_assets, 'asset_deck', $player_id);
+
+        // Refill the spread
+        $empty_slots = count($spread_assets);
+        $spread_assets_arr = $this->cards_and_tokens->pickCardsForLocation($empty_slots, 'asset_deck', 'the_spread');
+
+        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate('${player_name} takes ${spread_for_log} from the Spread and ${deck_num} asset/s from the deck'), array(
+                'player_name' => self::getActivePlayerName(),
+                'spread_for_log' => $spread_assets_for_log,
+                'spread_card_ids' => $spread_assets,
+                'deck_num' => $deck_assets,
+                'player_id' => $player_id,
+                'hand_count' => count($this->getAllDatas()["{$player_id}_hand_assets"]),
+                'spread_assets_arr' => $spread_assets_arr
+        ));
+
+        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate('${player_name} takes ${spread_for_log} from the Spread
+            and ${deck_num} asset/s from the deck'), array(
+                'player_name' => self::getActivePlayerName(),
+                'spread_for_log' => $spread_assets_for_log,
+                'spread_card_ids' => $spread_assets,
+                'deck_num' => $deck_assets,
+                'player_id' => $player_id,
+                'hand_count' => count($this->getAllDatas()["{$player_id}_hand_assets"]),
+                'deck_assets_arr' => $deck_assets_arr,
+                'spread_assets_arr' => $spread_assets_arr
+        ));
+
+        $this->gamestate->nextState('nextDraw');
     }
 
     
@@ -418,6 +486,11 @@ class FirstAscent extends Table
         game state.
     */
 
+    function argDrawAssets() {
+        return array(
+            "x_cards" => $this->getGlobalVariable('x_cards'),
+        );
+    }
 
     /*
     
@@ -451,22 +524,59 @@ class FirstAscent extends Table
         if (count($this->getGlobalVariable('available_characters')) > 1) {
             $this->gamestate->nextState('nextSelection');
         } else {
-            $this->gamestate->nextState('finishSetup');
+            $this->gamestate->nextState('drawAssets');
         }
     }
 
-    /*
-    
-    Example for game state "MyGameState":
+    function stNextDraw() {
+        $player_id = self::activeNextPlayer();
+        self::giveExtraTime($player_id);
 
-    function stMyGameState()
-    {
-        // Do some stuff ...
-        
-        // (very often) go to another gamestate
-        $this->gamestate->nextState( 'some_gamestate_transition' );
-    }    
-    */
+        $draw_step = $this->getGlobalVariable('draw_step');
+        $obj = $this;
+        function nextRound($obj) {
+            $obj->setGlobalVariable('draw_step', 10);
+            $obj->setGlobalVariable('x_cards', 3);
+            $obj->gamestate->nextState('nextRound');
+        }
+        switch (true) {
+            case $draw_step === 1:
+                $this->setGlobalVariable('draw_step', 2);
+                break;
+            case $draw_step === 2:
+                if ($draw_step < $this->getPlayersNumber()) { 
+                    $this->setGlobalVariable('draw_step', 3);
+                    $this->setGlobalVariable('x_cards', 6);
+                }
+                else { nextRound($obj); }
+                break;
+            case $draw_step === 3;
+                if ($draw_step < $this->getPlayersNumber()) { 
+                    $this->setGlobalVariable('draw_step', 4);
+                    $this->setGlobalVariable('x_cards', 7);
+                }
+                else { nextRound($obj); }
+                break;
+            case $draw_step === 4;
+                if ($draw_step < $this->getPlayersNumber()) { 
+                    $this->setGlobalVariable('draw_step', 5);
+                    $this->setGlobalVariable('x_cards', 8);
+                }
+                else { nextRound($obj); }
+                break;
+            case $draw_step === 5:
+                nextRound($obj);
+                break;
+            case $draw_step === 10:
+                $this->setGlobalVariable('draw_step', 11);
+                break;
+        }
+        $state = $this->gamestate->state();
+        if ($state['name'] == 'nextDraw') { $this->gamestate->nextState('drawAssets'); }
+    }
+
+    /*
+
 
 //////////////////////////////////////////////////////////////////////////////
 //////////// Zombie

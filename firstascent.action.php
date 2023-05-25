@@ -11,14 +11,6 @@
  * firstascent.action.php
  *
  * FirstAscent main action entry point
- *
- *
- * In this file, you are describing all the methods that can be called from your
- * user interface logic (javascript).
- *       
- * If you define a method "myAction" here, then you can call it from your javascript code with:
- * this.ajaxcall( "/firstascent/firstascent/myAction.html", ...)
- *
  */
   
   
@@ -38,35 +30,29 @@
             self::trace( "Complete reinitialization of board game" );
       }
   	} 
-  	
-  	// TODO: defines your action entry points there
-
-
-    /*
     
-    Example:
-  	
-    public function myAction()
-    {
-        self::setAjaxMode();     
-
-        // Retrieve arguments
-        // Note: these arguments correspond to what has been sent through the javascript "ajaxcall" method
-        $arg1 = self::getArg( "myArgument1", AT_posint, true );
-        $arg2 = self::getArg( "myArgument2", AT_posint, true );
-
-        // Then, call the appropriate method in your game logic, like "playCard" or "myAction"
-        $this->game->myAction( $arg1, $arg2 );
-
-        self::ajaxResponse( );
-    }
-    
-    */
-
-    public function chooseCharacter() {
+    public function confirmCharacter() {
         self::setAjaxMode();
         $character = self::getArg("character", AT_posint, true);
-        $this->game->chooseCharacter($character);
+        $this->game->confirmCharacter($character);
+        self::ajaxResponse();
+    }
+
+    public function confirmAssets() {
+        self::setAjaxMode();
+        $deck_assets = self::getArg("deck_assets", AT_posint);
+        $spread_assets_raw = self::getArg("spread_assets", AT_numberlist);
+
+        if (substr($spread_assets_raw, -1) == ',') {
+            $spread_assets_raw = substr($spread_assets_raw, 0, -1);
+        }
+        if ($spread_assets_raw == '') {
+            $spread_assets = array();
+        } else {
+            $spread_assets = explode(',', $spread_assets_raw);
+        }
+
+        $this->game->confirmAssets($deck_assets, $spread_assets);
         self::ajaxResponse();
     }
 

@@ -1,7 +1,7 @@
 /**
  *------
  * BGA framework: © Gregory Isabelli <gisabelli@boardgamearena.com> & Emmanuel Colin <ecolin@boardgamearena.com>
- * FirstAscent implementation : © <Your name here> <Your email address here>
+ * FirstAscent implementation : © <Jonathan Morgan> <Your email address here>
  *
  * This code has been produced on the BGA studio platform for use on http://boardgamearena.com.
  * See http://en.boardgamearena.com/#!doc/Studio for more information.
@@ -13,226 +13,773 @@
  *
  */
 
-/*
-    This is the CSS stylesheet of your game User Interface.
-    
-    Styles defined on this file will be applied to the HTML elements you define in your
-    HTML template (firstascent_firstascent.tpl), and to HTML elements you create dynamically
-    (in firstascent.js).
-    
-    Usually, you are using CSS to:
-    
-    1°) define the overall layout of your game
-        (ex: place the board on the top left, place player's hand beside, place the deck on the right, ...).
-
-    2°) create your CSS-sprites:
-        All images of your games should be gathered into a small number of image files. Then, using
-        background-image and background-position CSS properties, you create HTML blocks that can 
-        display these images correctly (see example below).
-    
-    3°) ... anything else:
-        It is really easy to add and remove CSS classes dynamically from your Javascript with
-        dojo.addClass and dojo.removeClass. It is also easy to check if an element has a class
-        (dojo.hasClass) or to get all elements with a specific class (dojo.query). This is why,
-        very often, using CSS classes for the logic of your user interface allow you to do complex
-        thing easily.
-        
-        
-     Note: on the production platform, this file will be compressed and comments will be removed.
-           Consequently, don't hesitate to put as many comments as necessary.
-*/
-
-
 /* Note: you must not use any @import directive */
 
+/* utility */
+.selectable {
+    border: 1px black solid;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+}
 
-/********* You can start writing your CSS below this line: **********/
+.cursor:hover {
+    cursor: pointer;
+}
 
+.popout {
+    border: 1px black solid;
+    border-radius: 10px;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+}
 
-/*
-    Example of CSS sprites (a black token and a white token, 20x20px each, embedded in the same "tokens.png" 40x20px image):
+/* animations */
+.move_character { animation: move_character 2s ease-in-out 1; }
+@keyframes move_character {
+  0% { transform: translateX(0) translateY(0); }
+  100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
+}
 
-    .white_token {
-        background-image: url('img/tokens.png');
-        background-position: 0px 0px;
-    }
-    .black_token {
-        background-image: url('img/tokens.png');
-        background-position: -20px 0px;
-    }
-    .token {
-        width: 20px;
-        height: 20px;
-        background-repeat: none;
-    }
-*/
+.move_deck_asset { animation: move_deck_asset 0.5s ease-in-out 1; }
+@keyframes move_deck_asset {
+    0% { transform: translateX(0) translateY(0) rotate(0deg); }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(-90deg); }
+}
+
+.flip_transform { animation: flip_transform 0.5s ease-in-out 1; }
+@keyframes flip_transform {
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(180deg); }
+}
+
+.move_to_counter { animation: move_to_counter 0.75s ease-in-out 1; }
+@keyframes move_to_counter {
+    0% { transform: translateX(0) translateY(0); width: 100%; height: 100%; }
+    100% { transform: translateX(var(--dy)) translateY(var(--dx)); width: 22%; height: 22%; }
+}
+
+.move_to_hand { animation: move_to_hand 1.25s ease-in-out 1; }
+@keyframes move_to_hand {
+    0% { transform: translateX(0) translateY(0); width: 100%; height: 100%; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 175%; height: 175%; }
+}
+
+.move_to_spread { animation: move_to_spread 0.5s ease-in-out 1; }
+@keyframes move_to_spread {
+    0% { transform: translateX(0) translateY(0); }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
+}
+
+/* flip card */
+#ebd-body .flip_card {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: transparent;
+    perspective: 1000px;
+}
+
+.flip_card_inner {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transform-style: preserve-3d;
+}
+
+#asset_deck_draw .flip_card_inner {
+    transform: rotateY(180deg);
+}
+
+#ebd-body .flip_card_front, #ebd-body .flip_card_back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+#ebd-body .flip_card_front {
+    transform: rotateY(180deg);
+}
+
+#asset_back_for_flip {
+    background-position: -0% -0%;
+}
+
+#ebd-body .asset_draw_resize {
+    width: 22%;
+    height: 22%;
+    transition: 0.5s ease;
+}
+
+#the_spread > .straighten_asset {
+    z-index: 3;
+    transform: none;
+    transition: 0.5s ease;
+}
 
 /* player panels */
 .reference {
-    height: 47.5px;
+    display: inline-block;
     width: 35px;
-    background-image: url('img/reference_objectives.jpg');
-    background-size: 800% 200%;
-    display: inline-block;
-}
-
-.desert {
-    height: 673.65px;
-    width: 1012.5px;
-    background-image: url('img/desert_board.jpg');
-    background-size: contain;
-    position: relative;
-}
-
-.forest {
-    height: 673.65px;
-    width: 1012.5px;
-    background-image: url('img/forest_board.jpg');
-    background-size: contain;
-    position: relative;
-}
-
-.summit_beta {
-    height: 70px;
-    width: 70px;
-    position: absolute;
-    background-image: url('img/summit_objectives.png');
-    background-size: 400% 800%;
-}
-
-.summit_pile_back {
-    background-position: -0% -0%;
-}
-
-/* climbing cards deck */
-.climbing {
-    height: 178.3px;
-    width: 105.5px;
-    position: absolute;
-    background-image: url('img/climbing_cards.jpg');
-    background-size: 1000% 800%;
-}
-
-.climbing_deck_back {
-    transform: rotate(270deg);
-    background-position: -0% -700%;
-}
-
-.shared_objective {
-    height: 70px;
-    width: 70px;
-    position: absolute;
-    background-image: url('img/summit_objectives.png');
-    background-size: 400% 800%;
-}
-
-.personal_objective {
-    height: 190px;
-    width: 124px;
-    position: relative;
+    height: 47.5px;
     background-image: url('img/reference_objectives.jpg');
     background-size: 800% 200%;
 }
 
-.po1 { background-position: -0% -0%; }    /****TEMP****/
-.po2 { background-position: -100% -0%; }
+#ref_horizontal_line { text-align: center; margin-top: -5px; }
+#ref_1 { background-position: -600% -0%; }
+#ref_1_text { vertical-align: top; }
+#ref_title_1 { margin-top: -1px; margin-bottom: -1px; }
+#ref_2 { background-position: -700% -0%; }
+#ref_2_text { vertical-align: top; font-size: 10px; }
 
-/* asset deck and spread */
-.assets {
-    height: 95px;
-    width: 62px;
-    position: absolute;
-    background-image: url('img/asset_cards.jpg');
-    background-size: 1200% 400%;
-}
-
-.asset_deck_back {
-    transform: rotate(90deg);
-    background-position: -0% -0%;
-}
-
-.spread {
-    position: absolute;
-    transform: rotate(90deg);
-}
-
-/* pitches */
-.pitch {
-    height: 92.7px;
-    width: 80.4px;
-    position: absolute;
-    background-image: url('img/pitches.png');
-    background-size: 1300% 400%;
-}
-
-/* characters */
-.character {
-    height: 324.375px;
-    width: 313.125px;
+/* risk die, water, and psych symbols */
+.water_psych {
     display: inline-block;
-    background-image: url('img/characters.jpg');
-    background-size: 800% 500%;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-image: url('img/risk_water_psych.png');
+    background-size: 500% 100%;
 }
 
-.character_select {
-    border-radius: 10px;
-    border: 1px black solid;
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
-    cursor: pointer;
-    transition: .5s ease;
-}
-
-.character_select:hover {
-    box-shadow: 0 0 0 10px #000000;
-    transition: .5s ease;
-}
-
-#asset_board {
-    height: 324.375px;
-    width: 626.25px;
+.risk {
     display: inline-block;
-}
-
-.asset_board {
-    background-image: url('img/characters.jpg');
-    background-size: 400% 500%;
-}
-
-/* tooltips */
-.pitch_tt {
-    height: 185.4px;
-    width: 160.8px;
-    position: static;
-}
-
-.shared_objective_tt {
-    height: 140px;
-    width: 140px;
-    position: static;
-}
-
-.assets_tt {
-    height: 190px;
-    width: 124px;
-    position: static;
-}
-
-.reference_tt {
-    height: 356.25px;
-    width: 232.5px;
-    position: static;
-    float: left;
-    margin-right: 5px;
-}
-
-.risk_die {
-    height: 15px;
+    position: absolute;
     width: 15px;
-    background-image: url('img/risk_die.png');
-    background-size: 300% 100%;
-    position: absolute;
+    height: 15px;
+    background-image: url('img/risk_water_psych.png');
+    background-size: 500% 100%;
 }
 
 .risk_1 { background-position: -0% -0%; }
 .risk_2 { background-position: -100% -0%; }
 .risk_3 { background-position: -200% -0%; }
+
+.water { background-position: -400% -0%; }
+.psych { background-position: -300% -0%; }
+
+.panel_num {
+    position: relative;
+    font-size: 20px;
+    top: -7px;
+}
+
+/* ropes */
+.pp_rope {
+    display: inline-block;
+    position: relative;
+    width: 60px;
+    height: 30px;
+    background-image: url('img/rope.png');
+    background-size: 300% 600%;
+    transform: rotate(45deg);
+    left: -13px;
+}
+
+/* hand counter */
+.hand_counter {
+    display: inline-block;
+    position: relative;
+    width: 20px;
+    height: 30px;
+    background-image: url('img/asset_cards.jpg');
+    background-size: 1200% 400%;
+    background-position: -0% -0%;
+    margin-left: 6px;
+    margin-right: 4px;
+}
+
+/* meeples */
+.meeple {
+    display: inline-block;
+    position: relative;
+    width: 24px;
+    height: 30px;
+    background-image: url('img/meeples.png');
+    background-size: 600% 100%;
+}
+
+/* skill symbols */
+.skill {
+    display: inline-block;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-image: url('img/skills.png');
+    background-size: 300% 100%;
+}
+.gear {
+    display: inline-block;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-image: url('img/gear.png');
+    background-size: 100% 100%;
+    background-position: -0% -0%;
+}
+
+/* techniques */
+.technique {
+    display: inline-block;
+    position: relative;
+    width: 30px;
+    height: 30px;
+    background-image: url('img/techniques.png');
+    background-size: 400% 100%;
+}
+
+/* boards */
+.board_ratio {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-top: 66.5331951232%;
+}
+
+.board_ratio_child {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+#board {
+    /* width: 1012.5px; height: 673.65px; */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-left: 0.5px;
+}
+
+.desert {
+    background-image: url('img/desert_board.jpg');
+}
+
+.forest {
+    background-image: url('img/forest_board.jpg');
+}
+
+/* summit beta tokens */
+.summit_pile_back {
+    width: 6.8%;
+    height: 10.1%;
+    background-position: -0% -0%;
+}
+
+.summit_beta {
+    /* width: 70px; height: 70px; */
+    position: absolute;
+    background-image: url('img/summit_objectives.png');
+    background-size: 400% 800%;
+}
+
+/* climbing cards deck */
+.climbing_deck_back {
+    width: 10.32%;
+    height: 26.54%;
+    background-position: -0% -700%;
+    transform: rotate(270deg);
+}
+
+.climbing {
+    position: absolute;
+    background-image: url('img/climbing_cards.jpg');
+    background-size: 1000% 800%;
+}
+
+/* objectives */
+.shared_objective {
+    position: absolute;
+    width: 6.8%;
+    height: 10.1%;
+    background-image: url('img/summit_objectives.png');
+    background-size: 400% 800%;
+    margin-bottom: 5px;
+}
+
+.personal_objective {
+    /* width: 126px; height: 215px; */
+    display: inline-block;
+    position: relative;
+    width: 48.965%;
+    height: 100%;
+    background-image: url('img/reference_objectives.jpg');
+    background-size: 800% 200%;
+    float: right;
+    top: 0.6%;
+    right: -1%;
+    margin-right: 1%;
+}
+
+/* asset deck and spread */
+.asset {
+    position: relative;
+    background-image: url('img/asset_cards.jpg');
+    background-size: 1200% 400%;
+}
+
+#asset_deck { z-index: 2; }
+
+.asset_deck_back {
+    width: 6.2%;
+    height: 14.2%;
+    background-position: -0% -0%;
+    transform: rotate(90deg);
+}
+
+.spread {
+    position: absolute;
+    width: 6.2%;
+    height: 14.2%;
+    transform: rotate(90deg);
+}
+
+.spread_asset {
+    width: 100%;
+    height: 100%;
+}
+
+#myhand_wrap .asset {
+    /* height: 190px; width: 125px; */
+    height: 100%;
+    flex-basis: 96%;
+    min-width: 100%;
+    max-width: 100%;
+}
+
+.hand_asset_wrap {
+    display: flex;
+    position: relative;
+    height: 90.8%;
+    flex-basis: 96%;
+    min-width: 13.78%;
+    max-width: 13.78%;
+    margin-top: 0.25%;
+    margin-right: 0.25%;
+    margin-bottom: 0.25%;
+    margin-left: 0.25%;
+}
+
+/* pitches */
+.pitch {
+    position: absolute;
+    width: 7.94%;
+    height: 13.79%;
+    background-image: url('img/pitches.png');
+    background-size: 1300% 400%;
+}
+
+/* characters */
+.character_selection_ratio {
+    display: inline-block;
+    position: relative;
+    width: 56%;
+    height: 0;
+    padding-top: 40.787007874016%;
+    margin-bottom: 7px;
+    vertical-align: top;
+}
+
+.csr_4 { margin-bottom: 70px; }
+.csr_5 { margin-bottom: 165px; }
+
+.character_selection_ratio_child {
+    display: inline-block;
+    position: absolute;
+    width: 178.4%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+#character_selection {
+    display: inline-flex;
+    width: 54%;
+    margin-bottom: 7px;
+    margin-left: 5px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    vertical-align: top;
+}
+
+.cs_2 { height: 69.2%; }
+.cs_3 { height: 92.27%; }
+.cs_4 { height: 115.335%; }
+.cs_5 { height: 138.4%; }
+
+.namebox {
+    /* height: 93px; width: 538.5px; background-size: 4320px 2976px; */
+    display: inline-flex;
+    position: relative;
+    width: 98.2%;
+    height: 100%;
+    background-image: url('img/characters.jpg');
+    background-size: 800% 3200%;
+    background-image: url('img/character_nameboxes.jpg');
+    background-size: 300% 400%;
+    border: solid 1px black;
+    margin-top: -0.5px;
+}
+
+.character {
+    display: inline-block;
+    position: absolute;
+    width: 310px;
+    height: 342px;
+    background-image: url('img/characters.jpg');
+    background-size: 800% 500%;
+}
+
+
+#show_character { 
+    display: inline;
+    margin-left: 10px;
+}
+
+#show_character .character {
+    /* width: 310px; */
+    display: none;
+    position: relative;
+    width: 36.6144%;
+    height: 410.4px;
+    min-height: 98.704%;
+    max-height: 98.704%;
+}
+
+.namebox_selected {
+    border: solid 3px red;
+}
+
+.character_ratio {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-top: 36.774193548387%;
+}
+
+.character_ratio_child {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.character_ratio .character {
+    position: relative;
+    width: 33%;
+    height: 99%;
+    margin-left: 3px;
+}
+
+.asset_board {
+    display: inline-block;
+    position: relative;
+    width: 200%;
+    height: 100%;
+    background-image: url('img/characters.jpg');
+    background-size: 400% 500%;
+    top: -16.16%;
+    left: 100%;
+}
+
+.cube {
+    display: inline-block;
+    position: relative;
+    width: 8%;
+    height: 7%;
+    visibility: hidden;
+}
+
+.cube::before {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    width: 101%;
+    height: 37%;
+    top: -36%;
+    left: 14%;
+    transform: skewX(-40deg);
+}
+
+.cube::after {
+    content: '';
+    display: inline-block;
+    position: absolute;
+    width: 30%;
+    height: 102%;
+    top: -19%;
+    left: 100%;
+    transform: skewY(-50deg);
+}
+
+.cb_w_0 { top: 74.7%; left: 2.8%; }
+.cb_w_1 { top: 74.7%; left: 8.02%; }
+.cb_w_2 { top: 74.7%; left: 12.9%; }
+.cb_w_3 { top: 74.7%; left: 17.5% }
+.cb_w_4 { top: 74.7%; left: 22.4%; }
+.cb_w_5 { top: 74.7%; left: 27.4%; }
+.cb_w_6 { top: 74.7%; left: 32.1%; }
+.cb_p_0 { top: 78%; left: 2.3%; }
+.cb_p_1 { top: 78%; left: 7.1%; }
+.cb_p_2 { top: 78%; left: 12.1%; }
+.cb_p_3 { top: 78%; left: 16.9%; }
+.cb_p_4 { top: 78%; left: 21.7%; }
+.cb_p_5 { top: 78%; left: 26.6%; }
+.cb_p_6 { top: 78%; left: 31.3%; }
+
+#phil_cube_w1 { left: 6.4%; }
+#phil_cube_w2 { left: 9.2%; }
+#phil_cube_w3 { left: 12.4%; }
+#phil_cube_w4 { left: 15.7%; }
+#phil_cube_w5 { left: 18.2%; }
+#phil_cube_w6 { left: 21.7%; }
+#phil_cube_w7 { top: 74.7%; left: 24%; }
+#phil_cube_p1 { left: 5.6%; }
+#phil_cube_p2 { left: 8.3%; }
+#phil_cube_p3 { left: 11.5%; }
+#phil_cube_p4 { left: 14.6%; }
+#phil_cube_p5 { left: 18.3%; }
+#phil_cube_p6 { left: 20.6%; }
+#phil_cube_p7 { top: 78%; left: 23.3%; }
+
+.character_ratio_child .cb_w_1 { left: 7.4%; }
+.character_ratio_child .cb_w_2 { left: 12.1%; }
+.character_ratio_child .cb_w_3 { left: 17.2%; }
+.character_ratio_child .cb_w_4 { left: 21.8%; }
+.character_ratio_child .cb_w_5 { left: 26.7%; }
+.character_ratio_child .cb_w_6 { left: 31.5%; }
+.character_ratio_child .cb_p_1 { left: 6.7%; }
+.character_ratio_child .cb_p_2 { left: 11.5%; }
+.character_ratio_child .cb_p_3 { left: 16.5%; }
+.character_ratio_child .cb_p_4 { left: 21%; }
+.character_ratio_child .cb_p_5 { left: 26%; }
+.character_ratio_child .cb_p_6 { left: 30.9%; }
+
+#character_8 > #phil_cube_w1 { left: 6.1%; }
+#character_8 > #phil_cube_w2 { left: 9%; }
+#character_8 > #phil_cube_w7 { left: 23.2%; }
+#character_8 > #phil_cube_p3 { left: 11.2%; }
+#character_8 > #phil_cube_p4 { left: 14.1%; }
+#character_8 > #phil_cube_p7 { left: 22.4%; }
+
+.cb_blue { background: #1d7dad; }
+.cb_blue::before { background: #46A6B8; }
+.cb_blue::after { background: #04646F; }
+
+.cb_red { background: #be3d27; }
+.cb_red::before { background: #D36650; }
+.cb_red::after { background: #80240E; }
+
+.cb_yellow { background: #f6e03f; }
+.cb_yellow::before { background: #FFFF68; }
+.cb_yellow::after { background: #B8C726; }
+
+.cb_black { background: #4d5760; }
+.cb_black::before { background: #768075; }
+.cb_black::after { background: #343E22; }
+
+.cb_green { background: #517f3e; }
+.cb_green::before { background: #7A9467; }
+.cb_green::after { background: #384125; }
+
+.cb_purple { background: #7c2b87; }
+.cb_purple::before { background: #A5549C; }
+.cb_purple::after { background: #631249; }
+
+/* tooltips */
+.pitch_tt {
+    position: static;
+    width: 160.8px;
+    height: 185.4px;
+}
+
+.shared_objective_tt {
+    position: static;
+    width: 140px;
+    height: 140px;
+    margin-bottom: 5px;
+}
+
+.asset_tt {
+    position: static;
+    width: 124px;
+    height: 190px;
+}
+
+.reference_tt {
+    position: static;
+    width: 232.5px;
+    height: 356.25px;
+    float: left;
+    margin-right: 5px;
+}
+
+/* hand */
+#myhand_wrap {
+    /* height: 233px; */
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    margin-top: 0;
+}
+
+#myhand_flex {
+    display: inline-flex;
+    position: relative;
+    width: 72%;
+    height: 195px;
+    max-width: 72%;
+    bottom: 5%;
+}
+
+#new_assets {
+    display: inline-flex;
+    position: absolute;
+    width: 51.8%;
+    height: 80.23%;
+    justify-content: space-evenly;
+    top: 14%;
+}
+
+
+#assets_wrap .summit_beta {
+    position: relative;
+    width: 16.18%;
+    height: 69.396%;
+    margin-top: 2.4%;
+    margin-right: 0.25%;
+}
+
+#hand_objectives {
+    /* height: 243px; width: 256px; */
+    display: inline-block;
+    position: absolute;
+    width: 26.07%;
+    height: 95%;
+    right: 0.5%;
+    bottom: 2.4%;
+}
+
+#hand_ratio {
+    position: relative;
+    width: 100%;
+    height: 0;
+    padding-top: 21%;
+    padding-bottom: 10px;
+    margin-top: 10px;
+}
+
+#hand_ratio_child {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+/* drawing from asset deck */
+#draw_num {
+    display: inline-block;
+    position: absolute;
+    width: 44%;
+    font-size: 1.3em;
+    text-align: center;
+    top: 38.5%;
+    left: 26.5%;
+    border-radius: 50%;
+    color: white;
+    background-color: #5a7994;
+    transform: rotate(270deg);
+
+}
+
+.draw_button {
+    position: absolute;
+    width: 51%;
+    height: 26%;
+    text-align: center;
+    font-weight: bold;
+    padding: 0 24.5%;
+    color: #5a7994;
+    opacity: 0.6;
+    writing-mode: vertical-lr;
+}
+
+#asset_deck_draw {
+    display: none;
+    position: absolute;
+    width: 57%;
+    height: 15%;
+    top: 13%;
+    left: 31%;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 1;
+}
+
+.draw_wrap {
+    position: relative;
+    width: 10.877%;
+    height: 94.665%;
+    margin-left: .4%;
+    transform: none;
+}
+
+#asset_deck > .deck_temp {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+}
+
+#asset_deck > .flip_card, #the_spread .flip_card {
+    transform: none;
+}
+
+#asset_deck_draw .deck_temp, #asset_deck_draw .flip_card {
+    width: 100%;
+    height: 100%;
+    transform: none;
+}
+
+#minus_one { 
+    top: 76%;
+    background-color: white;
+}
+#plus_one { 
+    background-color: white;
+}
+
+.selected_asset {
+    border: 3px solid red;
+}
+
+#assets_wrap {
+    display: inline-flex;
+    position: relative;
+    width: 73%;
+    height: 77.42%;
+    margin-top: -0.5%;
+    flex-wrap: wrap;
+}
+
+/* two rows */
+#hand_ratio.hand_ratio_two_rows { padding-top: 33.6%; }
+#myhand_wrap > .assets_wrap_two_rows { height: 49.213%; }
+#myhand_wrap > .hand_objectives_two_rows { height: 61.636%; bottom: 31.3%; }
+
+/* three rows */
+#hand_ratio.hand_ratio_three_rows { padding-top: 48.9%; }
+#myhand_wrap > .assets_wrap_three_rows { height: 34.119%; }
+#myhand_wrap > .hand_objectives_three_rows { height: 41.867%; bottom: 53.5%; }
+
+/* four rows */
+#hand_ratio.hand_ratio_four_rows { padding-top: 64.4%; }
+#myhand_wrap > .assets_wrap_four_rows { height: 26.031%; }
+#myhand_wrap > .hand_objectives_four_rows { height: 31.942%; bottom: 64.36%; }
