@@ -118,6 +118,9 @@ let jstpl_flip_card='<div id="deck_asset_${asset_id}" class="flip_card ${extra_c
     <div class="flip_card_back ${back_type}"></div> \
     <div class="flip_card_front ${front_type}" style="background-position: -${cX}% -${cY}%;"></div></div></div>';
 
+// tooltips for log
+let jstpl_log_asset='<span id="asset_tooltip_${card_key}" class="asset_tooltip">${card_name}</span>';
+
 // miscellany
 
 let jstpl_personal_objective='<div id="personal_objective_${poId}" class="personal_objective" style=" \

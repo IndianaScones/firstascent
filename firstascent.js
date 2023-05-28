@@ -14,10 +14,11 @@
 
 define([
     "dojo","dojo/_base/declare",
+    "dojo/aspect",
     "ebg/core/gamegui",
     "ebg/counter"
 ],
-function (dojo, declare) {
+function (dojo, declare, aspect) {
     return declare("bgagame.firstascent", ebg.core.gamegui, {
         constructor: function(){
             console.log('firstascent constructor');
@@ -25,6 +26,10 @@ function (dojo, declare) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
+            let gameObject = this;            //Needed as the this object in aspect.before will not refer to the game object in which the formatting function resides
+            aspect.before(dojo.string, "substitute", function(template, map, transform) {      //This allows you to modify the arguments of the dojo.string.substitute method before they're actually passed to it
+                return [template, map, transform, gameObject];
+            });
 
         },
         
@@ -55,8 +60,8 @@ function (dojo, declare) {
                 if (this.player_id === Number(player_id)) {
 
                     // ref cards
-                    dojo.place(this.format_block('jstpl_references', player), player_panel_div); 
-                    dojo.addClass(player_panel_div, 'my_panel');
+                    dojo.place(this.format_block('jstpl_references', player), player_panel_div);
+                    player_panel_div.classList.add('my_panel');
 
                     // starting skills
                     let skills_title = _('Skills __________');
@@ -501,18 +506,12 @@ function (dojo, declare) {
                 this.addTooltipHtml(`shared_objective${i+1}`, html, 1000);
             }
 
-            // asset cards
+            // spread cards
 
             for (let i=0; i<=3; i++) {
                 let current_asset = spread_cards[i];
                 let current_asset_ids = Object.keys(gamedatas.spread);
-                let bg_pos = gamedatas.asset_cards[current_asset]['x_y'];
-                let skill = _(gamedatas.asset_cards[current_asset]['skill']);
-                let title = _(gamedatas.asset_cards[current_asset]['description']);
-                let html = `<div style="margin-bottom: 5px; display: inline;"><strong>${title}</strong></div>
-                            <span style="font-size: 10px; margin-left: 5px;">${skill}</span>
-                            <div class="asset asset_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>`;
-                this.addTooltipHtml(`asset_card_${current_asset_ids[i]}`, html, 1000);
+                this.assetTooltip(`asset_card_${current_asset_ids[i]}`, current_asset);
             }
 
             // pitches
@@ -613,6 +612,18 @@ function (dojo, declare) {
                 this.addTooltipHtml(`pain_tolerance_icon_${player_id}`, _('Pain Tolerance'), 500);
                 this.addTooltipHtml(`power_icon_${player_id}`, _('Power'), 500);
             }
+
+            // log
+            dojo.connect(this.notifqueue, 'addToLog', () => {
+                const asset_elements = document.getElementsByClassName('asset_tooltip');
+                Array.from(asset_elements).forEach((ele) => {
+                    let ele_id = ele.id;
+                    let asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
+                    console.log('ele_id = ');
+                    console.log(ele_id);
+                    this.assetTooltip(ele_id, asset_type);
+                });
+            });
 
             // style and connect asset deck and spread during draw asset action
             if (this.checkAction('drawAsset', true)) {
@@ -1008,6 +1019,42 @@ function (dojo, declare) {
             $(`hand_num_${player_id}`).innerHTML = hand_count;
         },
 
+        getTooltipsForLog: function(format_values, type) {
+            switch(type) {
+                case 'assets':
+                    if (format_values.length === 1) {
+                        const asset = format_values[0];
+                        const asset_title = this.gamedatas['asset_cards'][asset]['description'];
+                        return this.format_block('jstpl_log_asset', {
+                                card_key: asset,
+                                card_name: asset_title,
+                            });
+                    } else if (format_values.length > 1) {
+                        let spread_for_log = '';
+                        for (let asset of format_values) {
+                            const asset_title = this.gamedatas['asset_cards'][asset]['description'];
+                            const tooltip_span = this.format_block('jstpl_log_asset', {
+                                                    card_key: asset,
+                                                    card_name: asset_title,
+                                                 });
+                            if (asset === format_values[format_values.length-1]) { spread_for_log += tooltip_span; }
+                            else { spread_for_log += `${tooltip_span}, `; }
+                        }
+                        return spread_for_log;
+                    } else { return 'nothing'; }
+            }
+        },
+
+        assetTooltip: function(ele, card_type) {
+            let bg_pos = this.gamedatas.asset_cards[card_type]['x_y'];
+            let skill = _(this.gamedatas.asset_cards[card_type]['skill']);
+            let title = _(this.gamedatas.asset_cards[card_type]['description']);
+            let html = `<div style="margin-bottom: 5px; display: inline;"><strong>${title}</strong></div>
+                        <span style="font-size: 10px; margin-left: 5px;">${skill}</span>
+                        <div class="asset asset_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>`;
+            this.addTooltipHtml(ele, html, 1000);
+        },
+
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -1301,10 +1348,18 @@ function (dojo, declare) {
         },
 
         notif_confirmOpponentAssets: async function (notif) {
+            dojo.query('.asset_tooltip').forEach((ele) => {
+                let ele_id = ele.id;
+                let asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
+                this.assetTooltip(ele_id, asset_type);
+
+            });
             let player_id = notif.args.player_id;
             let spread_ids = notif.args.spread_card_ids;
             let new_deck_assets = notif.args.deck_num;
             let new_spread_assets = spread_ids.length;
+            console.log('spread_card_types = ');
+            console.log(notif.args.spread_card_types);
 
             let drawCards = async () => {
                 return new Promise(resolve => {
@@ -1388,6 +1443,12 @@ function (dojo, declare) {
         },
 
         notif_confirmYourAssets: async function (notif) {
+            dojo.query('.asset_tooltip').forEach((ele) => {
+                let ele_id = ele.id;
+                let asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
+                this.assetTooltip(ele_id, asset_type);
+
+            });
             let card_num = dojo.query('#assets_wrap .asset').length;
             let token_num = dojo.query('#assets_wrap .summit_beta').length;
             let new_deck_assets = notif.args.deck_num;

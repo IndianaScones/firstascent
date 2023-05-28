@@ -450,9 +450,10 @@ class FirstAscent extends Table
         $empty_slots = count($spread_assets);
         $spread_assets_arr = $this->cards_and_tokens->pickCardsForLocation($empty_slots, 'asset_deck', 'the_spread');
 
-        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate('${player_name} takes ${spread_for_log} from the Spread and ${deck_num} asset/s from the deck'), array(
+        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate('${player_name} takes ${assets:getTooltipsForLog} from the Spread and ${deck_num} asset/s from the deck'), array(
                 'player_name' => self::getActivePlayerName(),
-                'spread_for_log' => $spread_assets_for_log,
+                'assets' => $spread_card_types,
+                'spread_card_types' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,
@@ -460,10 +461,10 @@ class FirstAscent extends Table
                 'spread_assets_arr' => $spread_assets_arr
         ));
 
-        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate('${player_name} takes ${spread_for_log} from the Spread
+        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate('${player_name} takes ${assets:getTooltipsForLog} from the Spread
             and ${deck_num} asset/s from the deck'), array(
                 'player_name' => self::getActivePlayerName(),
-                'spread_for_log' => $spread_assets_for_log,
+                'assets' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,

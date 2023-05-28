@@ -620,6 +620,10 @@
     margin-right: 5px;
 }
 
+.asset_tooltip {
+    font-weight: bold;
+}
+
 /* hand */
 #myhand_wrap {
     /* height: 233px; */
