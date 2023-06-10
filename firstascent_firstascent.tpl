@@ -30,6 +30,24 @@
                 <!-- END shared_objective -->
             </div>
 
+            <div id="asset_deck_draw">
+                <div id="deck_draw_8" class="draw_wrap"></div>
+                <div id="deck_draw_7" class="draw_wrap"></div>
+                <div id="deck_draw_6" class="draw_wrap"></div>
+                <div id="deck_draw_5" class="draw_wrap"></div>
+                <div id="deck_draw_4" class="draw_wrap"></div>
+                <div id="deck_draw_3" class="draw_wrap"></div>
+                <div id="deck_draw_2" class="draw_wrap"></div>
+                <div id="deck_draw_1" class="draw_wrap"></div>
+            </div>
+
+            <div id="spread_draw">
+                <div id="spread_draw_4" class="spread_wrap"></div>
+                <div id="spread_draw_3" class="spread_wrap"></div>
+                <div id="spread_draw_2" class="spread_wrap"></div>
+                <div id="spread_draw_1" class="spread_wrap"></div>
+            </div>
+
             <div id="the_spread"></div>
 
             <div id="the_portaledge">
@@ -42,7 +60,8 @@
             
             <div id="pitches">
                 <!-- BEGIN pitch -->
-                    <div id="pitch{X}" class="pitch p{PITCH}" style="bottom: {BOTTOM}%; left: {LEFT}%; background-position: -{PX}% -{PY}%;"></div>
+                    <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%";>
+                    <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;"><div id="pitch_{X}_available"></div></div></div>
                 <!-- END pitch -->
             </div>
 
@@ -79,21 +98,21 @@ let jstpl_namebox='<div id="namebox_${type}" class="namebox" style="background-p
     -${charY}%;"></div>';
 let jstpl_character='<div id="character_${type}" class="character" style="background-position: -${charX}% \
     -${charY}%; ${extra_style}"> \
-    <div id="${character}_cube_w0" class="cube cb_w_0 cb_${color}"></div> \
-    <div id="${character}_cube_w1" class="cube cb_w_1 cb_${color}"></div> \
-    <div id="${character}_cube_w2" class="cube cb_w_2 cb_${color}"></div> \
-    <div id="${character}_cube_w3" class="cube cb_w_3 cb_${color}"></div> \
-    <div id="${character}_cube_w4" class="cube cb_w_4 cb_${color}"></div> \
-    <div id="${character}_cube_w5" class="cube cb_w_5 cb_${color}"></div> \
-    <div id="${character}_cube_w6" class="cube cb_w_6 cb_${color}"></div> \
+    <div id="${character}_cube_w0" class="cube cb_w_0 cb_water"></div> \
+    <div id="${character}_cube_w1" class="cube cb_w_1 cb_water"></div> \
+    <div id="${character}_cube_w2" class="cube cb_w_2 cb_water"></div> \
+    <div id="${character}_cube_w3" class="cube cb_w_3 cb_water"></div> \
+    <div id="${character}_cube_w4" class="cube cb_w_4 cb_water"></div> \
+    <div id="${character}_cube_w5" class="cube cb_w_5 cb_water"></div> \
+    <div id="${character}_cube_w6" class="cube cb_w_6 cb_water"></div> \
     <br id="${character}_break"> \
-    <div id="${character}_cube_p0" class="cube cb_p_0 cb_${color}"></div> \
-    <div id="${character}_cube_p1" class="cube cb_p_1 cb_${color}"></div> \
-    <div id="${character}_cube_p2" class="cube cb_p_2 cb_${color}"></div> \
-    <div id="${character}_cube_p3" class="cube cb_p_3 cb_${color}"></div> \
-    <div id="${character}_cube_p4" class="cube cb_p_4 cb_${color}"></div> \
-    <div id="${character}_cube_p5" class="cube cb_p_5 cb_${color}"></div> \
-    <div id="${character}_cube_p6" class="cube cb_p_6 cb_${color}"></div> \
+    <div id="${character}_cube_p0" class="cube cb_p_0 cb_psych"></div> \
+    <div id="${character}_cube_p1" class="cube cb_p_1 cb_psych"></div> \
+    <div id="${character}_cube_p2" class="cube cb_p_2 cb_psych"></div> \
+    <div id="${character}_cube_p3" class="cube cb_p_3 cb_psych"></div> \
+    <div id="${character}_cube_p4" class="cube cb_p_4 cb_psych"></div> \
+    <div id="${character}_cube_p5" class="cube cb_p_5 cb_psych"></div> \
+    <div id="${character}_cube_p6" class="cube cb_p_6 cb_psych"></div> \
     </div>';
 let jstpl_asset_board='<div id="asset_board_${player}" class="asset_board" style="background-position: \
     -${abX}% -${abY}%;"></div>';
@@ -141,23 +160,23 @@ let jstpl_pp_rope='<div id="${player_id}_rope_counter" class="pp_rope" style="ba
 let jstpl_meeple='<div id="meeple_${player_id}" class="meeple" style="background-position: -${mX}% -${mY}%;"></div>';
 let jstpl_skills='<div id=${player_id}_skills" class="cp_panel"> \
     <div id="gear_icon_${player_id}" class="gear" style="background-position: -0% -0%;"></div> \
-    <span id="gear_num_${player_id}" class="panel_num">0</span> \
+    <span id="gear_num_${player_id}" class="panel_num resource">0</span> \
     <div id="face_icon_${player_id}" class="skill" style="background-position: -100% -0%;"></div> \
-    <span id="face_num_${player_id}" class="panel_num">0</span> \
+    <span id="face_num_${player_id}" class="panel_num resource">0</span> \
     <div id="crack_icon_${player_id}" class="skill" style="background-position: -0% -0%;"></div> \
-    <span id="crack_num_${player_id}" class="panel_num">0</span> \
+    <span id="crack_num_${player_id}" class="panel_num resource">0</span> \
     <div id="slab_icon_${player_id}" class="skill" style="background-position: -200% -0%;"></div> \
-    <span id="slab_num_${player_id}" class="panel_num">0</span> \
+    <span id="slab_num_${player_id}" class="panel_num resource">0</span> \
     </div>';
 let jstpl_techniques='<div id=${player_id}_techniques"> \
     <div id="precision_icon_${player_id}" class="technique" style="background-position: -200% -0%;"></div> \
-    <span id="precision_num_${player_id}" class="panel_num">0</span> \
+    <span id="precision_num_${player_id}" class="panel_num resource">0</span> \
     <div id="balance_icon_${player_id}" class="technique" style="background-position: -100% -0%;"></div> \
-    <span id="balance_num_${player_id}" class="panel_num">0</span> \
+    <span id="balance_num_${player_id}" class="panel_num resource">0</span> \
     <div id="pain_tolerance_icon_${player_id}" class="technique" style="background-position: -0% -0%;"></div> \
-    <span id="pain_tolerance_num_${player_id}" class="panel_num">0</span> \
+    <span id="pain_tolerance_num_${player_id}" class="panel_num resource">0</span> \
     <div id="power_icon_${player_id}" class="technique" style="background-position: -300% -0%;"></div> \
-    <span id="power_num_${player_id}" class="panel_num">0</span> \
+    <span id="power_num_${player_id}" class="panel_num resource">0</span> \
     </div>';
 
 </script>  

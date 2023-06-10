@@ -58,7 +58,17 @@ $machinestates = array(
             "type" => "game",
             "action" => "stNextDraw",
             "updateGameProgression" => true,
-            "transitions" => array("drawAssets" => 10, "nextRound" => 98)
+            "transitions" => array("drawAssets" => 10, "nextRound" => 20)
+    ),
+
+    20 => array(
+            "name" => "climbOrRest",
+            "description" => clienttranslate('${actplayer} must choose a pitch or rest'),
+            "descriptionmyturn" => clienttranslate('${you} must choose a pitch or rest'),
+            "type" => "activeplayer",
+            "args" => "argClimbOrRest",
+            "possibleactions" => array("selectPitch", "confirmPitch", "rest"),
+            "transitions" => array("selectAssets" => 98, "nextClimber" => 98)
     ),
 
     98 => array(
@@ -67,7 +77,7 @@ $machinestates = array(
             "descriptionmyturn" => "You've reached the end of the road",
             "type" => "activeplayer",
             "possibleactions" => array("placeholder"),
-            "transitions" => array("nowhere" => 2)
+            "transitions" => array("nowhere" => 99)
     ),
     
 /*

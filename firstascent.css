@@ -32,39 +32,33 @@
 }
 
 /* animations */
-.move_character { animation: move_character 2s ease-in-out 1; }
+.move_character { animation: move_character 1.5s ease-in-out 1; }
 @keyframes move_character {
-  0% { transform: translateX(0) translateY(0); }
-  100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
+  100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 33%; max-height: 89.7%; min-height: 89.7%; }
 }
 
-.move_deck_asset { animation: move_deck_asset 0.5s ease-in-out 1; }
-@keyframes move_deck_asset {
-    0% { transform: translateX(0) translateY(0) rotate(0deg); }
+.move_drawn_asset { animation: move_drawn_asset .5s ease-in-out 1; }
+@keyframes move_drawn_asset {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(-90deg); }
 }
 
 .flip_transform { animation: flip_transform 0.5s ease-in-out 1; }
 @keyframes flip_transform {
-    0% { transform: rotateY(0deg); }
     100% { transform: rotateY(180deg); }
 }
 
 .move_to_counter { animation: move_to_counter 0.75s ease-in-out 1; }
 @keyframes move_to_counter {
-    0% { transform: translateX(0) translateY(0); width: 100%; height: 100%; }
-    100% { transform: translateX(var(--dy)) translateY(var(--dx)); width: 22%; height: 22%; }
+    100% { transform: translateX(var(--dy)) translateY(var(--dx)); width: 31%; height: 31%; }
 }
 
 .move_to_hand { animation: move_to_hand 1.25s ease-in-out 1; }
 @keyframes move_to_hand {
-    0% { transform: translateX(0) translateY(0); width: 100%; height: 100%; }
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 175%; height: 175%; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 162%; height: 164%; }
 }
 
 .move_to_spread { animation: move_to_spread 0.5s ease-in-out 1; }
 @keyframes move_to_spread {
-    0% { transform: translateX(0) translateY(0); }
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
 }
 
@@ -75,6 +69,7 @@
     height: 100%;
     background-color: transparent;
     perspective: 1000px;
+    background-position: -0% -0%;
 }
 
 .flip_card_inner {
@@ -108,12 +103,6 @@
 #ebd-body .asset_draw_resize {
     width: 22%;
     height: 22%;
-    transition: 0.5s ease;
-}
-
-#the_spread > .straighten_asset {
-    z-index: 3;
-    transform: none;
     transition: 0.5s ease;
 }
 
@@ -322,7 +311,11 @@
     background-size: 1200% 400%;
 }
 
-#asset_deck { z-index: 2; }
+#asset_deck { z-index: 6; }
+#the_spread #spread_slot1 { z-index: 5; }
+#the_spread #spread_slot2 { z-index: 4; }
+#the_spread #spread_slot3 { z-index: 3; }
+#the_spread #spread_slot4 { z-index: 2; }
 
 .asset_deck_back {
     width: 6.2%;
@@ -367,11 +360,77 @@
 /* pitches */
 .pitch {
     position: absolute;
-    width: 7.94%;
-    height: 13.79%;
+    width: 100%;
+    height: 100%;
     background-image: url('img/pitches.png');
     background-size: 1300% 400%;
+    clip-path: polygon(50% 0, 100% 25%, 100% 75%, 50% 100%, 0 75%, 0 25%);
 }
+
+.pitch_wrap {
+    position: absolute;
+    width: 7.94%;
+    height: 13.79%;
+}
+
+.available_pitch {
+    filter: drop-shadow(1px 0px 0px black)
+            drop-shadow(-1px 0px 0px black)
+            drop-shadow(0px 1px 0px black)
+            drop-shadow(0px -1px 0px black)
+            drop-shadow(1px 1px 0px black)
+            drop-shadow(-1px -1px 0px black)
+            drop-shadow(-1px 1px 0px black)
+            drop-shadow(1px -1px 0px black);
+    z-index: 2;
+}
+
+/*.available_pitch {
+  position: relative;
+  width: 76.5px;
+  width: 94.8%;
+  height: 47.455px;
+  height: 51%;
+  left: -1px;
+  left: -1.1%;
+  top: -0.8%;
+  margin: 23.726px 0;
+  margin: 29% 0;
+  border-left: solid 3px red;
+  border-right: solid 3px red;
+  z-index: 4;
+}
+
+.available_pitch:before,
+.available_pitch:after {
+  box-sizing: border-box;
+  content: "";
+  position: absolute;
+  z-index: 1;
+  width: 59px;
+  width: 76%;
+  height: 58.118px;
+  height: 122%;
+  -webkit-transform: scaleY(0.5774) rotate(-45deg);
+  -ms-transform: scaleY(0.5774) rotate(-45deg);
+  transform: scaleY(0.5774) rotate(-45deg);
+  left: 8.6px;
+  left: 12%;
+}
+
+.available_pitch:before {
+  top: -29.059px;
+  top: -61%;
+  border-top: solid 3px red;
+  border-right: solid 3px red;
+}
+
+.available_pitch:after {
+  bottom: -29.059px;
+  bottom: -61%;
+  border-bottom: solid 3px red;
+  border-left: solid 3px red;
+}*/
 
 /* characters */
 .character_selection_ratio {
@@ -518,6 +577,14 @@
     transform: skewY(-50deg);
 }
 
+.cb_water { background: #4B9CD3; }
+.cb_water::before { background: #74C5E8; }
+.cb_water::after { background: #2D5FC2; }
+
+.cb_psych { background: #808080; }
+.cb_psych::before { background: #A9A9A9; }
+.cb_psych::after { background: #404040; }
+
 .cb_w_0 { top: 74.7%; left: 2.8%; }
 .cb_w_1 { top: 74.7%; left: 8.02%; }
 .cb_w_2 { top: 74.7%; left: 12.9%; }
@@ -567,30 +634,6 @@
 #character_8 > #phil_cube_p3 { left: 11.2%; }
 #character_8 > #phil_cube_p4 { left: 14.1%; }
 #character_8 > #phil_cube_p7 { left: 22.4%; }
-
-.cb_blue { background: #1d7dad; }
-.cb_blue::before { background: #46A6B8; }
-.cb_blue::after { background: #04646F; }
-
-.cb_red { background: #be3d27; }
-.cb_red::before { background: #D36650; }
-.cb_red::after { background: #80240E; }
-
-.cb_yellow { background: #f6e03f; }
-.cb_yellow::before { background: #FFFF68; }
-.cb_yellow::after { background: #B8C726; }
-
-.cb_black { background: #4d5760; }
-.cb_black::before { background: #768075; }
-.cb_black::after { background: #343E22; }
-
-.cb_green { background: #517f3e; }
-.cb_green::before { background: #7A9467; }
-.cb_green::after { background: #384125; }
-
-.cb_purple { background: #7c2b87; }
-.cb_purple::before { background: #A5549C; }
-.cb_purple::after { background: #631249; }
 
 /* tooltips */
 .pitch_tt {
@@ -725,7 +768,7 @@
     left: 31%;
     align-items: center;
     justify-content: flex-end;
-    z-index: 1;
+    z-index: 3;
 }
 
 .draw_wrap {
@@ -736,13 +779,46 @@
     transform: none;
 }
 
+.draw_wrap > .asset {
+    width: 100%;
+    height: 100%;
+}
+
+#spread_draw {
+    display: none;
+    position: absolute;
+    width: 28%;
+    height: 15%;
+    top: 31%;
+    left: 60%;
+    align-items: center;
+    justify-content: flex-end;
+    z-index: 1;
+}
+
+.spread_wrap {
+    position: relative;
+    width: 22.143%;
+    height: 94.665%;
+    margin-left: .4%;
+    transform: none;
+}
+
+.spread_wrap > .asset {
+    height: 100%;
+}
+
+.deck_temp {
+    background-position: -0% -0%;
+}
+
 #asset_deck > .deck_temp {
     position: absolute;
     width: 100%;
     height: 100%;
 }
 
-#asset_deck > .flip_card, #the_spread .flip_card {
+#the_spread .flip_card {
     transform: none;
 }
 

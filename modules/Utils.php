@@ -58,6 +58,112 @@ trait UtilTrait {
         return self::getCollectionFromDb('SELECT pitch_location location, pitch_id id FROM board ORDER BY pitch_location', true);
     }
 
+    function getAvailablePitches($current_pitch) {
+        $available_pitches = [];
+        switch ($current_pitch) {
+            case false:
+                $available_pitches = [1,2,3,4,5,6,7,8];
+                break;
+            case 1:
+                $available_pitches = [2,9];
+                break;
+            case 2:
+                $available_pitches = [1,3,9,10];
+                break;
+            case 3:
+                $available_pitches = [2,4,10,11];
+                break;
+            case 4:
+                $available_pitches = [3,5,11,12];
+                break;
+            case 5:
+                $available_pitches = [4,6,12,13];
+                break;
+            case 6:
+                $available_pitches = [5,7,13,14];
+                break;
+            case 7:
+                $available_pitches = [6,8,14,15];
+                break;
+            case 8:
+                $available_pitches = [7,15];
+                break;
+            case 9:
+                $available_pitches = [1,2,10,16];
+                break;
+            case 10:
+                $available_pitches = [2,3,9,11,16,17];
+                break;
+            case 11:
+                $available_pitches = [3,4,10,12,17,18];
+                break;
+            case 12:
+                $available_pitches = [4,5,11,13,18,19];
+                break;
+            case 13:
+                $available_pitches = [5,6,12,14,19,20];
+                break;
+            case 14:
+                $available_pitches = [6,7,13,15,20,21];
+                break;
+            case 15:
+                $available_pitches = [7,8,14,21];
+                break;
+            case 16:
+                $available_pitches = [9,10,17,18,19,20,21,22,23,24,25,26];
+                break;
+            case 17:
+                $available_pitches = [10,11,16,18,19,20,21,22,23,24,25,26];
+                break;
+            case 18:
+                $available_pitches = [11,12,16,17,19,20,21,22,23,24,25,26];
+                break;
+            case 19:
+                $available_pitches = [12,13,16,17,18,20,21,22,23,24,25,26];
+                break;
+            case 20:
+                $available_pitches = [13,14,16,17,18,19,21,22,23,24,25,26];
+                break;
+            case 21:
+                $available_pitches = [14,15,16,17,18,19,20,22,23,24,25,26];
+                break;
+            case 22:
+                $available_pitches = [16,17,18,19,20,21,23,24,25,26,27];
+                break;
+            case 23:
+                $available_pitches = [16,17,18,19,20,21,23,24,25,26,27,28];
+                break;
+            case 24:
+                $available_pitches = [16,17,18,19,20,21,22,23,25,26,28,29];
+                break;
+            case 25:
+                $available_pitches = [16,17,18,19,20,21,22,23,24,26,29,30];
+                break;
+            case 26:
+                $available_pitches = [16,17,18,19,20,21,22,23,24,25,30];
+                break;
+            case 27:
+                $available_pitches = [22,23,28,31];
+                break;
+            case 28:
+                $available_pitches = [23,24,27,29,31];
+                break;
+            case 29:
+                $available_pitches = [24,25,28,30,32];
+                break;
+            case 30:
+                $available_pitches = [25,26,29,32];
+                break;
+            case 31:
+                $available_pitches = [27,28];
+                break;
+            case 32:
+                $available_pitches = [29,30];
+                break;
+        }
+        return $available_pitches;
+    }
+
     function php_debug() {
 
         //$this->dump("variable", variable);
@@ -70,5 +176,44 @@ trait UtilTrait {
            return $players[$player_id]['player_color'];
        else
            return null;
+    }
+
+    function getPlayerAssets($player_id) {
+        $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset' AND card_location='$player_id'";
+        return self::getCollectionFromDb($sql, true);
+    }
+
+    function getPlayerTokens($player_id) {
+        $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='summit_beta' AND card_location='$player_id'";
+        return self::getCollectionFromDb($sql, true);
+    }
+
+    function updateResourceTracker($player_id, $assets, $operation='add') {
+        $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
+        $skills = ['gear', 'face', 'crack', 'slab'];
+        $techniques = ['precision', 'balance', 'pain_tolerance', 'power'];
+
+        foreach ($assets as $asset) {
+            $asset_skills = $this->asset_cards[$asset]['skills'];
+            $asset_techniques = $this->asset_cards[$asset]['techniques'];
+
+            if ($operation === 'add') { 
+                for ($i=0; $i<4; $i++) {
+                    $skill = $skills[$i];
+                    $technique = $techniques[$i];
+                    $resource_tracker[$player_id]['skills'][$skill] += $asset_skills[$skill];
+                    $resource_tracker[$player_id]['techniques'][$technique] += $asset_techniques[$technique];
+                }
+            }
+            else if ($operation === 'subtract') { 
+                for ($i=0; $i<4; $i++) {
+                    $skill = $skills[$i];
+                    $technique = $techniques[$i];
+                    $resource_tracker[$player_id]['skills'][$skill] -= $asset_skills[$skill];
+                    $resource_tracker[$player_id]['techniques'][$technique] -= $asset_techniques[$technique];
+                }
+            }
+        }
+        $this->setGlobalVariable('resource_tracker', $resource_tracker);
     }
 }

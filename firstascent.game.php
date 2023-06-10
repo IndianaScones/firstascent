@@ -154,6 +154,15 @@ class FirstAscent extends Table
             $this->cards_and_tokens->moveCard($slab_to_ledge[$i]['card_id'], 'portaSlab', $i);
         }
 
+        // ****** SPREAD TESTING ******
+
+        /*$assets_20 = $this->cards_and_tokens->getCardsOfType('asset', '20');
+        $i = 1;
+        foreach ($assets_20 as $asset) {
+            if ($i <= 2) { $this->cards_and_tokens->moveCard($asset['id'], 'the_spread'); }
+            $i++;
+        }*/
+
         // draw starting spread
         $this->cards_and_tokens->pickCardsForLocation(4, 'asset_deck', 'the_spread');
 
@@ -240,7 +249,6 @@ class FirstAscent extends Table
         foreach($pitch_order as $location => $pitch) {
 
             $pitch_location = $location;
-            //$pitch_name = $this->pitches[$pitch]['name'];
             $pitch_id = $pitch;
 
             $sql_values[] = "('$pitch_location','$pitch_id')";
@@ -277,14 +285,42 @@ class FirstAscent extends Table
         $this->setGlobalVariable('draw_step', 1);
         $this->setGlobalVariable('x_cards', 5);
 
-        // Activate first player
-        $this->activeNextPlayer();
+        // Initialize pitch tracker
+        $pitch_tracker = [];
+        foreach($players as $player_id => $player) { $pitch_tracker[$player_id] = []; }
+        $this->setGlobalVariable('pitch_tracker', $pitch_tracker);
+
+        // Initialize resource tracker
+        $resource_tracker = [];
+        foreach($players as $player_id => $player) {
+            $resource_tracker[$player_id] = [
+                "skills" => [
+                    "gear" => 0,
+                    "face" => 0,
+                    "crack" => 0,
+                    "slab" => 0
+                ],
+
+                "techniques" => [
+                    "precision" => 0,
+                    "balance" => 0,
+                    "pain_tolerance" => 0,
+                    "power" => 0
+                ]
+            ];
+        }
+        $this->setGlobalVariable('resource_tracker', $resource_tracker);
+
+        // Activate last player
+        $player_count = count($players);
+        $last_player = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no` = '$player_count'");
+        $this->gamestate->changeActivePlayer($last_player);
 
         /**** FOR TESTING ****/
-        foreach ($players as $player_id => $player) {
+        /*foreach ($players as $player_id => $player) {
             $this->cards_and_tokens->pickCardsForLocation(3, 'asset_deck', $player_id);
         }
-
+*/
         /************ End of the game initialization *****/
     }
 
@@ -309,7 +345,7 @@ class FirstAscent extends Table
         $result['players'] = self::getCollectionFromDB( $sql );
 
         // FOR DEBUGGING THROUGH JAVASCRIPT
-
+        $result['pitch_tracker'] = $this->getGlobalVariable('pitch_tracker', true);
         
         // Get materials
         $result['pitches'] = $this->pitches;
@@ -330,19 +366,12 @@ class FirstAscent extends Table
                                 "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='the_spread'", true
         );
 
-        // Get cards in each players' hands
+        // Get cards and tokens in each players' hand
         foreach ($result['players'] as $player) {
-            $player_id = $player['id'];
-            $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset' AND card_location='$player_id'";
-            $result["{$player['id']}_hand_assets"] = self::getCollectionFromDb($sql, true);
+            $result["{$player['id']}_hand_assets"] = $this->getPlayerAssets($player['id']);
+            $result["{$player['id']}_hand_tokens"] = $this->getPlayerTokens($player['id']);
         }
-
-        // Get token in each players' hands
-        foreach ($result['players'] as $player) {
-            $player_id = $player['id'];
-            $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='summit_beta' AND card_location='$player_id'";
-            $result["{$player['id']}_hand_tokens"] = self::getCollectionFromDb($sql, true);
-        }
+        $result['resource_tracker'] = $this->getGlobalVariable('resource_tracker', true);
 
         return $result;
     }
@@ -424,53 +453,88 @@ class FirstAscent extends Table
     }
 
 
-    function confirmAssets($deck_assets, $spread_assets) {
+    function confirmAssets($deck_assets=0, $spread_assets=[]) {
         self::checkAction('confirmAssets');
         $player_id = self::getActivePlayerId();
         $deck_assets = intval($deck_assets);
+
         if ($spread_assets) {
-            $spread_assets_db = self::getCollectionFromDB("SELECT card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $spread_assets)).")");
-            $spread_card_types = array_keys($spread_assets_db);
+            $spread_assets_db = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $spread_assets)).")");
+            $spread_card_types = [];
+            foreach (array_values($spread_assets_db) as $asset) {
+                array_push($spread_card_types, $asset['card_type_arg']);
+            } 
 
             // Move selected spread cards to hand
             $this->cards_and_tokens->moveCards($spread_assets, $player_id);
             $spread_assets_for_log = '';
+
             for ($i=1; $i<=count($spread_assets); $i++) {
-                $asset_title = $this->asset_cards[$spread_card_types[$i-1]]['description'];
-                if ($i === 1) { $spread_assets_for_log .= $asset_title; }
-                elseif ($i === count($spread_assets)) { $spread_assets_for_log .= ", and {$asset_title}"; }
-                else { $spread_assets_for_log .= ', ' . $asset_title; }
+                $type = $spread_card_types[$i-1];
+
+                // spread message for log
+                $asset_title = $this->asset_cards[$type]['description'];
+                if ($i === 1) { $spread_assets_for_log .= "[{$asset_title}({$type})]"; }
+                elseif ($i === count($spread_assets)) { $spread_assets_for_log .= ", and [{$asset_title}({$type})]"; }
+                else { $spread_assets_for_log .= ", [{$asset_title}({$type})]"; }
             }
-        } else { $spread_assets_for_log = 'nothing'; }
+
+            // update resource_tracker
+            $this->updateResourceTracker($player_id, $spread_card_types, 'add');
+
+        } else { 
+            $spread_assets_for_log = 'nothing';
+            $spread_card_types = [];
+        }
 
         // Move selected deck cards to hand
         $deck_assets_arr = $this->cards_and_tokens->pickCardsForLocation($deck_assets, 'asset_deck', $player_id);
+        $deck_card_types = array_column($deck_assets_arr, 'type_arg');
+
+        // update resource_tracker
+        $this->updateResourceTracker($player_id, $deck_card_types, 'add');
+
+        $deck_assets_for_log = '';
+        for ($i=1; $i<=count($deck_card_types); $i++) {
+            $type = $deck_card_types[$i-1];
+            $asset_title = $this->asset_cards[$type]['description'];
+            if ($i === 1) { $deck_assets_for_log .= "[{$asset_title}({$type})]"; }
+            elseif ($i === count($deck_card_types)) { $deck_assets_for_log .= ", and [{$asset_title}({$type})]"; }
+            else { $deck_assets_for_log .= ", [{$asset_title}({$type})]"; }
+        }
+
+        $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
 
         // Refill the spread
         $empty_slots = count($spread_assets);
         $spread_assets_arr = $this->cards_and_tokens->pickCardsForLocation($empty_slots, 'asset_deck', 'the_spread');
 
-        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate('${player_name} takes ${assets:getTooltipsForLog} from the Spread and ${deck_num} asset/s from the deck'), array(
+        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate('${player_name} takes ${spread_assets_for_log} from the Spread and ${deck_num} asset/s from the deck'), array(
                 'player_name' => self::getActivePlayerName(),
-                'assets' => $spread_card_types,
-                'spread_card_types' => $spread_card_types,
+                'spread_assets' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,
                 'hand_count' => count($this->getAllDatas()["{$player_id}_hand_assets"]),
-                'spread_assets_arr' => $spread_assets_arr
+                'spread_assets_arr' => $spread_assets_arr,
+                'spread_assets_for_log' => $spread_assets_for_log,
+                'player_resources' => $player_resources,
         ));
 
-        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate('${player_name} takes ${assets:getTooltipsForLog} from the Spread
-            and ${deck_num} asset/s from the deck'), array(
+        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate('${player_name} takes ${spread_assets_for_log} from the Spread
+            and ${deck_assets_for_log} from the deck'), array(
                 'player_name' => self::getActivePlayerName(),
-                'assets' => $spread_card_types,
+                'spread_assets' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
+                'deck_assets' => $deck_card_types,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,
                 'hand_count' => count($this->getAllDatas()["{$player_id}_hand_assets"]),
+                'spread_assets_arr' => $spread_assets_arr,
                 'deck_assets_arr' => $deck_assets_arr,
-                'spread_assets_arr' => $spread_assets_arr
+                'spread_assets_for_log' => $spread_assets_for_log,
+                'deck_assets_for_log' => $deck_assets_for_log,
+                'player_resources' => $player_resources,
         ));
 
         $this->gamestate->nextState('nextDraw');
@@ -490,6 +554,15 @@ class FirstAscent extends Table
     function argDrawAssets() {
         return array(
             "x_cards" => $this->getGlobalVariable('x_cards'),
+        );
+    }
+
+    function argClimbOrRest() {
+        $current_player = self::getActivePlayerId();
+        $current_pitch = $this->getGlobalVariable('pitch_tracker')->$current_player;
+
+        return array(
+            "available_pitches" => $this->getAvailablePitches($current_pitch),
         );
     }
 
@@ -520,11 +593,12 @@ class FirstAscent extends Table
     */
 
     function stNextCharacterSelect() {
-        $player_id = self::activeNextPlayer();
-        self::giveExtraTime($player_id);
         if (count($this->getGlobalVariable('available_characters')) > 1) {
+            $player_id = self::activePrevPlayer();
+            self::giveExtraTime($player_id);
             $this->gamestate->nextState('nextSelection');
         } else {
+            self::giveExtraTime($this->getActivePlayerId());
             $this->gamestate->nextState('drawAssets');
         }
     }
@@ -540,35 +614,35 @@ class FirstAscent extends Table
             $obj->setGlobalVariable('x_cards', 3);
             $obj->gamestate->nextState('nextRound');
         }
-        switch (true) {
-            case $draw_step === 1:
+        switch ($draw_step) {
+            case 1:
                 $this->setGlobalVariable('draw_step', 2);
                 break;
-            case $draw_step === 2:
+            case 2:
                 if ($draw_step < $this->getPlayersNumber()) { 
                     $this->setGlobalVariable('draw_step', 3);
                     $this->setGlobalVariable('x_cards', 6);
                 }
                 else { nextRound($obj); }
                 break;
-            case $draw_step === 3;
+            case 3;
                 if ($draw_step < $this->getPlayersNumber()) { 
                     $this->setGlobalVariable('draw_step', 4);
                     $this->setGlobalVariable('x_cards', 7);
                 }
                 else { nextRound($obj); }
                 break;
-            case $draw_step === 4;
+            case 4;
                 if ($draw_step < $this->getPlayersNumber()) { 
                     $this->setGlobalVariable('draw_step', 5);
                     $this->setGlobalVariable('x_cards', 8);
                 }
                 else { nextRound($obj); }
                 break;
-            case $draw_step === 5:
+            case 5:
                 nextRound($obj);
                 break;
-            case $draw_step === 10:
+            case 10:
                 $this->setGlobalVariable('draw_step', 11);
                 break;
         }
