@@ -188,7 +188,7 @@ trait UtilTrait {
         return self::getCollectionFromDb($sql, true);
     }
 
-    function updateResourceTracker($player_id, $assets, $operation='add') {
+    function updateResourceTracker($player_id, $assets=[], $operation='add', $water=null, $psych=null) {
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
         $skills = ['gear', 'face', 'crack', 'slab'];
         $techniques = ['precision', 'balance', 'pain_tolerance', 'power'];
@@ -214,6 +214,11 @@ trait UtilTrait {
                 }
             }
         }
+        if ($water && $operation === 'add') { $resource_tracker[$player_id]['water'] += $water; }
+        else if ($water && $operation === 'subtract') { $resource_tracker[$player_id]['water'] -= $water; }
+        if ($psych && $operation === 'add') { $resource_tracker[$player_id]['psych'] += $psych; }
+        else if ($psych && $operation === 'subtract') { $resource_tracker[$player_id]['psych'] -= $psych; }
+
         $this->setGlobalVariable('resource_tracker', $resource_tracker);
     }
 }

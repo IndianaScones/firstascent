@@ -61,7 +61,9 @@
             <div id="pitches">
                 <!-- BEGIN pitch -->
                     <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%";>
-                    <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;"><div id="pitch_{X}_available"></div></div></div>
+                    <div id="pitch_{X}_border" class="pitch_border"></div>
+                    <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;">
+                    </div></div>
                 <!-- END pitch -->
             </div>
 
@@ -115,7 +117,36 @@ let jstpl_character='<div id="character_${type}" class="character" style="backgr
     <div id="${character}_cube_p6" class="cube cb_p_6 cb_psych"></div> \
     </div>';
 let jstpl_asset_board='<div id="asset_board_${player}" class="asset_board" style="background-position: \
-    -${abX}% -${abY}%;"></div>';
+    -${abX}% -${abY}%;"> \
+    <div id="${player}_gear"> \
+    <div id="${player}_gear_1" class="asset_board_slot gear_1"></div> \
+    <div id="${player}_gear_2" class="asset_board_slot gear_2"></div> \
+    <div id="${player}_gear_3" class="asset_board_slot gear_3"></div> \
+    <div id="${player}_gear_4" class="asset_board_slot gear_4"></div> \
+    <div id="${player}_gear_5" class="asset_board_slot gear_5"></div> \
+    <div id="${player}_gear_6" class="asset_board_slot gear_6"></div></div> \
+    <div id="${player}_face"> \
+    <div id="${player}_face_1" class="asset_board_slot face_1"></div> \
+    <div id="${player}_face_2" class="asset_board_slot face_2"></div> \
+    <div id="${player}_face_3" class="asset_board_slot face_3"></div> \
+    <div id="${player}_face_4" class="asset_board_slot face_4"></div> \
+    <div id="${player}_face_5" class="asset_board_slot face_5"></div> \
+    <div id="${player}_face_6" class="asset_board_slot face_6"></div></div> \
+    <div id="${player}_crack"> \
+    <div id="${player}_crack_1" class="asset_board_slot crack_1"></div> \
+    <div id="${player}_crack_2" class="asset_board_slot crack_2"></div> \
+    <div id="${player}_crack_3" class="asset_board_slot crack_3"></div> \
+    <div id="${player}_crack_4" class="asset_board_slot crack_4"></div> \
+    <div id="${player}_crack_5" class="asset_board_slot crack_5"></div> \
+    <div id="${player}_crack_6" class="asset_board_slot crack_6"></div></div> \
+    <div id="${player}_slab"> \
+    <div id="${player}_slab_1" class="asset_board_slot slab_1"></div> \
+    <div id="${player}_slab_2" class="asset_board_slot slab_2"></div> \
+    <div id="${player}_slab_3" class="asset_board_slot slab_3"></div> \
+    <div id="${player}_slab_4" class="asset_board_slot slab_4"></div> \
+    <div id="${player}_slab_5" class="asset_board_slot slab_5"></div> \
+    <div id="${player}_slab_6" class="asset_board_slot slab_6"></div></div> \
+    </div>';
 
 // card and token backs
 
@@ -138,7 +169,7 @@ let jstpl_flip_card='<div id="deck_asset_${asset_id}" class="flip_card ${extra_c
     <div class="flip_card_front ${front_type}" style="background-position: -${cX}% -${cY}%;"></div></div></div>';
 
 // tooltips for log
-let jstpl_log_asset='<span id="asset_tooltip_${card_key}" class="asset_tooltip">${card_name}</span>';
+let jstpl_log_item='<span id="item_tooltip_${item_key}" class="${item_type} item_tooltip">${item_name}</span>';
 
 // miscellany
 
@@ -157,25 +188,26 @@ let jstpl_water_and_psych='<div id="${player_id}_water_and_psych" class="cp_pane
     </div>';
 let jstpl_pp_rope='<div id="${player_id}_rope_counter" class="pp_rope" style="background-position: -${rX}% -${rY}%;"></div> \
     <span id="rope_num_${player_id}" class="panel_num" style="left: -30px;">8</span>';
+let jstpl_rope='<div id="${player_id}_rope_${rope_num}" class="rope ${extra_classes}"></div>';
 let jstpl_meeple='<div id="meeple_${player_id}" class="meeple" style="background-position: -${mX}% -${mY}%;"></div>';
 let jstpl_skills='<div id=${player_id}_skills" class="cp_panel"> \
-    <div id="gear_icon_${player_id}" class="gear" style="background-position: -0% -0%;"></div> \
+    <div id="gear_icon_${player_id}" class="skills_and_techniques" style="background-position: -800% -0%;"></div> \
     <span id="gear_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="face_icon_${player_id}" class="skill" style="background-position: -100% -0%;"></div> \
+    <div id="face_icon_${player_id}" class="skills_and_techniques" style="background-position: -600% -0%;"></div> \
     <span id="face_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="crack_icon_${player_id}" class="skill" style="background-position: -0% -0%;"></div> \
+    <div id="crack_icon_${player_id}" class="skills_and_techniques" style="background-position: -500% -0%;"></div> \
     <span id="crack_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="slab_icon_${player_id}" class="skill" style="background-position: -200% -0%;"></div> \
+    <div id="slab_icon_${player_id}" class="skills_and_techniques" style="background-position: -700% -0%;"></div> \
     <span id="slab_num_${player_id}" class="panel_num resource">0</span> \
     </div>';
 let jstpl_techniques='<div id=${player_id}_techniques"> \
-    <div id="precision_icon_${player_id}" class="technique" style="background-position: -200% -0%;"></div> \
+    <div id="precision_icon_${player_id}" class="skills_and_techniques" style="background-position: -200% -0%;"></div> \
     <span id="precision_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="balance_icon_${player_id}" class="technique" style="background-position: -100% -0%;"></div> \
+    <div id="balance_icon_${player_id}" class="skills_and_techniques" style="background-position: -100% -0%;"></div> \
     <span id="balance_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="pain_tolerance_icon_${player_id}" class="technique" style="background-position: -0% -0%;"></div> \
+    <div id="pain_tolerance_icon_${player_id}" class="skills_and_techniques" style="background-position: -0% -0%;"></div> \
     <span id="pain_tolerance_num_${player_id}" class="panel_num resource">0</span> \
-    <div id="power_icon_${player_id}" class="technique" style="background-position: -300% -0%;"></div> \
+    <div id="power_icon_${player_id}" class="skills_and_techniques" style="background-position: -300% -0%;"></div> \
     <span id="power_num_${player_id}" class="panel_num resource">0</span> \
     </div>';
 

@@ -48,7 +48,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must draw ${x_cards} Asset cards'),
             "type" => "activeplayer",
             "args" => "argDrawAssets",
-            "possibleactions" => array("selectAsset", "confirmAssets"),
+            "possibleactions" => array("confirmAssets"),
             "transitions" => array("nextDraw" => 11, "nextRound" => 20)
     ),
 
@@ -67,8 +67,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must choose a pitch or rest'),
             "type" => "activeplayer",
             "args" => "argClimbOrRest",
-            "possibleactions" => array("selectPitch", "confirmPitch", "rest"),
-            "transitions" => array("selectAssets" => 98, "nextClimber" => 98)
+            "possibleactions" => array("confirmRequirements", "rest"),
+            "transitions" => array("drawClimbingCard" => 98, "nextClimber" => 98)
     ),
 
     98 => array(

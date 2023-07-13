@@ -306,7 +306,10 @@ class FirstAscent extends Table
                     "balance" => 0,
                     "pain_tolerance" => 0,
                     "power" => 0
-                ]
+                ],
+
+                "water" => 0,
+                "psych" => 0
             ];
         }
         $this->setGlobalVariable('resource_tracker', $resource_tracker);
@@ -370,8 +373,19 @@ class FirstAscent extends Table
         foreach ($result['players'] as $player) {
             $result["{$player['id']}_hand_assets"] = $this->getPlayerAssets($player['id']);
             $result["{$player['id']}_hand_tokens"] = $this->getPlayerTokens($player['id']);
+            $result["{$player['id']}_board_assets"] = [];
+            foreach(['gear', 'face', 'crack', 'slab'] as $type) {
+                $location = "{$player['id']}_played_{$type}";
+                $result["{$player['id']}_board_assets"][$type] = self::getCollectionFromDB(
+                                                                    "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='{$location}'", true);
+            }
         }
+        
         $result['resource_tracker'] = $this->getGlobalVariable('resource_tracker', true);
+
+        $result['asset_identifier'] = self::getCollectionFromDB(
+                                        "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset'", true);
+
 
         return $result;
     }
@@ -438,6 +452,11 @@ class FirstAscent extends Table
         $psych[$player_id] = $starting_value;
         $this->setGlobalVariable('psych', $psych);
 
+        $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
+        $resource_tracker[$player_id]['water'] = $starting_value;
+        $resource_tracker[$player_id]['psych'] = $starting_value;
+        $this->setGlobalVariable('resource_tracker', $resource_tracker);
+
         self::notifyAllPlayers("confirmCharacter", clienttranslate('${player_name} chooses ${character}'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
@@ -475,6 +494,7 @@ class FirstAscent extends Table
                 // spread message for log
                 $asset_title = $this->asset_cards[$type]['description'];
                 if ($i === 1) { $spread_assets_for_log .= "[{$asset_title}({$type})]"; }
+                elseif (count($spread_assets) === 2 && $i === 2) { $spread_assets_for_log .= " and [{$asset_title}({$type})]"; }
                 elseif ($i === count($spread_assets)) { $spread_assets_for_log .= ", and [{$asset_title}({$type})]"; }
                 else { $spread_assets_for_log .= ", [{$asset_title}({$type})]"; }
             }
@@ -499,6 +519,7 @@ class FirstAscent extends Table
             $type = $deck_card_types[$i-1];
             $asset_title = $this->asset_cards[$type]['description'];
             if ($i === 1) { $deck_assets_for_log .= "[{$asset_title}({$type})]"; }
+            elseif (count($deck_card_types) === 2 && $i === 2) { $deck_assets_for_log .= " and [{$asset_title}({$type})]"; }
             elseif ($i === count($deck_card_types)) { $deck_assets_for_log .= ", and [{$asset_title}({$type})]"; }
             else { $deck_assets_for_log .= ", [{$asset_title}({$type})]"; }
         }
@@ -540,6 +561,77 @@ class FirstAscent extends Table
         $this->gamestate->nextState('nextDraw');
     }
 
+    function confirmRequirements($selected_resources, $selected_pitch) {
+        self::checkAction('confirmRequirements');
+        $player_id = self::getActivePlayerId();
+
+        $pitch_tracker = $this->getGlobalVariable('pitch_tracker', true);
+        array_push($pitch_tracker[$player_id], $selected_pitch);
+        $this->setGlobalVariable('pitch_tracker', $pitch_tracker);
+
+        if ($selected_resources) {
+            $selected_resources_db = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $selected_resources)).")");
+            $selected_resource_types = [];
+            foreach (array_values($selected_resources_db) as $asset) {
+                array_push($selected_resource_types, $asset['card_type_arg']);
+            } 
+
+            $requirements_arr_for_log = [];
+            $requirements = $this->pitches[$selected_pitch]['requirements'];
+
+            for ($i=1; $i<=count($selected_resources); $i++) {
+
+                $type_arg = $selected_resource_types[$i-1];
+                $resource_type = $this->asset_cards[$type_arg]['skills'];
+                foreach ($resource_type as $key=>$value) {
+                    if ($value) { $type = $key; }
+                }
+                $this->cards_and_tokens->moveCard($selected_resources[$i-1], "{$player_id}_played_{$type}");
+
+                $asset_title = $this->asset_cards[$type_arg]['description'];
+                array_push($requirements_arr_for_log, "[{$asset_title}({$type_arg})]");
+            }
+            if ($requirements['water'] > 0) {
+                $water_for_log = $requirements['water'] . ' water';
+                array_push($requirements_arr_for_log, $water_for_log);
+            }
+            if ($requirements['psych'] > 0) {
+                $psych_for_log = $requirements['psych'] . ' psych';
+                array_push($requirements_arr_for_log, $psych_for_log);
+            }
+
+            $requirements_for_log = '';
+            for ($i=0; $i<=count($requirements_arr_for_log)-1; $i++) {
+                if (count($requirements_arr_for_log) === 2 && $i === 0) { $requirements_for_log .= $requirements_arr_for_log[$i]; }
+                elseif ($i < count($requirements_arr_for_log)-1) { $requirements_for_log .= $requirements_arr_for_log[$i] . ', '; }
+                else { $requirements_for_log .= 'and ' . $requirements_arr_for_log[$i]; }
+            }
+
+            // update resource_tracker
+            if ($requirements['water'] != 0) { $water = $requirements['water']; } else { $water = null; }
+            if ($requirements['psych'] != 0) { $psych = $requirements['psych']; } else { $psych = null; }
+            $this->updateResourceTracker($player_id, $selected_resource_types, 'subtract', $water, $psych);
+
+        } else { 
+            $requirements_for_log = 'nothing';
+            $selected_resource_types = [];
+        }
+
+        $pitch = $this->pitches[$selected_pitch]['description'];
+        $pitch_for_log = '{' . $pitch . '(' . $selected_pitch . ')}';
+
+        self::notifyAllPlayers("confirmOpponentRequirements", clienttranslate('${player_name} spends ${requirements_for_log} and climbs ${pitch_for_log}'), array(
+                'player_name' => self::getActivePlayerName(),
+                'requirements_for_log' => $requirements_for_log,
+                'pitch_for_log' => $pitch_for_log,
+                'selected_resources' => $selected_resources,
+                'selected_pitch' => $selected_pitch,
+                'pitch_tracker' => $pitch_tracker,
+                'selected_resource_types' => $selected_resource_types,
+                'player_id' => $player_id,
+        ));
+    }
+
     
 //////////////////////////////////////////////////////////////////////////////
 //////////// Game state arguments
@@ -560,9 +652,11 @@ class FirstAscent extends Table
     function argClimbOrRest() {
         $current_player = self::getActivePlayerId();
         $current_pitch = $this->getGlobalVariable('pitch_tracker')->$current_player;
+        $resource_tracker = $this->getGlobalVariable('resource_tracker')->$current_player;
 
         return array(
             "available_pitches" => $this->getAvailablePitches($current_pitch),
+            "resources" => $resource_tracker,
         );
     }
 

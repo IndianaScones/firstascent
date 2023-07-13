@@ -56,6 +56,24 @@
         self::ajaxResponse();
     }
 
+    public function confirmRequirements() {
+        self::setAjaxMode();
+        $selected_resources_raw = self::getArg("selected_resources", AT_numberlist);
+        $selected_pitch = self::getArg("selected_pitch", AT_posint);
+
+        if (substr($selected_resources_raw, -1) == ',') {
+            $selected_resources_raw = substr($selected_resources_raw, 0, -1);
+        }
+        if ($selected_resources_raw == '') {
+            $selected_resources = array();
+        } else {
+            $selected_resources = explode(',', $selected_resources_raw);
+        }
+
+        $this->game->confirmRequirements($selected_resources, $selected_pitch);
+        self::ajaxResponse();
+    }
+
   }
   
 

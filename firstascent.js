@@ -16,7 +16,8 @@ define([
     "dojo","dojo/_base/declare",
     "dojo/aspect",
     "ebg/core/gamegui",
-    "ebg/counter"
+    "ebg/counter",
+    g_gamethemeurl + "modules/utils.js"
 ],
 function (dojo, declare, aspect) {
     return declare("bgagame.firstascent", ebg.core.gamegui, {
@@ -26,10 +27,11 @@ function (dojo, declare, aspect) {
             // Here, you can init the global variables of your user interface
             // Example:
             // this.myGlobalValue = 0;
-            let gameObject = this;            //Needed as the this object in aspect.before will not refer to the game object in which the formatting function resides
+            let gameObject = this;            //Needed as the 'this' object in aspect.before will not refer to the game object in which the formatting function resides
             aspect.before(dojo.string, "substitute", function(template, map, transform) {      //This allows you to modify the arguments of the dojo.string.substitute method before they're actually passed to it
                 return [template, map, transform, gameObject];
             });
+            this.utils = new bgagame.utils();
 
         },
         
@@ -49,7 +51,7 @@ function (dojo, declare, aspect) {
         setup: function( gamedatas )
         {
             console.log( "Starting game setup" );
-            
+
             // Setting up player panels
             for( const player_id in gamedatas.players )
             {
@@ -78,6 +80,9 @@ function (dojo, declare, aspect) {
                     dojo.place(this.format_block('jstpl_techniques', {
                         player_id : player_id,
                     }), player_panel_div);
+
+                    // tracked resources
+                    this.utils.updatePlayerResources(player_id, gamedatas.resource_tracker[player_id]);
                 }
 
                 // starting water and psych
@@ -126,12 +131,12 @@ function (dojo, declare, aspect) {
 
 
         // Setup constants -
-            const player_count = Object.keys(gamedatas.players).length;
-            const cards_to_draw = 0;
+            this.player_count = Object.keys(gamedatas.players).length;
+            this.cards_to_draw = 0;
 
         // Display the correct board for player count
 
-            if (player_count <= 3) {
+            if (this.player_count <= 3) {
                 $('board').classList.add('desert');
             } else {
                 $('board').classList.add('forest');
@@ -144,7 +149,7 @@ function (dojo, declare, aspect) {
         // Place Summit Beta Token pile
 
             let summmit_beta_coords;
-            if (player_count <= 3) {summit_beta_coords = [36.2, 1.88];} // Desert board
+            if (this.player_count <= 3) {summit_beta_coords = [36.2, 1.88];} // Desert board
             else {summit_beta_coords = [36.2, 2.27];}                     // Forest board
             dojo.place(this.format_block('jstpl_summit_pile', {
                 summit_pile_top : summit_beta_coords[0],
@@ -154,7 +159,7 @@ function (dojo, declare, aspect) {
         // Place Climbing deck
 
             let climbing_deck_coords;
-            if (player_count <= 3) {climbing_deck_coords = [-2.82, 5.38];} // Desert board
+            if (this.player_count <= 3) {climbing_deck_coords = [-2.82, 5.38];} // Desert board
             else {climbing_deck_coords = [-2.386, 5.7];}                 // Forest board
             dojo.place(this.format_block('jstpl_climbing_deck', {
                 climbing_deck_top : climbing_deck_coords[0],
@@ -166,7 +171,7 @@ function (dojo, declare, aspect) {
             // place asset deck
 
             let asset_deck_coords;
-            if (player_count <= 3) {asset_deck_coords = [0.1, 90.4];} // Desert board
+            if (this.player_count <= 3) {asset_deck_coords = [0.1, 90.4];} // Desert board
             else {asset_deck_coords = [0.5, 89.85];}                   // Forest board
             dojo.place(this.format_block('jstpl_asset_deck', {
                 asset_deckX : asset_deck_coords[0],
@@ -176,7 +181,7 @@ function (dojo, declare, aspect) {
             // place spread slots
 
             let spread_coords;
-            if (player_count <= 3) {
+            if (this.player_count <= 3) {
                 spread_coords = [ [10.8, 90.4], [21.5, 90.4], [32.2, 90.4], [42.9, 90.4] ]; // Desert board
             } else {spread_coords = [ [11.1, 89.86], [21.71, 89.86], [32.3, 89.86], [42.93, 89.86] ];}    // Forest board
             for (let i=0; i<=3; i++) {
@@ -218,7 +223,7 @@ function (dojo, declare, aspect) {
              const token_ids = Object.keys(player_tokens);
              const token_num = token_ids.length;
 
-             this.resizeHand(asset_num, token_num);
+             this.utils.resizeHand(asset_num, token_num);
              let slot = 1;
              card_ids.forEach((card_id) => {
                 const asset = gamedatas.asset_cards[player_assets[card_id]];
@@ -235,7 +240,7 @@ function (dojo, declare, aspect) {
 
             // place character area wrappers
 
-            for (let i=1; i<=player_count; i++) {
+            for (let i=1; i<=this.player_count; i++) {
                 const current_player_id = Object.keys(gamedatas.players)[i-1];
                 const current_player = gamedatas.players[`${current_player_id}`];
 
@@ -269,7 +274,7 @@ function (dojo, declare, aspect) {
             // character selection
 
             if (gamedatas.available_characters.length > 1) {
-                switch (player_count) {
+                switch (this.player_count) {
                     case 2:
                         $('character_selection').classList.add('cs_2');
                         break;
@@ -333,7 +338,7 @@ function (dojo, declare, aspect) {
                     this.addTooltipHtml(`character_${character_id}`, html, 1000);
                 }
 
-                const selected_characters = (player_count + 1) - gamedatas.available_characters.length;
+                const selected_characters = (this.player_count + 1) - gamedatas.available_characters.length;
                 for (let i=1; i<=selected_characters; i++) {
                     dojo.place(this.format_block('jstpl_namebox', {
                         type: 1-i,
@@ -428,6 +433,32 @@ function (dojo, declare, aspect) {
                 }
             }
 
+            // place asset cards on asset boards
+            for (const player_id in gamedatas.players) {
+
+                const board_cards = gamedatas[`${player_id}_board_assets`];
+
+                ['gear', 'face', 'crack', 'slab'].forEach((type) => {
+
+                    const type_cards = board_cards[type];
+
+                    let i = 1;
+                    Object.entries(type_cards).forEach(([id, type_arg]) => {
+
+                        const asset = gamedatas.asset_cards[type_arg];
+                        const asset_pos = asset['x_y'];
+
+                        dojo.place(this.format_block('jstpl_asset_card', {
+                            CARD_ID : id,
+                            EXTRA_CLASSES : '',
+                            acX : asset_pos[0],
+                            acY : asset_pos[1],
+                        }), `${player_id}_${type}_${i}`);
+                        i++;
+                    });
+                });
+            }
+
             // set player colors to character colors
             for (const player_id in gamedatas.players) {
                 const playerInfo = gamedatas.players[player_id];
@@ -488,21 +519,15 @@ function (dojo, declare, aspect) {
             for (let i=0; i<=3; i++) {
                 const current_asset = spread_cards[i];
                 const current_asset_ids = Object.keys(gamedatas.spread);
-                this.assetTooltip(`asset_card_${current_asset_ids[i]}`, current_asset);
+                this.utils.assetTooltip(`asset_card_${current_asset_ids[i]}`, current_asset);
             }
 
             // pitches
 
-            if (player_count <= 3) {
+            if (this.player_count <= 3) {
                 for (let i=1; i<=21; i++) {
                     const current_pitch = dojo.attr(`pitch_${i}`, 'class').slice(-2).replace(/^\D+/g, '');
-                    const bg_pos = gamedatas.pitches[current_pitch]['x_y'];
-                    const title = _(gamedatas.pitches[current_pitch]['description']);
-                    const type = _(gamedatas.pitches[current_pitch]['type_description']);
-                    const html = `<div style="margin-bottom: 5px;"><strong>${title}</strong></div>
-                                <div class="pitch pitch_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>
-                                <div> Type: ${type} / Value: ${gamedatas.pitches[current_pitch]['value']}</div>`;
-                    this.addTooltipHtml(`pitch_${i}`, html, 1000);
+                    this.utils.pitchTooltip(`pitch_${i}`, current_pitch);
                 }
             }
 
@@ -591,12 +616,7 @@ function (dojo, declare, aspect) {
 
             // log
             dojo.connect(this.notifqueue, 'addToLog', () => {
-                const asset_elements = dojo.query('.asset_tooltip');
-                Array.from(asset_elements).forEach((ele) => {
-                    const ele_id = ele.id;
-                    const asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
-                    this.assetTooltip(ele_id, asset_type);
-                });
+                this.utils.addTooltipsToLog();
             });
 
             // style and connect asset deck and spread during draw asset action
@@ -741,15 +761,62 @@ function (dojo, declare, aspect) {
             /*******END NEW HAND WORKSPACE*******/
 
             /*******PHP DEBUGGING*******/
-            console.log('pitch_tracker = ');
+            /*console.log('pitch_tracker = ');
             console.log(gamedatas.pitch_tracker);
             console.log('pitch_tracker.player_id = ');
             console.log(gamedatas['pitch_tracker'][this.player_id]);
+            console.log('asset_identifier = ');
+            console.log(gamedatas.asset_identifier);*/
+            for (const player_id in gamedatas.players) {
+                console.log('asset_board = ');
+                console.log(gamedatas[`${player_id}_board_assets`]);
+            }
 
             // Setup game notifications to handle (see "setupNotifications" method below)
             this.setupNotifications();
 
             console.log( "Ending game setup" );
+        },
+
+        // Override for log injection
+        format_string_recursive: function (log, args) {
+            if (log === null) {
+                console.error('format_string_recursive called with a null string with args:', args);
+                return 'null_tr_string';
+            }
+            let formattedString = '';
+            if (log) {
+                const clientTranslatedString = this.clienttranslate_string(log);
+                if (clientTranslatedString === null) {
+                    this.showMessage('Missing translation for `' + log + '`', 'error');
+                    console.error('Missing translation for `' + log + '`', 'error');
+                    return '';
+                }
+                const { i18n = [] } = (args || {});
+                (i18n || []).forEach(key => args[key] = this.clienttranslate_string(args[key]));
+                Object.keys(args).forEach(key => {
+                    if (key !== 'i18n' && typeof args[key] === 'object') {
+                        if (args[key] !== null) {
+                            if (args[key].log && args[key].args) {
+                                args[key] = this.format_string_recursive(args[key].log, args[key].args);
+                            }
+                        }
+                    }
+                });
+                try {
+                    formattedString = dojo.string.substitute(clientTranslatedString, args);
+                } catch (e) {
+                    this.prevent_error_rentry = gameui.prevent_error_rentry || 0;
+                    this.prevent_error_rentry++;
+                    if (gameui.prevent_error_rentry >= 10) {
+                        console.error('Preventing error reentry => ABORTING');
+                    }
+                    this.prevent_error_rentry--;
+                    console.log('Bad substitution', log, args);
+                    formattedString = clientTranslatedString;
+                }
+            }
+            return this.utils.logInject(formattedString);
         },
        
 
@@ -766,10 +833,9 @@ function (dojo, declare, aspect) {
             switch( stateName )
             {
             case 'characterSelection':
-                const player_count = Object.keys(this.gamedatas.players).length;
                 const available_characters = dojo.query('#character selection .character').length;
                 // check # of available characters so as not to double dojo.connect() for starting player
-                if (this.isCurrentPlayerActive() && available_characters < player_count+1) {
+                if (this.isCurrentPlayerActive() && available_characters < this.player_count+1) {
                     dojo.query('.namebox').forEach((element) => {
                         element.classList.add('cursor');
                     });
@@ -789,23 +855,30 @@ function (dojo, declare, aspect) {
                     $('asset_deck').classList.add('selectable');
 
                     // connect asset deck and spread cards to draw asset action
+                    this.asset_handlers = [];
                     dojo.connect($('minus_one'), 'onclick', this, 'onSelectAsset');
                     dojo.connect($('plus_one'), 'onclick', this, 'onSelectAsset');
                     for (let slot=0; slot<=3; slot++) {
                         const available_asset = dojo.query(`#spread_slot${slot+1}`)[0].firstChild;
-                        dojo.connect(available_asset, 'onclick', this, 'onSelectAsset');          
+                        this.asset_handlers.push(dojo.connect(available_asset, 'onclick', this, 'onSelectAsset'));
                     }
 
                     // number of cards to be drawn
-                    cards_to_draw = args.args.x_cards;
+                    this.cards_to_draw = args.args.x_cards;
                 }
                 break;
 
             case 'climbOrRest':
                 if (this.isCurrentPlayerActive()) {
+                    this.pitch_handlers = [];
+                    let i = 0;
                     for (let pitch_num of args.args.available_pitches) {
-                        $(`pitch_${pitch_num}_wrap`).classList.add('available_pitch', 'cursor');
+                        const ele = $(`pitch_${pitch_num}_border`);
+                        ele.classList.add('available_pitch', 'cursor');
+                        this.pitch_handlers[i] = dojo.connect(ele, 'onclick', this, 'onSelectPitch');
+                        i++;
                     }
+                    this.resources = args.args.resources;
                 }
                 break;
             }          
@@ -835,6 +908,21 @@ function (dojo, declare, aspect) {
                     this.disconnect($('confirm_button'), 'onclick');
                 }
                 break;
+
+            case 'drawAssets':
+                for (const key in this.asset_handlers) {
+                    dojo.disconnect(this.asset_handlers[key]);
+                }
+                this.asset_handlers = [];
+                break;
+
+            case 'climbOrRest':
+                for (const key in this.resource_handlers) { 
+                    dojo.disconnect(this.resource_handlers[key]);
+                }
+                this.pitch_handlers = [];
+                this.resource_handlers = [];
+                break;
             }               
         }, 
 
@@ -858,6 +946,11 @@ function (dojo, declare, aspect) {
                     this.addActionButton('confirm_button', _('Confirm'), 'onConfirmAssets', null, false, 'white');
                     $('confirm_button').classList.add('disabled');
                     break;
+
+                case 'climbOrRest':
+                    this.addActionButton('confirm_button', _('Confirm'), 'onConfirmPitch', null, false, 'white');
+                    $('confirm_button').classList.add('disabled');
+                    this.addActionButton('rest_button', _('Rest'), 'onRest', null, false, 'white');
 /*               
                  Example:
  
@@ -873,235 +966,6 @@ function (dojo, declare, aspect) {
                 }
             }
         },        
-
-        ///////////////////////////////////////////////////
-        //// Utility methods
-        
-        /*
-        
-            Here, you can defines some utility methods that you can use everywhere in your javascript
-            script.
-        
-        */
-
-        // animations
-        moveToNewParent: function(ele, destination, invert=null) { // takes nodes
-            const beforeAnimation = (ele, destination, invert) => {
-
-                ele.style.zIndex = '1000';
-                const parentOriginal = ele.parentElement;
-                parentOriginal.appendChild(ele); //put back to where it was
-                const x0 = ele.getBoundingClientRect().left;
-                const y0 = ele.getBoundingClientRect().top;
-
-                destination.appendChild(ele);
-                const x1 = ele.getBoundingClientRect().left;
-                const y1 = ele.getBoundingClientRect().top;
-                parentOriginal.appendChild(ele);
-
-                if (invert === 1) {
-                    ele.style.setProperty('--dx', (y1 - y0) + 'px');
-                    ele.style.setProperty('--dy', (x1 - x0) + 'px');
-                } else if (invert === 2) {
-                    ele.style.setProperty('--dx', (y1 - y0 +16.4973) + 'px');
-                    ele.style.setProperty('--dy', (x0 - x1 +16.4973) + 'px');
-                } else {
-                    ele.style.setProperty('--dx', (x1 - x0) + 'px');
-                    ele.style.setProperty('--dy', (y1 - y0) + 'px');
-                }
-            }
-
-            const afterAnimation = (ele, destination) => {
-                destination.appendChild(ele);
-                ele.style.zIndex = 'auto';
-            }
-
-            const func = {
-                before: beforeAnimation,
-                after: afterAnimation
-            }
-
-            return func;
-        },
-
-        animationPromise: function(ele, class_name, type, func=null, destroy=false, remove_class=false, ...params) {
-
-            return new Promise(resolve => {
-                if (func && 'before' in func) { func.before(...params); }
-
-                if (type === 'anim') {
-                    const afterAnimationCb = () => {
-                        if (func && 'after' in func) { func.after(...params); }
-                        if (remove_class) { ele.classList.remove(class_name); }
-                        ele.removeEventListener('animationend', afterAnimationCb);
-                        if (destroy) { ele.remove(); }
-                        resolve();
-                    }
-
-                    ele.addEventListener('animationend', afterAnimationCb);
-                    ele.classList.add(class_name);
-
-                } else if (type ==='trans') {
-                    const afterTransitionCb = () => {
-                        if (func && 'after' in func) { func.after(...params); }
-                        if (remove_class) { ele.classList.remove(class_name); }
-                        ele.removeEventListener('transitionend', afterTransitionCb);
-                        if (destroy) { ele.remove(); }
-                        resolve();
-                    }
-
-                    ele.addEventListener('transitionend', afterTransitionCb);
-                    ele.classList.add(class_name);
-
-                } else { throw new Error('type must be anim or trans') }
-            })
-        },
-        // end animations
-
-        resizeHand: function(card_num=0, token_num=0, resources=[]) {
-            $('hand_ratio').className = '';
-            $('assets_wrap').className = '';
-            $('hand_objectives').className = '';
-            const card_sum = card_num
-            const token_sum = token_num * 1.1742;
-            rows = Math.ceil((card_sum + token_sum) / 7);
-
-            switch (true) {
-                case rows === 1 || rows === 0: 
-                    break;
-
-                case rows === 2:
-                    $('hand_ratio').classList.add('hand_ratio_two_rows');
-                    $('assets_wrap').classList.add('assets_wrap_two_rows');
-                    $('hand_objectives').classList.add('hand_objectives_two_rows');
-                    dojo.query('#assets_wrap > .summit_beta').forEach((ele) => {
-                        ele.classList.add('summit_beta_two_rows');
-                    });
-                    break;
-
-                case rows === 3:
-                    $('hand_ratio').classList.add('hand_ratio_three_rows');
-                    $('assets_wrap').classList.add('assets_wrap_three_rows');
-                    $('hand_objectives').classList.add('hand_objectives_three_rows');
-                    dojo.query('#assets_wrap > .summit_beta').forEach((ele) => {
-                        ele.classList.add('summit_beta_three_rows');
-                    });
-                    break;
-
-                case rows === 4:
-                    $('hand_ratio').classList.add('hand_ratio_four_rows');
-                    $('assets_wrap').classList.add('assets_wrap_four_rows');
-                    $('hand_objectives').classList.add('hand_objectives_four_rows');
-                    dojo.query('#assets_wrap > .summit_beta').forEach((ele) => {
-                        ele.classList.add('summit_beta_four_rows');
-                    });
-                    break;
-            }
-
-            for (let i=1; i<=card_sum; i++) {
-                if (!$(`hand_asset_${i}`)) {
-                    dojo.place(`<div id="hand_asset_${i}" class="hand_asset_wrap"></div>`, 'assets_wrap');
-                }
-            }
-        },
-
-        handCount: function(player_id, hand_count) {
-            $(`hand_num_${player_id}`).innerHTML = hand_count;
-        },
-
-        getTooltipForLog: function(card, type) {
-            switch(type) {
-                case 'asset':
-                    const card_title = this.gamedatas['asset_cards'][card]['description'];
-                    return this.format_block('jstpl_log_asset', {
-                            card_key: card,
-                            card_name: card_title,
-                        });
-            }
-        },
-
-        assetTooltip: function(ele, card_type) {
-            const bg_pos = this.gamedatas.asset_cards[card_type]['x_y'];
-            const skill = _(this.gamedatas.asset_cards[card_type]['skill']);
-            const title = _(this.gamedatas.asset_cards[card_type]['description']);
-            const html = `<div style="margin-bottom: 5px; display: inline;"><strong>${title}</strong></div>
-                        <span style="font-size: 10px; margin-left: 5px;">${skill}</span>
-                        <div class="asset asset_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>`;
-            this.addTooltipHtml(ele, html, 1000);
-        },
-
-        shouldAnimate: function() {
-            return document.visibilityState !== 'hidden' && !this.instantaneousMode;
-        },
-
-        // Override
-        format_string_recursive: function (log, args) {
-            if (log === null) {
-                console.error('format_string_recursive called with a null string with args:', args);
-                return 'null_tr_string';
-            }
-            let formattedString = '';
-            if (log) {
-                const clientTranslatedString = this.clienttranslate_string(log);
-                if (clientTranslatedString === null) {
-                    this.showMessage('Missing translation for `' + log + '`', 'error');
-                    console.error('Missing translation for `' + log + '`', 'error');
-                    return '';
-                }
-                const { i18n = [] } = (args || {});
-                (i18n || []).forEach(key => args[key] = this.clienttranslate_string(args[key]));
-                Object.keys(args).forEach(key => {
-                    if (key !== 'i18n' && typeof args[key] === 'object') {
-                        if (args[key] !== null) {
-                            if (args[key].log && args[key].args) {
-                                args[key] = this.format_string_recursive(args[key].log, args[key].args);
-                            }
-                        }
-                    }
-                });
-                try {
-                    formattedString = dojo.string.substitute(clientTranslatedString, args);
-                } catch (e) {
-                    this.prevent_error_rentry = this.prevent_error_rentry || 0;
-                    this.prevent_error_rentry++;
-                    if (this.prevent_error_rentry >= 10) {
-                        console.error('Preventing error reentry => ABORTING');
-                    }
-                    this.prevent_error_rentry--;
-                    console.log('Bad substitution', log, args);
-                    formattedString = clientTranslatedString;
-                }
-            }
-            return this.logInject(formattedString);
-        },
-
-        logInject: function (log_entry) {
-            const asset_regex = /\[\w+-*\w* *\w*\(\d+\)\]/g;
-            const assets_to_replace = log_entry.matchAll(asset_regex);
-
-            for (let asset of assets_to_replace) {
-                const match = asset[0];
-                const left_parenthesis = match.indexOf('(');
-
-                const asset_name = match.slice(1, left_parenthesis);
-                const asset_type = match.slice(left_parenthesis+1, match.length-2);
-
-                asset_span = this.getTooltipForLog(asset_type, 'asset');
-                log_entry = log_entry.replace(match, asset_span);
-            }
-            return log_entry;
-        },
-
-        updatePlayerResources: function (player_id, updated_resources) {
-            dojo.query(`#player_board_${player_id} .resource`).forEach((ele) => {
-                const resource = ele.id.substring(0, ele.id.indexOf('_num'));
-                if (['gear', 'face', 'crack', 'slab'].includes(resource)) {
-                    ele.innerHTML = updated_resources['skills'][resource];
-                } else if (['precision', 'balance', 'pain_tolerance', 'power'].includes(resource)) {
-                    ele.innerHTML = updated_resources['techniques'][resource];
-                }
-            });
-        },
 
         ///////////////////////////////////////////////////
         //// Player's action
@@ -1122,8 +986,9 @@ function (dojo, declare, aspect) {
         },
 
         onSelectCharacter: function(evt) {
-            const character = evt.currentTarget.id.slice(-2).replace(/^\D+/g, '');
             dojo.stopEvent(evt);
+
+            const character = evt.currentTarget.id.slice(-2).replace(/^\D+/g, '');
 
             if (this.checkAction('selectCharacter')) {
                 dojo.query('#character_selection *').forEach((element) => {
@@ -1167,7 +1032,7 @@ function (dojo, declare, aspect) {
             let spread_draw_num = dojo.query('.selected_asset').length;
 
             if (evt.currentTarget.id == 'plus_one') {
-                if (deck_draw_num + spread_draw_num == cards_to_draw) { return; }
+                if (deck_draw_num + spread_draw_num == this.cards_to_draw) { return; }
                 if (!deck_classes.contains('draw')) {
                     deck_classes.add('draw', '1');
                     dojo.place('<span id="draw_num">1</span>', 'asset_deck');
@@ -1193,16 +1058,16 @@ function (dojo, declare, aspect) {
                     asset_card.classList.remove('selected_asset');
                     spread_draw_num--;
                 }
-                else if (deck_draw_num + spread_draw_num == cards_to_draw) { return; }
+                else if (deck_draw_num + spread_draw_num == this.cards_to_draw) { return; }
                 else { 
                     asset_card.classList.add('selected_asset');
                     spread_draw_num++;
                 }
             }
 
-            if ((deck_draw_num + spread_draw_num === cards_to_draw) && $('confirm_button').classList.contains('disabled')) { 
+            if ((deck_draw_num + spread_draw_num === this.cards_to_draw) && $('confirm_button').classList.contains('disabled')) { 
                 $('confirm_button').classList.remove('disabled');
-            } else if ((deck_draw_num + spread_draw_num != cards_to_draw) && !$('confirm_button').classList.contains('disabled')) {
+            } else if ((deck_draw_num + spread_draw_num != this.cards_to_draw) && !$('confirm_button').classList.contains('disabled')) {
                 $('confirm_button').classList.add('disabled');
             }
         },
@@ -1225,6 +1090,188 @@ function (dojo, declare, aspect) {
                     deck_assets : deck_to_draw
                 }, this, function(result) {} );
             }
+        },
+
+        onSelectPitch: function(evt) {
+            dojo.stopEvent(evt);
+
+            dojo.query('#generalactions .requirement_wrap').forEach((ele) => { ele.remove(); });
+
+            const pitch_border = evt.target;
+            const pitch = pitch_border.nextElementSibling;
+            console.log('pitch = ');
+            console.log(pitch);
+            const hex_num = pitch.id.slice(-2).replace(/^\D+/g, '');
+            const pitch_num = pitch.classList[pitch.classList.length-1].slice(-2).replace(/^\D+/g, '');
+            const selected_pitch = dojo.query('.selected_pitch')[0];
+            if (selected_pitch) { 
+                selected_pitch.classList.remove('selected_pitch');
+                selected_pitch.classList.add('available_pitch');
+            }
+            pitch_border.classList.remove('available_pitch');
+            pitch_border.classList.add('selected_pitch');
+
+            const pitch_requirements = this.gamedatas.pitches[pitch_num]['requirements'];
+            const available_resources = this.resources['skills'];
+            available_resources['water'] = this.resources['water'];
+            available_resources['psych'] = this.resources['psych'];
+            let temp_resources = Object.assign({}, available_resources);
+
+            Object.keys(pitch_requirements).forEach(function(type) {
+                const num = pitch_requirements[type];
+                for (let i=1; i<=num; i++) {
+
+                    const requirement_wrap = document.createElement('div');
+                    requirement_wrap.classList.add('requirement_wrap');
+                    const requirement_border = document.createElement('div');
+                    const requirement = document.createElement('div');
+
+                    if (['gear', 'face', 'crack', 'slab', 'any_skill'].includes(type)) { requirement.classList.add('skills_and_techniques'); }
+                    else if (['water', 'psych'].includes(type)) { requirement.classList.add('water_psych'); }
+
+                    temp_resources['any_skill'] = temp_resources['face'] + temp_resources['crack'] + temp_resources['slab'];
+
+                    if (1 <= temp_resources[type]) {
+                        temp_resources[type]--;
+                    } else {
+                        if (type === 'gear') { requirement_border.classList.add('gear_border'); }
+                        else if (['face', 'crack', 'slab', 'any_skill'].includes(type)) { requirement_border.classList.add('skill_border'); }
+                        else if (['water', 'psych'].includes(type)) { requirement_border.classList.add('water_psych_border'); }
+                    }
+
+                    switch (type) {
+                        case 'psych': requirement.style.backgroundPosition = '-300% -0%'; break;
+                        case 'water': // fallthrough
+                        case 'any_skill': requirement.style.backgroundPosition = '-400% -0%'; break;
+                        case 'crack': requirement.style.backgroundPosition = '-500% -0%'; break;
+                        case 'face': requirement.style.backgroundPosition = '-600% -0%'; break;
+                        case 'slab': requirement.style.backgroundPosition = '-700% -0%'; break;
+                        case 'gear': requirement.style.backgroundPosition = '-800% -0%'; break;
+                    }
+                    if (requirement_border.classList.length === 1) {
+                        requirement_border.classList.add('requirement_border');
+                        requirement_wrap.append(requirement_border);
+                    }
+                    requirement_wrap.append(requirement);
+                    $('rest_button').insertAdjacentElement('beforebegin', requirement_wrap);
+                }
+            });
+            $('confirm_button').classList.remove('disabled');
+        },
+
+        onConfirmPitch: function(evt) {
+            dojo.stopEvent(evt);
+
+            this.gamedatas.gamestate.descriptionmyturn = _('You must select assets');
+            this.updatePageTitle();
+            this.removeActionButtons();
+            this.addActionButton('confirm_requirements_button', _('Confirm'), 'onConfirmRequirements', null, false, 'white');
+            $('confirm_requirements_button').classList.add('disabled');
+            this.addActionButton('risk_it_button', _('Risk it'), 'onRiskIt', null, false, 'white');
+            $('risk_it_button').classList.add('disabled');
+            this.addActionButton('my_undo_button', _('Undo'), dojo.hitch(this, function() {
+                this.restoreServerGameState();
+                const selected_pitch = dojo.query('.selected_pitch')[0];
+                selected_pitch.classList.remove('selected_pitch');
+                selected_pitch.classList.add('available_pitch');
+                dojo.query('.selected_resource').forEach((ele) => {
+                    ele.classList.remove('selected_resource');
+                    ele.parentElement.classList.remove('selected_resource_wrap');
+                });
+            }), null, false, 'white');
+
+            const pitch = dojo.query('.selected_pitch')[0].nextElementSibling;
+            const hex_num = pitch.id.slice(-2).replace(/^\D+/g, '');
+            const pitch_num = pitch.classList[pitch.classList.length-1].slice(-2).replace(/^\D+/g, '');
+            const selected_pitch = dojo.query('.selected_pitch')[0];
+            const pitch_requirements = this.gamedatas.pitches[pitch_num]['requirements'];
+
+            this.resource_handlers = [];
+            dojo.query('#assets_wrap .asset').forEach((element) => {
+                this.resource_handlers.push(dojo.connect(element, 'onclick', this, 'onSelectResource'));
+                element.classList.add('cursor');
+            });
+        },
+
+        onRest: function(evt) {
+            return;
+        },
+
+        onSelectResource: function(evt) {
+            dojo.stopEvent(evt);
+
+            const resource = evt.target;
+            if (resource.classList.contains('selected_resource')) {
+                resource.classList.remove('selected_resource');
+                resource.parentElement.classList.remove('selected_resource_wrap');
+            }
+            else {
+                resource.classList.add('selected_resource');
+                resource.parentElement.classList.add('selected_resource_wrap');
+            }
+
+            const selected_pitch = dojo.query('.selected_pitch')[0].nextElementSibling;
+            const pitch_num = selected_pitch.classList[selected_pitch.classList.length-1].slice(-2).replace(/^\D+/g, '');
+            const pitch_requirements = this.gamedatas.pitches[pitch_num]['requirements'];
+
+            const selected_resources = {
+                'gear' : 0,
+                'face' : 0,
+                'crack' : 0,
+                'slab' : 0,
+                'any_skill' : 0,
+            };
+            if (this.resources['water'] >= pitch_requirements['water']) { selected_resources['water'] = pitch_requirements['water']; }
+            else selected_resources['water'] = 0;
+            if (this.resources['psych'] >= pitch_requirements['psych']) { selected_resources['psych'] = pitch_requirements['psych']; }
+
+            dojo.query('.selected_resource').forEach((ele) => {
+                const id = ele.id.slice(-3).replace(/^\D+/g, '');
+                const asset = this.gamedatas.asset_identifier[id];
+                const skills = this.gamedatas.asset_cards[asset]['skills'];
+                for (const [key, value] of Object.entries(skills)) {
+                    if (value) {
+                        const resource = key;
+                        if (selected_resources[resource] >= pitch_requirements[resource] && resource != 'gear') { selected_resources['any_skill']++; }
+                        else { selected_resources[resource]++; }
+                    }
+                }
+            });
+
+            const fulfilled = Object.keys(selected_resources).every(key => selected_resources[key] === pitch_requirements[key]);
+            const confirm_button = $('confirm_requirements_button');
+
+            if (fulfilled && confirm_button.classList.contains('disabled')) {
+                confirm_button.classList.remove('disabled');
+            } else if (!confirm_button.classList.contains('disabled')) {
+                confirm_button.classList.add('disabled');
+            }
+        },
+
+        onConfirmRequirements: function(evt) {
+            dojo.stopEvent(evt);
+
+            let selected_resources = '';
+            dojo.query('.selected_resource').forEach((resource) => {
+                const id = resource.id.slice(-3).replace(/^\D+/g, '');
+                selected_resources += `${id},`;
+            });
+
+            const selected_pitch = dojo.query('.selected_pitch')[0].nextElementSibling;
+            const length = selected_pitch.classList.length;
+            const selected_pitch_type = selected_pitch.classList[length-1];
+            const selected_pitch_id = selected_pitch_type.slice(-2).replace(/^\D+/g, '');
+
+            if (this.checkAction('confirmRequirements')) {
+                this.ajaxcall("/firstascent/firstascent/confirmRequirements.html", { lock: true,
+                    selected_resources : selected_resources,
+                    selected_pitch : selected_pitch_id
+                }, this, function(result) {} );
+            }
+        },
+
+        onRiskIt: function(evt) {
+            return;
         },
 
         
@@ -1265,6 +1312,9 @@ function (dojo, declare, aspect) {
             this.notifqueue.setSynchronous('confirmOpponentAssets');
             this.notifqueue.setSynchronous('confirmYourAssets');
             this.notifqueue.setIgnoreNotificationCheck('confirmOpponentAssets', (notif) => (notif.args.player_id == this.player_id));
+
+            dojo.subscribe('confirmOpponentRequirements', this, "notif_confirmOpponentRequirements");
+            this.notifqueue.setSynchronous('confirmOpponentRequirements');
         },  
 
         notif_confirmCharacter: function(notif) {
@@ -1360,14 +1410,14 @@ function (dojo, declare, aspect) {
                 }), character_div);
             character_div.classList.remove('popout');
 
-            if (this.shouldAnimate()) {
+            if (this.utils.shouldAnimate()) {
 
-                let animateAndSetSync = async () => {
+                const animateCharacter = async () => {
                     const args = [character_div, character_area];
-                    await this.animationPromise(character_div, 'move_character', 'anim', this.moveToNewParent(), false, true, ...args);
+                    await this.utils.animationPromise(character_div, 'select_character', 'anim', this.utils.moveToNewParent(), false, true, ...args);
                     this.notifqueue.setSynchronousDuration();
                 }
-                animateAndSetSync();
+                animateCharacter();
             } else { 
                 character_area.append(character_div);
                 this.notifqueue.setSynchronousDuration();
@@ -1404,20 +1454,20 @@ function (dojo, declare, aspect) {
             const new_spread_assets = spread_ids.length;
 
             // add tooltips to log
-            dojo.query('.asset_tooltip').forEach((ele) => {
+            dojo.query('.item_tooltip').forEach((ele) => {
                 const ele_id = ele.id;
                 const asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
-                this.assetTooltip(ele_id, asset_type);
+                this.utils.addTooltipsToLog();
             });
 
             const drawCards = async () => {
                 return new Promise(async (resolve) => {
 
                     // draw cards from deck
-                    if (this.shouldAnimate()) {
+                    if (this.utils.shouldAnimate()) {
 
-                        let move_drawn_asset = [];
-                        let move_to_counter = [];
+                        let asset_deck_to_display = [];
+                        let asset_display_to_counter = [];
                         const counter_div = $(`hand_counter_${player_id}`);
                         $('asset_deck_draw').style.display = 'flex';
                         $('spread_draw').style.display = 'flex';
@@ -1429,10 +1479,10 @@ function (dojo, declare, aspect) {
                             const deck_row = $(`deck_draw_${i}`);
 
                             let args = [deck_asset_div, deck_row, 2];
-                            move_drawn_asset.push(this.animationPromise.bind(null, deck_asset_div, 'move_drawn_asset', 'anim', this.moveToNewParent(), false, true, ...args));
+                            asset_deck_to_display.push(this.utils.animationPromise.bind(null, deck_asset_div, 'asset_deck_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
 
                             args = [deck_asset_div, counter_div, 1];
-                            move_to_counter.push(this.animationPromise.bind(null, deck_asset_div, 'move_to_counter', 'anim', this.moveToNewParent(), true, false, ...args));
+                            asset_display_to_counter.push(this.utils.animationPromise.bind(null, deck_asset_div, 'asset_display_to_counter', 'anim', this.utils.moveToNewParent(), true, false, ...args));
                         }
 
                         // draw cards from spread
@@ -1445,17 +1495,17 @@ function (dojo, declare, aspect) {
                             i++;
 
                             let args = [spread_div, draw_slot, 2];
-                            move_drawn_asset.push(this.animationPromise.bind(null, spread_div, 'move_drawn_asset', 'anim', this.moveToNewParent(), false, true, ...args));
+                            asset_deck_to_display.push(this.utils.animationPromise.bind(null, spread_div, 'asset_deck_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
 
                             args = [spread_div, counter_div, 1];
-                            move_to_counter.push(this.animationPromise.bind(null, spread_div, 'move_to_counter', 'anim', this.moveToNewParent(), true, false, ...args));
+                            asset_display_to_counter.push(this.utils.animationPromise.bind(null, spread_div, 'asset_display_to_counter', 'anim', this.utils.moveToNewParent(), true, false, ...args));
                         });
 
-                        await Promise.all(move_drawn_asset.map((func) => { return func(); }))
+                        await Promise.all(asset_deck_to_display.map((func) => { return func(); }))
                         .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
-                        .then(async () => { await Promise.all(move_to_counter.map((func) => { return func(); })) })
+                        .then(async () => { await Promise.all(asset_display_to_counter.map((func) => { return func(); })) })
                         .then(() => {
-                            this.handCount(player_id, notif.args.hand_count);
+                            this.utils.handCount(player_id, notif.args.hand_count);
                             $('asset_deck_draw').style.display = 'none';
                             $('spread_draw').style.display = 'none';
                             resolve();
@@ -1466,7 +1516,7 @@ function (dojo, declare, aspect) {
                             const spread_div = $(`asset_card_${id}`);
                             spread_div.remove();
                         });
-                        this.handCount(player_id, notif.args.hand_count);
+                        this.utils.handCount(player_id, notif.args.hand_count);
                         resolve();
                     }
                 });
@@ -1507,15 +1557,15 @@ function (dojo, declare, aspect) {
                                                         acY : asset.x_y[1],
                                                     }), ele]);
 
-                                if (this.shouldAnimate()) {
+                                if (this.utils.shouldAnimate()) {
                                     const args = [deck_asset_div, ele, 1];
-                                    flip_and_move.push(this.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
-                                    flip_and_move.push(this.animationPromise.bind(null, deck_asset_div, 'move_to_spread', 'anim', this.moveToNewParent(), true, false, ...args));
+                                    flip_and_move.push(this.utils.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
+                                    flip_and_move.push(this.utils.animationPromise.bind(null, deck_asset_div, 'asset_deck_to_spread', 'anim', this.utils.moveToNewParent(), true, false, ...args));
                                 }
                             }
                         });
 
-                        if (this.shouldAnimate()) {
+                        if (this.utils.shouldAnimate()) {
                             await Promise.all(flip_and_move.map((func) => { return func(); }))
                             .then(() => {
                                 cards_to_place.map((card) => { dojo.place(card[0], card[1]); })
@@ -1542,15 +1592,15 @@ function (dojo, declare, aspect) {
             const spread_ids = notif.args.spread_card_ids;
             const new_spread_assets = spread_ids.length;
             const new_cards = new_deck_assets + new_spread_assets;
-            this.resizeHand(card_num+new_cards, token_num);
+            this.utils.resizeHand(card_num+new_cards, token_num);
             const player_id = notif.args.player_id;
             const deck_assets = notif.args.deck_assets_arr;
 
             // add tooltips to log
-            dojo.query('.asset_tooltip').forEach((ele) => {
+            dojo.query('.item_tooltip').forEach((ele) => {
                 const ele_id = ele.id;
                 const asset_type = ele_id.slice(-2).replace(/^\D+/g, '');
-                this.assetTooltip(ele_id, asset_type);
+                this.utils.assetTooltip(ele_id, asset_type);
             });
 
             $('asset_deck').classList.remove('selectable');
@@ -1583,14 +1633,14 @@ function (dojo, declare, aspect) {
                         const spread_div = $(`asset_card_${id}`);
                         const hand_slot = $(`hand_asset_${card_num+i}`);
                         cards_for_hand.push([spread_div, hand_slot]);
-
+                        i++;
                     });
 
-                    if (this.shouldAnimate()) {
+                    if (this.utils.shouldAnimate()) {
 
-                        let move_drawn_asset = [];
+                        let asset_deck_to_display = [];
                         let cards_to_place = [];
-                        let move_to_hand = [];
+                        let asset_display_to_hand = [];
                         $('asset_deck_draw').style.display = 'flex';
                         $('spread_draw').style.display = 'flex';
 
@@ -1610,8 +1660,8 @@ function (dojo, declare, aspect) {
                             const deck_asset_div = $(`deck_asset_${id}`);
 
                             let args = [deck_asset_div, deck_row, 2];
-                            move_drawn_asset.push(this.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
-                            move_drawn_asset.push(this.animationPromise.bind(null, deck_asset_div, 'move_drawn_asset', 'anim', this.moveToNewParent(), true, false, ...args));
+                            asset_deck_to_display.push(this.utils.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
+                            asset_deck_to_display.push(this.utils.animationPromise.bind(null, deck_asset_div, 'asset_deck_to_display', 'anim', this.utils.moveToNewParent(), true, false, ...args));
 
                             cards_to_place.push([this.format_block('jstpl_asset_card', {
                                                     CARD_ID : id,
@@ -1633,13 +1683,13 @@ function (dojo, declare, aspect) {
                             i++;
 
                             let args = [spread_div, draw_slot, 2];
-                            move_drawn_asset.push(this.animationPromise.bind(null, spread_div, 'move_drawn_asset', 'anim', this.moveToNewParent(), false, true, ...args));
+                            asset_deck_to_display.push(this.utils.animationPromise.bind(null, spread_div, 'asset_deck_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
 
                             args = [spread_div, hand_slot];
-                            move_to_hand.push(this.animationPromise.bind(null, spread_div, 'move_to_hand', 'anim', this.moveToNewParent(), false, true, ...args));
+                            asset_display_to_hand.push(this.utils.animationPromise.bind(null, spread_div, 'asset_display_to_hand', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                         });
 
-                        await Promise.all(move_drawn_asset.map((func) => { return func(); }))
+                        Promise.all(asset_deck_to_display.map((func) => { return func(); }))
                         .then(() => { cards_to_place.map((card) => { dojo.place(card[0], card[1]); }) })
                         .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
                         .then(() => {
@@ -1651,24 +1701,24 @@ function (dojo, declare, aspect) {
                                 i++;
 
                                 args = [card, hand_slot];
-                                move_to_hand.push(this.animationPromise.bind(null, card, 'move_to_hand', 'anim', this.moveToNewParent(), false, true, ...args));
+                                asset_display_to_hand.push(this.utils.animationPromise.bind(null, card, 'asset_display_to_hand', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                             }
                         })
-                        .then(async () => { await Promise.all(move_to_hand.map((func) => { return func(); })) })
+                        .then(async () => { await Promise.all(asset_display_to_hand.map((func) => { return func(); })) })
                         .then(() => {
-                            this.handCount(player_id, notif.args.hand_count);
-                            this.updatePlayerResources(player_id, notif.args.player_resources);
+                            this.utils.handCount(player_id, notif.args.hand_count);
+                            this.utils.updatePlayerResources(player_id, notif.args.player_resources);
                             $('asset_deck_draw').style.display = 'none';
                             $('spread_draw').style.display = 'none';
                             resolve();
                         });
-                    } else { // if shouldAnimate()
+                    } else { // shouldn't animate
                         cards_for_hand.map((card) => { dojo.place(card[0], card[1]); });
                         spread_ids.map((id) => {
                             const spread_div = $(`asset_card_${id}`);
                             spread_div.remove();
                         });
-                        this.handCount(player_id, notif.args.hand_count);
+                        this.utils.handCount(player_id, notif.args.hand_count);
                         resolve();
                     }
                 });
@@ -1709,15 +1759,15 @@ function (dojo, declare, aspect) {
                                                         acY : asset.x_y[1],
                                                     }), ele]);
 
-                                if (this.shouldAnimate()) {
+                                if (this.utils.shouldAnimate()) {
                                     const args = [deck_asset_div, ele, 1];
-                                    flip_and_move.push(this.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
-                                    flip_and_move.push(this.animationPromise.bind(null, deck_asset_div, 'move_to_spread', 'anim', this.moveToNewParent(), true, false, ...args));
+                                    flip_and_move.push(this.utils.animationPromise.bind(null, deck_asset_div.firstElementChild, 'flip_transform', 'anim', null, false, true));
+                                    flip_and_move.push(this.utils.animationPromise.bind(null, deck_asset_div, 'asset_deck_to_spread', 'anim', this.utils.moveToNewParent(), true, false, ...args));
                                 }
                             }
                         });
 
-                        if (this.shouldAnimate()) {
+                        if (this.utils.shouldAnimate()) {
                             await Promise.all(flip_and_move.map((func) => { return func(); }))
                             .then(() => {
                                 cards_to_place.map((card) => { dojo.place(card[0], card[1]); })
@@ -1735,5 +1785,89 @@ function (dojo, declare, aspect) {
 
             this.notifqueue.setSynchronousDuration();
         },
+
+        notif_confirmOpponentRequirements: async function (notif) {
+
+            const player_id = notif.args.player_id;
+
+            const playAssets = async () => {
+
+                return new Promise(async (resolve) => {
+
+                    const resource_type_args = notif.args.selected_resource_types;
+
+                    let cards_for_playing = [];
+                    const slots = {
+                        'gear' : 0,
+                        'face' : 0,
+                        'crack' : 0,
+                        'slab' : 0,
+                    };
+                    // REFACTORING TO FIGURE OUT SLOT FOR EACH CARD ON ASSET BOARD FOR BOTH SHOULD AND SHOULDN'T ANIMATE
+                    for (let i=0; i<=resource_types.length-1; i++) {
+                        const id = notif.args.selected_resources[i];
+                        const type_arg = resource_type_args[i];
+                        const asset = this.gamedatas.asset_cards[type_arg];
+                        const type = this.utils.getAssetType(type_arg);
+                        cards_for_playing.push([this.format_block('jstpl_asset_card', {
+                                                    CARD_ID : id,
+                                                    EXTRA_CLASSES : '',
+                                                    acX : asset.x_y[0],
+                                                    acY : asset.x_y[1],
+                                                }), `hand_counter_${player_id}`]);
+                    }
+
+                    if (this.utils.shouldAnimate()) {
+
+                        $('asset_deck_draw').style.display = 'flex';
+                        cards_for_playing.map((card) => { dojo.place(card[0], card[1]); });
+
+                        const asset_counter_to_display = [];
+                        const asset_display_to_board = [];
+                        let i = 1;
+                        for (const card of $(`hand_counter_${player_id}`).children) {
+                            const deck_draw_slot = $(`deck_draw_${i}`);
+                            let args = [card, deck_draw_slot];
+                            asset_counter_to_display.push(this.utils.animationPromise.bind(null, card, 'asset_counter_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
+                            i++;
+                        }
+
+                        Promise.all(asset_counter_to_display.map((func) => { return func(); }))
+                        .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
+                        .then(() => {
+                            dojo.query('#asset_deck_draw .asset').forEach((ele) => {
+                                const type = this.utils.getAssetType(ele);
+                                slots[type]++;
+                                const slot_num = dojo.query(`${player_id}_${type} .asset`).length + slots[type];
+                                const slot = $(`${player_id}_${type}_${slot_num}`);
+                                args = [ele, slot];
+                                asset_display_to_board.push(this.utils.animationPromise.bind(null, ele, 'asset_display_to_board', 'anim', this.utils.moveToNewParent(), false, true, ...args));
+                            });
+                        })
+                        .then(async () => { await Promise.all(asset_display_to_board.map((func) => { return func(); })); })
+                        .then(async () => {
+                            const rope_num = this.gamedatas.pitch_tracker[player_id].length;
+                            const character_id = String(this.gamedatas.players[player_id]['character']);
+                            const color = this.gamedatas.characters[character_id]['color_name'];
+
+                            dojo.place(this.format_block('jstpl_rope', {
+                                player_id : player_id,
+                                rope_num : rope_num+1,
+                                extra_classes : `${color}_straight`,
+                            }), `${player_id}_rope_counter`);
+                        })
+                    } else { // shouldn't animate
+                        cards_for_playing.map((card) => {
+
+                        });
+                    }
+
+                    resolve();
+                });
+            }
+            await playAssets();
+
+            this.utils.addTooltipsToLog();
+        }
     });             
 });
