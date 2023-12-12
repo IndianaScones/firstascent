@@ -49,7 +49,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "argDrawAssets",
             "possibleactions" => array("confirmAssets"),
-            "transitions" => array("nextDraw" => 11, "nextRound" => 20)
+            "transitions" => array("nextDraw" => 11, "nextPhase" => 20, "nextClimb" => 25)
     ),
 
     11 => array(
@@ -58,7 +58,7 @@ $machinestates = array(
             "type" => "game",
             "action" => "stNextDraw",
             "updateGameProgression" => true,
-            "transitions" => array("drawAssets" => 10, "nextRound" => 20)
+            "transitions" => array("drawAssets" => 10, "nextPhase" => 20)
     ),
 
     20 => array(
@@ -68,7 +68,125 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "argClimbOrRest",
             "possibleactions" => array("confirmRequirements", "rest"),
-            "transitions" => array("drawClimbingCard" => 98, "nextClimber" => 98)
+            "transitions" => array("drawClimbingCard" => 21, "nextClimb" => 25, "addTokenToPitch" => 27)
+    ),
+
+    21 => array(
+            "name" => "climbingCard",
+            "description" => clienttranslate('${actplayer} must resolve a Climbing card'),
+            "descriptionmyturn" => clienttranslate('${you} must resolve a Climbing card'),
+            "type" => "activeplayer",
+            "possibleactions" => array("confirmClimbingCardChoice"),
+            "transitions" => array("nextClimber" => 20, "discardAssets" => 22, "selectOpponent" => 23,  "selectPortaledge" => 24, 
+                                   "nextClimb" => 25, "portaledgeAll" => 26, "stealFromAssetBoard" => 28, "addAssetToAssetBoard" => 29,
+                                    "chooseSummitBetaToken" => 30, "chooseTechniqueToken" => 31)
+    ),
+
+    22 => array(
+            "name" => "discardAssets",
+            "description" => clienttranslate('${actplayer} must ${titlebar_message}'),
+            "descriptionmyturn" => clienttranslate('${you} must ${titlebar_message}'),
+            "type" => "activeplayer",
+            "args" => "argDiscardAssets",
+            "possibleactions" => array("confirmAssetsForDiscard"),
+            "transitions" => array("nextClimber" => 20, "selectOpponent" => 23, "selectPortaledge" => 24, "nextClimb" => 25, 
+                                   "stealFromAssetBoard" => 28, "chooseTechniqueToken" => 31, "drawAssets" => 10)
+    ),
+
+    23 => array(
+            "name" => "selectOpponent",
+            "description" => clienttranslate('${actplayer} must select a climber to ${titlebar_message_opponent}'),
+            "descriptionmyturn" => clienttranslate('${you} must select a climber to ${titlebar_message}'),
+            "type" => "activeplayer",
+            "args" => "argSelectOpponent",
+            "possibleactions" => array("confirmSelectedOpponent"),
+            "transitions" => array("nextClimb" => 20, "discardAssets" => 22, "nextClimb" => 25, "chooseTechniqueToken" => 31)
+    ),
+
+    24 => array(
+            "name" => "selectPortaledge",
+            "description" => clienttranslate('${actplayer} must take ${portaledge_num} card(s) from The Portaledge'),
+            "descriptionmyturn" => clienttranslate('${you} must take ${portaledge_num} card(s) from The Portaledge'),
+            "type" => "activeplayer",
+            "args" => "argSelectPortaledge",
+            "possibleactions" => array("confirmPortaledge"),
+            "transitions" => array("confirmPortaledge" => 25, "nextClimb" => 25, "portaledgeAll" => 26)
+    ),
+
+    25 => array(
+            "name" => "nextClimb",
+            "description" => "",
+            "type" => "game",
+            "action" => "stNextClimb",
+            "updateGameProgression" => true,
+            "transitions" => array("climbOrRest" => 20, "followPhase" => 98)
+    ),
+
+    26 => array(
+            "name" => "portaledgeAll",
+            "description" => "",
+            "type" => "game",
+            "action" => "stPortaledgeAll",
+            "updateGameProgression" => false,
+            "transitions" => array("selectPortaledge" => 24)
+    ),
+
+    27 => array(
+            "name" => "addTokenToPitch",
+            "description" => clienttranslate('${actplayer} must select an Asset Token and a Pitch'),
+            "descriptionmyturn" => clienttranslate('${you} must select an Asset Token'),
+            "type" => "activeplayer",
+            "args" => "argAddTokenToPitch",
+            "possibleactions" => array("confirmAddTokenToPitch"),
+            "transitions" => array("nextClimb" => 25)
+    ),
+
+    28 => array(
+            "name" => "stealFromAssetBoard",
+            "description" => clienttranslate('${actplayer} must select a ${types} card from an opponent\'s Asset Board'),
+            "descriptionmyturn" => clienttranslate('${you} must select a ${types} card from an opponent\'s Asset Board'),
+            "type" => "activeplayer",
+            "args" => "argStealFromAssetBoard",
+            "possibleactions" => array("confirmStealFromAssetBoard"),
+            "transitions" => array("nextClimb" => 25)
+    ),
+
+    29 => array(
+            "name" => "addAssetToAssetBoard",
+            "description" => clienttranslate('${actplayer} must select a ${types_message} card from their hand'),
+            "descriptionmyturn" => clienttranslate('${you} must select a ${types_message} card from your hand'),
+            "type" => "activeplayer",
+            "args" => "argAddAssetToAssetBoard",
+            "possibleactions" => array("confirmAssetToAssetBoard"),
+            "transitions" => array("nextClimb" => 25)
+    ),
+
+    30 => array(
+            "name" => "chooseSummitBetaToken",
+            "description" => clienttranslate('${actplayer} must select a Summit Beta token to keep'),
+            "descriptionmyturn" => clienttranslate('${you} must select a Summit Beta token to keep'),
+            "type" => "activeplayer",
+            "args" => "argChooseSummitBetaToken",
+            "possibleactions" => array("confirmChooseSummitBetaToken"),
+            "transitions" => array("nextClimb" => 25)
+    ),
+
+    31 => array(
+            "name" => "chooseTechniqueToken",
+            "description" => clienttranslate('${actplayer} must select a Technique Token'),
+            "descriptionmyturn" => clienttranslate('${you} must select a Technique Token'),
+            "type" => "activeplayer",
+            "possibleactions" => array("confirmChooseTechniqueToken"),
+            "transitions" => array("nextClimb" => 25, "techniqueOpponent" => 32)
+    ),
+
+    32 => array(
+            "name" => "techniqueOpponent",
+            "description" => "",
+            "type" => "game",
+            "action" => "stTechniqueOpponent",
+            "updateGameProgression" => false,
+            "transitions" => array("chooseTechniqueToken" => 31, "nextClimb" => 25)
     ),
 
     98 => array(

@@ -34,9 +34,12 @@ class view_firstascent_firstascent extends game_view
         $current_shared_objectives = $this->game->getGlobalVariable('current_shared_objectives');
         $this->page->begin_block("firstascent_firstascent", "shared_objective");
 
-        if ($player_count <= 3) {
-            $shared_objectives_coords = [ [2.68, 35.8], [2.68, 46.68], [2.68, 57.5] ]; // Desert board
-        } else {$shared_objectives_coords = [ [3.13, 35.79], [3.13, 46.49], [3.13, 57.2] ];} // Forest board
+        if ($player_count <= 3) { $board = 'desert'; }
+        else { $board = 'forest'; }
+
+        if ($board === 'desert') {
+            $shared_objectives_coords = [ [2.68, 35.8], [2.68, 46.68], [2.68, 57.5] ];
+        } elseif ($board === 'forest') { $shared_objectives_coords = [ [3.13, 35.79], [3.13, 46.49], [3.13, 57.2] ]; }
         
         for($i=0, $j = 3; $i < $j; $i++) {
 
@@ -64,34 +67,37 @@ class view_firstascent_firstascent extends game_view
             $max_coord = 26;
         }
         
-        for($i = 0, $j = count($tile_coords); $i < $j; $i++) {
+        for($i=0; $i<count($tile_coords); $i++) {
+            $pitch = $i+1;
+
             if ($i <= $max_coord) {
 
                 $this->page->insert_block("pitch", array(
-                'X' => $i+1,
-                'PITCH' => $pitch_order[$i+1],
+                'X' => $pitch,
+                'PITCH' => $pitch_order[$pitch],
                 'BOTTOM' => $tile_coords[$i][0],
                 'LEFT' => $tile_coords[$i][1],
-                'PX' => $this->game->pitches[$pitch_order[$i+1]]['x_y'][0],
-                'PY' => $this->game->pitches[$pitch_order[$i+1]]['x_y'][1]
+                'PX' => $this->game->pitches[$pitch_order[$pitch]]['x_y'][0],
+                'PY' => $this->game->pitches[$pitch_order[$pitch]]['x_y'][1]
                 ) );
 
-            } else if ($i > $max_coord) {
+            } elseif ($i > $max_coord) {
 
                 $this->page->insert_block("pitch", array(
-                'X' => $i+1,
-                'PITCH' => $pitches_face_down[$this->game->pitches[$pitch_order[$i+1]]['value']-1],
+                'X' => $pitch,
+                'PITCH' => $pitches_face_down[$this->game->pitches[$pitch_order[$pitch]]['value']-1],
                 'BOTTOM' => $tile_coords[$i][0],
                 'LEFT' => $tile_coords[$i][1],
-                'PX' => ($this->game->pitches[$pitch_order[$i+1]]['value'] + 5) * 100,
+                'PX' => ($this->game->pitches[$pitch_order[$pitch]]['value'] + 5) * 100,
                 'PY' => 300
                 ) );
             }
         }
 
         // Set up player area
-
-        $this->tpl['MY_HAND'] = self::_("My hand");
+        if (!$this->game->isSpectator()) {
+            $this->tpl['MY_HAND'] = self::_("My hand");
+        }
 
         /*********** Do not change anything below this line  ************/
   	}

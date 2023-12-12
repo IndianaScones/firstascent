@@ -59,6 +59,7 @@
     public function confirmRequirements() {
         self::setAjaxMode();
         $selected_resources_raw = self::getArg("selected_resources", AT_numberlist);
+        $selected_hex = self::getArg("selected_hex", AT_posint);
         $selected_pitch = self::getArg("selected_pitch", AT_posint);
 
         if (substr($selected_resources_raw, -1) == ',') {
@@ -70,7 +71,101 @@
             $selected_resources = explode(',', $selected_resources_raw);
         }
 
-        $this->game->confirmRequirements($selected_resources, $selected_pitch);
+        $this->game->confirmRequirements($selected_resources, $selected_hex, $selected_pitch);
+        self::ajaxResponse();
+    }
+
+    public function confirmClimbingCardChoice() {
+        self::setAjaxMode();
+        $choice = self::getArg("choice", AT_alphanum);
+        $card_id = self::getArg("card_id", AT_posint);
+        $card_type = self::getArg("card_type", AT_posint);
+
+        $this->game->confirmClimbingCardChoice($choice, $card_id, $card_type);
+        self::ajaxResponse();
+    }
+
+    public function confirmAssetsForDiscard() {
+        self::setAjaxMode();
+        $hand_card_ids = self::getArg("hand_card_ids", AT_numberlist);
+        $board_card_ids = self::getArg("board_card_ids", AT_numberlist);
+
+        $this->game->confirmAssetsForDiscard($hand_card_ids, $board_card_ids);
+        self::ajaxResponse();
+    }
+
+    public function confirmSelectedOpponent() {
+        self::setAjaxMode();
+        $opponent_id = self::getArg("opponent_id", AT_alphanum);
+
+        $this->game->confirmSelectedOpponent($opponent_id);
+        self::ajaxResponse();
+    }
+
+    public function confirmPortaledge() {
+        self::setAjaxMode();
+        $portaledge_to_draw_raw = self::getArg("portaledge_to_draw", AT_numberlist);
+
+        if (substr($portaledge_to_draw_raw, -1) == ',') {
+            $portaledge_to_draw_raw = substr($portaledge_to_draw_raw, 0, -1);
+        }
+        if ($portaledge_to_draw_raw == '') {
+            $portaledge_to_draw = array();
+        } else {
+            $portaledge_to_draw = explode(',', $portaledge_to_draw_raw);
+        }
+
+        $this->game->confirmPortaledge($portaledge_to_draw);
+        self::ajaxResponse();
+    }
+
+    public function confirmAddTokenToPitch() {
+        self::setAjaxMode();
+
+        $asset_token_type = self::getArg("asset_token_type", AT_alphanum);
+        $pitch_type_arg = self::getArg("pitch_type_arg", AT_alphanum);
+        $selected_pitch_id = self::getArg("selected_pitch_id", AT_alphanum);
+
+        $this->game->confirmAddTokenToPitch($asset_token_type, $pitch_type_arg, $selected_pitch_id);
+        self::ajaxResponse();
+    }
+
+    public function confirmAssetToAssetBoard() {
+        self::setAjaxMode();
+
+        $selected_resource = self::getArg("selected_resource", AT_alphanum);
+
+        $this->game->confirmAssetToAssetBoard($selected_resource);
+        self::ajaxResponse();
+    }
+
+    public function confirmStealFromAssetBoard() {
+        self::setAjaxMode();
+
+        $selected_resource = self::getArg("selected_resource", AT_alphanum);
+        $opponent_id = self::getArg("opponent_id", AT_alphanum);
+
+        $this->game->confirmStealFromAssetBoard($selected_resource, $opponent_id);
+        self::ajaxResponse();
+    }
+
+    public function confirmChooseSummitBetaToken() {
+        self::setAjaxMode();
+
+        $selected_token_id = self::getArg("selected_token_id", AT_posint);
+        $opponent_token_id = self::getArg("opponent_token_id", AT_posint);
+        $opponent_id = self::getArg("opponent_id", AT_posint);
+
+        $this->game->confirmChooseSummitBetaToken($selected_token_id, $opponent_token_id, $opponent_id);
+        self::ajaxResponse();
+    }
+
+    public function confirmChooseTechniqueToken() {
+        self::setAjaxMode();
+
+        $technique_token_type = self::getArg("technique_token_type", AT_alphanum);
+
+        $this->game->confirmChooseTechniqueToken($technique_token_type);
         self::ajaxResponse();
     }
 
