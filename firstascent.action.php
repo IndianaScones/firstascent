@@ -89,8 +89,10 @@
         self::setAjaxMode();
         $hand_card_ids = self::getArg("hand_card_ids", AT_numberlist);
         $board_card_ids = self::getArg("board_card_ids", AT_numberlist);
+        $tucked_card_types = self::getArg("tucked_card_types", AT_alphanum);
+        $tucked_card_nums = self::getArg("tucked_card_nums", AT_numberlist);
 
-        $this->game->confirmAssetsForDiscard($hand_card_ids, $board_card_ids);
+        $this->game->confirmAssetsForDiscard($hand_card_ids, $board_card_ids, $tucked_card_types, $tucked_card_nums);
         self::ajaxResponse();
     }
 
@@ -110,7 +112,7 @@
             $portaledge_to_draw_raw = substr($portaledge_to_draw_raw, 0, -1);
         }
         if ($portaledge_to_draw_raw == '') {
-            $portaledge_to_draw = array();
+            $portaledge_to_draw = [];
         } else {
             $portaledge_to_draw = explode(',', $portaledge_to_draw_raw);
         }
@@ -143,9 +145,10 @@
         self::setAjaxMode();
 
         $selected_resource = self::getArg("selected_resource", AT_alphanum);
+        $tucked_card_type = self::getArg("tucked_card_type", AT_alphanum);
         $opponent_id = self::getArg("opponent_id", AT_alphanum);
 
-        $this->game->confirmStealFromAssetBoard($selected_resource, $opponent_id);
+        $this->game->confirmStealFromAssetBoard($selected_resource, $tucked_card_type, $opponent_id);
         self::ajaxResponse();
     }
 
@@ -166,6 +169,40 @@
         $technique_token_type = self::getArg("technique_token_type", AT_alphanum);
 
         $this->game->confirmChooseTechniqueToken($technique_token_type);
+        self::ajaxResponse();
+    }
+
+    public function passClimbingCard() {
+        self::setAjaxMode();
+
+        $player_id = self::getArg("player_id", AT_alphanum);
+
+        $this->game->passClimbingCard($player_id);
+        self::ajaxResponse();
+    }
+
+    public function confirmPermanentAssets() {
+        self::setAjaxMode();
+
+        $player_id = self::getArg("player_id", AT_alphanum);
+        $gained_assets_raw = self::getArg("gained_assets_str", AT_numberlist);
+
+        if ($gained_assets_raw == '0,0,0,0') {
+            $gained_assets = [];
+        } else {
+            $gained_assets = explode(',', $gained_assets_raw);
+        }
+
+        $this->game->confirmPermanentAssets($player_id, $gained_assets);
+        self::ajaxResponse();
+    }
+
+    public function rest() {
+        self::setAjaxMode();
+
+        $player_id = self::getArg("player_id", AT_alphanum);
+
+        $this->game->rest($player_id);
         self::ajaxResponse();
     }
 

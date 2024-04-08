@@ -60,11 +60,12 @@ class view_firstascent_firstascent extends game_view
 
         $this->page->begin_block("firstascent_firstascent", "pitch");
 
-        if ($player_count <= 3) {
-            $max_coord = 20;
+        if ($this->game->getGlobalVariable('headwall_revealed')) {
+
+            $max_coord = $player_count <= 3 ? 32 : 43;
         }
         else {
-            $max_coord = 26;
+            $max_coord = $player_count <= 3 ? 20 : 26;
         }
         
         for($i=0; $i<count($tile_coords); $i++) {

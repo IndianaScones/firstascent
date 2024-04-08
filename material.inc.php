@@ -1666,10 +1666,11 @@ $this->asset_cards = [
             'slab' => 0,
         ],
         'techniques' => [
-            'precision' => 1,
-            'balance' => 1,
-            'pain_tolerance' => 1,
-            'power' => 1,
+            'precision' => 0,
+            'balance' => 0,
+            'pain_tolerance' => 0,
+            'power' => 0,
+            'wild' => 1,
         ],
         'number_in_deck' => 3,
         'x_y' => [400, 200],
@@ -1686,10 +1687,11 @@ $this->asset_cards = [
             'slab' => 0,
         ],
         'techniques' => [
-            'precision' => 1,
-            'balance' => 1,
-            'pain_tolerance' => 1,
-            'power' => 1,
+            'precision' => 0,
+            'balance' => 0,
+            'pain_tolerance' => 0,
+            'power' => 0,
+            'wild' => 1,
         ],
         'number_in_deck' => 3,
         'x_y' => [500, 200],
@@ -1726,10 +1728,11 @@ $this->asset_cards = [
             'slab' => 0,
         ],
         'techniques' => [
-            'precision' => 1,
-            'balance' => 1,
-            'pain_tolerance' => 1,
-            'power' => 1,
+            'precision' => 0,
+            'balance' => 0,
+            'pain_tolerance' => 0,
+            'power' => 0,
+            'wild' => 1,
         ],
         'number_in_deck' => 3,
         'x_y' => [700, 200],
@@ -1846,10 +1849,11 @@ $this->asset_cards = [
             'slab' => 0,
         ],
         'techniques' => [
-            'precision' => 1,
-            'balance' => 1,
-            'pain_tolerance' => 1,
-            'power' => 1,
+            'precision' => 0,
+            'balance' => 0,
+            'pain_tolerance' => 0,
+            'power' => 0,
+            'wild' => 1,
         ],
         'number_in_deck' => 3,
         'x_y' => [500, 300],
@@ -1866,10 +1870,11 @@ $this->asset_cards = [
             'slab' => 0,
         ],
         'techniques' => [
-            'precision' => 1,
-            'balance' => 1,
-            'pain_tolerance' => 1,
-            'power' => 1,
+            'precision' => 0,
+            'balance' => 0,
+            'pain_tolerance' => 0,
+            'power' => 0,
+            'wild' => 1,
         ],
         'number_in_deck' => 3,
         'x_y' => [600, 300],
@@ -1964,8 +1969,8 @@ $this->climbing_cards = [
         'a_args' => [
             'cost' => 'updateWaterPsych',
             'benefit' => 'summitBetaToken',
-            'water' => 0,
-            'psych' => -1,
+            'water' => -1,
+            'psych' => 0,
             'assets' => [
                 'gear' => 0,
                 'face' => 0,
@@ -2408,7 +2413,7 @@ $this->climbing_cards = [
             ],
             'give_assets' => 0,
             'discard_num' => 1,
-            'discard_type' => 'slab',
+            'discard_type' => 'gear',
             'symbol_type' => 'precision',
             'symbol_for_log' => 'Precision',
         ],
@@ -2440,7 +2445,7 @@ $this->climbing_cards = [
         ],
         'b_args' => [
             'cost' => '',
-            'benefit' => 'symbolToken',
+            'benefit' => '',
             'water' => 0,
             'psych' => 0,
             'assets' => [
@@ -2450,8 +2455,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'bespoke' => true,
-            'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
     ],
 
@@ -3029,7 +3032,7 @@ $this->climbing_cards = [
                 'crack' => 0,
                 'slab' => 0,
             ],
-            'opponents_only' => true,
+            'all' => true,
             'portaledge_num' => 1,
         ],
     ],
@@ -3128,7 +3131,7 @@ $this->climbing_cards = [
         'name' => 'bat_in_the_crack',
         'description' => clienttranslate("Bat in the crack!"),
         'effect_a_flavor' => clienttranslate("Layback the crack and hope you don't disturb the bat:"),
-        'effect_a' => clienttranslate("Lose 1 Water and gain 1 Power Token"),
+        'effect_a' => clienttranslate("Lose Crack Card and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Make noise to shoo it out:"),
         'effect_b' => clienttranslate("Lose 1 Psych and gain 1 Crack Card"),
         'x_y' => [100, 300],
@@ -4086,7 +4089,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Frantically place gear to calm your nerves:"),
         'effect_a' => clienttranslate("Lose 1 Gear Card and gain 1 Psych"),
         'effect_b_flavor' => clienttranslate("Sprint up to the belay ledge:"),
-        'effect_b' => clienttranslate("Lose 1 Water and gain 1 Psych"),
+        'effect_b' => clienttranslate("Lose 1 Water and gain 1 Skill Card"),
         'x_y' => [800, 500],
         'height_top_a' => [10.7, 68.1],
         'height_top_b' => [15.7, 82.8],
@@ -4675,6 +4678,7 @@ $this->characters = [
         'nb_x_y' => [0, 300],
         'color' => '1d7dad',
         'color_name' => 'blue',
+        'permanent_asset_slots' => 5,
     ],
 
     '2' => [
@@ -4697,6 +4701,7 @@ $this->characters = [
         'nb_x_y' => [0, 100],
         'color' => '1d7dad',
         'color_name' => 'blue',
+        'permanent_asset_slots' => 6,
     ],
 
     '3' => [
@@ -4714,12 +4719,13 @@ $this->characters = [
         'mx_y' => [400, 0],
         'rx_y' => [
             'board' => [0, 100],
-            'panel' => [100, 100],
+            'panel' => [200, 100],
         ],
         /*'nb_x_y' => [28.57, 41.21],*/
         'nb_x_y' => [200, 200],
         'color' => 'be3d27',
         'color_name' => 'red',
+        'permanent_asset_slots' => 6,
     ],
 
     '4' => [
@@ -4735,12 +4741,13 @@ $this->characters = [
         'mx_y' => [400, 0],
         'rx_y' => [
             'board' => [0, 100],
-            'panel' => [100, 100],
+            'panel' => [200, 100],
         ],
         /*'nb_x_y' => [42.84, 41.21],*/
         'nb_x_y' => [100, 300],
         'color' => 'be3d27',
         'color_name' => 'red',
+        'permanent_asset_slots' => 6,
     ],
 
     '5' => [
@@ -4756,12 +4763,13 @@ $this->characters = [
         'mx_y' => [100, 0],
         'rx_y' => [
             'board' => [0, 200],
-            'panel' => [100, 200],
+            'panel' => [0, 0],
         ],
         /*'nb_x_y' => [57.15, 41.22],*/
         'nb_x_y' => [100, 100],
-        'color' => 'f6e03f',
+        'color' => 'd6a228',
         'color_name' => 'yellow',
+        'permanent_asset_slots' => 6,
     ],
 
     '6' => [
@@ -4778,12 +4786,13 @@ $this->characters = [
         'mx_y' => [100, 0],
         'rx_y' => [
             'board' => [0, 200],
-            'panel' => [100, 200],
+            'panel' => [0, 0],
         ],
         /*'nb_x_y' => [71.42, 41.22],*/
         'nb_x_y' => [200, 300],
-        'color' => 'f6e03f',
+        'color' => 'd6a228',
         'color_name' => 'yellow',
+        'permanent_asset_slots' => 4,
 
     ],
 
@@ -4800,12 +4809,13 @@ $this->characters = [
         'mx_y' => [500, 0],
         'rx_y' => [
             'board' => [0, 500],
-            'panel' => [100, 500],
+            'panel' => [200, 0],
         ],
         /*'nb_x_y' => [85.74, 41.22],*/
         'nb_x_y' => [200, 0],
         'color' => '4d5760',
         'color_name' => 'black',
+        'permanent_asset_slots' => 6,
 
     ],
 
@@ -4823,12 +4833,13 @@ $this->characters = [
         'mx_y' => [500, 0],
         'rx_y' => [
             'board' => [0, 500],
-            'panel' => [100, 500],
+            'panel' => [200, 0],
         ],
         /*'nb_x_y' => [100, 41.22],*/
         'nb_x_y' => [200, 100],
         'color' => '4d5760',
         'color_name' => 'black',
+        'permanent_asset_slots' => 6,
     ],
 
     '9' => [
@@ -4844,12 +4855,13 @@ $this->characters = [
         'mx_y' => [0, 0],
         'rx_y' => [
             'board' => [0, 300],
-            'panel' => [100, 300],
+            'panel' => [0, 100],
         ],
         /*'nb_x_y' => [0, 20.5],*/
         'nb_x_y' => [0, 0],
         'color' => '517f3e',
         'color_name' => 'green',
+        'permanent_asset_slots' => 6,
     ],
 
     '10' => [
@@ -4867,12 +4879,13 @@ $this->characters = [
         'mx_y' => [0, 0],
         'rx_y' => [
             'board' => [0, 300],
-            'panel' => [100, 300],
+            'panel' => [0, 100],
         ],
         /*'nb_x_y' => [14.26, 20.5],*/
         'nb_x_y' => [100, 200],
         'color' => '517f3e',
         'color_name' => 'green',
+        'permanent_asset_slots' => 6,
     ],
 
     '11' => [
@@ -4888,12 +4901,13 @@ $this->characters = [
         'mx_y' => [300, 0],
         'rx_y' => [
             'board' => [0, 400],
-            'panel' => [100, 400],
+            'panel' => [100, 100],
         ],
         /*'nb_x_y' => [28.57, 20.55],*/
         'nb_x_y' => [100, 0],
         'color' => '7c2b87',
         'color_name' => 'purple',
+        'permanent_asset_slots' => 4,
     ],
 
     '12' => [
@@ -4909,11 +4923,12 @@ $this->characters = [
         'mx_y' => [300, 0],
         'rx_y' => [
             'board' => [0, 400],
-            'panel' => [100, 400],
+            'panel' => [100, 100],
         ],
         /*'nb_x_y' => [42.84, 20.55],*/
         'nb_x_y' => [0, 200],
         'color' => '7c2b87',
         'color_name' => 'purple',
+        'permanent_asset_slots' => 6,
     ],
 ];

@@ -49,7 +49,7 @@ $machinestates = array(
             "type" => "activeplayer",
             "args" => "argDrawAssets",
             "possibleactions" => array("confirmAssets"),
-            "transitions" => array("nextDraw" => 11, "nextPhase" => 20, "nextClimb" => 25)
+            "transitions" => array("nextDraw" => 11, "nextClimb" => 25)
     ),
 
     11 => array(
@@ -58,7 +58,16 @@ $machinestates = array(
             "type" => "game",
             "action" => "stNextDraw",
             "updateGameProgression" => true,
-            "transitions" => array("drawAssets" => 10, "nextPhase" => 20)
+            "transitions" => array("drawAssets" => 10, "resting" => 33, "climbOrRest" => 20, "nextRound" => 12)
+    ),
+
+    12 => array(
+            "name" => "nextRound",
+            "description" => clienttranslate('Passing Starting Player token'),
+            "type" => "game",
+            "action" => "stNextRound",
+            "updateGameProgression" => true,
+            "transitions" => array("climbOrRest" => 20)
     ),
 
     20 => array(
@@ -76,7 +85,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must resolve a Climbing card'),
             "descriptionmyturn" => clienttranslate('${you} must resolve a Climbing card'),
             "type" => "activeplayer",
-            "possibleactions" => array("confirmClimbingCardChoice"),
+            "possibleactions" => array("confirmClimbingCardChoice", "passClimbingCard"),
             "transitions" => array("nextClimber" => 20, "discardAssets" => 22, "selectOpponent" => 23,  "selectPortaledge" => 24, 
                                    "nextClimb" => 25, "portaledgeAll" => 26, "stealFromAssetBoard" => 28, "addAssetToAssetBoard" => 29,
                                     "chooseSummitBetaToken" => 30, "chooseTechniqueToken" => 31)
@@ -119,7 +128,7 @@ $machinestates = array(
             "type" => "game",
             "action" => "stNextClimb",
             "updateGameProgression" => true,
-            "transitions" => array("climbOrRest" => 20, "followPhase" => 98)
+            "transitions" => array("climbOrRest" => 20, "followPhase" => 40)
     ),
 
     26 => array(
@@ -128,7 +137,7 @@ $machinestates = array(
             "type" => "game",
             "action" => "stPortaledgeAll",
             "updateGameProgression" => false,
-            "transitions" => array("selectPortaledge" => 24)
+            "transitions" => array("selectPortaledge" => 24, "nextClimb" => 25)
     ),
 
     27 => array(
@@ -187,6 +196,61 @@ $machinestates = array(
             "action" => "stTechniqueOpponent",
             "updateGameProgression" => false,
             "transitions" => array("chooseTechniqueToken" => 31, "nextClimb" => 25)
+    ),
+
+    33 => array(
+            "name" => "resting",
+            "description" => clienttranslate('${actplayer} must choose five resources to take'),
+            "descriptionmyturn" => clienttranslate('${you} must choose five resources to take'),
+            "type" => "activeplayer",
+            "possibleactions" => array("confirmPortaledge"),
+            "transitions" => array("nextDraw" => 11, "nextRound" => 12)
+    ),
+
+    40 => array(
+            "name" => "matchingTechniques",
+            "description" => "Checking for matching Technique Symbols",
+            "type" => "game",
+            "action" => 'stMatchingTechniques',
+            "updateGameProgression" => false,
+            "transitions" => array("flagPermanentAssets" => 41)
+    ),
+
+    41 => array(
+            "name" => "flagPermanentAssets",
+            "description" => "",
+            "type" => "game",
+            "action" => "stFlagPermanentAssets",
+            "updateGameProgression" => false,
+            "transitions" => array("choosePermanentAssets" => 42, "flipPlayedAssets" => 44)
+    ),
+
+    42 => array(
+            "name" => "choosePermanentAssets",
+            "description" => clienttranslate('Players must decide which Permanent Asset Token(s) to gain'),
+            "descriptionmyturn" => clienttranslate('${you} must decide which Permanent Asset Token(s) to gain'),
+            "type" => "multipleactiveplayer",
+            "args" => "argChoosePermanentAssets",
+            "possibleactions" => array("confirmPermanentAssets"),
+            "transitions" => array("grantPermanentAssets" => 43)
+    ),
+
+    43 => array(
+            "name" => "grantPermanentAssets",
+            "description" => clienttranslate('Taking Permanent Asset token(s)'),
+            "type" => "game",
+            "action" => "stGrantPermanentAssets",
+            "updateGameProgression" => false,
+            "transitions" => array("flipPlayedAssets" => 44)
+    ),
+
+    44 => array(
+            "name" => "flipPlayedAssets",
+            "description" => clienttranslate('Flipping over played Assets'),
+            "type" => "game",
+            "action" => "stFlipPlayedAssets",
+            "updateGameProgression" => false,
+            "transitions" => array("nextDraw" => 11)
     ),
 
     98 => array(
