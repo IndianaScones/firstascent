@@ -20,6 +20,7 @@
 </div>
 
 <div id="climbing_slot"></div>
+<div id="climbing_dimmer"></div>
 
 <div id="portaledge">
     <div id="portagear" class="portaledge portagear" style="transform: none;"></div>
@@ -63,7 +64,9 @@
 
             <div id="shared_objectives">
                 <!-- BEGIN shared_objective -->
-                    <div id="shared_objective{soId}" class="shared_objective" style="background-position: -{soX}% -{soY}%; top: {TOP}%; left: {LEFT}%;"></div>
+                    <div id="shared_objective{soId}" class="shared_objective so_{soTA}" style="background-position: -{soX}% -{soY}%; top: {TOP}%; left: {LEFT}%;">
+                        <div id="shared_objective{soId}_tracker" class="shared_objective_tracker"></div>
+                    </div>
                 <!-- END shared_objective -->
             </div>
 
@@ -79,6 +82,8 @@
             </div>
 
             <div id="spread_draw">
+                <div id="spread_draw_6" class="spread_wrap"></div>
+                <div id="spread_draw_5" class="spread_wrap"></div>
                 <div id="spread_draw_4" class="spread_wrap"></div>
                 <div id="spread_draw_3" class="spread_wrap"></div>
                 <div id="spread_draw_2" class="spread_wrap"></div>
@@ -96,7 +101,7 @@
             
             <div id="pitches">
                 <!-- BEGIN pitch -->
-                    <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%";>
+                    <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%;">
                     <div id="pitch_{X}_border" class="pitch_border"></div>
                     <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;">
                         <div id="pitch_{X}_rope" class="rope_hub"></div>
@@ -111,12 +116,11 @@
     </div>
 </div>
 
+<h3 id ="hand_title">{MY_HAND}</h3>
 <div id="hand_ratio">
     <div id="hand_ratio_child">
         <div id="myhand_wrap">
-            <h3 style="margin-left: 0.5%; font-size: 2.6vmin;">{MY_HAND}</h3>
             <div id="assets_wrap"></div>
-            <div id="hand_objectives"></div>
         </div>
     </div>
 </div>
@@ -133,7 +137,7 @@
 // characters
 
 let jstpl_character_area='<div id="player_${player}" class="character_area" style="position: relative; \
-    width: 100%; left: 0px; margin-top: 10px;"><h3 id="character_area_${player_name}" style="color: \
+    width: 100%; left: 0px; margin-top: 10px;"><h3 id="character_area_${player_name}" class="player_name_board" style="color: \
     #${color}; text-align: center;">${player_name}</h3><div class="character_ratio"><div \
     class="character_ratio_child"></div></div></div>';
 let jstpl_namebox='<div id="namebox_${type}" class="namebox" style="background-position: -${charX}% \
@@ -204,17 +208,102 @@ let jstpl_asset_board='<div id="asset_board_${player}" class="asset_board" style
     <div id="${character}_slab_counter" class="asset_counter board_slab_counter"> \
     <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
     </div>';
+let jstpl_fs_asset_board='<div id="asset_board_${player}" class="asset_board" style="background-position: \
+    -${abX}% -${abY}%;"> \
+    <div id="${character}_two_point_tokens" class="two_point_tokens"> \
+    <div id="${character}_points_1" class="points_wrapper pw1"></div> \
+    <div id="${character}_points_2" class="points_wrapper pw2"></div> \
+    <div id="${character}_points_3" class="points_wrapper pw3"></div> \
+    <div id="${character}_points_4" class="points_wrapper pw4"></div> \
+    <div id="${character}_points_5" class="points_wrapper pw5"></div> \
+    <div id="${character}_points_6" class="points_wrapper pw6"></div> \
+    <div id="${character}_points_7" class="points_wrapper pw7"></div> \
+    <div id="${character}_points_8" class="points_wrapper pw8"></div></div> \
+    <div id="${character}_permanent_assets" class="permanent_asset_tokens"> \
+    <div id="${character}_permanent_1" class="permanent_assets_wrapper pa1"></div> \
+    <div id="${character}_permanent_2" class="permanent_assets_wrapper pa2"></div> \
+    <div id="${character}_permanent_3" class="permanent_assets_wrapper pa3"></div> \
+    <div id="${character}_permanent_4" class="permanent_assets_wrapper pa4"></div> \
+    <div id="${character}_permanent_5" class="permanent_assets_wrapper pa5"></div> \
+    <div id="${character}_permanent_6" class="permanent_assets_wrapper pa6"></div></div> \
+    <div id="${character}_face"> \
+    <div id="${character}_face_1" class="asset_board_slot face_1 fs_f1"></div> \
+    <div id="${character}_face_2" class="asset_board_slot face_2 fs_f2"></div> \
+    <div id="${character}_face_3" class="asset_board_slot face_3 fs_f3"></div> \
+    <div id="${character}_face_4" class="asset_board_slot face_4 fs_f4"></div> \
+    <div id="${character}_face_counter" class="asset_counter board_face_counter fs_fc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    <div id="${character}_crack"> \
+    <div id="${character}_crack_1" class="asset_board_slot crack_1 fs_c1"></div> \
+    <div id="${character}_crack_2" class="asset_board_slot crack_2 fs_c2"></div> \
+    <div id="${character}_crack_3" class="asset_board_slot crack_3 fs_c3"></div> \
+    <div id="${character}_crack_4" class="asset_board_slot crack_4 fs_c4"></div> \
+    <div id="${character}_crack_counter" class="asset_counter board_crack_counter fs_cc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    <div id="${character}_slab"> \
+    <div id="${character}_slab_1" class="asset_board_slot slab_1 fs_s1"></div> \
+    <div id="${character}_slab_2" class="asset_board_slot slab_2 fs_s2"></div> \
+    <div id="${character}_slab_3" class="asset_board_slot slab_3 fs_s3"></div> \
+    <div id="${character}_slab_4" class="asset_board_slot slab_4 fs_s4"></div> \
+    <div id="${character}_slab_counter" class="asset_counter board_slab_counter fs_fc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    </div>';
+let jstpl_yp_asset_board='<div id="asset_board_${player}" class="asset_board" style="background-position: \
+    -${abX}% -${abY}%;"> \
+    <div id="${character}_two_point_tokens" class="two_point_tokens"> \
+    <div id="${character}_points_1" class="points_wrapper pw1"></div> \
+    <div id="${character}_points_2" class="points_wrapper pw2"></div> \
+    <div id="${character}_points_3" class="points_wrapper pw3"></div> \
+    <div id="${character}_points_4" class="points_wrapper pw4"></div> \
+    <div id="${character}_points_5" class="points_wrapper pw5"></div> \
+    <div id="${character}_points_6" class="points_wrapper pw6"></div> \
+    <div id="${character}_points_7" class="points_wrapper pw7"></div> \
+    <div id="${character}_points_8" class="points_wrapper pw8"></div></div> \
+    <div id="${character}_permanent_assets" class="permanent_asset_tokens"> \
+    <div id="${character}_permanent_1" class="permanent_assets_wrapper pa1"></div> \
+    <div id="${character}_permanent_2" class="permanent_assets_wrapper pa2"></div> \
+    <div id="${character}_permanent_3" class="permanent_assets_wrapper pa3"></div> \
+    <div id="${character}_permanent_4" class="permanent_assets_wrapper pa4"></div> \
+    <div id="${character}_permanent_5" class="permanent_assets_wrapper pa5"></div> \
+    <div id="${character}_permanent_6" class="permanent_assets_wrapper pa6"></div></div> \
+    <div id="${character}_gear"> \
+    <div id="${character}_gear_1" class="asset_board_slot gear_1 yp_g1"></div> \
+    <div id="${character}_gear_2" class="asset_board_slot gear_2 yp_g2"></div> \
+    <div id="${character}_gear_3" class="asset_board_slot gear_3 yp_g3"></div> \
+    <div id="${character}_gear_4" class="asset_board_slot gear_4 yp_g4"></div> \
+    <div id="${character}_gear_5" class="asset_board_slot gear_5 yp_g5"></div> \
+    <div id="${character}_gear_counter" class="asset_counter board_gear_counter"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    <div id="${character}_face"> \
+    <div id="${character}_face_1" class="asset_board_slot face_1"></div> \
+    <div id="${character}_face_2" class="asset_board_slot face_2 yp_f2"></div> \
+    <div id="${character}_face_3" class="asset_board_slot face_3"></div> \
+    <div id="${character}_face_counter" class="asset_counter board_face_counter yp_fc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    <div id="${character}_crack"> \
+    <div id="${character}_crack_1" class="asset_board_slot crack_1"></div> \
+    <div id="${character}_crack_2" class="asset_board_slot crack_2"></div> \
+    <div id="${character}_crack_3" class="asset_board_slot crack_3"></div> \
+    <div id="${character}_crack_counter" class="asset_counter board_crack_counter yp_cc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    <div id="${character}_slab"> \
+    <div id="${character}_slab_1" class="asset_board_slot slab_1"></div> \
+    <div id="${character}_slab_2" class="asset_board_slot slab_2"></div> \
+    <div id="${character}_slab_3" class="asset_board_slot slab_3"></div> \
+    <div id="${character}_slab_counter" class="asset_counter board_slab_counter yp_sc"> \
+    <div class="asset_counter_img"></div><div class="asset_counter_num">0</div></div></div> \
+    </div>';
 
 // card and token backs
 
 let jstpl_summit_pile='<div id="summit_pile" class="summit_beta summit_pile_back" style="top: ${summit_pile_top}%; left: \
     ${summit_pile_left}%;"></div>';
-let jstpl_summit_discard='<div id="summit_discard" class="summit_beta" style="top: ${summit_discard_top}%; left: \
+let jstpl_summit_discard='<div id="summit_discard" class="summit_discard" style="top: ${summit_discard_top}%; left: \
     ${summit_discard_left}%;"></div>';
 let jstpl_climbing_deck='<div id="climbing_deck" class="climbing climbing_deck_back" style="top: ${climbing_deck_top}%; left: \
     ${climbing_deck_left}%;"><div id="climbing_straightened"></div></div>';
 let jstpl_climbing_discard='<div id="climbing_discard" style="top: ${climbing_discard_top}%; left: ${climbing_discard_left}%;"> \
-    <div id="climbing_discard_straightened"></div></div>'
+    <div id="climbing_discard_straightened"></div><div id="climbing_discard_90"</div></div>'
 let jstpl_asset_deck='<div id="asset_deck" class="asset asset_deck_back" style="top: ${asset_deckX}%; left: \
     ${asset_deckY}%;"></div>';
 
@@ -223,7 +312,9 @@ let jstpl_asset_deck='<div id="asset_deck" class="asset asset_deck_back" style="
 let jstpl_asset_card='<div id="asset_card_${CARD_ID}" class="asset ${EXTRA_CLASSES}" style="background-position: \
     -${acX}% -${acY}%;"></div>';
 let jstpl_summit_beta='<div id="summit_beta_${TOKEN_ID}" class="summit_beta" style="background-position: \
-    -${sbX}% -${sbY}%;"></div>';
+    -${sbX}% -${sbY}%;"> \
+    <div id="sb_click_${TOKEN_ID}" class="summit_beta_click cursor"></div> \
+    </div>';
 let jstpl_climbing_card='<div id="climbing_card_${CARD_ID}" class="climbing drawn_climbing" style="background-position: \
     -${ccX}% -${ccY}%;"> \
     <div id="${CARD_ID}_top" class="choice a" style="height: ${a_height}%; top: ${a_top}%;"></div> \
@@ -271,7 +362,7 @@ let jstpl_pp_rope='<div id="${player_id}_rope_counter" class="pp_rope" style="ba
 let jstpl_rope='<div id="${player_id}_rope_${rope_num}" class="rope ${extra_classes}" \
     style="background-position: -${rX}% -${rY}%;"></div>';
 let jstpl_meeple='<div id="meeple_${player_id}" class="meeple" style="background-position: -${mX}% -${mY}%;"></div>';
-let jstpl_skills='<div id=${player_id}_skills" class="cp_panel"> \
+let jstpl_skills='<div id=${player_id}_skills" class="cp_panel cp_skills"> \
     <div id="gear_icon_${player_id}" class="skills_and_techniques" style="background-position: -800% -0%;"></div> \
     <span id="gear_num_${player_id}" class="panel_num resource">0</span> \
     <div id="face_icon_${player_id}" class="skills_and_techniques" style="background-position: -600% -0%;"></div> \
@@ -281,18 +372,23 @@ let jstpl_skills='<div id=${player_id}_skills" class="cp_panel"> \
     <div id="slab_icon_${player_id}" class="skills_and_techniques" style="background-position: -700% -0%;"></div> \
     <span id="slab_num_${player_id}" class="panel_num resource">0</span> \
     </div>';
-let jstpl_techniques='<div id=${player_id}_techniques"> \
-    <div id="precision_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -200% -0%;"></div> \
-    <div id="balance_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -100% -0%;"></div> \
-    <div id="pain_tolerance_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -0% -0%;"></div> \
-    <div id="power_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -300% -0%;"></div> \
-    <div id="wild_icon_${player_id}" class="skills_and_techniques panel_technique wild_icon"></div> \
-    <br> \
+let jstpl_techniques='<div id=${player_id}_techniques" class="cp_techniques" style="height: 49px;"> \
+    <div id="precision_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -200% -0%;"> \
     <span id="precision_num_${player_id}" class="panel_num resource technique_num">0</span> \
+    </div> \
+    <div id="balance_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -100% -0%;"> \
     <span id="balance_num_${player_id}" class="panel_num resource technique_num">0</span> \
+    </div> \
+    <div id="pain_tolerance_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -0% -0%;"> \
     <span id="pain_tolerance_num_${player_id}" class="panel_num resource technique_num">0</span> \
+    </div> \
+    <div id="power_icon_${player_id}" class="skills_and_techniques panel_technique" style="background-position: -300% -0%;"> \
     <span id="power_num_${player_id}" class="panel_num resource technique_num">0</span> \
+    </div> \
+    <div id="wild_icon_${player_id}" class="skills_and_techniques panel_technique wild_icon"> \
     <span id="wild_num_${player_id}" class="panel_num resource technique_num">0</span> \
+    </div> \
+    <br> \
     </div>';
 let jstpl_asset_counter_draw_box='<div id="${player_id}_${type}_draw_box" class="tucked_draw_box"> \
     <div class="tucked_minus_click"></div> \
