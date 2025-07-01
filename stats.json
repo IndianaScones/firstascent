@@ -1,0 +1,330 @@
+{
+    "table": {
+        "rounds": {
+            "id": 90,
+            "name": "Rounds",
+            "type": "int"
+        }
+    },
+
+    "player": {
+        "climbed_arete": {
+            "id": 10,
+            "name": "Arete pitches climbed",
+            "type": "int"
+        },
+        "climbed_corner": {
+            "id": 11,
+            "name": "Corner pitches climbed",
+            "type": "int"
+        },
+        "climbed_crack": {
+            "id": 12,
+            "name": "Crack pitches climbed",
+            "type": "int"
+        },
+        "climbed_flake": {
+            "id": 13,
+            "name": "Flake pitches climbed",
+            "type": "int"
+        },
+        "climbed_roof": {
+            "id": 14,
+            "name": "Roof pitches climbed",
+            "type": "int"
+        },
+        "climbed_slab": {
+            "id": 15,
+            "name": "Slab pitches climbed",
+            "type": "int"
+        },
+        "played_gear": {
+            "id": 20,
+            "name": "Gear cards played",
+            "type": "int"
+        },
+        "played_face": {
+            "id": 21,
+            "name": "Face cards played",
+            "type": "int"
+        },
+        "played_crack": {
+            "id": 22,
+            "name": "Crack cards played",
+            "type": "int"
+        },
+        "played_slab": {
+            "id": 23,
+            "name": "Slab cards played",
+            "type": "int"
+        },
+        "water_spent": {
+            "id": 24,
+            "name": "Water spent climbing pitches",
+            "type": "int"
+        },
+        "psych_spent": {
+            "id": 25,
+            "name": "Psych spent climbing pitches",
+            "type": "int"
+        },
+        "climbed_one_star": {
+            "id": 30,
+            "name": "1-star pitches climbed",
+            "type": "int"
+        },
+        "climbed_two_star": {
+            "id": 31,
+            "name": "2-star pitches climbed",
+            "type": "int"
+        },
+        "climbed_three_star": {
+            "id": 32,
+            "name": "3-star pitches climbed",
+            "type": "int"
+        },
+        "climbed_four_star": {
+            "id": 33,
+            "name": "4-star pitches climbed",
+            "type": "int"
+        },
+        "climbed_five_star": {
+            "id": 34,
+            "name": "5-star pitches climbed",
+            "type": "int"
+        },
+        "climbed_summit": {
+            "id": 35,
+            "name": "Player reached the summit",
+            "type": "bool"
+        },
+        "shared_objectives_met": {
+            "id": 40,
+            "name": "Shared Objectives scored",
+            "type": "int"
+        },
+        "shared_objectives_points": {
+            "id": 41,
+            "name": "Points gained from Shared Objectives",
+            "type": "int"
+        },
+        "ridgeline_challenge_north": {
+            "id": 42,
+            "name": "Points from Ridgeline Challenge North",
+            "type": "int"
+        },
+        "ridgeline_challenge_south": {
+            "id": 43,
+            "name": "Points from Ridgeline Challenge South",
+            "type": "int"
+        },
+        "stay_in_the_shade": {
+            "id": 44,
+            "name": "Points from Stay in the Shade",
+            "type": "int"
+        },
+        "stay_in_the_sun": {
+            "id": 45,
+            "name": "Points from Stay in the Sun",
+            "type": "int"
+        },
+        "jolly_jammer": {
+            "id": 46,
+            "name": "Points from Jolly Jammer",
+            "type": "int"
+        },
+        "smear_campaign": {
+            "id": 47,
+            "name": "Points from Smear Campaign",
+            "type": "int"
+        },
+        "star_stemmer": {
+            "id": 48,
+            "name": "Points from Star Stemmer",
+            "type": "int"
+        },
+        "exposure_junkie": {
+            "id": 49,
+            "name": "Points from Exposure Junkie",
+            "type": "int"
+        },
+        "grand_traverse": {
+            "id": 50,
+            "name": "Points from Grand Traverse",
+            "type": "int"
+        },
+        "all-arounding": {
+            "id": 51,
+            "name": "Points from All-Arounding",
+            "type": "int"
+        },
+        "the_elitist": {
+            "id": 52,
+            "name": "Points from The Elitist",
+            "type": "int"
+        },
+        "a_day_in_the_alpine": {
+            "id": 53,
+            "name": "Points from A Day in the Alpine",
+            "type": "int"
+        },
+        "flake_freak": {
+            "id": 54,
+            "name": "Points from Flake Freak",
+            "type": "int"
+        },
+        "pull-up_champion": {
+            "id": 55,
+            "name": "Points from Pull-up Champion",
+            "type": "int"
+        },
+        "stonemaster": {
+            "id": 56,
+            "name": "Points from Stonemaster",
+            "type": "int"
+        },
+        "off-width_aficionado": {
+            "id": 57,
+            "name": "Points from Off-width Aficionado",
+            "type": "int"
+        },
+        "personal_objective_scored": {
+            "id": 60,
+            "name": "Scored Personal Objective",
+            "type": "int"
+        },
+        "personal_objective_points": {
+            "id": 61,
+            "name": "Personal Objective points",
+            "type": "int"
+        },
+        "rocky_mountains_tour": {
+            "id": 62,
+            "name": "Points from Rocky Mountains Tour",
+            "type": "int"
+        },
+        "a_day_at_the_zoo": {
+            "id": 63,
+            "name": "Points from A Day at the Zoo",
+            "type": "int"
+        },
+        "call_it_like_you_see_it": {
+            "id": 64,
+            "name": "Points from Call it Like You See it",
+            "type": "int"
+        },
+        "sporty_spice": {
+            "id": 65,
+            "name": "Points from Sporty Spice",
+            "type": "int"
+        },
+        "rainbow_vibes": {
+            "id": 66,
+            "name": "Points from Rainbow Vibes",
+            "type": "int"
+        },
+        "southern_rock": {
+            "id": 67,
+            "name": "Points from Southern Rock",
+            "type": "int"
+        },
+        "climb_your_way_out": {
+            "id": 68,
+            "name": "Points from Climb Your Way Out",
+            "type": "int"
+        },
+        "desert_days": {
+            "id": 69,
+            "name": "Points from Desert Days",
+            "type": "int"
+        },
+        "glory_days_of_the_piton": {
+            "id": 70,
+            "name": "Points from Glory Days of the Piton",
+            "type": "int"
+        },
+        "social_butterfly": {
+            "id": 71,
+            "name": "Points from Social Butterfly",
+            "type": "int"
+        },
+        "full_body_workout": {
+            "id": 72,
+            "name": "Points from Full Body Workout",
+            "type": "int"
+        },
+        "national_parks_pass": {
+            "id": 73,
+            "name": "Points from National Parks Pass",
+            "type": "int"
+        },
+        "technique_token_points": {
+            "id": 80,
+            "name": "Points from 2-point Tokens",
+            "type": "int"
+        },
+        "permanent_gear_assets": {
+            "id": 81,
+            "name": "Permanent Gear tokens",
+            "type": "int"
+        },
+        "permanent_face_assets": {
+            "id": 82,
+            "name": "Permanent Face Tokens",
+            "type": "int"
+        },
+        "permanent_crack_assets": {
+            "id": 83,
+            "name": "Permanent Crack Tokens",
+            "type": "int"
+        },
+        "permanent_slab_assets": {
+            "id": 84,
+            "name": "Permanent Slab Tokens",
+            "type": "int"
+        },
+        "played_summit_beta_tokens": {
+            "id": 85,
+            "name": "Played Summit Beta Tokens",
+            "type": "int"
+        },
+        "previously_climbed_pitches": {
+            "id": 86,
+            "name": "Previously climbed pitches",
+            "type": "int"
+        },
+        "times_rested": {
+            "id": 87,
+            "name": "Timed rested",
+            "type": "int"
+        },
+        "risky_climbs": {
+            "id": 88,
+            "name": "Times climbing a risky pitch",
+            "type": "int"
+        },
+        "times_retreated": {
+            "id": 89,
+            "name": "Times retreated from a pitch",
+            "type": "int"
+        }
+    },
+
+    "value_labels": {
+        "60": {
+            "0": "None",
+            "1": "Rocky Mountains Tour",
+            "2": "A Day at the Zoo",
+            "3": "Call it Like You See it",
+            "4": "Sporty Spice",
+            "5": "Rainbow Vibes",
+            "6": "Southern Rock",
+            "7": "Climb Your Way Out",
+            "8": "Desert Days",
+            "9": "Glory Days of the Piton",
+            "10": "Social Butterfly",
+            "11": "Full Body Workout",
+            "12": "National Parks Pass"
+        }
+    }
+}

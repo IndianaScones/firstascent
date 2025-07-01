@@ -29,7 +29,7 @@ trait UtilTrait {
             return [
         /*row 1*/   [2.6, 17.88],  [2.55, 25.87],  [2.593, 33.85],  [2.59, 41.85],  [2.57, 49.83], 
                           [2.55, 57.84], [2.56, 65.83], [2.6, 73.84],
-        /*row 2*/     [12.981, 21.9],  [13, 29.86],  [13, 37.86],  [13, 45.85],  [13, 53.85], [13, 61.85], 
+        /*row 2*/     [13, 21.9],  [13, 29.86],  [13, 37.86],  [13, 45.85],  [13, 53.85], [13, 61.85], 
                           [13, 69.84],
         /*row 3*/     [23.42, 25.876], [23.42, 33.87], [23.42, 41.85], [23.42, 49.84], [23.415, 57.84], [23.42, 65.86],
         /*row 4*/     [40, 29.87], [40, 37.86], [40, 45.85], [40, 53.85], [40, 61.87],
@@ -131,7 +131,7 @@ trait UtilTrait {
                 $available_pitches = ($board === 'desert') ? [16,17,18,19,20,21,23,24,25,26,27]    : [13,14,20,21,23,24,25,26,27,28,29,30,31,32,33,34];
                 break;
             case 23:
-                $available_pitches = ($board === 'desert') ? [16,17,18,19,20,21,23,24,25,26,27,28] : [14,15,20,21,22,24,25,26,27,28,29,30,31,32,33,34];
+                $available_pitches = ($board === 'desert') ? [16,17,18,19,20,21,22,24,25,26,27,28] : [14,15,20,21,22,24,25,26,27,28,29,30,31,32,33,34];
                 break;
             case 24:
                 $available_pitches = ($board === 'desert') ? [16,17,18,19,20,21,22,23,25,26,28,29] : [15,16,20,21,22,23,25,26,27,28,29,30,31,32,33,34];
@@ -202,6 +202,17 @@ trait UtilTrait {
         //$this->dump("variable", variable);
     }
 
+    function adjacentInArray($arr, $val1, $val2) {
+
+        for ($i=0; $i<count($arr); $i++) {
+
+            if (($arr[$i] === $val1 && $arr[$i+1] === $val2) || ($arr[$i] === $val2 && $arr[$i+1] === $val1)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function getActivePlayerColor() {
        $player_id = self::getActivePlayerId();
        $players = self::loadPlayersBasicInfos();
@@ -229,7 +240,7 @@ trait UtilTrait {
     function fillLowerSlot($board_assets, $player_id, $type, $assets, $target_slot, $upper_slots) {
 
         foreach ($upper_slots as $slot) {
-            if (!empty($board_assets[$player_id][$type][$slot])) {
+            if (isset($board_assets[$player_id][$type][$slot]) && !empty($board_assets[$player_id][$type][$slot])) {
 
                 $board_assets[$player_id][$type][$target_slot] = $board_assets[$player_id][$type][$slot];
                 $board_assets[$player_id][$type]['flipped'][$target_slot] = $board_assets[$player_id][$type]['flipped'][$slot];
@@ -247,9 +258,18 @@ trait UtilTrait {
         $board_assets = $this->getGlobalVariable('board_assets', true);
 
         foreach($board_assets[$player_id] as $type => $assets) {
-            if (empty($assets['1'])) { $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '1', ['2', '3', '4']); }
-            if (empty($board_assets[$player_id][$type]['2'])) { $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '2', ['3', '4']); }
-            if (empty($board_assets[$player_id][$type]['3'])) { $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '3', ['4']); }
+            if (empty($assets['1'])) {
+                $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '1', ['2', '3', '4', '5']);
+            }
+            if (empty($board_assets[$player_id][$type]['2'])) {
+                $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '2', ['3', '4', '5']);
+            }
+            if (isset($board_assets[$player_id][$type]['4']) && empty($board_assets[$player_id][$type]['3'])) {
+                $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '3', ['4', '5']);
+            }
+            if (isset($board_assets[$player_id][$type]['5']) && empty($board_assets[$player_id][$type]['4'])) {
+                $board_assets = $this->fillLowerSlot($board_assets, $player_id, $type, $assets, '4', ['5']);
+            }
         }
 
         $this->setGlobalVariable('board_assets', $board_assets);
@@ -267,75 +287,76 @@ trait UtilTrait {
         }
     }
 
-    function getTechniqueType($type_arg) {
+    function getTechniqueType($type_arg, $player_id=null) {
         $technique = null;
         $card = $this->asset_cards[$type_arg];
         foreach($card['techniques'] as $type => $val) {
             if ($val == 1) { $technique = $type; }
         }
+
+        // sendy jammer
+        $player_id = $player_id ?? self::getActivePlayerId();
+        $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
+        $asset_type = $this->getAssetType($type_arg);
+        if ($character_id === '4' && $asset_type === 'gear') { $technique = 'wild'; }
+
         return $technique;
     }
 
-    function updateResourceTracker($player_id, $operation='add', $water=null, $psych=null, $assets=[], $symbol_token=null, $from_board=false, $to_board=false) {
+    function updateResourceTracker($player_id, $operation='add', $water=null, $psych=null, $assets=[], $symbol_token=null, $from_board=false, $to_board=false, $flipped_and_tucked_type_args=[]) {
 
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
         $water_psych_tracker = $this->getGlobalVariable('water_psych_tracker', true);
+        $board_assets = $this->getGlobalVariable('board_assets', true);
+        $asset_identifier = $this->getGlobalVariable('asset_identifier', true);
 
         $skills = ['gear', 'face', 'crack', 'slab'];
         $techniques = ['precision', 'balance', 'pain_tolerance', 'power'];
         $multi_tech_assets = ['26', '27', '29', '35', '36'];
 
-        if ($assets != []) {
+        if ($assets != []) {            
+
             foreach ($assets as $asset) {
-                $asset_skills = $this->asset_cards[$asset]['skills'];
-                $asset_techniques = $this->asset_cards[$asset]['techniques'];
 
-                if ($operation === 'add') { 
-                    for ($i=0; $i<4; $i++) {
-                        $skill = $skills[$i];
-                        $technique = $techniques[$i];
-                        $resource_tracker[$player_id]['skills'][$skill] += $asset_skills[$skill];
-                        if (!in_array($asset, $multi_tech_assets)) { $resource_tracker[$player_id]['techniques'][$technique] += $asset_techniques[$technique]; }
+                $type = $this->getAssetType($asset);
+                $technique = $this->getTechniqueType($asset, $player_id);
+
+                if ($operation === 'add') {
+                    if (!$to_board) {
+                        $resource_tracker[$player_id]['skills'][$type]++;
+                        if ($technique) { $resource_tracker[$player_id]['techniques'][$technique]++; }
                     }
-                    if (in_array($asset, $multi_tech_assets)) { $resource_tracker[$player_id]['techniques']['wild']++; }
+
+                    else if ($to_board) {
+                        $techniques = $resource_tracker[$player_id]['asset_board']['techniques'];
+                        $resource_tracker[$player_id]['asset_board']['skills'][$type]++;
+                        if ($technique) { $resource_tracker[$player_id]['asset_board']['techniques'][$technique]++; }
+                    }
                 }
-                else if ($operation === 'subtract') { 
-                    for ($i=0; $i<4; $i++) {
-                        $skill = $skills[$i];
-                        $technique = $techniques[$i];
 
-                        if (!$from_board) {
-                            $resource_tracker[$player_id]['skills'][$skill] -= $asset_skills[$skill];
-                            if (!in_array($asset, $multi_tech_assets)) {
-                                $resource_tracker[$player_id]['techniques'][$technique] -= $asset_techniques[$technique];
-                            }
+                else if ($operation === 'subtract') {
+                    if (!$from_board) {
+                        $resource_tracker[$player_id]['skills'][$type]--;
+                        if ($technique) { $resource_tracker[$player_id]['techniques'][$technique]--; }
 
-                            if ($to_board) {
-                                $resource_tracker[$player_id]['asset_board']['skills'][$skill] += $asset_skills[$skill];
-                                $resource_tracker[$player_id]['asset_board']['techniques'][$technique] += $asset_techniques[$technique];
-                            }
-
-                        } else if ($from_board) { 
-                            $resource_tracker[$player_id]['asset_board']['skills'][$skill] -= $asset_skills[$skill];
-                            if (!in_array($asset, $multi_tech_assets)) {
-                                $resource_tracker[$player_id]['asset_board']['techniques'][$technique] -= $asset_techniques[$technique];
-                            }
+                        if ($to_board) {
+                            $resource_tracker[$player_id]['asset_board']['skills'][$type]++;
+                            if ($technique) { $resource_tracker[$player_id]['asset_board']['techniques'][$technique]++; }
                         }
                     }
 
-                    if (in_array($asset, $multi_tech_assets) && !$from_board) {
-                        $resource_tracker[$player_id]['techniques']['wild']--;
-
-                        if ($to_board) { $resource_tracker[$player_id]['asset_board']['techniques']['wild']++; }
-                    
-                    } else if (in_array($asset, $multi_tech_assets) && $from_board) {
-                        $resource_tracker[$player_id]['asset_board']['techniques']['wild']--;
+                    else if ($from_board) {
+                        $resource_tracker[$player_id]['asset_board']['skills'][$type]--;
+                        if (in_array($asset, $flipped_and_tucked_type_args)) {
+                            unset($flipped_and_tucked_type_args[array_search($asset, $flipped_and_tucked_type_args)]);
+                        }
+                        else if ($technique) { $resource_tracker[$player_id]['asset_board']['techniques'][$technique]--; }
                     }
                 }
             }
         }
 
-        $character_id = $this->getUniqueValueFromDb("SELECT `character` FROM `player` WHERE `player_id` = '$player_id'");
+        $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
         $character = $this->characters[$character_id];
         $max_water_psych = ($character['name'] != 'phil') ? 6 : 7;
         $this->setGlobalVariable('max_water_psych', $max_water_psych);
@@ -343,6 +364,7 @@ trait UtilTrait {
         if ($water && $operation === 'add') {
             $new_num = $resource_tracker[$player_id]['water'] + $water;
             if ($new_num > $max_water_psych) { $new_num = $max_water_psych; }
+            else if ($new_num < 0) { $new_num = 0; }
             $resource_tracker[$player_id]['water'] = $new_num;
             $water_psych_tracker[$player_id]['water'] = $new_num;
         }
@@ -355,6 +377,7 @@ trait UtilTrait {
         if ($psych && $operation === 'add') {
             $new_num = $resource_tracker[$player_id]['psych'] + $psych;
             if ($new_num > $max_water_psych) { $new_num = $max_water_psych; }
+            else if ($new_num < 0) { $new_num = 0; }
             $resource_tracker[$player_id]['psych'] = $new_num;
             $water_psych_tracker[$player_id]['psych'] = $new_num;
         }
@@ -387,22 +410,28 @@ trait UtilTrait {
 
         $deck = 'porta' . $type;
 
-        if (count($remaining_cards) > 0) { return $this->cards_and_tokens->pickCardForLocation($deck, $player_id); }
-
-        else {
+        if (count($remaining_cards) === 1) {
 
             $asset_discard = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='discard'");
             $asset_deck = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
 
-            switch ($type) {
-                case 'gear': function sortType($asset) { if ($asset['card_type_arg'] >= 22) {return true;} } break;
-                case 'face': function sortType($asset) { if ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21) {return true;} } break;
-                case 'crack': function sortType($asset) { if ($asset['card_type_arg'] <= 7) {return true;} } break;
-                case 'slab': function sortType($asset) { if ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14) {return true;} } break;
-            }
+            $sortType = function ($asset) use ($type) {
+                switch ($type) {
+                    case 'gear':
+                        return ($asset['card_type_arg'] >= 22);
+                    case 'face':
+                        return ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21);
+                    case 'crack':
+                        return ($asset['card_type_arg'] <= 7);
+                    case 'slab':
+                        return ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14);
+                    default:
+                        return false;
+                }
+            };
                     
             if ($asset_discard) {
-                $discard_type = array_filter($asset_discard, 'sortType');
+                $discard_type = array_filter($asset_discard, $sortType);
                 $discard_num = count($discard_type) <= 7 ? count($discard_type) : 7;
                 $discard_to_ledge = array_slice($discard_type, 0, $discard_num);
             } else {
@@ -412,8 +441,7 @@ trait UtilTrait {
 
             if ($discard_num < 7) {
 
-                $deck_type = array_filter($asset_deck, 'sortType');
-
+                $deck_type = array_filter($asset_deck, $sortType);
                 $deck_num = 7 - $discard_num;
                 $deck_to_ledge = array_slice($deck_type, 0, $deck_num);
                 $type_to_ledge = array_merge($discard_to_ledge, $deck_to_ledge);
@@ -424,9 +452,41 @@ trait UtilTrait {
             $refill_portaledge[$deck] = [$discard_num, $card_idx];
             $this->setGlobalVariable('refill_portaledge', $refill_portaledge);
 
-            for ($i=0; $i<=6; $i++) { $this->cards_and_tokens->moveCard($type_to_ledge[$i]['card_id'], $deck, $i); }
+            for ($i=0; $i<=6; $i++) {
+                $id = $type_to_ledge[$i]['card_id'];
+                $refill = $this->cards_and_tokens->moveCard($id, $deck, $i);
+                if ($i+1 <= $discard_num) {
+                    $type_arg = $type_to_ledge[$i]['card_type_arg'];
+                    $this->updateAssetDiscard($id, $type_arg, 'remove');
+                }
+            }
             return $this->cards_and_tokens->pickCardForLocation($deck, $player_id);
         }
+        else { return $this->cards_and_tokens->pickCardForLocation($deck, $player_id); }
+    }
+
+    function checkSpread() {
+
+        $spread_assets = array_keys(self::getCollectionFromDb("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'"));
+        $first_type = '';
+        foreach($spread_assets as $id) {
+
+            $type_arg = $this->getGlobalVariable('asset_identifier', true)[$id];
+            $type = $this->getAssetType($type_arg);
+            if ($first_type === '') { $first_type = $type; }
+            else if ($type != $first_type) { return true; }
+        }
+        return false;
+    }
+
+    function updateAssetDiscard($id, $type_arg, $operation) {
+
+        $asset_discard = $this->getGlobalVariable('asset_discard', true);
+
+        if ($operation === 'add') { $asset_discard[$id] = $type_arg; }
+        else if ($operation === 'remove') { unset($asset_discard[$id]); }
+
+        $this->setGlobalVariable('asset_discard', $asset_discard);
     }
 
     function getCurrentPitch($player_id) {
@@ -462,7 +522,7 @@ trait UtilTrait {
         }
     }
 
-    function bespokeClimbingCard($player_id, $card_type_arg, $choice) {
+    function bespokeClimbingCard($player_id, $card_type_arg, $choice, $jesus_piece) {
 
         switch ($card_type_arg) {
 
@@ -475,13 +535,29 @@ trait UtilTrait {
                     $current_pitch = $this->getCurrentPitch($player_id);
                     if ($current_pitch) {
                         $pitch_info = $this->pitches[$current_pitch];
-                        if ($pitch_info['shade'] === 0) { $sunny_players[] = $player_id; }
+                        if ($pitch_info['shade'] === 0 || $pitch_info['shade'] === 2) { $sunny_players[] = $player_id; }
                     }
                 }
 
                 if ($card_type_arg == '55' && $choice == 'a') {
                     foreach ($sunny_players as $player_id) {
-                        $this->updateResourceTracker($player_id, 'add', -1, null);
+
+                        if ($jesus_piece && $player_id == self::getActivePlayerId()) {
+                            self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                                'player_name' => self::getActivePlayerName(),
+                                'player_id' => $player_id,
+                            ));
+                            $player_idx = array_search($player_id, $sunny_players);
+                            unset($sunny_players[$player_idx]);
+                            $sunny_players = array_values($sunny_players);
+
+                            $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
+                            $jesus_piece_id = array_search('10', $hand_sb_tokens);
+                            $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                        }
+
+                        else { $this->updateResourceTracker($player_id, 'add', -1, null); }
                     }
                 }
 
@@ -523,5 +599,64 @@ trait UtilTrait {
                 break;
         }
         $this->setGlobalVariable('climbing_card_info', array());
+    }
+
+    function sortAssetBoardByFlipped(array $type): array
+    {
+        $cards = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $key = (string) $i;
+            if (isset($type[$key])) {
+                $cards[$key] = $type[$key];
+            }
+        }
+
+        $flippedStatus = [];
+        for ($i = 1; $i <= 4; $i++) {
+            $key = (string) $i;
+            $flippedStatus[$key] = isset($type['flipped'][$key]) ? (bool) $type['flipped'][$key] : false;
+        }
+
+        $sortedCards = [];
+        $sortedFlipped = [];
+
+        foreach ($cards as $key => $card) {
+            if ($flippedStatus[$key]) {
+                $sortedCards[$key] = $card;
+                $sortedFlipped[$key] = true;
+            }
+        }
+
+        foreach ($cards as $key => $card) {
+            if (!$flippedStatus[$key]) {
+                $sortedCards[$key] = $card;
+                $sortedFlipped[$key] = false;
+            }
+        }
+
+        $finalSortedCards = [];
+        $finalSortedFlipped = [];
+        $newKeys = ['1', '2', '3', '4'];
+        $index = 0;
+
+        foreach ($sortedCards as $key => $card) {
+            if ($index < 4) {
+                $finalSortedCards[$newKeys[$index]] = $card;
+                $finalSortedFlipped[$newKeys[$index]] = $sortedFlipped[$key];
+                $index++;
+            }
+        }
+
+        $final = $finalSortedCards;
+        $final['count'] = $type['count'];
+        $final['tucked'] = $type['tucked'];
+        $final['flipped'] = $finalSortedFlipped;
+        $final['permanent'] = $type['permanent'];
+
+        return $final;
+    }
+
+    public function debug_goToState(int $state=98) {
+        $this->gamestate->jumpToState($state);
     }
 }

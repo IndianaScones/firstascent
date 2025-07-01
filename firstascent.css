@@ -15,21 +15,161 @@
 
 /* Note: you must not use any @import directive */
 
-/*#page-content { zoom: 1 !important; }*/
+* { --bga-game-zoom: 1 !important; } /* turn off bga zoom */
 
 /* edit standard bga elements */
-#page-title { z-index: 300; }
+#page-title { z-index: 1052 !important; }
+.action-button { margin-left: 7px; }
+#go_to_next_table_inactive_player { padding: 6px 3px !important; }
+#go_to_next_table_active_player { padding: 6px 3px !important; }
 
-#page-title { box-sizing: border-box; } /* suggested by dev quietmint to fix a potential problem with the fixed action bar width in Firefox */
-#page-title.fixed-page-title { width: 100% !important; }
+#page-title {
+    /* box-sizing: border-box; suggested by dev quietmint to fix a potential problem with the fixed action bar width in Firefox */
+    margin-bottom: 28px;
+}
+.mobile_version #page-title {
+    z-index: 302;
+}
+/* #page-title.fixed-page-title { width: 100% !important; } */
+
+/* .doubletime_infos { display: none; } */
+
+.debug_save, .debug_load {
+    position: fixed;
+    left: 1%;
+    width: 2%;
+    height: 1%;
+    padding: 4px;
+    font-size: 46%;
+    line-height: 83%;
+    z-index: 2000;
+}
+#debug_save1 { top: 80%; }
+#debug_load1 { top: 83%; }
+#debug_save2 { top: 86%; }
+#debug_load2 { top: 89%; }
+#debug_save3 { top: 92%; }
+#debug_load3 { top: 95%; }
+
+#titlebar_addon {
+    position: absolute;
+    width: 100%;
+    height: 66%;
+    height: 2.4191vw;
+    height: 27.807px;
+    top: 100%;
+    left: 0;
+    color: black;
+    background-color: #DCDCDC;
+}
+#round_tracker, #phase_tracker {
+    display: inline-block;
+    position: absolute;
+    bottom: -16%;
+}
+#round_tracker {
+    left: 10.2px;
+}
+#phase_tracker {
+    left: 111.7px;
+}
+#final_round_msg {
+    color: red;
+    font-weight: bold;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+#toggles_wrap {
+    display: flex;
+    position: absolute;
+    width: 45vmin;
+    top: 100%;
+    right: 2%;
+    justify-content: flex-end;
+    gap: 3px;
+}
+#addon_toggle {
+    padding: 2px;
+    font-size: 0.6em;
+    line-height: 92%;
+    background-color: #0f0f0f;
+    color: #f0f0f0;
+}
+#personal_objectives_toggle {
+    padding: 2px;
+    font-size: 0.6em;
+    line-height: 92%;
+    background-color: #2a2867;
+    color: #f0f0f0;
+}
+#personal_objectives_box { /* 511 x 874px */
+    display: none;
+    position: absolute;
+    width: 62.1vmin;
+    height: 52.006vmin;
+    top: 100%;
+    right: -0.17%;
+}
+.fixed-page-title #personal_objectives_box { right: 19.5%; }
+#shared_objectives_toggle {
+    padding: 2px;
+    font-size: 0.6em;
+    line-height: 92%;
+    background-color: #CC5500;
+    color: #f0f0f0;
+}
+#available_sb_message {
+    position: absolute;
+    top: 3px;
+    left: 262.5px;
+    font-size: 69%;
+    line-height: 2vmin;
+    color: #6495ED;
+}
+#scorecard_toggle {
+    padding: 2px;
+    font-size: 0.6em;
+    line-height: 92%;
+    background-color: #8B0000;
+    color: #f0f0f0;
+}
+
+#opponent_objectives_toggle {
+    padding: 2px;
+    font-size: 0.6em;
+    line-height: 92%;
+    background-color: #005947;
+    color: #f0f0f0;
+}
+#opponent_objectives_toggle_msg {
+    position: absolute;
+    top: 0.7vmin;
+    right: 22.9%;
+    font-size: 0.6em;
+    line-height: 92%;
+}
+
+#button_undo {
+    float: right;
+    background-color: red;
+    background-image: none;
+}
 
 /* utility */
 .selectable {
     border: 1px black solid;
     box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
 }
+.mobile_version .selectable {
+    box-shadow: .1em .1em .1em 0px rgba(0,0,0,4);
+}
+.mobile_version .selected_asset {
+    border: 1.5px solid red;
+}
 
 .cursor:hover {
+    cursor: pointer;
+}
+.always_cursor:hover {
     cursor: pointer;
 }
 
@@ -45,17 +185,17 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 33%; max-height: 89.7%; min-height: 89.7%; }
 }
 
-.asset_deck_to_display { animation: asset_deck_to_display 0.75s ease-in-out 1; } 
+.asset_deck_to_display { animation: asset_deck_to_display .75s ease-in-out 1; } 
 @keyframes asset_deck_to_display {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(-90deg); }
 }
 
-.flip_transform { animation: flip_transform 0.75s ease-in-out 1; } 
+.flip_transform { animation: flip_transform .75s ease-in-out 1; } 
 @keyframes flip_transform {
     100% { transform: rotateY(180deg); }
 }
 
-.unflip_transform { animation: unflip_transform 0.75s ease-in-out 1; }
+.unflip_transform { animation: unflip_transform .75s ease-in-out 1; }
 @keyframes unflip_transform {
     100% { transform: rotateY(0deg); }
 }
@@ -67,7 +207,7 @@
 
 .asset_display_to_counter { animation: asset_display_to_counter 0.75s ease-in-out 1; }
 @keyframes asset_display_to_counter {
-    100% { transform: translateX(var(--dy)) translateY(var(--dx)); width: 31%; height: 31%; }
+    100% { top: 0; left: 0; width: var(--dw);  height: var(--dh); }
 }
 
 .asset_display_to_hand { animation: asset_display_to_hand 1.25s ease-in-out 1; }
@@ -80,7 +220,7 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(90deg); }
 }
 
-.asset_portaledge_to_hand { animation: asset_portaledge_to_hand 2s ease-in-out 1; }
+.asset_portaledge_to_hand { animation: asset_portaledge_to_hand 1.5s ease-in-out 1; }
 @keyframes asset_portaledge_to_hand {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 81%; height: 85%; }
 }
@@ -100,9 +240,14 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
 }
 
+.asset_spread_to_discard { animation: asset_spread_to_discard 0.75s linear; }
+@keyframes asset_spread_to_discard {
+    100% { transform: translateX(var(--dy)) translateY(var(--dx)); }
+}
+
 .asset_counter_to_display { animation: asset_counter_to_display 0.75s ease-in-out 1; }
 @keyframes asset_counter_to_display {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 315%; height: 320%; }
+    100% { width: var(--dw); height: var(--dh); top: 0; left: 0; }
 }
 
 .asset_counter_to_counter { animation: asset_counter_to_counter 0.75s ease-in-out 1; }
@@ -110,7 +255,12 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
 }
 
-.asset_display_to_board { animation: asset_display_to_board 2s ease-in-out 1; }
+.asset_tucked_to_board { animation: asset_tucked_to_board 1s linear; }
+@keyframes asset_tucked_to_board {
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: var(--dw); height: var(--dh); }
+}
+
+.asset_display_to_board { animation: asset_display_to_board 1.5s ease-in-out 1; }
 @keyframes asset_display_to_board {
     0% { z-index: var(--z); }
     100% { z-index: var(--z); transform: translateX(var(--dx)) translateY(var(--dy)); width: 181%; height: 180.1%; }
@@ -119,7 +269,7 @@
 .asset_hand_to_board { animation: asset_hand_to_board 1s ease-in-out 1; }
 @keyframes asset_hand_to_board {
     0% { z-index: var(--z); width: 100%; }
-    100% { z-index: var(--z); transform: translateX(var(--dx)) translateY(var(--dy)); width: 111.5%; min-width: 111.5%; max-width: 111.5%; height: 110% }
+    100% { z-index: var(--z); transform: translateX(var(--dx)) translateY(var(--dy)); width: 112.8%; min-width: 112.8%; max-width: 112.8%; height: 111.5% }
 }
 
 .asset_board_to_hand { animation: asset_board_to_hand 1s ease-in-out 1; }
@@ -140,7 +290,7 @@
 
 .asset_hand_to_counter { animation: asset_hand_to_counter 1.5s ease-in-out 1; }
 @keyframes asset_hand_to_counter {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); min-width: 20%; max-width: 20%; height: 20%; }
+    100% { top: 0; left: 0; min-width: var(--dw); max-width: var(--dw); height: var(--dh); }
 }
 
 .climbing_card_discard { animation: climbing_card_discard 0.25s linear; }
@@ -148,14 +298,19 @@
     100% { transform: rotate(-90deg); }
 }
 
-.asset_hand_to_discard { animation: asset_hand_to_discard 2s ease-in-out 1; }
+.asset_hand_to_discard { animation: asset_hand_to_discard 1.5s ease-in-out 1; }
 @keyframes asset_hand_to_discard {
     0% { border-radius: 0; }
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(90deg); 
         width: 62%; min-width: 62%; max-width: 62%; height: 61%; border-radius: 0; }
 }
 
-.asset_board_to_discard { animation: asset_board_to_discard 2s ease-in-out 1; }
+.asset_hand_to_display { animation: asset_hand_to_display 1s ease-in-out 1; }
+@keyframes asset_hand_to_display {
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); min-width: 61.6%; max-width: 61.6%; height: 61%; }
+}
+
+.asset_board_to_discard { animation: asset_board_to_discard 1.5s ease-in-out 1; }
 @keyframes asset_board_to_discard {
     0% { border-radius: 0; }
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(90deg); width: 55.6%; height: 55.4%; border-radius: 0; }
@@ -173,7 +328,7 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(90deg); width: 314.95%; height: 319.95%; }
 }
 
-.asset_tucked_to_discard { animation: asset_tucked_to_discard 2s ease-in-out 1; }
+.asset_tucked_to_discard { animation: asset_tucked_to_discard 1.5s ease-in-out 1; }
 @keyframes asset_tucked_to_discard {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(90deg); width: 314.95%; height: 319.95%; }
 }
@@ -183,7 +338,7 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
 }
 
-.asset_tucked_to_display { animation: asset_tucked_to_display 2s ease-in-out 1; }
+.asset_tucked_to_display { animation: asset_tucked_to_display 1.5s ease-in-out 1; }
 @keyframes asset_tucked_to_display {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 314.892%; height: 318.982%; }
 }
@@ -193,12 +348,7 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 510.99%; height: 523.37%; }
 }
 
-.asset_tucked_to_board { animation: asset_tucked_to_board 1s ease-in-out 1; }
-@keyframes asset_tucked_to_board {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width:569.95%; height: 575.78%; }
-}
-
-.asset_board_to_display { animation: asset_board_to_display 2s ease-in-out 1; }
+.asset_board_to_display { animation: asset_board_to_display 1.5s ease-in-out 1; }
 @keyframes asset_board_to_display {
     0% { border-radius: 0; }
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 55.6%; height: 55.4%; border-radius: 0; }
@@ -215,6 +365,16 @@
     100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(-90deg); width: 200.14%; height: 191.905%; top: -60%; left: 46%; }
 }
 
+.asset_discard_to_display { animation: asset_discard_to_display .75s ease-in-out 1; }
+@keyframes asset_discard_to_display {
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)) rotate(-90deg); }
+}
+
+.discard_box_to_hand { animation: discard_box_to_hand 1.5s ease-in-out 1; }
+@keyframes discard_box_to_hand {
+    100% { width: var(--dw); height: var(--dh); top: var(--dt); left: var(--dl); }
+}
+
 .token_board_to_counter { animation: token_board_to_display 1.5s ease-in-out 1; }
 @keyframes token_board_to_display {
     100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 35%; height: 35%; }
@@ -227,8 +387,14 @@
 
 .token_board_to_hand_choose { animation: token_board_to_hand_choose 1.25s ease-in-out 1; }
 @keyframes token_board_to_hand_choose {
-    0% { width: 200%; height: 200%; }
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 174%; height: 175%; }
+    0% { width: 200%; height: 200%; top: 55%; left: -2px; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 174%; height: 175%; top: 0%; left: 0; }
+}
+
+.token_board_to_counter_choose { animation: token_board_to_counter_choose 1.5s ease-in-out 1; }
+@keyframes token_board_to_counter_choose {
+    0% { width: 200%; height: 200%; top: 55%; left: -2px; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 35%; height: 35%; top: 0; left: 0; }
 }
 
 .token_hand_to_discard { animation: token_hand_to_discard 1.25s ease-in-out 1; }
@@ -238,37 +404,59 @@
 
 .token_counter_to_discard { animation: token_counter_to_discard 1.25s ease-in-out 1; }
 @keyframes token_counter_to_discard {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 285.714%; height: 285.714%; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 345.53%; height: 227.64%; }
+}
+
+.token_display_to_discard { animation: token_display_to_discard 1s ease-in-out 1; }
+@keyframes token_display_to_discard {
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
 }
 
 .token_hand_to_display { animation: token_hand_to_display 1.25s ease-in-out 1; }
 @keyframes token_hand_to_display {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 58%; height: 58%; right: 0; margin-right: 0; }
+    0% { right: 0; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: var(--dw); height: var(--dh); right: 42.68%; margin-right: 0; }
 }
 
-.token_counter_to_display { animation: token_counter_to_display .75s ease-in-out 1; }
+.token_counter_to_display { animation: token_counter_to_display 0.75s ease-in-out 1; }
 @keyframes token_counter_to_display {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 345.414%; height: 227.57%; }
+    100% { width: var(--dw); height: var(--dh); top: 0; left: 0; }
+}
+
+.tech_token_counter_to_display { animation: tech_token_counter_to_display 0.75s ease-in-out 1; }
+@keyframes tech_token_counter_to_display {
+    100% { width: var(--dw); height: var(--dh); top: 11%; left: 0; }
 }
 
 .rope_counter_to_pitch { animation: rope_counter_to_pitch 2s ease-in-out 1; }
 @keyframes rope_counter_to_pitch {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
+    25% { top: var(--dtcounter); left: var(--dlcounter); }
+    100% { top: var(--dt); left: var(--dl); }
+}
+
+.rope_pitch_to_pitch { animation: rope_pitch_to_pitch 1.5s linear; }
+@keyframes rope_pitch_to_pitch {
+    100% { top: var(--dt); left: var(--dl); }
 }
 
 .meeple_panel_to_pitch { animation: meeple_panel_to_pitch 2s ease-in-out 1; }
 @keyframes meeple_panel_to_pitch {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: var(--dw); height: var(--dh); }
+    100% { width: var(--dw); height: var(--dh); top: var(--dt); left: var(--dl); }
+}
+
+.meeple_pitch_to_pitch { animation: meeple_pitch_to_pitch 1.5s linear; }
+@keyframes meeple_pitch_to_pitch {
+    100% { width: var(--dw); height: var(--dh); top: var(--dt); left: var(--dl); }
 }
 
 .lower_ledge_destination { animation: lower_ledge_destination 1s linear; animation-fill-mode: forwards; }
 @keyframes lower_ledge_destination {
-    100% { top: 35%; left: 15%; }
+    100% { top: 35%; left: 22%; }
 }
 
 .upper_ledge_destination { animation: upper_ledge_destination 1s linear; animation-fill-mode: forwards; }
 @keyframes upper_ledge_destination {
-    100% { top: 40%; left: 40%; }
+    100% { top: -13%; left: 79%; }
 }
 
 .water_psych_cubes { animation: water_psych_cubes 1s ease-in-out 1; }
@@ -278,7 +466,16 @@
 
 .climbing_card_straighten { animation: climbing_card_straighten .75s linear; }
 @keyframes climbing_card_straighten {
-    100% { transform: rotate(90deg); }
+    100% { transform: rotate(90deg) translateY(21%); }
+}
+
+.crimper_first_card_straighten { animation: crimper_first_card_straighten .75s linear; }
+@keyframes crimper_first_card_straighten {
+    100% { transform: rotate(90deg) translateY(19.5%) translateX(-39%); }
+}
+.crimper_second_card_straighten { animation: crimper_second_card_straighten .75s linear; }
+@keyframes crimper_second_card_straighten {
+    100% { transform: rotate(90deg) translateY(19.5%) translateX(61%); }
 }
 
 .climbing_card_to_display { animation: climbing_card_to_display 1s ease-in-out 1; }
@@ -303,7 +500,7 @@
 
 .roll_die_wrapper { animation: roll_die_wrapper 0.75s linear; animation-fill-mode: forwards; }
 @keyframes roll_die_wrapper {
-    100% { margin-right: 0; }
+    100% { margin-right: -51.2vmin; }
 }
 .roll_die { animation: roll_die 0.75s linear; animation-fill-mode: forwards; }
 @keyframes roll_die {
@@ -311,8 +508,8 @@
 }
 .remove_die { animation: remove_die 0.5s linear; animation-delay: 0s; }
 @keyframes remove_die {
-    0% { margin-right: 0%; opacity: 1; } 
-    100% { margin-right: -25%; opacity: 0; }
+    0% { margin-right: -51.2vmin; opacity: 1; } 
+    100% { margin-right: -77.8vmin; opacity: 0; }
 }
 
 .token_appears { animation: token_appears 0.75s linear; animation-fill-mode: forwards; }
@@ -341,25 +538,38 @@
 
 .token_to_pitch { animation: token_to_pitch 1s linear; }
 @keyframes token_to_pitch {
-    0% { margin-right: 0%; right: 25%; }
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 1.4vmax; height: 2.8vmin; right: 29.5%; }
+    100% { width: var(--dw); height: var(--dh); top: 0; left: 0; }
 }
 
 .token_to_hand { animation: token_to_hand 1s linear; }
 @keyframes token_to_hand {
-    0% { margin-right: 0; right: 25%}
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 9.3vmax; height: 20vmin; right: 19.65%; }
+    100% { width: var(--dw); height: var(--dh); top: 0; left: 0; }
 }
 
 .token_to_counter { animation: token_to_counter .75s linear; }
 @keyframes token_to_counter {
-    0% { margin-right: 0; right: 25%; }
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); width: 2.2vmax; height: 4.1vmin; right: 24%; }
+    100% { width: var(--dw); height: var(--dh); top: 0; left: 0; }
+}
+
+.token_to_first_position { animation: token_to_first_position 1s ease-in-out 1; }
+@keyframes token_to_first_position {
+    0% { top: 0%; }
+    100% { top: 57%; }
 }
 
 .token_to_second_position { animation: token_to_second_position 1s ease-in-out 1; }
 @keyframes token_to_second_position {
-    100% { transform: translateX(var(--dx)) translateY(var(--dy)); }
+    0% { top: 0%; }
+    100% { transform: translateX(var(--dx)) translateY(var(--dy)); top: 57%; }
+}
+
+.token_grow_no_flip { animation: token_grow_no_flip 1s ease-in-out 1; }
+@keyframes token_grow_no_flip {
+    100% { width: 200%; height: 200%; }
+}
+.token_flip_no_grow { animation: token_flip_no_grow 1s ease-in-out 1; animation-fill-mode: forwards; }
+@keyframes token_flip_no_grow {
+    100% { transform: rotateY(180deg); }
 }
 
 .token_to_permanent_slot { animation: token_to_permanent_slot 1.5s ease-in-out 1; }
@@ -381,13 +591,22 @@
 .deck_reshuffle_L { animation: deck_reshuffle_L .75s cubic-bezier(.81,.53,.86,.79); }
 @keyframes deck_reshuffle_L {
     50% { z-index: var(--z); transform: translateX(var(--xTarget)) rotate(-30deg); }
-    100% { transform: translateX(0) rotate(0); }
+    100% { z-index: var(--z); transform: translateX(0) rotate(0); }
 }
 .deck_reshuffle_R { animation: deck_reshuffle_R .75s cubic-bezier(.81,.53,.86,.79); }
 @keyframes deck_reshuffle_R {
     50% { z-index: var(--z); transform: translateX(var(--xTarget)) rotate(30deg); }
-    100% { transform: translateX(0) rotate(0); }
+    100% { z-index: var(--z); transform: translateX(0) rotate(0); }
 }
+#final_round_msg { animation: pulse 2s forwards; }
+@keyframes pulse {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.5); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.5); }
+    100% { transform: scale(1); }
+}
+/* end animations */
 
 .shuffle_back {
     width: 100%;
@@ -438,30 +657,79 @@
 /* climbing card */
 #climbing_slot {
     display: none;
-    position: fixed;
-    width: 20.4786vmax;
-    height: 73.409vmin;
-    top: 19.5%;
-    left: 30%;
+    position: absolute;
+    width: 19.455vmax;
+    height: 0;
+    padding-top: 32.636vmax;
+    top: 100%;
+    /* left: 17vmax; */
     z-index: 201;
 }
-
 .mobile_version #climbing_slot {
-    width: 61.4358vmax;
-    height: 220.227vmin;
-    top: 35%;
-    left: 18%;
+    width: 46vw;
+    padding-top: 77.037vw;
+    left: 28vw;
+}
+#climbing_dimmer {
+    position: fixed;
+    z-index: 200;
+}
+
+#crimper_draw {
+    display: none;
+    position: absolute;
+    width: 208.34%;
+    height: 100%;
+    top: 9%;
+    left: -87%;
+    transform: rotate(90deg);
+    /* border: 2px solid black; */
+}
+#crimper_draw_1, #crimper_draw_2 {
+    display: inline-block;
+    width: 48%;
+    height: 100%;
+    transform: rotate(270deg);
+    /* border: 1px dashed red; */
+}
+#crimper_draw_2 { margin-left: -2%; }
+
+#crimper_display {
+    display: none;
+    position: absolute;
+    width: 35.149vw;
+    height: 0;
+    padding-top: 63vmin;
+    top: 100%;
+    left: 25%;
+    z-index: 201;
+    /* border: 2px solid black; */
+}
+.mobile_version #crimper_display {
+    width: 50.705vw;
+    height: 0;
+    padding-top: 42.53vw;
+    top: 146%;
+    left: 23.5%;
     z-index: 301;
 }
-
-.mobile_version #page-title {
-    z-index: 302;
+#crimper_display_1, #crimper_display_2 {
+    display: inline-block;
+    position: absolute;
+    width: 50.05%;
+    height: 100%;
+    top: 0;
+    z-index: 201;
+    /* border: 1px dashed red; */
 }
+#crimper_display_1 { left: 0px; }
+#crimper_display_2 { left: 55%; }
 
 #climbing_straightened {
     position: absolute;
     width: 100%;
     height: 100%;
+    left: -35.4%;
     transform: rotate(90deg);
 }
 
@@ -485,16 +753,45 @@
     height: 30px;
 }
 
+.token_button .skills_and_techniques { left: 15%; }
+
+.button_wrap { position: relative; }
+
+.gear_button { background: #dec5a1 !important; }
+.face_button { background: #b2d77f !important; }
+.crack_button { background: #b7a6d0 !important; }
+.slab_button { background: #f69b8f !important; }
+
+#msg_wrapper {
+    position: absolute;
+    top: 32%;
+}
+.clear .skills_and_techniques {
+    display: inline-block;
+    position: relative;
+    left: 1vmin;
+}
+.confirmation_msg {
+    display: inline-block;
+    position: relative;
+}
+
 #generalactions .token_button {
     display: inline-flex;
     padding: 5px 3px;
 }
 
-#generalactions .token_button > * {
+#generalactions .token_button > .skills_and_techniques {
     width : 90%;
     height : 36px;
     top : -10%;
     left: 4%;
+}
+
+.button_text_wrap {
+    position: relative;
+    top: -28%;
+    font-size: 0.9em;
 }
 
 /*.mobile_version #generalactions .token_button { width: 3%; }
@@ -529,7 +826,7 @@
     width: 30px;
     height: 30px;
     background-image: url('img/risk_water_psych.png');
-    background-size: 500% 100%;
+    background-size: 1000% 100%;
 }
 
 .risk {
@@ -538,7 +835,7 @@
     width: 15px;
     height: 15px;
     background-image: url('img/risk_water_psych.png');
-    background-size: 500% 100%;
+    background-size: 1000% 100%;
 }
 
 .risk_checkmark { background-position: -0% -0%; }
@@ -556,15 +853,28 @@
 
 .rope_num { margin-right: 5px; }
 
+/* push opponents' info left to make room for starting token */
+.water_psych_panel > .panel_num { margin-left: -0.5%; }
+.water_psych_panel > .psych { margin-left: -0.5%; }
+.water_psych_panel > .hand_counter { margin-left: 1.7%; }
+.water_psych_panel > .pp_rope { margin-left: -1%; }
+
+.current-player-board .water_psych_panel > .panel_num { margin-left: 0; }
+.current-player-board .water_psych_panel > .psych { margin-left: 0; }
+.current-player-board .water_psych_panel > .hand_counter { margin-left: 6px; }
+.current-player-board .water_psych_panel > .pp_rope { margin-left: 0; }
+.current-player-board .water_psych_panel > .rope_num { margin-right: 5px; }
+
+
 #die_wrapper {
     display: none;
-    position: absolute;
+    position: fixed;
     width: 5vmax;
     height: 10.475vmin;
-    top: 11%;
-    right: 25%;
-    margin-right: -25%;
-    z-index: 299;
+    top: 34vmin;
+    right: 110.7vmin;
+    margin-right: -77.8vmin;
+    z-index: 298;
 }
 
 .risk_die {
@@ -580,7 +890,7 @@
     width: 100%;
     height: 100%;
     background-image: url('img/risk_water_psych.png');
-    background-size: 500% 100%;
+    background-size: 1000% 100%;
     border-radius: 2%;
     line-height: 2em;
     border: 2px solid black;
@@ -624,21 +934,32 @@
 .meeple {
     display: inline-block;
     position: absolute;
+    width: 24px;
+    height: 29.564px;
     background-image: url('img/meeples.png');
     background-size: 600% 100%;
-    z-index: 20;
+    z-index: 21;
 }
 
-#ref_row .meeple { width: 10.258%; height: 11.651%; top: 24%; left: 54%; }
-.cp_panel .meeple { width: 10.258%; height: 30px; top: 21%; left: 55%; /*height: 37.98%;*/ }
-.pitch .meeple { width: 29.755%; height: 32.185%; }
+#ref_row .meeple {
+    top: 36%;
+    left: 55%;
+}
+.cp_panel .meeple {
+    top: 21%;
+    left: 52%;
+}
 
-.mobile_version #ref_row .meeple { width: 6.65%; height: 12.846%; left: 22%; }
-.mobile_version .cp_panel .meeple { width: 6.65%; height: 37.81%; }
+.mobile_version #ref_row .meeple {
+    left: 22%;
+}
 
 .pitch > .meeple {
-    top: 28.4%;
-    left: 33.2%;
+    width: 29.755%;
+    height: 32.185%;
+    top: 31.3%;
+    left: 36.2%;
+    pointer-events: all;
 }
 
 #starting_player {
@@ -652,7 +973,7 @@
 }
 
 #ref_row > #starting_player {
-    top: 16%;
+    top: 31%;
     left: 34%;
 }
 
@@ -678,8 +999,8 @@
 
 .panel_technique { margin-right: 2%; }
 .technique_num {
-    top: -2px;
-    left: 4%;
+    top: 97%;
+    left: 31%;
     margin-right: 10.2%;
 }
 
@@ -746,7 +1067,7 @@
     height: 60%;
     width: 60%;
     background-image: url('img/risk_water_psych.png');
-    background-size: 500% 100%;
+    background-size: 1000% 100%;
 }
 
 #rest_water_symbol { background-position: -400% -0%; }
@@ -766,25 +1087,36 @@
     display: none;
     top: 7%;
     left: 3.6%;
-    font-size: 329%;
+    font-size: 4vw;
     color: #5a7994;
     pointer-events: none;
+}
+.mobile_version .rest_minus {
+    font-size: 5vw;
 }
 
 .rest_plus {
     display: none;
     top: 16%;
     left: 80.5%;
-    font-size: 234%;
+    font-size: 2.9vw;
     color: #5a7994;
     pointer-events: none;
+}
+.mobile_version .rest_plus {
+    font-size: 4vw;
 }
 
 .rest_draw_num {
     display: none;
     top: 68%;
-    left: 41.5%;
-    font-size: 200%;
+    left: 40%;
+    /* font-size: 200%; */
+    top: 63%;
+    font-size: 3vw;
+}
+.mobile_version .rest_draw_num {
+    font-size: 4vw;
 }
 
 .rest_icon { top: 6%; left: 19%; }
@@ -846,24 +1178,39 @@
     background-size: 400% 800%;
 }
 
+.summit_beta_click {
+    display: none;
+    width: 99%;
+    height: 98%;
+    clip-path: circle(50% at 50% 50%);
+}
+
+.summit_discard {
+    position: absolute;
+    width: 6.8%;
+    height: 10.1%;
+}
+
+.hand_counter > .summit_beta {
+    width: 150%;
+    height: 100%;
+    left: -23%;
+}
+
 /* symbol tokens */
 .symbol_token {
     position: absolute;
     width: 5vmax;
     height: 10.475vmin;
     top: 11%;
-    right: 25%;
-    margin-right: -25%;
-    z-index: 299;
     background-image: url('img/skills_and_techniques.png');
     background-size: 900% 100%;
 }
 
-#assets_wrap .symbol_token {
-    position: relative;
-    z-index: 0;
-    right: 0;
-    margin-right: 0;
+#board > .symbol_token {
+    right: 25%;
+    margin-right: -25%;
+    z-index: 299;
 }
 
 .points_wrapper {
@@ -884,14 +1231,21 @@
 
 .points_token {
     position: absolute;
-    width: 2.6vmax;
-    height: 6.2vmin;
+    width: 104.49%;
+    height: 0;
+    padding-top: 116.6%;
     top: 11%;
     right: 25%;
     margin-right: -25%;
-    z-index: 200;
     background-image: url('img/points.png');
     background-size: 200% 100%;
+}
+
+#board > .points_token {
+    width: 33.276px;
+    height: 37.135px;
+    padding-top: 0;
+    z-index: 1;
 }
 
 .points_wrapper > .points_token {
@@ -899,6 +1253,7 @@
     right: -0.4%;
     margin-right: 0;
 }
+#ebd-body .points_wrapper > .flip_card { height: 0; }
 
 .two_points { background-position: -0% -0%; }
 .four_points { background-position: -100% -0%; }
@@ -916,21 +1271,46 @@
 .pa1 { left: 60.5%; }
 .pa2 { left: 66.8%; }
 .pa3 { left: 73.3%; }
-.pa4 { left: 79.4%; }
-.pa5 { left: 85.8%; }
+.pa4 { left: 79.6%; }
+.pa5 { left: 86%; }
 .pa6 { left: 92.6%; }
 
 .permanent_assets_wrapper > .skills_and_techniques { width: 100%; height: 100%; }
 .permanent_assets_wrapper > .gear_token { width: 98%; }
+.gear_token_border {
+    position: absolute;
+    width: 70%;
+    height: 70%;
+    top: 13%;
+    left: 11%;
+    transform: rotate(45deg);
+    border: 1px solid black;
+    box-shadow: 5px 0px 5px 0px rgba(0,0,0,4);
+}
+.selected_gear_border {
+    top: 13%;
+    left: 12%;
+    border: 2px solid blue;
+    z-index: 1;
+    pointer-events: none;
+    width: 62%;
+    height: 64%;
+}
+.unnecessary_gear_border {
+    top: 9%;
+    left: 6.5%;
+    border: 3px solid red;
+}
 
 .gear_token { background-position: -800% -0%; }
-.face_token { background-position: -600% -0%; }
-.crack_token { background-position: -500% -0%; }
-.slab_token { background-position: -700% -0%; }
+.face_token { background-position: -600% -0%; border-radius: 50%; }
+.crack_token { background-position: -500% -0%; border-radius: 50%; }
+.slab_token { background-position: -700% -0%; border-radius: 50%; }
 .precision_token { background-position: -200% -0%; }
 .balance_token { background-position: -100% -0%; }
 .pain_tolerance_token { background-position: -0% -0%; }
 .power_token { background-position: -300% -0%; }
+.any_skill { background-position: -400% -0%; }
 
 #permanent_asset_box {
     width: 20vmax;
@@ -940,8 +1320,8 @@
     margin-right: -14%;
     z-index: 10;
     position: absolute;
-    border: 1px solid;
-    background-color: whitesmoke;
+    /* border: 1px solid;
+    background-color: whitesmoke; */
 
 }
 #permanent_asset_box .skills_and_techniques {
@@ -962,6 +1342,14 @@
     left: 0;
 }
 
+.pa_checkbox {
+    position: absolute;
+    top: -32%;
+    left: -7.7%;
+    font-size: 1.2em;
+    color: black;
+}
+
 .pitch .symbol_token {
     width: 100%;
     height: 100%;
@@ -973,16 +1361,35 @@
     position: absolute;
     width: 19%;
     height: 16%;
-    top: 69%;
-    left: 41.5%;
+    top: 77%;
+    left: 44.5%;
+}
+.pitch_token_wrapper_2 {
+    top: 69.5%;
+    left: 63%;
+}
+.pitch_token_wrapper_3 {
+    top: 60%;
+    left: 80.5%;
 }
 
 .pitch_token_wrapper_tt {
-    height: 12%;
-    top: 62%;
-    left: 44%;
-    width: 18%;
+    height: 5.009vmin;
+    top: 29vmin;
+    left: 12.85vmin;
+    width: 5.009vmin;
 }
+.pitch_token_wrapper_2.pitch_token_wrapper_tt {
+    top: 28.8vmin;
+    left: 17.45vmin;
+}
+.pitch_token_wrapper_3.pitch_token_wrapper_tt {
+    top: 26vmin;
+    left: 22.4vmin;
+}
+.pitch_token_wrapper_tt.with_rope_order { top: 29vmin; }
+.pitch_token_wrapper_2.pitch_token_wrapper_tt.with_rope_order { top: 26.4vmin; }
+.pitch_token_wrapper_3.pitch_token_wrapper_tt.with_rope_order { top: 23.7vmin; }
 
 #assets_wrap .symbol_token {
     width: 100%;
@@ -991,15 +1398,27 @@
 }
 
 .selectable_token {
-    border: 1px solid black;
+    top: -3%;
+    left: -7%;
+    border: 2px solid black;
     border-radius: 50%;
     box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+    margin-left: 8%;
+}
+
+#assets_wrap .selected_token {
+    margin-left: 8%;
 }
 
 .selected_token {
-    border: 3px solid red;
+    top: -3%;
     border-radius: 50%;
-    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+    box-shadow: 
+        inset 0 0 0 3px blue,
+        5px 5px 5px 0px rgba(0,0,0,4);
+}
+#assets_wrap .selected_token_wrap {
+    margin-right: 1.2%;
 }
 
 /* climbing cards deck */
@@ -1025,9 +1444,14 @@
     height: 100%;
     transform: rotate(90deg);
     z-index: 200;
+    pointer-events: none;
 }
 
-#climbing_discard > .climbing { top: 0; }
+#climbing_discard_90 > .climbing {
+    width: 100%;
+    height: 100%;
+    top: 0;
+}
 
 .climbing {
     position: absolute;
@@ -1035,7 +1459,11 @@
     background-size: 1000% 800%;
 }
 
-.drawn_climbing { width: 100%; height: 100%; }
+.drawn_climbing {
+    width: 100%;
+    height: 100%;
+    top: 0;
+}
 
 /* objectives */
 .shared_objective {
@@ -1047,18 +1475,85 @@
     margin-bottom: 5px;
 }
 
+.shared_objective_tracker {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    position: absolute;
+    top: 111%;
+    padding: 5px 7px 5px 5px;
+    background-color: white;
+}
+
+.shared_player_div {
+    display: flex;
+    position: relative;
+    font-size: 0.7em;
+}
+.midSizeDialog .shared_player_div { font-size: 0.85em; }
+
+.o_unmet, .o_met, .o_num {
+    display: inline-block;
+    position: relative;
+    margin-left: 3%;
+    font-weight: bold;
+}
+.o_met {
+    top: -0.225vmin;
+}
+.midSizeDialog .o_met {
+    top: -0.4vmin;
+}
+
+.dot {
+    margin-left: 4%;
+    line-height: 134%;
+}
+
 .personal_objective {
-    /* width: 126px; height: 215px; */
     display: inline-block;
     position: relative;
     width: 48.965%;
     height: 100%;
     background-image: url('img/reference_objectives.jpg');
     background-size: 800% 200%;
-    float: right;
-    top: 0.6%;
-    right: -1%;
-    margin-right: 1%;
+}
+#personal_objective_8 { background-position: -100.1% -100% !important; }
+
+.log_personal_objective_tooltip_parent {
+    /* max-width: 170px; */
+    width: 47vmin;
+    height: 39.361vmin;
+}
+.game_personal_objective_tooltip_parent { max-width: 35vmin; }
+.po_tt_wrapper {
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 1%;
+    left: 50.5%;
+    font-size: 0.9em;
+}
+.log_personal_objective_tooltip_parent > .po_tt_wrapper * { position: absolute; }
+.po_tt_wrapper > #po_tt_title { text-wrap: nowrap; }
+.dijitTooltipBelow .log_below { top: 6%; }
+.tt_hr {
+    left: 40%;
+    color: black;
+    width: 11%;
+}
+.po_tt_wrapper > .tt_hr { position: absolute; }
+#po_tt_cilysi {
+    position: absolute;
+    top: 39%;
+    font-size: 0.9em;
+}
+
+.check {
+    position: absolute;
+    font-size: 0.8em;
+    font-weight: bold;
+    left: 0.9%;
 }
 
 /* asset deck and spread */
@@ -1089,6 +1584,39 @@
 }
 
 #asset_discard > .asset {
+    width: 100%;
+    height: 100%;
+}
+
+#discard_box {
+    display: flex;
+    position: absolute;
+    width: 51.305vmax;
+    height: 55vmin;
+    top: 10%;
+    left: 30%;
+    flex-wrap: wrap;
+    overflow-y: scroll;
+    background-color: whitesmoke;
+    border: 1px solid black;
+    z-index: 301;
+}
+.mobile_version #discard_box {
+    width: 26.305vmax;
+    height: 30vmin;
+}
+
+#discard_box > .discard_wrapper {
+    height: 47.753%;
+    flex-basis: 96%;
+    min-width: 15.974%;
+    max-width: 15.974%;
+    margin-top: 0.25%;
+    margin-bottom: 0.25%;
+    margin-left: 0.25%;
+}
+
+.discard_wrapper > .asset {
     width: 100%;
     height: 100%;
 }
@@ -1130,29 +1658,36 @@
 .hand_asset_wrap {
     display: flex;
     position: relative;
-    height: 90.8%;
     flex-basis: 96%;
-    min-width: 13.78%;
-    max-width: 13.78%;
+    min-width: 17.062vmin;
+    max-width: 17.062vmin;
+    height: 26.2121vmin;
     margin-top: 0.25%;
     margin-right: 0.25%;
-    margin-bottom: 0.25%;
+    margin-bottom: 1.25%;
     margin-left: 0.25%;
+    /* height: 90.8%; */
+    /* min-width: 14.37%; */
+    /* max-width: 14.37%; */
+    /* width: 102.198px; */
+    /* height: 157.01px; */
 }
+.selectable_wrap { margin-right: 0.5%; }
 
-.hand_token_wrap {          /* formerly #assets_wrap .summit_beta */
+.hand_token_wrap {
     display: flex;
     position: relative;
-    height: 69.396%;
-    flex-basis: 96%;
-    min-width: 16.18%;
-    max-width: 16.18%;
+    min-width: 20.034vmin;
+    max-width: 20.034vmin;
+    height: 20.034vmin;
     margin-top: 2.7%;
     margin-right: 0.25%;
-    margin-left: 0.2%;
+    margin-left: 1.2%; /* was recently 0.2 */
 }
 
-.hand_token_wrap > .summit_beta { width: 100%; height: 100%; }
+.hand_token_wrap > .summit_beta, #summit_discard > .summit_beta { width: 100%; height: 100%; }
+
+.break_div { flex-basis: 100%; height: 0; }
 
 /* pitches */
 .pitch {
@@ -1205,6 +1740,8 @@
 }
 
 /* characters */
+.player_name_board { font-size: 2.7vmin; }
+
 .character_selection_ratio {
     display: inline-block;
     position: relative;
@@ -1283,7 +1820,7 @@
 }
 
 .namebox_selected {
-    border: solid 3px red;
+    border: solid 3px blue;
 }
 
 .character_ratio {
@@ -1423,6 +1960,7 @@
 }
 
 .asset_board_slot > .asset {
+    position: absolute;
     width: 100%;
     height: 100%;
     border-radius: 5%;
@@ -1447,6 +1985,41 @@
 .slab_3 { top: 34.8%; left: 77.4%; z-index: 5; }
 .slab_4 { top: 26.8%; left: 75.3%; z-index: 6; }
 
+/* Free Soloist */
+.fs_f1 { top: 50.9%; left: 7.6%;}
+.fs_f2 { left: 5.6%; }
+.fs_f3 { left: 3.5%; }
+.fs_f4 { left: 1.5%; }
+.fs_fc { left: 18.3%; }
+.fs_c1 { top: 50.7%; left: 32.2%; }
+.fs_c2 { left: 30%; }
+.fs_c3 { left: 28.1%; }
+.fs_c4 { left: 26%; }
+.fs_cc { left: 43%; }
+.fs_s1 { left: 56.8%; }
+.fs_s2 { top: 42.6%; left: 54.7%; }
+.fs_s3 { left: 52.7%; }
+.fs_s4 { left: 50.6%; }
+.fs_sc { left: 67.6%; }
+
+/* Young Prodigy */
+.yp_g1 { top: 50.7%; left: 9.9%; z-index: 3; }
+.yp_g2 { top: 44.7%; left: 7.8%; z-index: 4; }
+.yp_g3 { top: 38.8%; left: 5.6%; z-index: 5; }
+.yp_g4 { top: 32.7%; left: 3.6%; z-index: 6; }
+.yp_g5 { top: 26.7%; left: 1.5%; z-index: 7; }
+.yp_f2 { top: 42.6%; left: 30.4%; }
+.yp_fc { top: 34.5%; left: 44.9%; }
+.yp_cc { top: 34.7%; left: 69.6%; }
+.yp_sc { top: 34.8%; left: 94.2%; }
+
+#young_prodigy_gear_1 { top: 50.6%; left: 9.9%; z-index: 3; }
+#young_prodigy_gear_2 { top: 44.7%; left: 7.8%; z-index: 4; }
+#young_prodigy_gear_3 { top: 38.8%; left: 5.6%; z-index: 5; }
+#young_prodigy_gear_4 { top: 32.7%; left: 3.6%; z-index: 6; }
+#young_prodigy_gear_5 { top: 26.7%; left: 1.5%; z-index: 7; }
+#young_prodigy_face_2 { top: 42.6%; left: 30.4%; z-index: 4; }
+
 .asset_counter {
     display: none;
     position: absolute;
@@ -1461,6 +2034,10 @@
 .board_face_counter { left: 42.87%; }
 .board_crack_counter { left: 67.55%; }
 .board_slab_counter { left: 92.2%; }
+#free_soloist_face_counter { left: 18.2%; }
+#free_soloist_crack_counter { left: 42.91%; }
+#free_soloist_slab_counter { left: 67.4%; }
+#young_prodigy_gear_counter { left: 20.5%; }
 
 .asset_counter_img {
     position: absolute;
@@ -1536,13 +2113,6 @@
     left: 74%;
 }
 
-#young_prodigy_gear_1 { top: 50.6%; left: 9.9%; z-index: 7; }
-#young_prodigy_gear_2 { top: 44.7%; left: 7.8%; z-index: 6; }
-#young_prodigy_gear_3 { top: 38.8%; left: 5.6%; z-index: 5; }
-#young_prodigy_gear_4 { top: 32.7%; left: 3.6%; z-index: 4; }
-#young_prodigy_gear_5 { top: 26.7%; left: 1.5%; z-index: 3; }
-#young_prodigy_face_2 { top: 42.6%; left: 30.4%; }
-
 .hand_counter > .asset {
     position: absolute;
     width: 100%;
@@ -1560,20 +2130,24 @@
 .rope {
     display: inline-block;
     position: absolute;
-    width: 250%;
-    height: 272%;
-    top: -227.3%;
-    left: -77%;
+    width: 10%;
+    height: 0;
+    padding-top: 281%;
+    top: -231%;
+    left: 49%;
     transform-origin: bottom;
     background-image: url('img/rope.png');
-    background-size: 200% 600%;
+    background-size: 100% 600%;
     z-index: 10;
 }
 
 .rope_hub {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    /*width: 30px;
+    height: 30px;*/
+    width: 37.19%;
+    height: 0;
+    padding-top: 37.19%;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
@@ -1582,23 +2156,32 @@
 
 .rope_wrapper {
     position: absolute;
-    width: 30px;
-    height: 30px;
+    /*width: 30px;
+    height: 30px;*/
+    width: 100%;
+    height: 0;
+    padding-top: 100%;
     top: -1px;
     left: -1px;
     z-index: 19;
 /*    border: 1px solid black;*/
 }
 
-.rope_hub > .r90 { top: 7%; }
-.rope_hub > .r150 { top: 7%; left: -3%; }
-.rope_hub > .r210 { left: -1.1px; }
-.rope_hub > .r330 { left: 1px; }
-.rope_hub > .r30 { top: 2%; left: 6%; }
+.rope_hub > .r90 { top: 1.5%; left: -8%; }
+.rope_hub > .r150 { top: -2%; left: -5%; }
+.rope_hub > .r210 { top: -2%; left: 0%; }
+.rope_hub > .r270 { top: 3.3%; left: 4%; }
+.rope_hub > .r330 { top: 8%; left: -1%; }
+.rope_hub > .r30 { top: 7%; left: -7%; }
+.rope_hub > .r30 > .mini_rope { top: -174%; left: -89%; }
+.rope_hub > .rope_overflow > .r210 > .mini_rope { top: -173%; left: 48%; }
 
 .mini_rope {
-    height: 221%;
-    top: -178.3%;
+    width: 10%;
+    height: 0;
+    padding-top: 217%;
+    top: -166%;
+    left: 49%;
 }
 
 .rope_overflow {
@@ -1609,77 +2192,190 @@
 }
 
 .overflow_counter {
-    width: 3700%;
-    height: 2200%;
-    top: 63%;
-    right: 62%;
+    width: 3398%;
+    height: 2193%;
+    bottom: -162%;
+    left: -161%;
 }
 
-.overflow_210 {
+#pitches .overflow_counter > .rope_wrapper {
+    top: -11.7%;
+    left: 102.1%;
+    width: 2.943%;
+    padding-top: 2.943%;
+}
+
+.overflow_210 { /* upper right */
     width: 270%;
     height: 360%;
-    top: -306%;
-    left: 41%;
+    top: -71%;
+    left: -90%;
 }
-.overflow_210 > .rope_wrapper { top: 86%; left: -19%; }
+.overflow_210 > .rope_wrapper {
+    width: 37.04%;
+    padding-top: 37.04%;
+    top: 85%;
+    left: -17%;
+}
 
 .overflow_270 { /* right */
     width: 287%;
     height: 360%;
-    top: -114%;
-    left: 47%;
+    top: -115%;
+    left: -223.5%;
 }
-.overflow_270 > .rope_wrapper { top: 31%; left: -15%; }
+.overflow_270 > .rope_wrapper { /* from pitch 6-7 */
+    width: 34.85%;
+    padding-top: 34.85%;
+    top: 33%; /* was 32.5 */
+    left: -16%; /* was -10.5 */
+}
 
-.overflow_330 {
+.overflow_330 { /* lower right */
     width: 280%;
     height: 360%;
-    top: 46%;
-    left: 33%;
+    top: -186%;
+    left: -90%;
 }
-.overflow_330 > .rope_wrapper { top: -12%; left: -10%; }
+.overflow_330 > .rope_wrapper {
+    width: 35.72%;
+    padding-top: 35.72%;
+    top: -11%;
+    left: -15%;
+}
 
-.overflow_30 {
+.overflow_30 { /* lower left */
     width: 287%;
     height: 360%;
-    top: 45%;
-    left: -232%;
+    top: -185%;
+    left: -99%;
 }
-.overflow_30 > .rope_wrapper { top: -11%; left: 84%; }
+.overflow_30 > .rope_wrapper {
+    width: 34.85%;
+    padding-top: 34.85%;
+    top: -12%;
+    left: 79%;
+}
 
 .overflow_90 { /* left */
-    width: 287%;
+    width: 289%;
     height: 360%;
     top: -133%;
-    left: -236%;
+    left: 39%;
 }
-.overflow_90 > .rope_wrapper { top: 38%; left: 83%; }
-
-.overflow_150 {
-    width: 270%;
-    height: 360%;
-    top: -309%;
-    left: -219%;
-}
-.overflow_150 > .rope_wrapper { top: 86%; left: 75%; }
-
-.overflow_counter > .rope_wrapper {
-    top: -11%;
-    left: 101.5%;
+.overflow_90 > .rope_wrapper {
+    width: 34.61%;
+    padding-top: 34.61%;
+    top: 37.5%;
+    left: 81%;
 }
 
-/* specific map changes */
+.overflow_150 { /* upper left */
+    width: 272%;
+    height: 366%;
+    top: -74%;
+    left: -80.5%;
+}
+.overflow_150 > .rope_wrapper {
+    width: 36.78%;
+    padding-top: 36.78%;
+    top: 84%;
+    left: 78%;
+}
 
-/* pitch */
-.desert #pitch_17_wrap { height: 14%; }
+.pp_rope > .rope_wrapper {
+    top: -200.7%;
+    left: 107.1%;
+}
 
-/* meeple */
-.desert #pitch_2 .meeple { top: 28.6%; left: 33.73%; }
-.desert #pitch_10 .meeple { top: 28.5%; left: 33.05%; }
+.lower_ledge_overflow {
+    top: -304%;
+    left: 46%;
+}
+.lower_ledge_overflow > .rope_wrapper {
+    top: 88%;
+    left: -18%;
+}
+.upper_ledge_overflow {
+    top: 45%;
+    left: -227%;
+}
+.upper_ledge_overflow > .rope_wrapper {
+    top: -66%;
+    left: 120%;
+}
+.rope_hub .lower_ledge_refresh {
+    top: 35%;
+    left: 22.2%;
+}
+.rope_hub .upper_ledge_refresh {
+    top: -14%;
+    left: 79%;
+}
 
-/* rope */
-.desert #pitch_2 .rope_overflow .r150 { left: 74%; }
-.desert #pitch_1 .r30 { top: 10%; left: 10%; }
+.r30 > .rope { transform: rotate(30deg); }
+.r90 > .rope { transform: rotate(90deg); }
+.r150 > .rope { transform: rotate(150deg); }
+.r210 > .rope { transform: rotate(210deg); }
+.r270 > .rope { transform: rotate(270deg); }
+.r330 > .rope { transform: rotate(330deg); }
+.r30 > .mini_rope { transform: rotate(210deg); }
+
+/* overlapping ropes */
+.rope_hub > .over_1_30 { left: 4%; }
+.rope_hub > .over_2_30 { left: 26%; }
+.rope_hub > .over_3_30 { left: 37%; }
+.rope_hub > .over_4_30 { left: 48%; }
+
+.rope_hub > .over_1_90 { top: 9%; }
+.rope_hub > .over_2_90 { top: 39%; }
+.rope_hub > .over_3_90 { top: 48%; }
+.rope_hub > .over_4_90 { top: 55%; }
+
+.rope_hub > .over_1_150 { left: -16%; } #ebd-body #board .overflow_overlap_1_150 { top: -74%; left: -92%; }
+.rope_hub > .over_2_150 { left: 18%; }
+.rope_hub > .over_3_150 { left: 29%; }
+.rope_hub > .over_4_150 { left: 40%; }
+
+.rope_hub > .over_1_210 { left: 10%; } #ebd-body #board .overflow_overlap_1_210 { top: -66%; }
+
+.rope_hub > .over_2_210 { left: 23%; }
+.rope_hub > .over_3_210 { left: 33%; }
+.rope_hub > .over_4_210 { left: 44%; }
+
+.rope_hub > .over_1_270 { top: 14%; }
+#ebd-body #board .overflow_overlap_1_270 { top: -105%; left: -215%; } .overflow_overlap_1_270 > .rope_wrapper { left: -19%; }
+
+.rope_hub > .over_2_270 { top: 25%; } #ebd-body #board .overflow_overlap_2_270 { top: -97%; }
+.rope_hub > .over_3_270 { top: 33%; } #ebd-body #board .overflow_overlap_3_270 { top: -88%; }
+.rope_hub > .over_4_270 { top: 42%; } #ebd-body #board .overflow_overlap_4_270 { top: -79%; }
+
+.rope_hub > .over_1_330 { left: -11%; } #ebd-body #board .overflow_overlap_1_330 { left: -98%; }
+.rope_hub > .over_2_330 { left: 31%; }
+.rope_hub > .over_3_330 { left: 42%; }
+.rope_hub > .over_4_330 { left: 53%; }
+
+#board .over_1_lower { left: 58%; }
+.over_2_lower { left: 57%; }
+.over_3_1ower { left: 68%; }
+.over_4_1ower { left: 79%; }
+
+#board .over_1_upper { left: -223%; }
+.over_2_upper { left: -211%; }
+.over_3_upper { left: -198%; }
+.over_4_upper { left: -186%; }
+
+#board .over_meeple_1 { left: 52.2%; }
+#board .over_meeple_2 { left: 69.2%; }
+#board .over_meeple_3 { left: 19.2%; z-index: 18; }
+#board .over_meeple_4 { left: 2%; z-index: 17; }
+
+/* specific map tweaks */
+.desert #pitch_29_rope > .overflow_150 { top: -72%; }
+.desert #pitch_29_rope > .rope_overflow > .r150 { top: 85%; left: 80%; }
+.desert #pitch_29_rope > .overflow_210 { top: -76%; }
+/*.desert #pitch_19_rope > .rope_overflow { top: -77%; left: -78%; }
+.desert #pitch_19_rope > .rope_overflow > .rope_wrapper { top: 90%; left: 79%; }*/
 
 .pitch_center {
     width: 2px;
@@ -1689,7 +2385,7 @@
     position: absolute;
     background-color: black;
     border-radius: 50%;
-    z-index: 11;
+    z-index: 34;
 }
 
 /* tooltips */
@@ -1719,15 +2415,17 @@
 .reference_tt {
     position: static;
     width: 232.5px;
-    height: 356.25px;
+    height: 398.12px;
     float: left;
     margin-right: 5px;
 }
+.midSizeDialog:has(.reference_tt) { height: 397px; }
 
 .climbing_tt {
     position: static;
-    width: 13.27209vmax;
-    height: 47.71585vmin;
+    width: 167.677px;
+    height: 0;
+    padding-top: 284.974px;
 }
 
 .summit_beta_tt {
@@ -1773,10 +2471,16 @@
     /* height: 243px; width: 256px; */
     display: inline-block;
     position: absolute;
-    width: 26.07%;
-    height: 95%;
+    width: 32.5%;
+    height: 100%;
     right: 0.5%;
-    bottom: 2.4%;
+}
+
+#hand_title {
+    position: sticky;
+    margin-top: 6px;
+    margin-left: 0.5%;
+    font-size: 2.6vmin;
 }
 
 #hand_ratio {
@@ -1785,7 +2489,7 @@
     height: 0;
     padding-top: 21%;
     padding-bottom: 10px;
-    margin-top: 10px;
+    margin-top: 5px;
 }
 
 #hand_ratio_child {
@@ -1797,14 +2501,35 @@
 }
 
 .selected_resource, .selected_deck {
-    border: 3px solid red;
     border-radius: 10px;
     box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
 }
-
-.selected_resource_wrap {
-    margin-right: 1.25%;
+.selected_resource {
+    /* border: 3px solid blue; */
+    box-shadow:
+        inset 0 0 0 3px blue,
+        5px 5px 5px 0px black;
 }
+.selected_deck {
+    /* border: 3px solid black; */
+    box-shadow: inset 0 0 0 3px blue;
+}
+
+.unnecessary_resource {
+    /* border: 3px solid red; */
+    box-shadow:
+        inset 0 0 0 3px red,
+        5px 5px 5px 0px black;
+    border-radius: 10px;
+    /* box-shadow: 5px 5px 5px 0px rgba(0,0,0,4); */
+}
+.permanent_assets_wrapper > .unnecessary_resource {
+    border-radius: 50%;
+}
+
+/* .selected_resource_wrap {
+    margin-right: 1.25%;
+} */
 
 /* drawing from asset deck */
 #draw_num, .draw_num {
@@ -1821,13 +2546,24 @@
     background-color: #5a7994;
     transform: rotate(270deg);
 }
-.mobile_version #draw_num { font-size: 4vmin; }
+.mobile_version #draw_num {
+    width: 61%;
+    height: 51%;
+    top: 25.5%;
+    left: 18%;
+    font-size: 4vmin;
+}
 
 .draw_num {
     width: 42%;
-    font-size: 6.4vmin;
+    font-size: 3vw;
+    line-height: 3.9vw;
     top: 35.5%;
     transform: none;
+}
+.mobile_version .draw_num {
+    font-size: 4vw;
+    line-height: 4.5vw;
 }
 
 .draw_button {
@@ -1835,17 +2571,20 @@
     width: 37%;
     height: 64%;
     left: 31%;
-    font-size: 2.6vmin;
+    font-size: 3.6vmin;
     text-align: center;
     font-weight: bold;
     color: #5a7994;
     opacity: 0.6;
     background-color: white;
     transform: rotate(90deg);
-    line-height: 385%;
+    line-height: 4.5vw;
+}
+.mobile_version .draw_button {
+    line-height: 5.5vw;
 }
 
-.mobile_version .draw_button { line-height: 400%; }
+/* .mobile_version .draw_button { line-height: 400%; } */
 
 
 #minus_one { top: 53%; }
@@ -1867,7 +2606,7 @@
     font-size: 3vw;
     left: 5%;
     line-height: 52.2%;
-    padding: 77px 0%;
+    padding: 61% 0%;
 }
 
 .porta_plus {
@@ -1875,7 +2614,7 @@
     font-size: 2.6vw;
     left: 76%;
     line-height: 86.7%;
-    padding: 73px 0%;
+    padding: 58% 0%;
 }
 
 #asset_deck_draw {
@@ -1908,10 +2647,10 @@
 #spread_draw {
     display: none;
     position: absolute;
-    width: 28%;
+    width: 40%;
     height: 15%;
     top: 31%;
-    left: 60%;
+    left: 48%;
     align-items: center;
     justify-content: flex-end;
     z-index: 7;
@@ -1919,7 +2658,7 @@
 
 .spread_wrap {
     position: relative;
-    width: 22.143%;
+    width: 15.5%;
     height: 94.665%;
     margin-left: .4%;
     transform: none;
@@ -1927,6 +2666,7 @@
 
 .spread_wrap > .asset {
     height: 100%;
+    width: 100%;
 }
 
 #token_display {
@@ -1953,6 +2693,11 @@
     height: 71.13%;
 }
 
+.display_token_wrap > .summit_beta {
+    width: 100%;
+    height: 71.13%;
+}
+
 .deck_temp {
     background-position: -0% -0%;
 }
@@ -1974,32 +2719,20 @@
 }
 
 .selected_asset {
-    border: 3px solid red;
+    /* border: 3px solid blue; */
+    box-shadow:
+        inset 0 0 0 3px blue,
+        5px 5px 5px 0px black;
 }
 
 #assets_wrap {
     display: inline-flex;
     position: relative;
-    width: 73%;
+    width: 100%;
     height: 77.42%;
-    margin-top: -0.5%;
+    height: 100%;
     flex-wrap: wrap;
 }
-
-/* two rows */
-#hand_ratio.hand_ratio_two_rows { padding-top: 33.6%; }
-#myhand_wrap > .assets_wrap_two_rows { height: 49.213%; }
-#myhand_wrap > .hand_objectives_two_rows { height: 61.636%; bottom: 31.3%; }
-
-/* three rows */
-#hand_ratio.hand_ratio_three_rows { padding-top: 48.9%; }
-#myhand_wrap > .assets_wrap_three_rows { height: 34.119%; }
-#myhand_wrap > .hand_objectives_three_rows { height: 41.867%; bottom: 53.5%; }
-
-/* four rows */
-#hand_ratio.hand_ratio_four_rows { padding-top: 64.4%; }
-#myhand_wrap > .assets_wrap_four_rows { height: 26.031%; }
-#myhand_wrap > .hand_objectives_four_rows { height: 31.942%; bottom: 64.36%; }
 
 /* requirements in action bar */
 .requirement_wrap {
@@ -2009,11 +2742,15 @@
     height: 30px;
 }
 
+.fulfilled {
+    background-color: #4871b6;
+}
+
 .requirement_wrap_cards {
     display: inline-block;
     position: relative;
     width: 33px;
-    height: 51px;
+    height: 49px;
     vertical-align: middle;
 }
 
@@ -2022,28 +2759,36 @@
     width: 112%;
     height: 112%;
     top: -6%;
-    left: -5.5%;
+    left: -6%;
     background-size: contain;
 }
 
 .requirement_wrap_cards > .requirement_border {
-    width: 114%;
+    width: 109%;
     height: 109%;
 }
 
 .give_assets {
     display: inline-block;
     position: relative;
-    width: 33px;
-    height: 51px;
+    width: 30px;
+    height: 46.36px;
     background-image: url('img/asset_cards.jpg');
     background-size: 1200% 400%;
     background-position: -0% -0%;
 }
 
-.gear_border { background-image: url('img/gear_border.png'); }
-.skill_border { background-image: url('img/skill_border.png'); }
-.water_psych_border { background-image: url('img/water_psych_border.png'); }
+.gear_border { background-image: url('img/gear_border.png'); background-size: 200% 100%; background-position: -0% -0%; }
+.skill_border { background-image: url('img/skill_border.png'); background-size: 300% 100%; background-position: -0% -0%; }
+.water_psych_border {
+    background-image: url('img/water_psych_border.png');
+    background-size: 200% 100%;
+    background-position: -0% -0%;
+    height: 111%;
+    width: 111%;
+    top: -5.5%;
+    left: -5.5%;
+}
 .give_assets_border { background-image: url('img/give_assets_border.png'); }
 
 #generalactions .requirement_wrap {
@@ -2057,12 +2802,387 @@
     margin-right: 6px;
 }
 
-#requirements_message {
-    margin-left: 1%;
+#pass_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 10px;
+    font-size: 69%;
     color: red;
 }
+#pm_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#pm_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 3%;
+}
 
-#pass_message {
-    margin-right: 1%;
+#risk_it_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 10px;
+    font-size: 69%;
     color: red;
+}
+#ri_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#ri_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 9%;
+}
+
+#requirements_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 10px;
+    font-size: 69%;
+    color: red;
+}
+#re_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#re_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 1%;
+}
+#lt_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#lt_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 1%;
+}
+#wa_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#wa_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 1%;
+}
+#ps_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+}
+#ps_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: 1%;
+}
+#requirements_message.no_slots {
+    margin-left: 37px;
+}
+#sl_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+    left: -31px;
+}
+#sl_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: -61%;
+}
+
+#bad_selection_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 30px;
+    font-size: 69%;
+    color: red;
+}
+#bs_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+    left: -22px;
+}
+#bs_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: -25%;
+}
+
+#maxed_out_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 30px;
+    font-size: 69%;
+    color: red;
+}
+#mo_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+    left: -22px;
+}
+#mo_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: -24%;
+}
+
+#overstoker_message {
+    position: relative;
+    top: -7px;
+    margin-right: -5.3%;
+    margin-left: 30px;
+    font-size: 69%;
+    color: red;
+}
+#om_line1 {
+    display: inline-block;
+    position: relative;
+    top: 7%;
+    left: -22px;
+}
+#om_line2 {
+    display: inline-block;
+    position: absolute;
+    top: 35%;
+    left: -33%;
+}
+
+#bomber_anchor_counter {
+    display: inline-block;
+    position: relative;
+    width: 15vmin;
+    height: 6.4vmin;
+    top: 0.7vmin;
+    line-height: 2.8vmin;
+}
+#bomber_anchor_counter > * {
+    position: relative;
+    font-size: 0.75em;
+}
+
+#sb_skills_wrapper {
+    position: absolute;
+    width: 90%;
+    height: 44%;
+    top: -33%;
+    left: 3%;
+}
+.selectable_skill {
+    border: 1px solid black;
+    border-radius: 50%;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+}
+#sb_skills_wrapper > .selectable_skill, #sb_skills_wrapper > .selected_skill {
+    position: absolute;
+}
+.selected_skill {
+    border: 3px solid red;
+    border-radius: 50%;
+    box-shadow: 5px 5px 5px 0px rgba(0,0,0,4);
+}
+#sb_face { top: 49%; }
+#sb_face.selected_skill { top: 44%; left: -1%; }
+#sb_crack { top: 49%; left: 36%; }
+#sb_crack.selected_skill { top: 44%; left: 35%; }
+#sb_slab { top: 49%; left: 72%; }
+#sb_slab.selected_skill { top: 44%; left: 71%; }
+
+#dirtbag_button {
+    position: relative;
+    height: 18px;
+    background-color: #be3d27;
+}
+#dirtbag_sub {
+    width: 308%;
+    height: 101%;
+    top: -28%;
+    left: -150%;
+}
+
+#overstoker_button {
+    position: relative;
+    height: 18px;
+    background-color: #d6a228;
+}
+#overstoker_sub {
+    width: 24px;
+    height: 24px;
+    top: -9px;
+    left: -12px;
+}
+
+#crag_mama_button {
+    height: 19px;
+    background-color: #507e3d;
+}
+#crag_mama_sub {
+    display: inline-block;
+    position: relative;
+    width: 24px;
+    height: 24px;
+    top: -8.35px;
+    left: -12px;
+    background-image: url('img/risk_water_psych.png');
+    background-size: 1000% 100%;
+    background-position: -900% -0%;
+}
+
+#bionic_woman_button {
+    position: relative;
+    height: 18px;
+    background-color: #7c2b87;
+}
+#bionic_woman_sub {
+    width: 279.61%;
+    height: 99%;
+    top: -25%;
+    left: -126%;
+}
+.bionic_woman_border {
+    position: absolute;
+    width: 108%;
+    height: 115%;
+    top: -9%;
+    left: -5%;
+    background-position: -200% -0%;
+}
+
+#opponent_objectives_box {
+    position: absolute;
+    width: 102vmin;
+    height: 65vmin;
+    top: 100%;
+    left: 21%;
+    background-color: #ebd5bd;
+    z-index: 2001;
+}
+.opponent_objectives_wrap {
+    position: absolute;
+    width: 50%;
+    height: 50%;
+    /* border: 1px solid black; */
+}
+#opponent_objectives_2 { left: 50%; }
+#opponent_objectives_3 { top: 50%; }
+#opponent_objectives_4 { top: 50%; left: 50%; }
+.opponent_objective_card {
+    width: 30.18%;
+    height: 81%;
+    top: -2%;
+    margin: 0 4%;
+}
+.opponent_objective_card > .check {
+    font-size: 0.5em;
+}
+
+#scorecard {
+    position: absolute;
+    width: 102vmin;
+    height: 65vmin;
+    top: 100%;
+    left: 21%;
+    background-image: url('img/score_card.jpg');
+    background-size: contain;
+    background-repeat: no-repeat;
+    z-index: 2000;
+}
+
+#score_table {
+    width: 100%;
+    height: 100%;
+}
+
+#score_table * { height: 16.667%; }
+
+.first_column { width: 25.9%; }
+.player_column { width: 14.82%; }
+
+#see_table_msg {
+    position: absolute;
+    top: -1vmin;
+    right: 4.15%;
+}
+
+.fixed-page-title #hide_extension_msg { right: 3.8%; }
+.fixed-page-title #personal_objectives_toggle { right: 8.8%; }
+.fixed-page-title #show_hide_personal_objectives_msg { right: 10.85%; }
+
+/* media queries */
+
+/* change titlebar and this.player_id player panel when viewport is thin enough that the player panels will get stacked on top of each other */
+@media (max-width: 482px) {
+
+    /* titlebar */
+    #page-title { margin-top: -7px; margin-bottom: 19px; padding-bottom: 0px; }
+    #maintitlebar_content > div { top: -4px; }
+    #active_player_statusbar_icon { width: 16px !important; height: 16px !important; top: 4px; }
+    #generalactions { position: relative; top: 3px; }
+    #generalactions > .bgabutton { padding-top: 2px !important; padding-bottom: 2px !important; }
+    #go_to_next_table_inactive_player, #go_to_next_table_active_player { top: 2.6vw; padding-top: 2px !important; padding-bottom: 2px !important; }
+    #active_player_statusbar { width: 16px; }
+    #titlebar_addon { height: 17.807px; }
+    #round_tracker, #phase_tracker { font-size: 8.5px; bottom: -40%; }
+    #phase_tracker { left: 56.7px; }
+    #available_sb_message { top: -10.5px; left: 135.5px; font-size: 37%; }
+    #sb_line2 { top: 25%; }
+    .token_button { width: 30px; }
+    .token_button .skills_and_techniques { left: 0; }
+    .action-button { padding-left: 4px; padding-right: 4px; }
+    .pa_checkbox { top: -16%; }
+    #msg_wrapper { top: 29%; }
+    #hide_extension_msg, .fixed-page-title #hide_extension_msg { font-size: 7.5px; right: 7.2vmin; }
+    #show_hide_personal_objectives_msg, .fixed-page-title #show_hide_personal_objectives_msg { font-size: 7.5px; right: 22vmin; }
+    #personal_objectives_toggle, .fixed-page-title #personal_objectives_toggle { right: 17vmin; }
+    #personal_objectives_box { width: 46.575vmin; height: 39.0045vmin; }
+    #personal_objectives_box > .personal_objective { width: 48.8%; }
+    
+    /* this.player_id panel */
+    #topbar { margin-bottom: 0px; }
+    #ref_row .meeple { top: 53%; }
+    #ref_row #starting_player { top: 42%; }
+    #cp_skills_title { position: absolute; top: 52px; left: 196px; }
+    .cp_skills { position: absolute; top: 71px; left: 196px; }
+    #cp_techniques_title { position: absolute; top: 110px; left: 196px; }
+    .cp_techniques { position: relative; height: 30px; left: 144px; }
+    .panel_technique { margin-right: 4%; }
+    .technique_num { top: 8%; left: 113%; }
+    .cp_panel .meeple { left: 42%; }
+    .cp_panel > #starting_player { left: 50%; }
+
+    /* character buttons */
+    #page-title #crag_mama_button { font-size: 11px; line-height: 10px; }
+    #crag_mama_button > .button_text_wrap { top: -1px; }
+
+    /* hand area */
+    #assets_wrap { width: 53%; }
+    #hand_objectives { width: 46.5%; }
+
+    #page-title > #climbing_slot { top: 100%; left: 27vw; margin-top: 4.3%; }
+
 }

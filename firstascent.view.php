@@ -44,7 +44,8 @@ class view_firstascent_firstascent extends game_view
         for($i=0, $j = 3; $i < $j; $i++) {
 
             $this->page->insert_block("shared_objective", array(
-                'soId' => $i+1,
+                'soId' => $current_shared_objectives[$i],
+                'soTA' => $current_shared_objectives[$i],
                 'soX' => $this->game->shared_objectives[$current_shared_objectives[$i]]['x_y'][0],
                 'soY' => $this->game->shared_objectives[$current_shared_objectives[$i]]['x_y'][1],
                 'TOP' => $shared_objectives_coords[$i][0],
@@ -62,10 +63,10 @@ class view_firstascent_firstascent extends game_view
 
         if ($this->game->getGlobalVariable('headwall_revealed')) {
 
-            $max_coord = $player_count <= 3 ? 32 : 43;
+            $max_coord = $board === 'desert' ? 32 : 43;
         }
         else {
-            $max_coord = $player_count <= 3 ? 20 : 26;
+            $max_coord = $board === 'desert' ? 20 : 26;
         }
         
         for($i=0; $i<count($tile_coords); $i++) {
