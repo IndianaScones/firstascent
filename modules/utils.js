@@ -11,21 +11,64 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				this.selectable_skills = [];
 				this.selectable_pitches = [];
 				this.selectable_wraps = [];
+				this.selectable_gears = [];
 				this.button_undo = false;
+				this.active_zIndex_map = new Map();
+				this.trifecta_selections = {};
 			},
 
 			// animations
-	        moveToNewParent: function(ele, destination, adjust=null, straighten_asset=false, offset_method=false) { // takes nodes
-	            const beforeAnimation = (ele, destination, adjust, straighten_asset, offset_method) => {
+			moveToNewParent: function(ele, destination, adjust=null, orientation=false, offset_method=false) { // takes nodes
+	            const beforeAnimation = (ele, destination, adjust, orientation, offset_method) => {
 
 	            	const origin = offset_method ? destination : ele.parentElement;
+					const stacking_context_root = this.getStackingContextRoot(origin, destination);
+					const ele_original_zIndex_inline = ele.style.zIndex;
+					const ele_original_zIndex_computed = window.getComputedStyle(ele).zIndex === 'auto' ? 0 : Number(window.getComputedStyle(ele).zIndex);
+					const animate_in_front =
+						$('ebd-body').classList.contains('mobile_version') &&
+						!$('page-title').classList.contains('fixed-page-title')
+							? true
+							: false;
+					const temp_zIndex = animate_in_front? 1053 : 700;
+					ele.style.zIndex = String(temp_zIndex + ele_original_zIndex_computed);
 
-	            	const zIndex = ele.style.zIndex != '' ? Number(ele.style.zIndex) : 0;
-	            	const origin_zIndex = origin.style.zIndex != '' ? Number(origin.style.zIndex) : 0;
-	            	ele.style.zIndex = String(zIndex + 1000);
-	            	if (!origin.classList.contains('pitch')) { origin.style.zIndex = String(origin_zIndex + 1000); }
+					// guard against race condition from recording root_original_zIndex when several calls are firing concurrently
+					const root_tracker = this.active_zIndex_map.get(stacking_context_root);
+					if (!root_tracker) {
+						const root_original_zIndex_inline = stacking_context_root.style.zIndex;
+						const root_original_zIndex_computed = window.getComputedStyle(stacking_context_root).zIndex === 'auto' ? 0 : Number(window.getComputedStyle(stacking_context_root).zIndex);
+						this.active_zIndex_map.set(stacking_context_root, {
+							count: 1,
+							original_zIndex: root_original_zIndex_inline,
+						});
 
-	            	if (straighten_asset) { origin.style.transform = 'rotate(0deg)'; }
+						if (!stacking_context_root.classList.contains('pitch') && stacking_context_root.id !== 'board' && !origin.classList.contains('rope_overflow')) {
+							stacking_context_root.style.zIndex = String(root_original_zIndex_computed + temp_zIndex);
+						}
+					} else {
+						root_tracker.count++;
+					}
+
+					if (origin !== stacking_context_root) {
+						const origin_tracker = this.active_zIndex_map.get(origin);
+						if (!origin_tracker) {
+							const origin_original_zIndex_inline = origin.style.zIndex;
+							const origin_original_zIndex_computed = window.getComputedStyle(origin).zIndex === 'auto' ? 0 : Number(window.getComputedStyle(origin).zIndex);
+							this.active_zIndex_map.set(origin, {
+								count: 1,
+								original_zIndex: origin_original_zIndex_inline,
+							});
+
+							if (!origin.classList.contains('pitch') && origin.id !== 'board' && !origin.classList.contains('rope_overflow')) {
+								origin.style.zIndex = String(origin_original_zIndex_computed + temp_zIndex);
+							}
+						} else {
+							origin_tracker.count++;
+						}
+					}
+
+	            	if (orientation === 'straighten') { origin.style.transform = 'rotate(0deg)'; }
 
 					if (offset_method) {
 
@@ -61,11 +104,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						const y0 = ele.getBoundingClientRect().top;
 
 						destination.appendChild(ele);
+						if (orientation === 'rotate') { ele.style.transform = 'rotate(90deg)'; }
 						x1 = ele.getBoundingClientRect().left;
 						y1 = ele.getBoundingClientRect().top;
-						origin.appendChild(ele);   
+						origin.appendChild(ele);
 
-						if (straighten_asset) { origin.style.transform = ''; }
+						if (orientation === 'rotate') { ele.style.transform = ''; }
+
+						if (orientation === 'straighten') { origin.style.transform = ''; }
 
 						if (adjust === 1) {
 							ele.style.setProperty('--dx', (y1 - y0) + 'px');
@@ -74,26 +120,63 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							ele.style.setProperty('--dx', (y1 - y0) + 'px');
 							ele.style.setProperty('--dy', (x0 - x1) + 'px');
 						} else if (adjust === 3) {
-							ele.style.setProperty('--dx', (x1 - x0 +16.4973) + 'px');
-							ele.style.setProperty('--dy', (y1 - y0 -16.4973) + 'px');
+							ele.style.setProperty('--dx', (x1 - x0) + 'px');
+							ele.style.setProperty('--dy', (y1 - y0) + 'px');
 						} else if (adjust === 4) {
 							ele.style.setProperty('--dx', (y1 - y0 - 10) + 'px');
 							ele.style.setProperty('--dy', (y1 - y0) + 'px');
 						} else if (adjust === 5) {
 							ele.style.setProperty('--dx', (x0 - x1) + 'px');
 							ele.style.setProperty('--dy', (y1 - y0) + 'px');	                	
+						} else if (adjust === 6) {
+							ele.style.setProperty('--dx', (y0 - y1) + 'px');
+							ele.style.setProperty('--dy', (x0 - x1) + 'px');
 						} else {
 							ele.style.setProperty('--dx', (x1 - x0) + 'px');
 							ele.style.setProperty('--dy', (y1 - y0) + 'px');
 						}
-					}   	
+					}   
+
+					return {
+						'stacking_context_root': stacking_context_root,
+						'origin': origin,
+						'ele_original_zIndex_inline': ele_original_zIndex_inline,
+					};
 	            }
 
-	            const afterAnimation = (ele, destination, adjust, straighten_asset, offset_method) => {
-	            	const origin = !offset_method ? ele.parentElement : destination;
+	            const afterAnimation = (...args) => {
+
+					const before_result = args[args.length-1];
+					const { stacking_context_root, origin, ele_original_zIndex_inline } = before_result;
+					const ele = args[0];
+					const destination = args[1];
+					const offset_method = args[4];
+
 	                destination.appendChild(ele);
-	                ele.style.zIndex = '';
-	                origin.style.zIndex = '';
+
+					ele.style.zIndex = ele_original_zIndex_inline;
+					// guard against race condition from recording root_original_zIndex when several calls are firing concurrently
+					const root_tracker = this.active_zIndex_map.get(stacking_context_root);
+					if (root_tracker) {
+						root_tracker.count--;
+
+						if (root_tracker.count === 0) {
+							stacking_context_root.style.zIndex = root_tracker.original_zIndex;
+							this.active_zIndex_map.delete(stacking_context_root);
+						}
+					}
+
+					if (origin !== stacking_context_root) {
+						const origin_tracker = this.active_zIndex_map.get(origin);
+						if (origin_tracker) {
+							origin_tracker.count--;
+
+							if (origin_tracker.count === 0) {
+								origin.style.zIndex = origin_tracker.original_zIndex;
+								this.active_zIndex_map.delete(origin);
+							}
+						}
+					}
 
 					if (offset_method) {
 						dojo.setStyle(ele, {
@@ -115,23 +198,18 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	        animationPromise: function(ele, class_name, type, func=null, destroy=false, remove_class=false, ...params) {
 
-				// hide personal objectives if showing
-				if (
-					   $('addon_toggle').classList.contains('addon_on')
-					&& $('personal_objectives_toggle')
-					&& $('personal_objectives_toggle').classList.contains('addon_on')
-				) {
-					$('personal_objectives_toggle').click();
-				}
-
 	            return new Promise(resolve => {
-	                if (func && 'before' in func) { func.before(...params); }
+					let before_result = {};
+	                if (func && 'before' in func) {
+						before_result = func.before(...params);
+					}
 
 	                if (type === 'anim') {
 	                    const afterAnimationCb = () => {
-	                        if (func && 'after' in func) { func.after(...params); }
-	                        if (class_name == 'portaledge_close') {
-	                        }
+	                        if (func && 'after' in func) {
+								const after_args = [...params, before_result];
+								func.after(...after_args);
+							}
 	                        if (remove_class) { ele.classList.remove(class_name); }
 	                        ele.removeEventListener('animationend', afterAnimationCb);
 	                        if (destroy) { ele.remove(); }
@@ -143,7 +221,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	                } else if (type ==='trans') {
 	                    const afterTransitionCb = () => {
-	                        if (func && 'after' in func) { func.after(...params); }
+	                        if (func && 'after' in func) { func.after(...params, before_result); }
 	                        if (remove_class) { ele.classList.remove(class_name); }
 	                        ele.removeEventListener('transitionend', afterTransitionCb);
 	                        if (destroy) { ele.remove(); }
@@ -156,6 +234,38 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                } else { throw new Error('type must be anim or trans') }
 	            });
 	        },
+
+			getStackingContextRoot: function(origin, destination) {
+				// find the lowest common ancestor
+				const origin_ancestors = new Set();
+				let current = origin.parentElement;
+
+				while (current) {
+					origin_ancestors.add(current);
+					current = current.parentElement;
+				}
+
+				let common_ancestor = null;
+				current = destination.parentElement;
+
+				while (current) {
+					if (origin_ancestors.has(current)) {
+						common_ancestor = current;
+						break;
+					}
+					current = current.parentElement;
+				}
+
+				if (!common_ancestor || common_ancestor === origin) { return origin; }
+
+				// find the direct child of the lowest common ancestor that is ancestor to origin
+				let direct_child = origin;
+				while (direct_child.parentElement && direct_child.parentElement !== common_ancestor) {
+					direct_child = direct_child.parentElement;
+				}
+				return direct_child;
+			},
+
 	        // end animations
 
 			// mutation observer callbacks
@@ -165,113 +275,201 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			},
 
 			resizeTitlebar: function() {
+				// 1. THROTTLE: If a frame is already scheduled, let it run.
+				// Do NOT cancel it. This ensures the resize happens on the very next frame,
+				// rather than waiting for a burst of events to finish.
+				if (this._resizeTitlebarTimer) return;
 
-				const parent = $('maintitlebar_content');
-				const main_msg = $('pagemaintitletext');
-				const button_example = document.querySelector('#generalactions > .bgabutton');
-				const next_table_button = document.querySelector('#go_to_next_table_inactive_player').style.display === 'none' ?
-											document.querySelector('#go_to_next_table_active_player') :
-											document.querySelector('#go_to_next_table_inactive_player');
-				const next_table_margin = Number(next_table_button.style.marginLeft.slice(0, -2));
+				// 2. SCHEDULE: Run the logic in the next animation frame.
+				this._resizeTitlebarTimer = window.requestAnimationFrame(() => {
+					this._resizeTitlebarTimer = null; // Reset timer
 
-				// undo all changes
-				main_msg.style.fontSize = '';
-				next_table_button.style.marginLeft = '0px';
-				parent.querySelectorAll('.bgabutton').forEach(ele => {
-					ele.style.padding = '';
-					ele.style.marginLeft = '';
-					ele.style.fontSize = '';
+					const parent = $('maintitlebar_content');
+					const main_msg = $('pagemaintitletext');
+					
+					// Safety check: ensure elements exist before running
+					if (!parent || !main_msg) return;
+
+					const button_example = document.querySelector('#generalactions > .bgabutton');
+					
+					// Safety check for next table button
+					const active_btn = document.querySelector('#go_to_next_table_active_player');
+					const inactive_btn = document.querySelector('#go_to_next_table_inactive_player');
+					
+					let next_table_button = null;
+					if (inactive_btn && inactive_btn.style.display === 'none' && active_btn) {
+						next_table_button = active_btn;
+					} else if (inactive_btn) {
+						next_table_button = inactive_btn;
+					}
+
+					// If vital elements are missing, abort to prevent errors
+					if (!next_table_button) return;
+
+					const next_table_margin = next_table_button.style.marginLeft ? Number(next_table_button.style.marginLeft.slice(0, -2)) : 0;
+
+					// --- RESET PHASE ---
+					main_msg.style.fontSize = '';
+					next_table_button.style.marginLeft = '0px';
+					parent.querySelectorAll('.bgabutton').forEach(ele => {
+						ele.style.padding = '';
+						ele.style.marginLeft = '';
+						ele.style.fontSize = '';
+					});
+
+					// --- MEASURE PHASE ---
+					let children_width = 0;
+					
+					// Helper to safely get width including margins
+					const getOuterWidth = (el) => {
+						if (!el) return 0;
+						const style = window.getComputedStyle(el);
+						// Handle hidden elements gracefully
+						if (style.display === 'none') return 0;
+						return el.getBoundingClientRect().width 
+							+ (parseFloat(style.marginLeft) || 0) 
+							+ (parseFloat(style.marginRight) || 0);
+					};
+
+					const child_list = parent.firstElementChild ? parent.firstElementChild.children : [];
+
+					for (const child of child_list) {
+						if (child.id != 'not_playing_help' && child.id != 'generalactions') {
+							children_width += getOuterWidth(child);
+						}
+					}
+					
+					const general_actions = $('generalactions');
+					if (general_actions) {
+						for (const child of general_actions.children) {
+							children_width += getOuterWidth(child);
+						}
+					}
+
+					children_width += getOuterWidth(active_btn);
+					children_width += getOuterWidth(inactive_btn);
+					
+					const parent_width = parent.getBoundingClientRect().width;
+					if (parent_width === 0) return; // Prevent division by zero if parent is hidden
+
+					let percentage = Math.round((children_width / parent_width) * 100);
+					const font_min = document.querySelector('.mobile_version') ? 10 : 14;
+
+					if (document.querySelector('.mobile_version') && percentage > 97) {
+						const first_icon = document.querySelector('.requirement_wrap');
+						if (first_icon && !document.querySelector('#titlebar_line_break')) {
+							first_icon.insertAdjacentHTML('beforebegin', '<div id="titlebar_line_break"></div>');
+						}
+					}
+
+					let button_padding, button_margin, button_font_size, button_ninety_five;
+					
+					// Safety Brake: Max 20 loops to prevent browser freeze if logic fails
+					let safety_loop_count = 0; 
+
+					while (percentage > 80 && safety_loop_count < 20) {
+						safety_loop_count++;
+						
+						const main_msg_style = window.getComputedStyle(main_msg);
+						const msg_font_size = parseFloat(main_msg_style.fontSize);
+						const msg_ninety_five = msg_font_size * 0.95;
+
+						if (button_example) {
+							const btn_style = window.getComputedStyle(button_example);
+							button_padding = parseFloat(btn_style.paddingLeft);
+							button_margin = parseFloat(btn_style.marginLeft);
+							button_font_size = parseFloat(btn_style.fontSize);
+							button_ninety_five = button_font_size * 0.95;
+						}
+
+						if (msg_ninety_five > font_min) {
+							const width_before = main_msg.getBoundingClientRect().width;
+							main_msg.style.fontSize = `${msg_ninety_five}px`;
+							const width_after = main_msg.getBoundingClientRect().width; 
+							children_width -= (width_before - width_after);
+							percentage = Math.round((children_width / parent_width) * 100);
+						}
+						else if (button_example && button_font_size > font_min) {
+							// Batch button updates to minimize thrashing
+							const buttons_general = document.querySelectorAll('#generalactions > .bgabutton');
+							const buttons_next = document.querySelectorAll('#gotonexttable_wrap > .bgabutton');
+							
+							const resizeButtons = (nodeList) => {
+								nodeList.forEach(ele => {
+									const w_before = ele.getBoundingClientRect().width;
+									ele.style.fontSize = `${button_ninety_five}px`;
+									const w_after = ele.getBoundingClientRect().width;
+									children_width -= (w_before - w_after);
+								});
+							};
+
+							resizeButtons(buttons_general);
+							resizeButtons(buttons_next);
+							
+							percentage = Math.round((children_width / parent_width) * 100);
+						}
+						else if (button_example && button_padding > 3) {
+							parent.querySelectorAll('.bgabutton').forEach(ele => {
+								ele.style.padding = `6px ${button_padding - 3}px`;
+								children_width -= 6;
+							});
+							percentage = Math.round((children_width / parent_width) * 100);
+						}
+						else if (next_table_margin > -50) {
+							next_table_button.style.marginLeft = '-50px';
+							children_width -= 50; 
+							percentage = Math.round((children_width / parent_width) * 100);
+						}
+						else if (button_example && button_margin > 2) {
+							parent.querySelectorAll('.bgabutton').forEach(ele => {
+								ele.style.marginLeft = `${button_margin - 2.5}px`;
+								children_width -= 2.5;
+							});
+							percentage = Math.round((children_width / parent_width) * 100);
+						}
+						else { 
+							break; 
+						}
+					}
 				});
+			},
 
-				let children_width = 0;
-				const child_list = parent.firstElementChild.children;
+			delay: function(ms) {
+				return new Promise(function(resolve) {
+					setTimeout(resolve, ms);
+				});
+			},
 
-				for (const child of child_list) {
-					if (child.id != 'not_playing_help' && child.id != 'generalactions') {
-						children_width += child.getBoundingClientRect().width
-									   +  Number(window.getComputedStyle(child).marginLeft.slice(0, -2))
-									   +  Number(window.getComputedStyle(child).marginRight.slice(0, -2));
-					}
+			getZIndex: function(ele) {
+				const computed_style = window.getComputedStyle(ele);
+				const z_index_val = computed_style.getPropertyValue('z-index');
+				return !isNaN(parseInt(z_index_val)) ? Number(z_index_val) : 0;
+			},
+
+			showHideAssetBoard: function(evt) {
+				const button_ele = evt.currentTarget;
+				const character_ele = button_ele.parentElement;
+
+				if (button_ele.classList.contains('board_off')) {
+					const character_num = character_ele.id.slice(-2).replace(/^\D+/g, '');
+					const character = gameui.gamedatas.characters[character_num];
+					const ab_pos = character['ab_x_y'];
+					const asset_board = dojo.place(gameui.format_block('jstpl_asset_board', {
+						player : 0,
+						character : character['name'],
+						abX : ab_pos[0],
+						abY : ab_pos[1],
+					}), character_ele);
+					asset_board.classList.add('character_select');
+					button_ele.innerHTML = _('Hide Asset Board');
+					button_ele.classList.remove('board_off');
+					button_ele.classList.add('board_on');
 				}
-				for (const child of $('generalactions').children) {
-					children_width += child.getBoundingClientRect().width
-								   +  Number(window.getComputedStyle(child).marginLeft.slice(0, -2))
-								   +  Number(window.getComputedStyle(child).marginRight.slice(0, -2));
-				}
-				children_width += $('go_to_next_table_active_player').getBoundingClientRect().width;
-				children_width += $('go_to_next_table_inactive_player').getBoundingClientRect().width;
-				const parent_width = parent.getBoundingClientRect().width;
-
-				let percentage = Math.round( (children_width / parent_width) * 100 );
-				const font_min = document.querySelector('.mobile_version') ? 10 : 14;
-
-				if (document.querySelector('.mobile_version') && percentage > 97) {
-					const first_icon = document.querySelector('.requirement_wrap');
-					if (first_icon && !document.querySelector('#titlebar_line_break')) {
-						first_icon.insertAdjacentHTML('beforebegin', '<div id="titlebar_line_break"></div>');
-					}
-				}
-
-				let button_padding, button_margin, button_font_size, button_ninety_five;
-				while (percentage > 80) {
-					const msg_font_size = Number(window.getComputedStyle(main_msg).fontSize.slice(0, -2));
-					const msg_ninety_five = msg_font_size * 0.95;
-
-					if (button_example) {
-						button_padding = Number(window.getComputedStyle(button_example).paddingLeft.slice(0, -2));
-						button_margin = Number(window.getComputedStyle(button_example).marginLeft.slice(0, -2));
-						button_font_size = Number(window.getComputedStyle(button_example).fontSize.slice(0, -2));
-						button_ninety_five = button_font_size * 0.95;
-					}
-
-					if (msg_ninety_five > font_min) {
-						const width_before = main_msg.getBoundingClientRect().width;
-						main_msg.style.fontSize = `${String(msg_ninety_five)}px`;
-						const width_after = main_msg.getBoundingClientRect().width;
-						children_width -= width_before - width_after;
-						percentage = Math.round( (children_width / parent_width) * 100);
-					}
-
-					else if (button_example && button_font_size > font_min) {
-						document.querySelectorAll('#generalactions > .bgabutton').forEach(ele => {
-							const width_before = ele.getBoundingClientRect().width;
-							ele.style.fontSize = `${String(button_ninety_five)}px`;
-							const width_after = ele.getBoundingClientRect().width;
-							children_width -= width_before - width_after;
-							percentage = Math.round( (children_width / parent_width) * 100);
-						});
-						document.querySelectorAll('#gotonexttable_wrap > .bgabutton').forEach(ele => {
-							const width_before = ele.getBoundingClientRect().width;
-							ele.style.fontSize = `${String(button_ninety_five)}px`;
-							const width_after = ele.getBoundingClientRect().width;
-							children_width -= width_before - width_after;
-							percentage = Math.round( (children_width / parent_width) * 100);
-						});
-					}
-
-					else if (button_example && button_padding > 3) {
-						parent.querySelectorAll('.bgabutton').forEach(ele => {
-							ele.style.padding = `6px ${button_padding - 3}px`;
-							children_width -= 6;
-						});
-						percentage = Math.round( (children_width / parent_width) * 100);
-					}
-
-					else if (next_table_margin > -50) {
-						next_table_button.style.marginLeft = '-50px';
-						children_width -= 50;
-						percentage = Math.round( (children_width / parent_width) * 100);
-					}
-
-					else if (button_example && button_margin > 2) {
-						parent.querySelectorAll('.bgabutton').forEach(ele => {
-							ele.style.marginLeft = `${button_margin - 2.5}px`;
-							children_width -= 2.5;
-						});
-						percentage = Math.round( (children_width / parent_width) * 100);
-					}
-
-					else { break; }
+				else if (button_ele.classList.contains('board_on')) {
+					character_ele.querySelector('.character_select').remove();
+					button_ele.innerHTML = _('Show Asset Board');
+					button_ele.classList.remove('board_on');
+					button_ele.classList.add('board_off');
 				}
 			},
 
@@ -345,53 +543,70 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					// if token is added, add new slot and return token slot number
 					for (let i=1; i<=token_num; i++) {
 						if (!$(`hand_token_${i}`)) {
-							dojo.place(`<div id="hand_token_${i}" class="hand_token_wrap"></div>`, 'assets_wrap');
+							const wrapper = dojo.place(`<div id="hand_token_${i}" class="hand_token_wrap" style="z-index: ${i+card_sum}"></div>`, 'assets_wrap');
 						}
 					}
+
 					let new_token_slot = null;
 					if (new_token) {
-						const hand_tokens = Object.keys(gameui.gamedatas.hand_summit_beta_tokens);
+						// 1. Establish the priority order: IDs (Summit Beta) first, then Types (Symbols)
+						const hand_tokens_order = this.getHandSummitBetaTokens(true);
 						const symbol_tokens = gameui.gamedatas.hand_symbol_tokens;
 						for (const [symbol, num] of Object.entries(symbol_tokens)) {
-							for (let i=1; i<=num; i++) { hand_tokens.push(symbol); }
+							for (let i = 1; i <= num; i++) { hand_tokens_order.push(symbol); }
 						}
-						let tech_num = 1;
-						for (let i=0; i<token_num; i++) {
-							const slot = $(`hand_token_${i+1}`);
-							slot.id = `hand_token_${i+1}`;
-							const token = hand_tokens[i];
-							const token_ele = Number(token) ? $(`summit_beta_${token}`) : $(`${token}_token_${tech_num}`);
-							if (!Number(token)) {
-								if (tech_num < symbol_tokens[token]) { tech_num++; }
-								else { tech_num = 1; }
+
+						// 2. Grab all potential token elements from the DOM
+						const current_elements = [...dojo.query('#assets_wrap .summit_beta'), ...dojo.query('#assets_wrap .symbol_token')];
+						const claimed_ids = []; // Track elements we've already moved
+
+						for (let i = 1; i <= token_num; i++) {
+							const slot = $(`hand_token_${i}`);
+							const target = hand_tokens_order[i - 1];
+							let token_ele = null;
+
+							// 3. Identification Logic
+							if (typeof target === 'number' || !isNaN(target)) {
+								// Summit Beta: Find by specific ID
+								token_ele = current_elements.find(el => el.id === `summit_beta_${target}`);
+							} else {
+								// Symbol Token: Find by partial ID or class, ensuring we haven't used this specific DOM node yet
+								token_ele = current_elements.find(el => {
+									const isMatch = el.id.includes(target) || el.classList.contains(target);
+									return isMatch && !claimed_ids.includes(el.id);
+								});
 							}
-							if (token_ele) { // not the new one
-								if (slot.firstElementChild != token_ele) { slot.append(token_ele); }
-							}
-							else { // the new one
-								new_token_slot = slot;	
+
+							if (token_ele) {
+								// 4. Perform the move
+								claimed_ids.push(token_ele.id);
+								if (slot.firstElementChild !== token_ele) {
+									slot.appendChild(token_ele); 
+								}
+							} else if (!new_token_slot) {
+								// 5. This slot is empty and no element exists for it yet -> Animation Target
+								new_token_slot = slot;
 							}
 						}
 					}
 			
+					let card_j = 1;
 					// upon cards or tokens leaving hand
 					if (new_cards.length === 0 && asset_or_token === '') {
 						const existing_card_wraps = dojo.query('.hand_asset_wrap');
-						let card_j = 1;
 						const current_card_ids_in_dom = dojo.query('#assets_wrap .asset').map(ele => ele.id.slice(-3).replace(/^\D+/g, '')); // Get current card IDs in DOM
 						for (let i = 0; i < existing_card_wraps.length; i++) {
-							// Check if the wrap contains a card that is still in the hand
+							// check if the wrap contains a card that is still in the hand
 							if (existing_card_wraps[i].firstChild && current_card_ids_in_dom.includes(existing_card_wraps[i].firstChild.id.slice(-3).replace(/^\D+/g, ''))) {
 								existing_card_wraps[i].id = `hand_asset_${card_j}`;
 								existing_card_wraps[i].style.zIndex = card_j;
 								card_j++;
 							} else {
-								// If the wrap is empty or contains a card no longer in hand, remove it
+								// if the wrap is empty or contains a card no longer in hand, remove it
 								existing_card_wraps[i].remove();
 							}
 						}
-						// Remove any wraps that might be left over if logic above wasn't perfect (edge case)
-						// This is probably redundant if the above is correct, but harmless
+						// remove any wraps that might be left over if logic above wasn't perfect (edge case)
 						dojo.query('.hand_asset_wrap').forEach((wrap, index) => {
 						    if (index >= card_sum) { wrap.remove(); }
 						});
@@ -403,21 +618,22 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						let token_j = 1;
 						const current_token_eles_in_dom = [...dojo.query('#assets_wrap .summit_beta'), ...dojo.query('#assets_wrap .symbol_token')];
 						for (let i = 0; i < existing_token_wraps.length; i++) {
-							// Check if the wrap contains a token that is still in the hand (assuming tokens are also direct children here)
+							// check if the wrap contains a token that is still in the hand (assuming tokens are also direct children here)
 							if (existing_token_wraps[i].firstChild && current_token_eles_in_dom.includes(existing_token_wraps[i].firstChild)) {
 								existing_token_wraps[i].id = `hand_token_${token_j}`;
+								existing_token_wraps[i].style.zIndex = card_j-1 + token_j;
 								token_j++;
 							} else {
 								existing_token_wraps[i].remove();
 							}
 						}
-						// Remove any wraps that might be left over
+						// remove any wraps that might be left over
 						dojo.query('.hand_token_wrap').forEach((wrap, index) => {
 						    if (index >= token_num) { wrap.remove(); }
 						});
 					}
 			
-					// Ensure tokens are appended last in assets_wrap
+					// ensure tokens are appended last in assets_wrap
 					dojo.query('.hand_token_wrap').forEach(ele => {
 						assets_wrap.appendChild(ele);
 					});
@@ -425,6 +641,19 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					// set height of hand_ratio
 					// Recalculate hand_bottom based on all current wraps
 					let current_hand_wraps = dojo.query('.hand_asset_wrap, .hand_token_wrap'); // Get both types of wraps
+
+					// place temp card if hand is empty but player has personal objectives
+					const personal_objective = $('personal_objective_1_wrap').firstElementChild;
+					let temp_asset;
+					if (current_hand_wraps.length === 0 && personal_objective) {
+						temp_asset = dojo.place(
+							`<div id="hand_asset_1" class="hand_asset_wrap">
+								<div id="deck_temp_1" class="asset deck_temp"></div>
+							</div>`
+						, 'assets_wrap');
+						current_hand_wraps.push(temp_asset);
+					}
+
 					let hand_bottom_px = null;
 					let assets_wrap_top_px = assets_wrap.getBoundingClientRect().top;
 			
@@ -439,17 +668,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					let height_px = hand_bottom_px || 0; // If no wraps, height is 0
 			
 					if (height_px >= 0) { // Ensure height is non-negative
-						const height_vmin = this.convertPxToVmin(height_px);
-						// Only update if significantly different to potentially avoid unnecessary layout thrashing
-						// Might need to tune the threshold (e.g., 0.1 or 0.5)
-						const current_padding_px = hand_ratio.getBoundingClientRect().height; // Get current *rendered* height from padding
-						if (Math.abs(current_padding_px - height_px) > 1) { // Check if difference is more than 1px
-							hand_ratio.style.paddingTop = `${height_vmin}vmin`;
-						} else if (height_px === 0 && current_padding_px > 0) {
-							// Special case: if intended height is 0 but current is not, force reset
-							hand_ratio.style.paddingTop = '0vmin';
-						}
+						const width_px = hand_ratio.getBoundingClientRect().width;
+						hand_ratio.style.aspectRatio = `${width_px} / ${height_px}`;
+					} else {
+						hand_ratio.style.aspectRatio = 'auto';
 					}
+
+					// clean up temp asset
+					if (temp_asset) { temp_asset.remove(); }
 			
 					if (asset_or_token === 'asset') { return new_card_slots; }
 					else if (asset_or_token === 'token') { return new_token_slot; }
@@ -465,10 +691,18 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			
 			convertVmaxToPx: function(vmax) {
 
-				const viewportWidth = window.innerWidth;
-				const viewportHeight = window.innerHeight;
-				const largerDimension = Math.max(viewportWidth, viewportHeight);
-				return (vmax / 100) * largerDimension;
+				const viewport_width = window.innerWidth;
+				const viewport_height = window.innerHeight;
+				const larger_dimension = Math.max(viewport_width, viewport_height);
+				return (vmax / 100) * larger_dimension;
+			},
+
+			convertVminToPx: function(vmin) {
+
+				const viewport_width = window.innerWidth;
+				const viewport_height = window.innerHeight;
+				const smaller_dimension = Math.min(viewport_width, viewport_height);
+				return (vmin / 100) * smaller_dimension;
 			},
 
 			clicksOff: function(type='default') {
@@ -490,12 +724,20 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							ele.classList.remove('selectable_token');
 						});
 						document.querySelectorAll('.selectable_skill').forEach(ele => {
-							this.selectable_skills.push(ele);
-							ele.classList.remove('selectable_skill');
+							if (!ele.classList.contains('disable_for_risk_resolution')) {
+								this.selectable_skills.push(ele);
+								ele.classList.remove('selectable_skill');
+							}
 						});
 						document.querySelectorAll('.selectable_wrap').forEach(ele => {
 							this.selectable_wraps.push(ele);
 							ele.classList.remove('selectable_wrap');
+						});
+						document.querySelectorAll('.gear_token_border').forEach(ele => {
+							this.selectable_gears.push(ele);
+							ele.style.border = 'none';
+							ele.style.top = '13%';
+							ele.style.left = '14%';
 						});
 						const confirm_button = document.getElementById('confirm_button');
 						if (confirm_button && !confirm_button.classList.contains('disabled')) {
@@ -516,6 +758,25 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						if (trade_button && !trade_button.classList.contains('disabled')) {
 							trade_button.classList.add('disabled');
 							this.trade_button = true;
+						}
+						const rest_button = document.getElementById('rest_button');
+						if (rest_button && !rest_button.classList.contains('disabled')) {
+							rest_button.classList.add('disabled');
+							this.rest_button = true;
+						}
+						const continue_button = document.getElementById('continue_button');
+						if (continue_button && !continue_button.classList.contains('disabled')) {
+							continue_button.classList.add('disabled');
+							this.continue_button = true;
+						}
+						this.token_buttons = [];
+						if (document.querySelector('.token_button')) {
+							document.querySelectorAll('.token_button').forEach(button => {
+								if (!button.classList.contains('disabled')) {
+									button.classList.add('disabled');
+									this.token_buttons.push(button); 
+								}
+							});
 						}
 					
 					case 'default':
@@ -552,10 +813,16 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						for (const ele of this.selectable_tokens) { ele.classList.add('selectable_token'); }
 						for (const ele of this.selectable_skills) { ele.classList.add('selectable_skill'); }
 						for (const ele of this.selectable_wraps) { ele.classList.add('selectable_wrap'); }
+						for (const ele of this.selectable_gears) {
+							ele.style.border = '';
+							ele.style.top = '';
+							ele.style.left = '';
+						}
 						this.selectables = [];
 						this.selectable_tokens = [];
 						this.selectable_skills = [];
 						this.selectable_wraps = [];
+						this.selectable_gears = [];
 
 						if (this.confirm_button) {
 							document.getElementById('confirm_button').classList.remove('disabled');
@@ -572,6 +839,20 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						if (this.trade_button) {
 							document.getElementById('trade_button').classList.remove('disabled');
 							delete this.trade_button;
+						}
+						if (this.rest_button) {
+							document.getElementById('rest_button').classList.remove('disabled');
+							delete this.rest_button;
+						}
+						if (this.continue_button) {
+							document.getElementById('continue_button').classList.remove('disabled');
+							delete this.continue_button;
+						}
+						if (this.token_buttons) {
+							this.token_buttons.forEach(button => {
+								if (button) { button.classList.remove('disabled'); }
+							});
+							delete this.token_buttons;
 						}
 						break;
 
@@ -647,10 +928,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        assetTooltip: function(ele, card_type) {
 	        	const card = gameui.gamedatas.asset_cards[card_type];
 	            const bg_pos = card['x_y'];
-	            const skill = _(card['skill']);
-	            const title = _(card['description']);
-	            const html = `<div style="margin-bottom: 5px; display: inline;"><strong>${title}</strong></div>
-	                          <span style="font-size: 10px; margin-left: 5px;">${skill}</span>
+				let skill = dojo.string.substitute("${skill}", { skill: card['skill'] });
+				if (skill !== 'gear') { skill += ' skill'; }
+				const description = dojo.string.substitute("${description}", { description: card['description'] });
+	            const html = `<div style="margin-bottom: 5px; display: inline;"><strong>${description}</strong></div>
+	                          <span style="font-size: 12px; margin-left: 5px;">${skill}</span>
 	                          <div class="asset asset_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>`;
 	            gameui.addTooltipHtml(ele, html, 1000);
 	        },
@@ -658,8 +940,8 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        pitchTooltip: function(ele, pitch_type, tokens=false, rope_order) {
 	        	const pitch = gameui.gamedatas.pitches[pitch_type];
 	            const bg_pos = pitch['x_y'];
-	            const title = _(pitch['description']);
-	            const type = _(pitch['type_description']);
+				const description = dojo.string.substitute("${description}", { description: pitch['description'] });
+				const type = dojo.string.substitute("${type}", { type: pitch['type_description'] });
 	            let skill_tokens = '';
 
 	            if (tokens) {
@@ -670,7 +952,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	            		skill_tokens += clone.outerHTML;
 	            	}
 	            }
-	            const html = `<div style="margin-bottom: 5px;"><strong>${title}</strong></div>
+	            const html = `<div style="margin-bottom: 5px;"><strong>${description}</strong></div>
 	                          <div class="pitch pitch_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;">
 	                          ${skill_tokens}</div>
 	                          <div> Type: ${type} / Value: ${gameui.gamedatas.pitches[pitch_type]['value']}</div>
@@ -712,7 +994,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
                         const player = gameui.gamedatas.players[player_id];
                         const name_span = gameui.format_block('jstpl_colored_name', {
                             player_id : player_id,
-                            color : player.color,
+                            color : `#${player.color}`,
                             player_name : player.name,
                         });
 						if (!rope_order) { rope_order += 'Rope order:'; }
@@ -725,13 +1007,13 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        climbingTooltip: function(ele, card_type, log=false) {
 	        	const card = gameui.gamedatas.climbing_cards[card_type];
 	        	const bg_pos = card['x_y'];
-	        	const title = _(card['description']);
-	        	const effect_a_flavor = _(card['effect_a_flavor']);
-	        	const effect_a = _(card['effect_a']);
-	        	const effect_b_flavor = _(card['effect_b_flavor']);
-	        	const effect_b = _(card['effect_b']);
+				const description = dojo.string.substitute("${description}", { description: card['description'] });
+				const effect_a_flavor = dojo.string.substitute("${effect_a_flavor}", { effect_a_flavor: card['effect_a_flavor'] });
+				const effect_a = dojo.string.substitute("${effect_a}", { effect_a: card['effect_a'] });
+				const effect_b_flavor = dojo.string.substitute("${effect_b_flavor}", { effect_b_flavor: card['effect_b_flavor'] });
+				const effect_b = dojo.string.substitute("${effect_b}", { effect_b: card['effect_b'] });
 	        	const log_pic = (log) ? `<div class="climbing climbing_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%; margin-bottom: 5px;"></div>` : '';
-	        	const html = `<div class="climbing_tooltip_wrapper"><div style="margin-bottom: 5px;"><strong>${title}</strong></div>
+	        	const html = `<div class="climbing_tooltip_wrapper"><div style="margin-bottom: 5px;"><strong>${description}</strong></div>
 	        				  ${log_pic}
 	        				  <div style="text-align: center;"><i>${effect_a_flavor}</i></div><br><div>${effect_a}</div>
 	        				  <div style="text-align: center; position: relative; bottom: 4px;">_________________________</div>
@@ -742,10 +1024,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        summitBetaTooltip: function(ele, summit_beta_type) {
 	        	const token = gameui.gamedatas.summit_beta_tokens[summit_beta_type];
 	        	const bg_pos = token['x_y'];
-	        	const title = _(token['description']);
-	        	const effect_string = _(token['effect_string']);
-	        	const subscript_string = _(token['subscript_string']) || '';
-	        	const html = `<div style="margin-bottom: 5px;"><strong>${title}</strong></div>
+				const description = dojo.string.substitute("${description}", { description: token['description'] });
+				const effect_string = dojo.string.substitute("${effect_string}", { effect_string: token['effect_string'] });
+				const subscript_string = token['subscript_string'] ? dojo.string.substitute("${subscript_string}", { subscript_string: token['subscript_string'] }) : '';
+	        	const html = `<div style="margin-bottom: 5px;"><strong>${description}</strong></div>
                             <div class="summit_beta summit_beta_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%;"></div>
                             <div>${effect_string}</div>
                             <div style="font-size:10px;"><i>${subscript_string}</i></div>`;
@@ -754,12 +1036,15 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			sharedObjectiveTooltip: function(shared_objective) {
 				const shared_objectives = gameui.gamedatas.shared_objectives;
-                const bg_pos = shared_objectives[shared_objective]['x_y'];
-                const subscript = _(shared_objectives[shared_objective]['subscript_string']) || '';
-                const title = _(shared_objectives[shared_objective]['description']);
-                const condition = _(shared_objectives[shared_objective]['objective_string']);
+				const objective = shared_objectives[shared_objective];
+                const bg_pos = objective['x_y'];
+				const subscript = (objective['subscript_string'])
+									? dojo.string.substitute("${subscript}", { subscript: objective['subscript_string'] })
+									: '';
+				const description = dojo.string.substitute("${description}", { description: objective['description'] });
+				const condition = dojo.string.substitute("${condition}", { condition: objective['objective_string'] });
                 const objective_tracker_ele = document.querySelector(`.so_${shared_objective}`).firstElementChild;
-                const html = `<div style="margin-bottom: 5px;"><strong>${title}</strong></div>
+                const html = `<div style="margin-bottom: 5px;"><strong>${description}</strong></div>
                             <div class="shared_objective shared_objective_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%;"></div>
                             <div>${condition}</div>
                             <div style="font-size:10px;">${subscript}</div>
@@ -771,12 +1056,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			personalObjectiveTooltip: function(ele, personal_objective_type, log=false) {
 				const objective = gameui.gamedatas.personal_objectives[personal_objective_type];
 				const bg_pos = objective['x_y'];
-				const title = _(objective['description']);
-				const text = _(objective['text']);
-				const mark = _(objective['mark']);
+				const description = dojo.string.substitute("${description}", { description: objective['description'] });
+				const text = dojo.string.substitute("${text}", { text: objective['text'] });
+				const mark = dojo.string.substitute("${mark}", { mark: objective['mark'] });
 				let pitch_names = [...objective['pitch_names']];
-				const starting_top = gameui.gamedatas.personal_objectives[personal_objective_type]['starting_check_top'];
-				let checks = '';
 				let tracker = null;
 
 				if (gameui.gamedatas.personal_objectives_tracker && Object.keys(gameui.gamedatas.personal_objectives_tracker).includes(String(personal_objective_type))) {
@@ -795,25 +1078,22 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					tracker = gameui.gamedatas.opponents_objectives_tracker[found_key][personal_objective_type];
 				}
 				else { tracker = []; } // spectator
-				for (let index of tracker) {
-					const check_top = starting_top + 5.98 * index;
-					const check = `<div class="check" style="top: ${check_top}%;">\u2713</div>`;
-					checks += check;
-					pitch_names[index] = `<strong style="position: relative;">\u2713</strong> ${pitch_names[index]}`;
-				}
+				const tracker_num = tracker.length < 3 ? tracker.length : 3;
+				const tracker_tt = `${tracker_num}/3 completed`;
 
 				const log_tt_tops = objective['log_tt_tops'];
 				const padding = objective['log_tt_padding_rights'];
 				let pitches_wrapper = `<div id="po_tt_pitches" style="top: ${log_tt_tops['pitches']};">`;
 				pitch_names.forEach(pitch => {
-					pitches_wrapper += `${_(pitch)}<br>`;
+					const pitch_description = dojo.string.substitute("${pitch_description}", { pitch_description: pitch });
+					pitches_wrapper += pitch_description + '<br>';
 				});
 				pitches_wrapper += '</div>';
 				const call_it_like_you_see_it = personal_objective_type === '3' ? `<div id="po_tt_cilysi">${_('Any route with')}</div><br>` : '';
 				const html = (log) ?
-									`<div class="personal_objective personal_objective_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%;">${checks}</div>
+									`<div class="personal_objective personal_objective_tt" style="background-position: -${bg_pos[0]}% -${bg_pos[1]}%;"></div>
 									 <div class="po_tt_wrapper log_below">
-									 <div id="po_tt_title" style="top: ${log_tt_tops['title']};${padding['title']}"><strong>${title}</strong></div><br>
+									 <div id="po_tt_title" style="top: ${log_tt_tops['title']};${padding['title']}"><strong>${description}</strong></div><br>
 									 <hr id="title_hr" class="tt_hr" style="top: ${log_tt_tops['title_hr']};">
 									 <div id="po_tt_text" style="top: ${log_tt_tops['text']};${padding['text']}">${text}</div><br>
 									 <hr id="text_hr" class="tt_hr" style="top: ${log_tt_tops['text_hr']};">
@@ -821,16 +1101,20 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 									 <hr id="mark_hr" class="tt_hr" style="top: ${log_tt_tops['mark_hr']};">
 									 ${call_it_like_you_see_it}
 									 ${pitches_wrapper}
+									 <br>
+									 <strong>${tracker_tt}</strong>
 									 </div>`
 								   :
-								    `<div id="po_tt_title"><strong>${title}</strong></div>
+								    `<div id="po_tt_title"><strong>${description}</strong></div>
 									 <hr id="title_hr" class="tt_hr">
 									 <div id="po_tt_text">${text}</div>
 									 <hr id="text_hr" class="tt_hr">
 									 <div id="po_tt_mark">${mark}</div>
 									 <hr id="mark_hr" class="tt_hr">
 									 ${call_it_like_you_see_it}
-									 ${pitches_wrapper}`
+									 ${pitches_wrapper}
+									 <br>
+									 <strong>${tracker_tt}</strong>`
 								   ;
 				gameui.addTooltipHtml(ele, html, 1000);
 
@@ -848,7 +1132,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	        addTooltipsToLog: function() {
 	            const item_elements = dojo.query('.item_tooltip:not(.tt_processed)');
-	            Array.from(item_elements).forEach((ele) => {
+	            Array.from(item_elements).forEach(ele => {
 	                const ele_id = ele.id;
 					ele.classList.add('tt_processed');
 
@@ -953,7 +1237,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	                const name_span = gameui.format_block('jstpl_colored_name', {
 				                    		player_id : player.id,
-				                    		color : player.color,
+				                    		color : `#${player.color}`,
 				                    		player_name : name,
 				                      });
 
@@ -990,39 +1274,41 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        	const board_assets = gameui.gamedatas.board_assets;
 	        	for (const player_id of Object.keys(board_assets)) {
 
-	        		const player = gameui.gamedatas.players[player_id];
-	        		const character_id = player.character;
-	        		const character = gameui.gamedatas.characters[character_id];
+					if (this.notAZombie(player_id)) {
+						const player = gameui.gamedatas.players[player_id];
+						const character_id = player.character;
+						const character = gameui.gamedatas.characters[character_id];
 
-	        		const asset_board = gameui.gamedatas.board_assets[player_id];
-	        		for (const type of Object.keys(asset_board)) {
+						const asset_board = gameui.gamedatas.board_assets[player_id];
+						for (const type of Object.keys(asset_board)) {
 
-						if (character_id === '2' && type === 'gear') { continue; } // Free Soloist
-						let slots = 4;
-						if (character_id === '6') { slots = type === 'gear' ? 5 : 3; } // Young Prodigy
+							if (character_id === '2' && type === 'gear') { continue; } // Free Soloist
+							let slots = 4;
+							if (character_id === '6') { slots = type === 'gear' ? 5 : 3; } // Young Prodigy
 
-	        			let temp_type = [];
-	        			for (let i=1; i<=slots; i++) {
-	        				const card_obj = gameui.gamedatas.board_assets[player_id][type][String(i)];
-	        				if (Object.values(card_obj).length > 0) {
-	        					temp_type.push(Object.keys(card_obj)[0]);
-	        				}
-	        			}
+							let temp_type = [];
+							for (let i=1; i<=slots; i++) {
+								const card_obj = gameui.gamedatas.board_assets[player_id][type][String(i)];
+								if (Object.values(card_obj).length > 0) {
+									temp_type.push(Object.keys(card_obj)[0]);
+								}
+							}
 
-	        			dojo.query(`#asset_board_${player_id} > #${character.name}_${type} .played_asset`).forEach(ele => {
-	        				const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
-	        				if (temp_type.includes(asset_id)) {
-	        					const idx = temp_type.indexOf(asset_id);
-	        					temp_type.splice(idx, 1);
-	        				} else {
-	        					ele.remove();
-	        				}
-	        			});
+							dojo.query(`#asset_board_${player_id} > #${character.name}_${type} .played_asset`).forEach(ele => {
+								const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
+								if (temp_type.includes(asset_id)) {
+									const idx = temp_type.indexOf(asset_id);
+									temp_type.splice(idx, 1);
+								} else {
+									ele.remove();
+								}
+							});
 
-	        			const db_tucked_num = Object.keys(asset_board[type]['tucked']).length;
-	        			const ele_tucked_num = dojo.query(`#${character.name}_${type} .asset_counter_num`)[0];
-	        			ele_tucked_num.innerHTML = db_tucked_num;
-	        		}
+							const db_tucked_num = Object.keys(asset_board[type]['tucked']).length;
+							const ele_tucked_num = dojo.query(`#${character.name}_${type} .asset_counter_num`)[0];
+							ele_tucked_num.innerHTML = db_tucked_num;
+						}
+					}
 	        	}
 	        },
 
@@ -1124,6 +1410,22 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        	else { return '0'; }
 	        },
 
+			tradeEnabled: function() {
+				const hand = gameui.gamedatas.hand_assets;
+				const hand_types = {
+					'gear' : 0,
+					'face' : 0,
+					'crack' : 0,
+					'slab' : 0,
+				};
+				Object.values(hand).forEach(type_arg => {
+					const type = this.getAssetType(type_arg);
+					hand_types[type]++;
+				});
+				const available_types = Object.keys(hand_types).filter(type => hand_types[type] >= 3);
+				return available_types.length > 0 ? available_types : false;
+			},
+
 	        includesDeep: function(array, value) {
 	        	return array.some(subArray => {
 	        		return subArray.every(
@@ -1131,6 +1433,22 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        		);
 	        	});
 	        },
+
+			removeBacktrackPitchSets: function(pitch_sets) {
+				const seen_pairs = new Set();
+				const result = [];
+
+				for (const pair of pitch_sets) {
+					const canonical_pair = [...pair].sort((a, b) => a - b).join('-');
+
+					if (!seen_pairs.has(canonical_pair)) {
+						seen_pairs.add(canonical_pair);
+						result.push(pair);
+					}
+				}
+
+				return result;
+			},
 
 	        getRope: function(/*strings*/ previous_pitch, current_pitch, board) {
 	        	const path = [Number(previous_pitch), Number(current_pitch)];
@@ -1140,77 +1458,133 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        	if (previous_pitch === '0') { rotation = '210'; mini = true; }
 
 	        	else {
-	        		if (board == 'desert') {
-		        		const LL_mini = [
-		        							[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [16, 22], [17, 22], [18, 22], [19, 22], 
-		        							[20, 22], [21, 22], [24, 22], [25, 22], [26, 22], [16, 23], [17, 23], [18, 23], [19, 23], [20, 23], 
-		        							[21, 23], [25, 23], [26, 23], [16, 24], [17, 24], [18, 24], [19, 24], [20, 24], [21, 24], [22, 24], 
-		        							[26, 24], [16, 25], [17, 25], [18, 25], [19, 25], [20, 25], [21, 25], [22, 25], [23, 25], [16, 26], 
-		        							[17, 26], [18, 26], [19, 26], [20, 26], [21, 26], [22, 26], [23, 26], [24, 26]
-		        						];
-		        		const UR_mini = [
-		        							[18, 16], [19, 16], [20, 16], [21, 16], [22, 16], [23, 16], [24, 16], [25, 16], [26, 16], [19, 17], [20, 17], 
-		        							[21, 17], [22, 17], [23, 17], [24, 17], [25, 17], [26, 17], [16, 18], [20, 18], [21, 18], [22, 18], [23, 18], 
-		        							[24, 18], [25, 18], [26, 18], [16, 19], [17, 19], [21, 19], [22, 19], [23, 19], [24, 19], [25, 19], [26, 19], 
-		        							[16, 20], [17, 20], [18, 20], [22, 20], [23, 20], [24, 20], [25, 20], [26, 20], [16, 21], [17, 21], [18, 21], 
-		        							[19, 21], [22, 21], [23, 21], [24, 21], [25, 21], [26, 21]
-		        						];
-		        		const LL = 		[
-		        							[9, 1], [10, 2], [11, 3], [12, 4], [13, 5], [14, 6], [15, 7], [16, 9], [17, 10], [18, 11], [19, 12], [20, 13], 
-		        							[21, 14], [27, 22], [28, 23], [29, 24], [30, 25], [31, 27], [32, 29]
-		        				   		];
-		        		const L = 		[
-		        							[2, 1], [3, 2], [4, 3], [5, 4], [6, 5], [7, 6], [8, 7], [10, 9], [11, 10], [12, 11], [13, 12], [14, 13],
-		        							[15, 14], [17, 16], [18, 17], [19, 18], [20, 19], [21, 20], [23, 22], [24, 23], [25, 24], [26, 25],
-		        							[28, 27], [29, 28], [30, 29]
-		        						];
-		        		const UL = 		[
-		        							[2, 9], [3, 10], [4, 11], [5, 12], [6, 13], [7, 14], [8, 15], [10, 16], [11, 17], [12, 18], [13, 19], [14, 20],
-		        							[15, 21], [23, 27], [24, 28], [25, 29], [26, 30], [28, 31], [30, 32]
-		        						];
-		        		const UR = 		[
-		        							[1, 9], [2, 10], [3, 11], [4, 12], [5, 13], [6, 14], [7, 15], [9, 16], [10, 17], [11, 18], [12, 19], [13, 20],
-		        							[14, 21], [22, 27], [23, 28], [24, 29], [25, 30], [27, 31], [29, 32]
-		        						];
-		        		const R  =      [
-		        							[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14], 
-		        							[14, 15], [16, 17], [17, 18], [18, 19], [19, 20], [20, 21], [22, 23], [23, 24], [24, 25], [25, 26],
-		        							[27, 28], [28, 29], [29, 30]
-		        						];
-		        		const LR = 		[
-		        							[9, 2], [10, 3], [11, 4], [12, 5], [13, 6], [14, 7], [15, 8], [16, 10], [17, 11], [18, 12], [19, 13], [20, 14],
-		        							[21, 15], [27, 23], [28, 24], [29, 25], [30, 26], [31, 28], [32, 30]
-		        						];
+					const LL_mini = board === 'desert' ?
+					[
+						[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [16, 22], [17, 22], [18, 22], [19, 22], 
+						[20, 22], [21, 22], [24, 22], [25, 22], [26, 22], [16, 23], [17, 23], [18, 23], [19, 23], [20, 23], 
+						[21, 23], [25, 23], [26, 23], [16, 24], [17, 24], [18, 24], [19, 24], [20, 24], [21, 24], [22, 24], 
+						[26, 24], [16, 25], [17, 25], [18, 25], [19, 25], [20, 25], [21, 25], [22, 25], [23, 25], [16, 26], 
+						[17, 26], [18, 26], [19, 26], [20, 26], [21, 26], [22, 26], [23, 26], [24, 26]
+					] :
+					[			// board === 'forest
+						[0, 1], [0, 2], [0, 3], [0, 4], [0, 5], [0, 6], [0, 7], [0, 8], [0, 9], [0, 10], [20, 28], [20, 29],
+						[20, 30], [20, 31], [20, 32], [20, 33], [20, 34], [21, 28], [21, 29], [21, 30], [21, 31], [21, 32], 
+						[21, 33], [21, 34], [22, 28], [22, 29], [22, 30], [22, 31], [22, 32], [22, 33], [22, 34], [23, 28],
+						[23, 29], [23, 30], [23, 31], [23, 32], [23, 33], [23, 34], [24, 28], [24, 29], [24, 30], [24, 31],
+						[24, 32], [24, 33], [24, 34], [25, 28], [25, 29], [25, 30], [25, 31], [25, 32], [25, 33], [25, 34],
+						[26, 28], [26, 29], [26, 30], [26, 31], [26, 32], [26, 33], [26, 34], [27, 28], [27, 29], [27, 30],
+						[27, 31], [27, 32], [27, 33], [27, 34]
+					];
+					const UR_mini = board === 'desert' ?
+					[
+						[18, 16], [19, 16], [20, 16], [21, 16], [22, 16], [23, 16], [24, 16], [25, 16], [26, 16], [19, 17], [20, 17], 
+						[21, 17], [22, 17], [23, 17], [24, 17], [25, 17], [26, 17], [16, 18], [20, 18], [21, 18], [22, 18], [23, 18], 
+						[24, 18], [25, 18], [26, 18], [16, 19], [17, 19], [21, 19], [22, 19], [23, 19], [24, 19], [25, 19], [26, 19], 
+						[16, 20], [17, 20], [18, 20], [22, 20], [23, 20], [24, 20], [25, 20], [26, 20], [16, 21], [17, 21], [18, 21], 
+						[19, 21], [22, 21], [23, 21], [24, 21], [25, 21], [26, 21]
+					] :
+					[			// board === 'forest
+						[22, 20], [23, 20], [24, 20], [25, 20], [26, 20], [27, 20], [28, 20], [29, 20], [30, 20], [31, 20], [32, 20],
+						[33, 20], [34, 20], [23, 21], [24, 21], [25, 21], [26, 21], [27, 21], [28, 21], [29, 21], [30, 21], [31, 21],
+						[32, 21], [33, 21], [34, 21], [20, 22], [24, 22], [25, 22], [26, 22], [27, 22], [28, 22], [29, 22], [30, 22],
+						[31, 22], [32, 22], [33, 22], [34, 22], [20, 23], [21, 23], [25, 23], [26, 23], [27, 23], [28, 23], [29, 23],
+						[30, 23], [31, 23], [32, 23], [33, 23], [34, 23], [20, 24], [21, 24], [22, 24], [26, 24], [27, 24], [28, 24],
+						[29, 24], [30, 24], [31, 24], [32, 24], [33, 24], [34, 24], [20, 25], [21, 25], [22, 25], [23, 25], [27, 25],
+						[28, 25], [29, 25], [30, 25], [31, 25], [32, 25], [33, 25], [34, 25], [20, 26], [21, 26], [22, 26], [23, 26],
+						[24, 26], [28, 26], [29, 26], [30, 26], [31, 26], [32, 26], [33, 26], [34, 26], [20, 27], [21, 27], [22, 27],
+						[23, 27], [24, 27], [25, 27], [28, 27], [29, 27], [30, 27], [31, 27], [32, 27], [33, 27], [34, 27]
+					];
+					const LL = board === 'desert' ?
+					[
+						[9, 1], [10, 2], [11, 3], [12, 4], [13, 5], [14, 6], [15, 7], [16, 9], [17, 10], [18, 11], [19, 12], [20, 13], 
+						[21, 14], [27, 22], [28, 23], [29, 24], [30, 25], [31, 27], [32, 29]
+					] : 
+					[		// board === 'forest
+						[11, 1], [12, 2], [13, 3], [14, 4], [15, 5], [16, 6], [17, 7], [18, 8], [19, 9], [20, 11], [21, 12], [22, 13],
+						[23, 14], [24, 15], [25, 16], [26, 17], [27, 18], [35, 28], [36, 29], [37, 30], [38, 31], [39, 32], [40, 33],
+						[41, 35], [42, 37], [43, 39]
+					];
+					const L = board === 'desert' ?
+					[
+						[2, 1], [3, 2], [4, 3], [5, 4], [6, 5], [7, 6], [8, 7], [10, 9], [11, 10], [12, 11], [13, 12], [14, 13],
+						[15, 14], [17, 16], [18, 17], [19, 18], [20, 19], [21, 20], [23, 22], [24, 23], [25, 24], [26, 25],
+						[28, 27], [29, 28], [30, 29]
+					] :
+					[	   // board === 'forest
+						[2, 1], [3, 2], [4, 3], [5, 4], [6, 5], [7, 6], [8, 7], [9, 8], [10, 9], [12, 11], [13, 12], [14, 13], [15, 14],
+						[16, 15], [17, 16], [18, 17], [19, 18], [21, 20], [22, 21], [23, 22], [24, 23], [25, 24], [26, 25], [27, 26],
+						[29, 28], [30, 29], [31, 30], [32, 31], [33, 32], [34, 33], [36, 35], [37, 36], [38, 37], [39, 38], [40, 30]
+					];
+					const UL = board === 'desert' ?
+					[
+						[2, 9], [3, 10], [4, 11], [5, 12], [6, 13], [7, 14], [8, 15], [10, 16], [11, 17], [12, 18], [13, 19], [14, 20],
+						[15, 21], [23, 27], [24, 28], [25, 29], [26, 30], [28, 31], [30, 32]
+					] :
+					[		// board === 'forest
+						[2, 11], [3, 12], [4, 13], [5, 14], [6, 15], [7, 16], [8, 17], [9, 18], [10, 19], [12, 20], [13, 21], [14, 22],
+						[15, 23], [16, 24], [17, 25], [18, 26], [19, 27], [29, 35], [30, 36], [31, 37], [32, 38], [33, 39], [34, 40],
+						[36, 41], [38, 42], [40, 43]
+					];
+					const UR = board === 'desert' ?
+					[
+						[1, 9], [2, 10], [3, 11], [4, 12], [5, 13], [6, 14], [7, 15], [9, 16], [10, 17], [11, 18], [12, 19], [13, 20],
+						[14, 21], [22, 27], [23, 28], [24, 29], [25, 30], [27, 31], [29, 32]
+					] :
+					[		// board === 'forest
+						[1, 11], [2, 12], [3, 13], [4, 14], [5, 15], [6, 16], [7, 17], [8, 18], [9, 19], [11, 20], [12, 21], [13, 22],
+						[14, 23], [15, 24], [16, 25], [17, 26], [18, 27], [28, 35], [29, 36], [30, 37], [31, 38], [32, 39], [33, 40],
+						[35, 41], [37, 42], [39, 43]
+					];
+					const R  = board === 'desert' ?
+					[
+						[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [9, 10], [10, 11], [11, 12], [12, 13], [13, 14], 
+						[14, 15], [16, 17], [17, 18], [18, 19], [19, 20], [20, 21], [22, 23], [23, 24], [24, 25], [25, 26],
+						[27, 28], [28, 29], [29, 30]
+					] :
+					[		// board === 'forest
+						[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [9, 10], [11, 12], [12, 13], [13, 14], [14, 15],
+						[15, 16], [16, 17], [17, 18], [18, 19], [20, 21], [21, 22], [22, 23], [23, 24], [24, 25], [25, 26], [26, 27],
+						[28, 29], [29, 30], [30, 31], [31, 32], [32, 33], [33, 34], [35, 36], [36, 37], [37, 38], [38, 39], [39, 40]
+					];
+					const LR = board === 'desert' ?
+					[
+						[9, 2], [10, 3], [11, 4], [12, 5], [13, 6], [14, 7], [15, 8], [16, 10], [17, 11], [18, 12], [19, 13], [20, 14],
+						[21, 15], [27, 23], [28, 24], [29, 25], [30, 26], [31, 28], [32, 30]
+					] :
+					[		// board === 'forest
+						[11, 2], [12, 3], [13, 4], [14, 5], [15, 6], [16, 7], [17, 8], [18, 9], [19, 10], [20, 12], [21, 13], [22, 14],
+						[23, 15], [24, 16], [25, 17], [26, 18], [27, 19], [35, 29], [36, 30], [37, 31], [38, 32], [39, 33], [40, 34],
+						[41, 36], [42, 38], [43, 40]
+					];
 
-		        		switch (true) {
-		        			case this.includesDeep(LL, path):
-		        				rotation = '30';
-		        				break;
-		        			case this.includesDeep(LL_mini, path):
-		        				rotation = '30';
-		        				mini = true;
-		        				break;
-		        			case this.includesDeep(L, path):
-		        				rotation = '90';
-		        				break;
-		        			case this.includesDeep(UL, path):
-		        				rotation = '150';
-		        				break;
-		        			case this.includesDeep(UR, path):
-		        				rotation = '210';
-		        				break;
-		        			case this.includesDeep(UR_mini, path):
-		        				rotation = '210';
-		        				mini = true;
-		        				break;
-		        			case this.includesDeep(R, path):
-		        				rotation = '270';
-		        				break;
-		        			case this.includesDeep(LR, path):
-		        				rotation = '330';
-		        				break;
-		        		}
-		        	}
+					switch (true) {
+						case this.includesDeep(LL, path):
+							rotation = '30';
+							break;
+						case this.includesDeep(LL_mini, path):
+							rotation = '30';
+							mini = true;
+							break;
+						case this.includesDeep(L, path):
+							rotation = '90';
+							break;
+						case this.includesDeep(UL, path):
+							rotation = '150';
+							break;
+						case this.includesDeep(UR, path):
+							rotation = '210';
+							break;
+						case this.includesDeep(UR_mini, path):
+							rotation = '210';
+							mini = true;
+							break;
+						case this.includesDeep(R, path):
+							rotation = '270';
+							break;
+						case this.includesDeep(LR, path):
+							rotation = '330';
+							break;
+					}
 	        	}
 	        	return({rotation: rotation, mini: mini});
 	    	},
@@ -1218,6 +1592,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        updateTitlebar: function(message) {
 
 				$('page-title').querySelectorAll('.name_span').forEach(ele => { ele.remove(); });
+				$('gameaction_status').querySelectorAll('.name_span').forEach(ele => { ele.remove(); });
 				const you_regex = /You/g;
 				const you_to_replace = message.match(you_regex);
 				let you_span;
@@ -1231,14 +1606,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					message = message.replace(you_to_replace, '');
 					$('gameaction_status').innerHTML = '';
 					$('gameaction_status').append(you_span);
-					$('gameaction_status').innerHTML += _(message);
+					$('gameaction_status').innerHTML += message;
 					$('pagemaintitletext').innerHTML = '';
 					$('pagemaintitletext').append(you_span);
-					$('pagemaintitletext').innerHTML += _(message);
+					$('pagemaintitletext').innerHTML += message;
 				}
 				else {
-					$('gameaction_status').innerHTML = _(message);
-					$('pagemaintitletext').innerHTML = _(message);
+					$('gameaction_status').innerHTML = message;
+					$('pagemaintitletext').innerHTML = message;
 				}
 				this.resizeTitlebar();
 	        },
@@ -1258,46 +1633,30 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 			},
 
-			toggleTitlebarAddon: function(evt) {
+			setupOutsideClickListener: function(target_elements, closeCallback) {
 
-				const addon = $('titlebar_addon');
-				const addon_toggle = $('addon_toggle');
-				const page_title = $('page-title');
-				const climbing_slot = $('climbing_slot');
-				const crimper_display = $('crimper_display');
-				const toggles_wrap = $('toggles_wrap');
+				this.removeOutsideClickListener();
+				const game_instance = gameui;
+				const targets = Array.isArray(target_elements) ? target_elements : [target_elements];
+				game_instance.globalOutsideClickListener = (evt) => {
+					const clicked_inside = targets.some(target => target && target.contains(evt.target));
+					if (!clicked_inside) {
+						closeCallback();
+					}
+				};
 
-				if (addon_toggle.classList.contains('addon_on')) { // turn off
-					addon.style.display = 'none';
-					addon_toggle.classList.remove('addon_on');
-					addon_toggle.classList.add('addon_off');
-					addon_toggle.innerHTML = _('Show<br>Extension');
-					page_title.append(climbing_slot);
-					if (crimper_display) { page_title.append(crimper_display); }
-					page_title.style.marginBottom = '0';
-					toggles_wrap.querySelectorAll('.toggle').forEach(ele => {
-						if (ele.id != 'addon_toggle') { ele.style.display = 'none'; }
-					});
-					this.deleteExtraneousStats();
-					if (gameui.gamedatas.gamestate.name === 'gameEnd') {
-						$('climbing_dimmer').classList.remove('dim_bg');
-					}
-					
-				}
-				else if (addon_toggle.classList.contains('addon_off')) { // turn on
-					addon.style.display = '';
-					addon_toggle.classList.remove('addon_off');
-					addon_toggle.classList.add('addon_on');
-					addon_toggle.innerHTML = _('Hide<br>Extension');
-					addon.append(climbing_slot);
-					if (crimper_display) { addon.append(crimper_display); }
-					page_title.style.marginBottom = '';
-					toggles_wrap.querySelectorAll('.toggle').forEach(ele => {
-						if (ele.id != 'addon_toggle') { ele.style.display = ''; }
-					});
-					if (gameui.gamedatas.gamestate.name === 'gameEnd' && $('scorecard_toggle').classList.contains('addon_on')) {
-						$('climbing_dimmer').classList.add('dim_bg');
-					}
+				// defer binding to prevent immediate firing
+				setTimeout(() => {
+					window.addEventListener('click', game_instance.globalOutsideClickListener);
+				}, 0);
+			},
+
+			removeOutsideClickListener: function() {
+
+				const game_instance = gameui;
+				if (game_instance && game_instance.globalOutsideClickListener) {
+					window.removeEventListener('click', game_instance.globalOutsideClickListener);
+					game_instance.globalOutsideClickListener = null;
 				}
 			},
 
@@ -1308,6 +1667,8 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				const opponent_objectives_toggle = $('opponent_objectives_toggle');
 				const shared_objectives_toggle = $('shared_objectives_toggle');
 				const scorecard_toggle = $('scorecard_toggle');
+				const climbing_slot = $('climbing_slot');
+				const crimper_display = $('crimper_display');
 
 				if (toggle_button.classList.contains('addon_on')) { // turn off
 					personal_objectives_box.style.display = '';
@@ -1317,17 +1678,25 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					this.deleteExtraneousStats();
 				}
 				else if (toggle_button.classList.contains('addon_off')) { // turn on
-					personal_objectives_box.style.display = 'inline-block';
+					personal_objectives_box.style.display = 'flex';
 					toggle_button.classList.remove('addon_off');
 					toggle_button.classList.add('addon_on');
 					toggle_button.innerHTML = _('Hide Personal<br>Objectives');
 
+					if (crimper_display && this.checkForOverlap(crimper_display, personal_objectives_box)) {
+						$('show_hide_card_button').click();
+					}
+					
+					if (climbing_slot && this.checkForOverlap(climbing_slot, personal_objectives_box)) {
+						$('show_hide_card_button').click();
+					}
+
 					if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
 						opponent_objectives_toggle.click();
 					}
-					if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
-						shared_objectives_toggle.click();
-					}
+					// if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
+					// 	shared_objectives_toggle.click();
+					// }
 					if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
 						scorecard_toggle.click();
 					}
@@ -1355,15 +1724,15 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					toggle_button.classList.add('addon_on');
 					toggle_button.innerHTML = _('Hide Shared<br>Objective Trackers');
 					
-					if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
-						personal_objectives_toggle.click();
-					}
-					if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
-						opponent_objectives_toggle.click();
-					}
-					if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
-						scorecard_toggle.click();
-					}
+					// if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
+					// 	personal_objectives_toggle.click();
+					// }
+					// if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
+					// 	opponent_objectives_toggle.click();
+					// }
+					// if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
+					// 	scorecard_toggle.click();
+					// }
 				}
 			},
 
@@ -1394,9 +1763,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
 						opponent_objectives_toggle.click();
 					}
-					if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
-						shared_objectives_toggle.click();
-					}
+					// if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
+					// 	shared_objectives_toggle.click();
+					// }
 					if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
 						personal_objectives_toggle.click();
 					}
@@ -1430,9 +1799,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
 						scorecard_toggle.click();
 					}
-					if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
-						shared_objectives_toggle.click();
-					}
+					// if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
+					// 	shared_objectives_toggle.click();
+					// }
 					if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
 						personal_objectives_toggle.click();
 					}
@@ -1455,13 +1824,151 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					});
 				}
 			},
+
+			chooseTrifectaOption: function(evt) {
+				const trifecta_box = $('trifecta_box');
+				const trifecta_selected_box = $('trifecta_selected_box');
+
+				if (evt === 'show_trifecta') {
+					trifecta_box.style.display = 'block';
+					$('trifecta_show_button').remove();
+
+					// set popup to close if user clicks x or outside of element
+					const closePopup = () => {
+						trifecta_box.style.display = 'none';
+						gameui.bga.statusBar.addActionButton(_('Show options'), () => this.chooseTrifectaOption('show_trifecta'), {
+							id: 'trifecta_show_button',
+							tooltip: _('Show Trifecta options'),
+						});
+						
+						this.removeOutsideClickListener();
+					};
+
+					// attach close logic to X button
+					const close_button = $('trifecta_hide_button');
+					if (close_button) { close_button.onclick = () => closePopup(); }
+
+					// start listener
+					this.setupOutsideClickListener(trifecta_box, closePopup);
+				}
+				else {
+					const button = evt.currentTarget;
+					const type = button.id.slice(0, -7);
+
+					if (type === 'trifecta_confirm') {
+						if (trifecta_box.querySelectorAll('.trifecta_selected').length === 2) {
+							const exposure_button = trifecta_box.querySelector('.tri_exposure.trifecta_selected');
+							const exposure = exposure_button.id.slice(0, -7);
+							const type_button = trifecta_box.querySelector('.tri_type.trifecta_selected');
+							const type = type_button.id.slice(0, -7);
+							const player_id = gameui.getActivePlayerId();
+							this.trifecta_selections[player_id] = `${exposure} ${type}`;
+							document.querySelectorAll('.trifecta_selected').forEach(ele => { ele.classList.remove('trifecta_selected'); });
+							trifecta_box.style.display = '';
+							$('confirm_button').classList.remove('disabled');
+							trifecta_selected_box.style.display = 'block';
+							const selected_exposure = exposure_button.cloneNode(true);
+							selected_exposure.id = 'selected_exposure';
+							selected_exposure.classList.add(exposure);
+							selected_exposure.classList.remove('always_cursor', 'trifecta_selected');
+							const selected_type = type_button.cloneNode(true);
+							selected_type.id = 'selected_type';
+							selected_type.classList.add(type);
+							selected_type.classList.remove('always_cursor', 'trifecta_selected');
+							trifecta_selected_box.append(selected_exposure, selected_type);
+							this.removeOutsideClickListener();
+						}
+					}
+					else if (type === 'trifecta_undo') {
+						Array.from(trifecta_selected_box.children).forEach(ele => {
+							if (ele.id !== 'trifecta_title_clone' && ele.id !== 'trifecta_undo_button') {
+								ele.remove();
+							}
+						});
+						trifecta_selected_box.style.display = '';
+						trifecta_box.style.display = 'block';
+						$('trifecta_confirm_button').style.backgroundColor = '';
+						
+						// set popup to close if user clicks x or outside of element
+						const closePopup = () => {
+							trifecta_box.style.display = 'none';
+							gameui.bga.statusBar.addActionButton(_('Show options'), () => this.chooseTrifectaOption('show_trifecta'), {
+								id: 'trifecta_show_button',
+								tooltip: _('Show Trifecta options'),
+							});
+							
+							this.removeOutsideClickListener();
+						};
+
+						// attach close logic to X button
+						const close_button = $('trifecta_hide_button');
+						if (close_button) { close_button.onclick = () => closePopup(); }
+
+						// start listener
+						this.setupOutsideClickListener(trifecta_box, closePopup);
+					}
+					else {
+						const exposures = ['sunny', 'shaded'];
+						const types = ['arete', 'corner', 'slab', 'flake', 'roof', 'crack'];
+						let selected_property = null;
+						if (exposures.includes(type)) { selected_property = 'exposure'; }
+						else if (types.includes(type)) { selected_property = 'type'; }
+						switch (selected_property) {
+							case 'exposure':
+								trifecta_box.querySelectorAll('.tri_exposure').forEach(ele => {
+									ele.classList.remove('trifecta_selected');
+								});
+								break;
+							case 'type':
+								trifecta_box.querySelectorAll('.tri_type').forEach(ele => {
+									ele.classList.remove('trifecta_selected');
+								});
+						}
+						button.classList.add('trifecta_selected');
+
+						// enable confirm if both exposure and type are selected
+						if (trifecta_box.querySelectorAll('.trifecta_selected').length === 2) {
+							$('trifecta_confirm_button').style.backgroundColor = '#4871b6';
+						}
+					}
+				}
+			},
+
+			undoTrifecta: function() {
+				this.updateTitlebar(_('You must choose a Pitch, Rest, or Trade Assets'));
+				if ($('risk_it_message')) { $('risk_it_message').remove(); }
+				document.querySelectorAll('.trifecta_selected').forEach(ele => { ele.classList.remove('trifecta_selected'); });
+				$('trifecta_box').style.display = '';
+				const trifecta_selected_box = $('trifecta_selected_box');
+				Array.from(trifecta_selected_box.children).forEach(ele => {
+					if (ele.id !== 'trifecta_title_clone' && ele.id !== 'trifecta_undo_button') {
+						ele.remove();
+					}
+				});
+				trifecta_selected_box.style.display = '';
+				$('trifecta_undo_button').style.display = '';
+			},
+
+			toggleTrifectaTypesDrawer: function() {
+				const drawer = $('trifecta_types_drawer');
+				const triangle = document.querySelector('#trifecta_drawer_toggle path:last-child');
+				const action = drawer.style.display === 'grid' ? 'close' : 'open';
+				if (action === 'open') {
+					drawer.style.display = 'grid';
+					triangle.setAttribute('d', 'M 65 85 L 85 85 L 75 60 Z');
+				}
+				else if (action === 'close') {
+					drawer.style.display = '';
+					triangle.setAttribute('d', 'M 65 60 L 85 60 L 75 85 Z');
+				}
+			},
 	        
 	        displayRequirements: function(resources, requirements, others=false, in_hand=false) {
 
 	        	dojo.query('.requirement_wrap').forEach((ele) => { ele.remove(); });
 	        	dojo.query('.requirement_wrap_cards').forEach((ele) => { ele.remove(); });
 
-	        	let temp_resources = JSON.parse(JSON.stringify(resources)); // JSON method for deep copying an object included nested objects
+	        	let temp_resources = structuredClone(resources);
 
 				const gamestate = gameui.gamedatas.gamestate.name;
 				const self = this;
@@ -1539,74 +2046,6 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    last_ele.insertAdjacentElement('afterend', requirement_wrap);
 		                }
 		            });
-
-					// if (
-					// 	   gameui.character_id === '3' // The Dirtbag
-					//  	&& resources['skills']['gear'] > requirements['gear']
-					//  	&& dojo.query('.requirement_border.skill_border').length > 0
-					// ) {
-					// 	dojo.query('.requirement_border.skill_border')[0].remove();
-					// }
-
-					// if (
-					// 	   gameui.character_id === '5' // The Overstoker
-					// 	&& resources['psych'] > requirements['psych']
-					// 	&& dojo.query('.requirement_border').length > 0
-					// ) {
-					// 	dojo.query('.requirement_border')[0].remove();
-					// }
-
-					// if (gameui.character_id === '9' && document.querySelector('.selected_pitch')) { // Crag Mama
-					// 		const selected_pitch = document.querySelector('.selected_pitch').nextElementSibling;
-					// 		const hex_num = selected_pitch.id.slice(-2).replace(/^\D+/g, '');
-					// 		const cutoff = this.board === 'desert' ? 21 : 27;
-
-					// 		if (hex_num <= cutoff && document.querySelector('.requirement_border')) {
-					// 			const requirement_borders = document.querySelectorAll('.requirement_border');
-					// 			for (let i=0; i<requirement_borders.length; i++) {
-					// 				const ele = requirement_borders[i];
-					// 				const type = ele.parentElement.classList[1].slice(0, -5);
-					// 				if (['face', 'crack', 'slab', 'any_skill'].includes(type)) {
-					// 					ele.remove();
-					// 					break;
-					// 				}
-					// 			}
-					// 		}
-					// }
-
-					// if (gameui.character_id === '11' && document.querySelectorAll('.requirement_border').length > 0) { // Bionic Woman
-					// 	const face = resources['skills']['face'] + resources['permanent_skills']['face'] - requirements['face'];
-					// 	const crack = resources['skills']['crack'] + resources['permanent_skills']['crack'] - requirements['crack'];
-					// 	const slab = resources['skills']['slab'] + resources['permanent_skills']['slab'] - requirements['slab'];
-					// 	const total = face + crack + slab - requirements['any_skill'];
-
-					// 	if (total >= 0 && [face, crack, slab].some(num => num < 0)) {
-					// 		const requirement_borders = document.querySelectorAll('.requirement_border');
-					// 		for (let i=0; i<requirement_borders.length; i++) {
-					// 			const ele = requirement_borders[i];
-					// 			const type = ele.parentElement.classList[1].slice(0, -5);
-					// 			if (['face', 'crack', 'slab'].includes(type)) {
-					// 				ele.remove();
-					// 				break;
-					// 			}
-					// 		}
-					// 	}
-					// }
-
-					// if (gameui.character_id === '12' && document.querySelector('.selected_pitch')) { // Buff Boulderer
-					// 	const selected_pitch = document.querySelector('.selected_pitch').nextElementSibling;
-					// 	const pitch_num = selected_pitch.classList[1].slice(1);
-					// 	const value = gameui.gamedatas.pitches[pitch_num]['value'];
-
-					// 	if (value === 4) {
-					// 		document.querySelector('.requirement_border').remove();
-					// 	}
-					// 	else if (value === 5) {
-					// 		const borders = document.querySelectorAll('.requirement_border');
-					// 		borders[0].remove();
-					// 		border[1].remove();
-					// 	}
-					// }
 	        	}
 	        },
 
@@ -1667,6 +2106,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			updateSharedObjectivesDisplay: function(shared_objectives_tracker) {
 				const player_names_and_colors = gameui.gamedatas.player_names_and_colors;
+				const toggle = $('shared_objectives_toggle');
 				for (const [type_arg, info] of Object.entries(shared_objectives_tracker)) {
 					const objective_tracker_ele = document.querySelector(`.so_${type_arg} > .shared_objective_tracker`);
 					objective_tracker_ele.innerHTML = ''; // removes existing children
@@ -1680,7 +2120,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							const player = gameui.gamedatas.players[player_id];
 							const name_span = gameui.format_block('jstpl_colored_name', {
 								player_id : player_id,
-								color : player.color,
+								color : `#${player.color}`,
 								player_name : player.name,
 							});
 							const player_div = dojo.place(
@@ -1700,7 +2140,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							const player = gameui.gamedatas.players[player_id];
 							const name_span = gameui.format_block('jstpl_colored_name', {
 								player_id : player_id,
-								color : player.color,
+								color : `#${player.color}`,
 								player_name : player.name,
 							});
 							const player_div = dojo.place(
@@ -1717,12 +2157,26 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					}
 					// center tracker to objective horizontally
 					const objective_ele = objective_tracker_ele.parentElement;
-					const objective_width = objective_ele.clientWidth;
 					objective_tracker_ele.style.display = 'flex';
-					const tracker_width = objective_tracker_ele.clientWidth;
-					const tracker_left = (objective_width / 2) - (tracker_width / 2);
-					objective_tracker_ele.style.display = '';
-					objective_tracker_ele.style.left = `${tracker_left}px`;
+					// handle visibility
+					if (toggle.classList.contains('addon_off')) {
+						objective_tracker_ele.style.display = '';
+					} else {
+						objective_tracker_ele.style.display = 'flex';
+					}
+
+					if (!objective_tracker_ele._scaleObserver) {
+						objective_tracker_ele._scaleObserver = new ResizeObserver(entries => {
+							for (let entry of entries) {
+								// calculate font size based on parent width
+								const newFontSize = entry.contentRect.width / 4.5;
+								objective_tracker_ele.style.fontSize = `${newFontSize}px`;
+							}
+						});
+						
+						// Start observing the parent element
+						objective_tracker_ele._scaleObserver.observe(objective_ele);
+					}
 
 					this.sharedObjectiveTooltip(type_arg);
 				}
@@ -1739,20 +2193,25 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					const destination_pitch_type_arg = notif.args.selected_pitch;
 		            gameui.gamedatas.pitch_tracker[player_id].push(destination_pitch_id);
 		            const pitch_tracker = gameui.gamedatas.pitch_tracker[player_id];
+					const bailed_pitch = gameui.gamedatas.bailed_pitch[player_id];
 		            const rope_overlaps = gameui.gamedatas.rope_overlaps[player_id];
-		            const current_pitch_id = pitch_tracker[pitch_tracker.length-2];
+		            const current_pitch_id = bailed_pitch || pitch_tracker[pitch_tracker.length-2];
 					const pitch_rope_order = notif.args.pitch_rope_order;
 					const current_climber_order = pitch_rope_order.indexOf(player_id) + 1;
 					const final_round = pitch_tracker.length === 9 ? true : false;
 
 					// final round message
-					if (final_round) {
+					if (final_round && !$('final_round_msg')) {
+						const final_round_wrapper = document.createElement('div');
+						final_round_wrapper.id = 'final_round_wrapper';
 						const final_round_msg = document.createElement('div');
 						final_round_msg.id = 'final_round_msg';
 						final_round_msg.innerHTML = _('Final Round');
 						const titlebar_addon = $('titlebar_addon');
 						const climbing_slot = $('climbing_slot');
-						titlebar_addon.insertBefore(final_round_msg, climbing_slot);
+						final_round_wrapper.append(final_round_msg);
+						titlebar_addon.insertBefore(final_round_wrapper, climbing_slot);
+						final_round_msg.classList.add('pulse');
 					}
 
 					// update shared objectives tracker
@@ -1795,6 +2254,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    let ledge_loc = null;
 		                    const cutoff_arr = gameui.board === 'desert' ? ['21', '22'] : ['27', '28'];
 		                    const divider = gameui.board === 'desert' ? 21 : 27;
+
 		                    if (this.ledgeTeleportCheck(current_pitch_id, destination_pitch_id, cutoff_arr)) {
 
 		                    		ledge = true;
@@ -1855,9 +2315,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			                    await this.updateWaterPsych(player_id, water, psych);
 
 		                    	const rotation = rope_info['rotation'];
-		                    	const rope_origin = rope_num > 1 ? $(`pitch_${current_pitch_id}_rope`) : $(`${player_id}_rope_counter`);
-		                    	let rope_anim = rope_num > 1 ? 'rope_pitch_to_pitch' : 'rope_counter_to_pitch';
-		                    	const meeple_anim = rope_num > 1 ? 'meeple_pitch_to_pitch' : 'meeple_panel_to_pitch';
+		                    	const rope_origin = (rope_num > 1 && bailed_pitch !== '0') ? $(`pitch_${current_pitch_id}_rope`) : $(`${player_id}_rope_counter`);
+		                    	let rope_anim = (rope_num > 1 && bailed_pitch !== '0') ? 'rope_pitch_to_pitch' : 'rope_counter_to_pitch';
+		                    	const meeple_anim = (rope_num > 1 && bailed_pitch !== '0') ? 'meeple_pitch_to_pitch' : 'meeple_panel_to_pitch';
+								const mobile_version = $('ebd-body').classList.contains('mobile_version') ? true : false;
+								if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) { $('board').style.zIndex = '1053'; }
 
 		                    	this.updateTitlebar(_('Placing Rope and Climber'));
 
@@ -1866,9 +2328,13 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    		`<div id="overflow_wrapper_${destination_pitch_id}_${player_id}" class="overflow_${rotation} rope_overflow ${overflow_ledge}">
 		                    			<div id="rope_wrapper_${player_id}_${rope_num}" class="rope_wrapper r${rotation}"></div>
 		                    		</div>`, rope_destination);
-		                    	if (rope_num === 1) {
+		                    	if (rope_num === 1 || bailed_pitch === '0') {
 		                    		overflow_wrapper.classList.remove(`overflow_${rotation}`);
 		                    		overflow_wrapper.classList.add('overflow_counter');
+									const rope_counter_top = rope_origin.getBoundingClientRect().top;
+									const overflow_wrapper_bottom = overflow_wrapper.getBoundingClientRect().bottom;
+									const overflow_height = overflow_wrapper_bottom - rope_counter_top;
+									overflow_wrapper.style.height = `${overflow_height-8}px`;
 		                    	}
 
 		                    	const rope_wrapper = $(`rope_wrapper_${player_id}_${rope_num}`);
@@ -1890,7 +2356,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			                    	rope_destination.append(rope_wrapper);
 			                    	const rope_destination_rect = rope_wrapper.getBoundingClientRect();
-			                    	const rope_destination_top = rope_destination_rect.top;
+			                    	let rope_destination_top = rope_destination_rect.top;
+									if (gameui.gamedatas.board === 'forest') {
+										rope_destination_top += 2;
+									}
 			                    	const rope_destination_left = rope_destination_rect.left;
 			                    	overflow_wrapper.append(rope_wrapper);
 
@@ -1899,7 +2368,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			                    	const rope_destination_top_diff = rope_destination_top - overflow_top;
 			                    	const rope_destination_left_diff = rope_destination_left - overflow_left;
 
-			                    	if (rope_num == 1) {
+			                    	if (rope_num == 1 || bailed_pitch === '0') {
 
 			                    		rope_wrapper.style.top = `${rope_origin_top_diff}px`;
 			                    		rope_wrapper.style.left = `${rope_origin_left_diff}px`;
@@ -1922,12 +2391,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                        meeple.style.setProperty('--dw', `${new_width}px`);
 		                        meeple.style.setProperty('--dh', `${new_height}px`);
 
-		                    	// const meeple_origin_style = window.getComputedStyle(meeple);
-		                    	// const meeple_origin_top = Number(meeple_origin_style.getPropertyValue('top').slice(0, -2));
-		                    	// const meeple_origin_left = Number(meeple_origin_style.getPropertyValue('left').slice(0, -2));
 		                    	const meeple_origin_doc = meeple.getBoundingClientRect();
 		                    	const meeple_origin_doc_top = meeple_origin_doc.top;
 		                    	const meeple_origin_doc_left = meeple_origin_doc.left;
+								const meeple_origin_doc_width = meeple_origin_doc.width;
+								const meeple_origin_doc_height = meeple_origin_doc.height;
 
 		                    	destination_pitch_ele.append(meeple);
 		                    	if (meeple_overlap) { meeple.classList.add(`over_meeple_${meeple_overlap}`); }
@@ -1943,12 +2411,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 		                    	meeple.style.top = `${meeple_destination_top + meeple_top_diff}px`;
 		                    	meeple.style.left = `${meeple_destination_left + meeple_left_diff}px`;
+								meeple.style.width = `${meeple_origin_doc_width}px`;
+								meeple.style.height = `${meeple_origin_doc_height}px`;
 		                    	meeple.style.setProperty('--dt', `${meeple_destination_top}px`);
 		                    	meeple.style.setProperty('--dl', `${meeple_destination_left}px`);
 
 		                    	if (ledge) {
 
-		                    		const ledge_rope_anim = destination_pitch_id <= 21 ? 'lower_ledge_destination' : 'upper_ledge_destination';
+		                    		const ledge_rope_anim = destination_pitch_id <= divider ? 'lower_ledge_destination' : 'upper_ledge_destination';
 
 		                    		let args = [meeple, destination_pitch_ele];
 		                    		// meeple.remove(); // TESTING
@@ -1978,15 +2448,18 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			                        // overflow_wrapper.remove(); // TESTING
 
 			                        args = [meeple, destination_pitch_ele];
-			                        rope_and_meeple_anim.push(this.animationPromise.bind(null, meeple, meeple_anim, 'anim', this.moveToNewParent(), false, false, ...args));
+			                        rope_and_meeple_anim.push(this.animationPromise.bind(null, meeple, meeple_anim, 'anim', this.moveToNewParent(), false, true, ...args));
 			                        // meeple.remove(); // TESTING
 
 			                        Promise.all(rope_and_meeple_anim.map(func => { return func(); }))
 			                        .then(() => {
+										if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) { $('board').style.zIndex = ''; }
 										rope_wrapper.parentElement.zIndex = '';
 			                        	meeple.style.zIndex = '';
 			                        	meeple.style.top = '';
 			                        	meeple.style.left = '';
+										meeple.style.width = '';
+										meeple.style.height = '';
 			                        	rope_wrapper.style.top = '';
 			                        	rope_wrapper.style.left = '';
 			                        	overflow_wrapper.remove();
@@ -2060,6 +2533,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					this.pitchTooltip(`pitch_${destination_pitch_id}_click`, destination_pitch_type_arg, skill_tokens, rope_order);
 		            const rope_num = gameui.gamedatas.pitch_tracker[player_id].length-1;
 		            $(`rope_num_${player_id}`).innerHTML = `${8 - rope_num}`;
+					gameui.gamedatas.bailed_pitch = notif.args.bailed_pitch;
 
 					// points tracker
 					gameui.scoreCtrl[player_id].incValue(notif.args.new_points);
@@ -2086,20 +2560,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								case 11: case 12: case 13:  idx = 5; break;
 							}
 						}
-						if (!gameui.gamedatas.personal_objectives_tracker[objective_id].includes(idx)) {
-							gameui.gamedatas.personal_objectives_tracker[objective_id].push(idx);
+						if (!personal_objectives_tracker[objective_id].includes(idx)) {
+							personal_objectives_tracker[objective_id].push(idx);
 						}
-						const check = document.createElement('div');
-						check.classList.add('check');
-						check.innerHTML = '\u2713';
-						$(`personal_objective_${objective_id}`).append(check);
-						const starting_top = gameui.gamedatas.personal_objectives[objective_id]['starting_check_top'];
-						const check_top = starting_top + 5.75 * idx;
-						check.style.top = `${check_top}%`;
-
-						check.dataset.idx = idx;
-						check.dataset.starting_top = starting_top;
-
+						const obj_ele = $(`personal_objective_${objective_id}`);
+						const po_tracker = obj_ele.firstElementChild;
+						const po_num = personal_objectives_tracker[objective_id].length < 3 ? personal_objectives_tracker[objective_id].length : 3;
+						po_tracker.innerHTML = `${po_num}/3`;
+						if (po_num === 3) { po_tracker.style.color = 'green'; }
 						this.personalObjectiveTooltip($(`personal_objective_${objective_id}`), objective_id);
 					}
 				}
@@ -2107,12 +2575,18 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	        ledgeTeleportCheck: function(current_pitch_id, destination_pitch_id, cutoff_arr) {
 
-	        	if (gameui.ledge.includes(current_pitch_id)
-                	&&  gameui.ledge.includes(destination_pitch_id)
-                	&&  ( Math.abs(Number(destination_pitch_id) - Number(current_pitch_id)) > 1
-                		&&  [current_pitch_id, destination_pitch_id].sort() != cutoff_arr) )  {
-                		return true;		
-            	}
+				const current_num = Number(current_pitch_id);
+				const dest_num = Number(destination_pitch_id);
+				const difference = Math.abs(dest_num - current_num);
+				const current_arr = JSON.stringify([current_pitch_id, destination_pitch_id].sort());
+				const co_arr = JSON.stringify(cutoff_arr);
+
+	        	if (gameui.ledge.includes(current_pitch_id) &&  gameui.ledge.includes(destination_pitch_id)) {
+					if ( (difference > 1 && current_arr !== co_arr)				// not adjacent
+					  || (difference ===1 && current_arr === co_arr) ) {		// on the cutoff
+						return true;
+					}
+				}
             	else { return false; }
 	        },
 
@@ -2161,11 +2635,12 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        highlightRoute: function(event) {
 
 	        	const meeple = event.target;
-	        	const player_id = meeple.id.slice(-7);
+	        	const player_id = meeple.id.split('_').pop();
+				const player_id_length = player_id.length;
 	        	const color = gameui.gamedatas.player_names_and_colors[player_id]['color'];
 	        	dojo.query('.rope').forEach(ele => {
 
-	        		if (ele.id.slice(0, 7) === player_id) {
+	        		if (ele.id.slice(0, player_id_length) === player_id) {
 	        			ele.style.boxShadow = `0 0 5px 2px ${color}`;
 	        			ele.style.zIndex = '50';
 	        		}
@@ -2176,10 +2651,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        unHighlightRoute: function(event) {
 
 	        	const meeple = event.target;
-	        	const player_id = meeple.id.slice(-7);
+	        	const player_id = meeple.id.split('_').pop();
+				const player_id_length = player_id.length;
 	        	dojo.query('.rope').forEach(ele => {
 
-	        		if (ele.id.slice(0, 7) === player_id) {
+	        		if (ele.id.slice(0, player_id_length) === player_id) {
 	        			ele.style.boxShadow = '';
 	        			ele.style.zIndex = '';
 	        		}
@@ -2187,15 +2663,105 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        	});
 	        },
 
+			moveClimbingSlotBehindPageTitle: function() {
+				const climbing_slot = $('climbing_slot');
+				const crimper_display = $('crimper_display');
+
+				// 1. Capture current position and state
+				const rect = climbing_slot.getBoundingClientRect();
+				this.climbing_slot_state = {
+					parent: climbing_slot.parentNode,
+					nextSibling: climbing_slot.nextElementSibling, // To put it back in exact order
+					originalStyle: climbing_slot.style.cssText
+				};
+
+				// 2. Apply fixed positioning to match exact screen location
+				climbing_slot.style.position = 'fixed';
+				climbing_slot.style.top = rect.top + 'px';
+				climbing_slot.style.left = rect.left + 'px';
+				climbing_slot.style.width = rect.width + 'px';
+				climbing_slot.style.transform = 'none';
+
+				// 3. Move to body
+				$('board').appendChild(climbing_slot);
+
+				// Cool-Headed Crimper
+				if (crimper_display) {
+					const crimp_rect = crimper_display.getBoundingClientRect();
+					this.crimper_display_state = {
+						parent: crimper_display.parentNode,
+						nextSibling: crimper_display.nextElementSibling,
+						originalStyle: crimper_display.style.cssText
+					};
+					crimper_display.style.position = 'fixed';
+					crimper_display.style.top = crimp_rect.top + 'px';
+					crimper_display.style.left = crimp_rect.left + 'px';
+					crimper_display.style.width = crimp_rect.width + 'px';
+					crimper_display.style.transform = 'none';
+					$('board').appendChild(crimper_display);
+				}
+			},
+
+			restoreClimbingSlot: function() {
+				const climbing_slot = $('climbing_slot');
+				const crimper_display = $('crimper_display');
+
+				// Cool-Headed Crimper
+				if (crimper_display) {
+					this.crimper_display_state.parent.insertBefore(crimper_display, this.crimper_display_state.nextSibling);
+					crimper_display.style.cssText = this.crimper_display_state.originalStyle;
+					delete this.crimper_display_state;
+					crimper_display.style.transform = '';
+				}
+
+				// 1. Restore to original parent and position
+				// usage of insertBefore handles if it was in the middle of other elements
+				this.climbing_slot_state.parent.insertBefore(climbing_slot, this.climbing_slot_state.nextSibling);
+
+				// 2. Restore original styles (removes fixed positioning, resets z-index)
+				climbing_slot.style.cssText = this.climbing_slot_state.originalStyle;
+				climbing_slot.style.transform = '';
+
+				// 3. Clear state
+				delete this.climbing_slot_state;
+			},
+
+			freezeScroll: function() {
+				// Save current position
+				const scrollY = window.scrollY;
+				
+				// Fix body in place, shifting it up by the scroll amount
+				document.body.style.position = 'fixed';
+				document.body.style.top = `-${scrollY}px`;
+				document.body.style.width = '100%';
+				document.body.style.overflowY = 'scroll'; // Force scrollbar to stay visible
+			},
+
+			unfreezeScroll: function() {
+				// Retrieve the scroll position from the body's top value
+				const scrollY = document.body.style.top;
+				
+				// Reset styles
+				document.body.style.position = '';
+				document.body.style.top = '';
+				document.body.style.width = '';
+				document.body.style.overflowY = '';
+				
+				// Jump back to the original position immediately
+				window.scrollTo(0, parseInt(scrollY || '0') * -1);
+			},
+
 	        retractClimbingCard: async function() {
 	        	return new Promise(async (resolve) => {
 
 					dojo.query('.choice').forEach(ele => { ele.style.pointerEvents = 'none'; });
 
 	        		const climbing_card_ele = $('climbing_slot').firstElementChild;
+					const climbing_card_id = climbing_card_ele.id.slice(-3).replace(/^\D+/g, '');
+					const climbing_card_type_arg = gameui.gamedatas.climbing_card_identifier[climbing_card_id];
 	        		const destination = $('climbing_discard_straightened');
 					const climbing_discard = document.getElementById('climbing_discard');
-		        	const args = [climbing_card_ele, destination];
+		        	const args = [climbing_card_ele, destination, null, false, true];
 		        	$('climbing_slot').style.display = 'block';
 		        	$('climbing_dimmer').classList.remove('dim_bg');
 		        	dojo.query('.selected_choice').forEach((ele) => { ele.classList.remove('selected_choice'); });
@@ -2206,39 +2772,30 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						const titlebar_backup = $('pagemaintitletext').cloneNode(true);
 						dojo.query('#generalactions > .action-button').forEach(ele => { ele.style.display = 'none'; });
 						this.updateTitlebar(_('Discarding Climbing Card'));
-
-		        		const start_pos = climbing_card_ele.getBoundingClientRect();
-		        		destination.append(climbing_card_ele);
-		        		const end_pos = climbing_card_ele.getBoundingClientRect();
-		        		const x_diff = Math.abs(end_pos.left - start_pos.left);
-		        		const y_diff = -(end_pos.top - start_pos.top);
-
-		        		dojo.setStyle(climbing_card_ele.id, {
-		        			'top' : `${y_diff}px`,
-		        			'left' : `${x_diff}px`,
-		        			'width' : `${start_pos.width}px`,
-		        			'height' : `${start_pos.height}px`
-		        		});
-
-		        		climbing_card_ele.style.setProperty('--dw', `${end_pos.width}px`);
-		        		climbing_card_ele.style.setProperty('--dh', `${end_pos.height}px`);
-
-		        		await this.animationPromise(climbing_card_ele, 'climbing_card_to_discard', 'anim', this.moveToNewParent(), false, true, ...args);
-		        		dojo.setStyle(climbing_card_ele.id, {
-		        			'top' : '',
-		        			'left' : '',
-		        			'width' : '',
-		        			'height' : ''
-		        		});
+		        		await this.animationPromise(climbing_card_ele, 'climbing_card_slot_to_display', 'anim', this.moveToNewParent(), false, true, ...args);
 		
 						$('pagemaintitletext').innerHTML = titlebar_backup.innerHTML;
 						dojo.query('#generalactions > .action-button').forEach(ele => { ele.style.display = ''; });
 		        	} else { destination.append(climbing_card_ele); }
 
+					this.climbingTooltip(climbing_card_ele.id, climbing_card_type_arg);
 					$('climbing_slot').style.display = '';
 		        	resolve();
-	        	})
+	        	});
 	        },
+
+			discardClimbingCard: async function() {
+				return new Promise(async (resolve) => {
+
+					const card_ele = $('climbing_discard_straightened').firstElementChild;
+					const destination = $('climbing_discard_90');
+					const args = [card_ele, destination, 3, 'rotate'];
+					await this.animationPromise(card_ele, 'climbing_card_discard', 'anim', this.moveToNewParent(), false, true, ...args);
+					card_ele.classList.remove('drawn_climbing');
+					this.cleanClimbingDiscardPile();
+					resolve();
+				});
+			},
 
 	        // **** Climbing effects ****
 
@@ -2343,7 +2900,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						no_target_message = true;
 
 						dojo.query('.asset_board_slot > .asset').forEach(ele => {
-							const player_id = ele.parentElement.parentElement.parentElement.id.slice(-7);
+							const player_id = ele.parentElement.parentElement.parentElement.id.split('_').pop();
 
 							if (player_id != gameui.player_id && !['3', '8', '14'].includes(card_type)) {
 								steal_requirement_met = true;
@@ -2387,17 +2944,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 
 				// Jesus Piece
-				const hand_summit_beta_tokens = gameui.gamedatas.hand_summit_beta_tokens;
+				const hand_summit_beta_tokens = this.getHandSummitBetaTokens();
 				const jesus_piece = Object.values(hand_summit_beta_tokens).includes('10');
 
 				if (!gameui.choices_info['a']['requirements_met'] && !gameui.choices_info['b']['requirements_met'] && !jesus_piece) {
 					
 					gameui.addActionButton('pass_button', _('Pass'), 'onPassClimbingCard', null, false, 'white');
 					$('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-						`<span id="pass_message">
-							<span id="pm_line1">You cannot choose</span>
-							<span id="pm_line2">either option</span>
-						</span>`
+						`<span id="pass_message">${_('You cannot choose<br>either option')}</span>`
 					);
 				}
 			},
@@ -2479,50 +3033,44 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		        })
 	        },
 
-	        updateWaterPsych: async function(player_id, water=0, psych=0) {
-	        	return new Promise(async resolve => {
-					this.clicksOff();
+			updateWaterPsych: async function(player_id, water = 0, psych = 0) {
+				this.clicksOff();
 
-		        	let cube = null;
-		        	const self = this;
+				const self = this;
 
-		        	const update = async function(water_or_psych) {
-		        		return new Promise(async (resolve) => {
+				const update = async function(water_or_psych) {
+					const msg_translated = dojo.string.substitute(_("Adjusting ${water_or_psych}"), {
+						water_or_psych: water_or_psych.charAt(0).toUpperCase() + water_or_psych.slice(1),
+					});
+					self.updateTitlebar(msg_translated);
+					const num = water_or_psych == 'water' ? water : psych;
+					const abbreviation = water_or_psych == 'water' ? 'w' : 'p';
+					const cube = dojo.query(`#player_${player_id} .cb_${water_or_psych}`)[0];
+					const current_loc = Number(cube.parentElement.id.at(-1));
+					let new_num = current_loc + Number(num);
+					if (new_num < 0) { new_num = 0; }
+					const max_num = dojo.query(`#player_${player_id} .cube_wrap`).length / 2 - 1;
+					const new_loc = new_num <= max_num ? new_num : max_num;
+					const destination = dojo.query(`#player_${player_id} .cb_${abbreviation}_${new_loc}`)[0];
+					if (destination && self.shouldAnimate()) {
+						const args = [cube, destination];
+						await self.animationPromise(cube, 'water_psych_cubes', 'anim', self.moveToNewParent(), false, true, ...args);
+					} else if (destination) { destination.append(cube); }
+					$(`${water_or_psych}_num_${player_id}`).innerHTML = new_loc;
 
-							const msg_translated = dojo.string.substitute(_("Adjusting ${water_or_psych}"), {
-								water_or_psych: water_or_psych,
-							});
-		        			self.updateTitlebar(msg_translated);
-			        		const num = water_or_psych == 'water' ? water : psych;
-			        		const abbreviation = water_or_psych == 'water' ? 'w' : 'p';
-			        		const cube = dojo.query(`#player_${player_id} .cb_${water_or_psych}`)[0];
-			        		const current_loc = Number(cube.parentElement.id.at(-1));
-			        		let new_num = current_loc + Number(num); // portaledge_to_draw during resting provides water and psych as strings
-							if (new_num < 0) { new_num = 0; }
-			        		const max_num = dojo.query(`#player_${player_id} .cube_wrap`).length / 2 - 1;
-			        		const new_loc = new_num <= max_num ? new_num : max_num;
-			        		const destination = dojo.query(`#player_${player_id} .cb_${abbreviation}_${new_loc}`)[0];
-			        		if (destination && self.shouldAnimate()) {
-			        			const args = [cube, destination];
-			        			await self.animationPromise(cube, 'water_psych_cubes', 'anim', self.moveToNewParent(), false, true, ...args);
-			        		} else if (destination) { destination.append(cube); }
-			        		$(`${water_or_psych}_num_${player_id}`).innerHTML = new_loc;
+					gameui.gamedatas.water_psych_tracker[player_id][water_or_psych] = new_loc;
+					if (player_id == gameui.player_id) { gameui.gamedatas.resource_tracker[water_or_psych] = new_loc; }
+				};
 
-			        		gameui.gamedatas.water_psych_tracker[player_id][water_or_psych] = new_loc;
-			        		if (player_id == gameui.player_id) { gameui.gamedatas.resource_tracker[water_or_psych] = new_loc; }
-			        		resolve();
-		        		});
-		        	}
+				if (this.notAZombie(player_id)) {
+					if (water < 0) { await update('water'); }
+					if (psych < 0) { await update('psych'); }
+					if (water > 0) { await update('water'); }
+					if (psych > 0) { await update('psych'); }
+				}
 
-		        	if (water < 0) { await update('water'); }
-		        	if (psych < 0) { await update('psych'); }
-		        	if (water > 0) { await update('water'); }
-		        	if (psych > 0) { await update('psych'); }
-
-					this.clicksOn();
-		            resolve();
-		        })
-	        },
+				this.clicksOn();
+			},
 
 	        portaledge: async function(player_id, type_args, ids, auto=false, hand_count, climbing_card_info=null, share=false, water=0, psych=0, last_card, refill_portaledge, player_resources=null) {
 	        	return new Promise(async resolve => {
@@ -2584,7 +3132,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	        			if (ids.length > 0) {
 
-	        				this.updateTitlebar(_('Drawing from Portaledge'));
+	        				this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 		        			if (auto) {
 		        				portaledge.style.display = 'block';
 			                    await this.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
@@ -2594,14 +3142,15 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 		                    let asset_display_to_hand = [];
 		                    $('asset_deck_draw').style.display = 'flex';
-		                    dojo.query('.portaledge > .cursor').forEach(ele => { ele.remove(); });
-		                    dojo.query('.portaledge > .draw_num').forEach(ele => { ele.remove(); });
+							portaledge.querySelectorAll('.porta_minus').forEach(ele => { ele.remove(); });
+							portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
+							portaledge.querySelectorAll('.draw_num').forEach(ele => { ele.remove(); });
 
 							$('asset_deck_draw').style.zIndex = '299';
 		                    await (async () => {
 		                    	return new Promise(async (resolve) => {
 
-		                    		this.updateTitlebar(_('Drawing Asset(s) from The Portaledge'));
+		                    		this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 									gameui.removeActionButtons();
 
 		                    		let card_idx = 1;
@@ -2616,11 +3165,12 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    			const flip_card = dojo.place(flip_arr[0], flip_arr[1]);
 		                    			args = [flip_card, display_slot];
 		                    			this.animationPromise(flip_card.firstElementChild, 'flip_transform', 'anim', null, false, true);
-		                    			this.animationPromise(flip_card, 'asset_portaledge_to_display', 'anim', this.moveToNewParent(), false, true, ...args);
+		                    			const card_anim = this.animationPromise(flip_card, 'asset_portaledge_to_display', 'anim', this.moveToNewParent(), false, true, ...args);
 
 		                    			if (last_card[type] === card_idx) {
 		                    				dojo.query('.flip_card').forEach(ele => { ele.style.visibility = 'visible'; });
-		                    				flip_card.parentElement.style.visibility = 'hidden';
+											const portaledge_deck = flip_card.parentElement;
+		                    				portaledge_deck.style.visibility = 'hidden';
 		                    			}
 
 		                    			await (async function() { return new Promise(resolve => setTimeout(resolve, 200)) })();
@@ -2628,9 +3178,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 										// Refill Portaledge deck
 
 		                    			if (refill && refill_portaledge[deck] && refill_portaledge[deck][1] === card_idx) {
+											await card_anim;
 		                    				const deck_ele = flip_arr[1];
 		                    				await this.refillPortaledge(deck_ele, refill_portaledge);
-		                    				this.updateTitlebar(_('Drawing Asset/s from The Portaledge'));
+		                    				this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 		                    			}
 
 		                    			if (card_idx === cards.length) {
@@ -2649,6 +3200,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 		                    	const card_ele = dojo.place(card, display_slot);
 	                			args = [card_ele, hand_slot];
+								this.assetDisplayToHandCalc(card_ele, hand_slot);
 	                			asset_display_to_hand.push(this.animationPromise.bind(null, card_ele, 'asset_display_to_hand', 'anim', this.moveToNewParent(), false, true, ...args));
 		                    }
 
@@ -2673,8 +3225,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        			} else {
 
 		                    await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-		                    dojo.query('.portaledge > .cursor').forEach(ele => { ele.remove(); });
-		                    dojo.query('.portaledge > .draw_num').forEach(ele => { ele.remove(); });
+		                    portaledge.querySelectorAll('.porta_minus').forEach(ele => { ele.remove(); });
+							portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
+							portaledge.querySelectorAll('.draw_num').forEach(ele => { ele.remove(); });
 	                		portaledge.style.marginTop = '-36.4061%';
 		                	portaledge.style.display = '';
 							this.clicksOn();
@@ -2684,9 +3237,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                } else { // shouldn't animate
 
 	                	cards_for_hand.map(card => { dojo.place(card[0], card[1]); });
+						this.updateDiscardTopCard();
 
-	                	dojo.query('.portaledge > .cursor').forEach(ele => { ele.remove(); });
-	                    dojo.query('.portaledge > .draw_num').forEach(ele => { ele.remove(); });
+	                	portaledge.querySelectorAll('.porta_minus').forEach(ele => { ele.remove(); });
+						portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
+						portaledge.querySelectorAll('.draw_num').forEach(ele => { ele.remove(); });
 
 	                	if (climbing_card_info && climbing_card_info.portaledge_all
 	                	&& climbing_card_info.finished_portaledge.length+1 == Object.keys(gameui.gamedatas.players).length) {
@@ -2726,7 +3281,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	                		const refill = refill_portaledge.length != [] ? true : false;
 
-		                	this.updateTitlebar(_('Drawing from Portaledge'));
+		                	this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 		        			const portaledge = $('portaledge');
 
 		        			if (auto || bomber_anchor) {
@@ -2742,7 +3297,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 									let zIndex = 10;
 		        					for (const [type, value] of Object.entries(asset_types)) {
 
-		        						const deck_ele = $(`porta${type}`);
+		        						const deck_ele = $(`porta${type.toLowerCase()}`);
 		        						const deck = deck_ele.id;
 				        				for (let i=1; i<=value; i++) {
 
@@ -2755,7 +3310,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 											asset_back.style.zIndex = `${zIndex}`;
 											zIndex--;
 
-						                    const args = [asset_back, hand_counter];
+						                    const args = [asset_back, hand_counter, null, false, true];
 						                    this.animationPromise(asset_back, 'asset_portaledge_to_counter', 'anim', this.moveToNewParent(), true, false, ...args);
 
 											if (Object.keys(last_card).includes(type) && last_card[type] === i) {
@@ -2765,7 +3320,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 											if (refill && refill_portaledge[deck] && refill_portaledge[deck][1] === i) {
 				        						await this.refillPortaledge($(`porta${type}`), refill_portaledge);
-				        						this.updateTitlebar(_('Drawing from Portaledge'));
+				        						this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 				        					}
 											deck_ele.style.visibility = '';
 
@@ -2805,9 +3360,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                		portaledge.style.marginTop = '-36.4061%';
 		                	portaledge.style.display = '';
 	                		resolve();
-	                }
+	                	}
 
 	                } else { // shouldn't animate
+						this.updateWaterPsych(player_id, water, psych);
+						this.updateDiscardTopCard();
 	                	if (climbing_card_info && climbing_card_info.portaledge_all
 	                	&& climbing_card_info.finished_portaledge.length+1 == Object.keys(gameui.gamedatas.players).length) {
 	                		portaledge.style.marginTop = '-36.4061%';
@@ -2827,11 +3384,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 				return new Promise(async (resolve) => {
 
-					this.updateTitlebar(_('Refilling The Portaledge'));
+					this.updateTitlebar(_('Refilling the Portaledge'));
 
 					const deck = deck_ele.id;
     				const discard_num = refill_portaledge[deck][0];
     				const deck_num = 7 - discard_num;
+					$('board').style.zIndex = '2';
+
+					this.updateDiscardTopCard();
     				
     				for (let i=1; i<=discard_num; i++) {
 
@@ -2884,7 +3444,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
     						case 2: c_pair = true; break;
     					}
     				}
-
+					deck_ele.style.zIndex = '10';
     				for (let i=0; i<=shuffle_backs.length-1; i++) {
 
     					const card_back = shuffle_backs[i];
@@ -2897,7 +3457,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
     					card_back.style.zIndex = `${i+1}`;
     					card_back.style.setProperty('--xTarget', `${xTarget}px`);
-    					card_back.style.setProperty('--z', `${i+1}`)
+    					card_back.style.setProperty('--z', `${i+1}`);
 
     					switch (true) {
 
@@ -2909,8 +3469,8 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
     						case i === 6: 			card_back.style.setProperty('--z', 5); break;
     					}
 
-    					if ([0, 2, 4, 6].includes(i)) { this.animationPromise(card_back, 'deck_reshuffle_L', 'anim', null, false, true); }
-    					else { this.animationPromise(card_back, 'deck_reshuffle_R', 'anim', null, false, true); }
+    					if ([0, 2, 4, 6].includes(i)) { this.animationPromise(card_back, 'portaledge_reshuffle_L', 'anim', null, false, true); }
+    					else { this.animationPromise(card_back, 'portaledge_reshuffle_R', 'anim', null, false, true); }
     					
     					await (async function() { return new Promise(resolve => setTimeout(resolve, 30)) })();
 
@@ -2918,202 +3478,250 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
     						await (async function() { return new Promise(resolve => setTimeout(resolve, 1000)) })();
     						shuffle_backs.forEach(ele => { ele.remove(); });
     						deck_ele.style.visibility = 'visible';
+							deck_ele.style.zIndex = '';
     						await (async function() { return new Promise(resolve => setTimeout(resolve, 500)) })();
+							$('board').style.zIndex = '';
     						resolve();
     					}
     				}
 				});
 	        },
 
-	        repositionAssetBoard: function(player_id) {
+			updateDiscardTopCard: function() {
 
-	        	const player = gameui.gamedatas.players[player_id];
-	        	const character_id = player.character;
-	            const character = gameui.gamedatas.characters[character_id];
-
-	        	const asset_board = $(`asset_board_${player_id}`);
-	        	for (const type_ele of asset_board.children) {
-
-	        		if (!type_ele.classList.contains('two_point_tokens') && !type_ele.classList.contains('permanent_asset_tokens')) {
-
-	        			const type = type_ele.id.slice(-5).replace(/_/g, '');
-	        			let played_assets = dojo.query(`#${type_ele.id} .played_asset`);
-	        			let flipped_status = Object.values(gameui.gamedatas.board_assets[player_id][type]['flipped']);
-
-	        			if (played_assets.length > 0) {
-
-	        				for (const wrapper of type_ele.children) {
-
-			        			if (wrapper.id.slice(-1) !== 'r') { // ignore tucked counters
-
-			        				const wrapper_slot = wrapper.id.slice(-1);
-				        			if (played_assets.length > 0) {
-				        				wrapper.append(played_assets.shift());
-				        				gameui.gamedatas.board_assets[player_id][type]['flipped'][wrapper_slot] = flipped_status.shift();
-				        			}
-				        			else if (played_assets.length === 0) {
-				        				gameui.gamedatas.board_assets[player_id][type]['flipped'][wrapper_slot] = null;
-				        			}
-			        			}
-			        		}
-	        			}
-
-		        		for (let asset_ele of played_assets) {
-
-		        			const id = asset_ele.id.slice(-3).replace(/^\D+/g, '');
-		        			const type_arg = gameui.gamedatas.asset_identifier[id];
-		        			const slot = asset_ele.parentElement.id.slice(-1);
-		        			gameui.gamedatas.board_assets[player_id][type][slot] = { id : type_arg };
-		        		}
-
-		        		const tucked_num = Object.keys(gameui.gamedatas.board_assets[player_id][type]['tucked']).length;
-		        		const tucked_counter = $(`${character.name}_${type}_counter`);
-		        		if (tucked_counter.style.display == 'block') {
-		        			if (tucked_num == 0) { tucked_counter.style.display = ''; }
-		        			else { 
-		        				const tucked_num_ele = dojo.query(`#${tucked_counter.id} > .asset_counter_num`);
-		        				tucked_num_ele.innerHTML = String(tucked_num);
-		        			}
-		        		}
-	        		}
-	        	}
-	        },
-
-	        vacateAssetSlots: async function(vacate_slots, character, player_id) {
-
-	        	for (const [column, num] of Object.entries(vacate_slots)) {
-
-                    for (let i=1; i<=num; i++) {
-
-                        if (i == 1) { $(`${character.name}_${column}_counter`).style.display = 'block'; }
-
-                        const card_ele = $(`${character.name}_${column}_${i}`).firstElementChild;
-                        const destination = dojo.query(`#${character.name}_${column}_counter > .asset_counter_img`)[0];
-                        const args = [card_ele, destination];
-
-                        const id = card_ele.id.slice(-3).replace(/^\D+/g, '');
-                        const type_arg = gameui.gamedatas.asset_identifier[id];
-                        const type = this.getAssetType(type_arg);
-                        const slot = card_ele.parentElement.id.slice(-1);
-
-                        delete gameui.gamedatas.board_assets[player_id][type][slot][id];
-                        gameui.gamedatas.board_assets[player_id][type]['tucked'][id] = type_arg;
-                        gameui.gamedatas.board_assets[player_id][type]['flipped'][slot] = false;
-
-                        if (this.shouldAnimate()) {
-                        	const old_slot = card_ele.parentElement;
-                        	const old_z = old_slot.style.zIndex;
-                        	old_slot.style.zIndex = '6';
-                        	await this.animationPromise(card_ele, 'asset_board_to_tucked', 'anim', this.moveToNewParent(), true, false, ...args);
-                        	old_slot.style.zIndex = old_z;
-                        
-                        } else {
-                        	card_ele.remove();
-                        }
-
-                        const old_num = Number(destination.nextElementSibling.innerHTML);
-                        destination.nextElementSibling.innerHTML = `${old_num + 1}`;
-                    }
-                    this.repositionAssetBoard(player_id);
-                }
-	        },
+				const discard = $('asset_discard');
+				discard.innerHTML = '';
+				if (gameui.gamedatas.asset_discard_top_card) {
+					const new_discard_id = gameui.gamedatas.asset_discard_top_card['id'];
+					const new_discard_top_type_arg = gameui.gamedatas.asset_discard_top_card['type_arg'];
+					const new_discard_top_card = gameui.gamedatas.asset_cards[new_discard_top_type_arg];
+					dojo.place(gameui.format_block('jstpl_asset_card', {
+						CARD_ID : new_discard_id,
+						EXTRA_CLASSES : '',
+						acX : new_discard_top_card.x_y[0],
+						acY : new_discard_top_card.x_y[1],
+					}), discard);
+				}
+			},
 
 			matchBoardAssets: async function() {
 
 				const board_assets = gameui.gamedatas.board_assets;
 
-				if (this.shouldAnimate()) {
+				if (this.shouldAnimate() && !gameui.isSpectator) {
 
 					let anims = [];
+					// arrange root z-indices for proper front/back appearance during animation
+					let changed_z_indices = [];
+					const hand_ratio = $('hand_ratio');
+					const hand_ratio_original_zIndex = hand_ratio.style.zIndex;
+					hand_ratio.style.zIndex = '20';
+					changed_z_indices.push([hand_ratio, hand_ratio_original_zIndex]);
+					const board_ratio = $('game_play_area').querySelector('.board_ratio');
+					const board_ratio_original_zIndex = board_ratio.style.zIndex;
+					board_ratio.style.zIndex = '21';
+					changed_z_indices.push([board_ratio, board_ratio_original_zIndex]);
+					const spread_draw = $('spread_draw');
+					const spread_draw_original_zIndex = spread_draw.style.zIndex;
+					spread_draw.style.zIndex = '22';
+					changed_z_indices.push([spread_draw, spread_draw_original_zIndex]);
+					const asset_deck_draw = $('asset_deck_draw');
+					const asset_deck_draw_original_zIndex = asset_deck_draw.style.zIndex;
+					asset_deck_draw.style.zIndex = '23';
+					changed_z_indices.push([asset_deck_draw, asset_deck_draw_original_zIndex]);
+					
 					for (const player_id of Object.keys(board_assets)) {
 
-						const player_board = board_assets[player_id];
-						const board_ele = $(`asset_board_${player_id}`);
-						const type_moved = {'gear' : 0, 'face' : 0, 'crack' : 0, 'slab' : 0};
-						for (const type of Object.keys(player_board)) {
+						if (this.notAZombie(player_id)) {
+							const player = gameui.gamedatas.players[player_id];
+							const character_id = player.character;
+	            			const character = gameui.gamedatas.characters[character_id];
+							const player_board = board_assets[player_id];
+							for (const type of Object.keys(player_board)) {
+								const tucked_num = Object.keys(gameui.gamedatas.board_assets[player_id][type]['tucked']).length;
+								const tucked_counter = $(`${character.name}_${type}_counter`);
+								if (tucked_num && tucked_counter && tucked_counter.style.display === '') {
+									tucked_counter.style.display = 'block';
+								}
+							}
+							const board_ele = $(`asset_board_${player_id}`);
+							const type_moved = {'gear' : 0, 'face' : 0, 'crack' : 0, 'slab' : 0};
+							for (const type of Object.keys(player_board)) {
 
-							const type_board = player_board[type];
+								const type_board = player_board[type];
 
-							const tucked_counter = board_ele.querySelector(`.board_${type}_counter > .asset_counter_img`);
-							for (let i=1; i<=5; i++) {
+								const tucked_counter_img = board_ele.querySelector(`.board_${type}_counter > .asset_counter_img`);
+								for (let i=1; i<=5; i++) {
 
-								const slot = board_ele.querySelector(`.${type}_${i}`);
-								const expected_id = type_board[i] ? Object.keys(type_board[i])[0] : null;
-								const current_id = slot && slot.firstElementChild ? slot.firstElementChild.id.slice(-3).replace(/^\D+/g, '') : null;
+									const slot = board_ele.querySelector(`.${type}_${i}`);
+									const expected_id = type_board[i] ? Object.keys(type_board[i])[0] : null;
+									const current_id = slot && slot.firstElementChild ? slot.firstElementChild.id.slice(-3).replace(/^\D+/g, '') : null;
 
-								if (expected_id != undefined && expected_id != current_id) {
-
-									let expected_card = $(`asset_card_${expected_id}`);
-									if (expected_card) {
-										const args = [expected_card, slot];
-										anims.push(this.animationPromise.bind(null, expected_card, 'asset_board_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+									if (expected_id != undefined && expected_id != current_id) {
+										let expected_card = $(`asset_card_${expected_id}`);
+										if (expected_card) {
+											expected_card.classList.add('played_asset');
+											const in_hand = expected_card.parentElement.parentElement.id === 'assets_wrap';
+											const in_display = expected_card.parentElement.classList.contains('draw_wrap') ||
+															   expected_card.parentElement.classList.contains('spread_wrap');
+											const args = [expected_card, slot];
+											const card_origin = expected_card.parentElement;
+											slot.append(expected_card);
+											const dest_width = expected_card.getBoundingClientRect().width;
+											const dest_height = expected_card.getBoundingClientRect().height;
+											card_origin.append(expected_card);
+											expected_card.style.setProperty('--dw', `${dest_width}px`);
+											expected_card.style.setProperty('--dh', `${dest_height}px`);
+											const card_original_zIndex = expected_card.style.zIndex;
+											const parent_original_zIndex = expected_card.parentElement.style.zIndex;
+											expected_card.style.zIndex = `${i+1+10}`;
+											expected_card.parentElement.style.zIndex = `${i+1+10}`;
+											changed_z_indices.push(
+												[expected_card, card_original_zIndex],
+												[expected_card.parentElement, parent_original_zIndex]
+											);
+											if (in_hand) {
+												anims.push(this.animationPromise.bind(this, expected_card, 'asset_hand_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+											} else if (in_display) {
+												anims.push(this.animationPromise.bind(this, expected_card, 'asset_board_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+											} else {
+												anims.push(this.animationPromise.bind(this, expected_card, 'asset_board_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+											}
+										}
+										else { // tucked card
+											const card_ele = dojo.place(gameui.format_block('jstpl_asset_card', {
+												CARD_ID : expected_id,
+												EXTRA_CLASSES : 'played_asset flipped',
+												acX : 0,
+												acY : 0,
+											}), tucked_counter_img);
+											const args = [card_ele, slot];
+											slot.append(card_ele);
+											const dest_width = card_ele.getBoundingClientRect().width;
+											const dest_height = card_ele.getBoundingClientRect().height;
+											tucked_counter_img.append(card_ele);
+											card_ele.style.setProperty('--dw', `${dest_width}px`);
+											card_ele.style.setProperty('--dh', `${dest_height}px`);
+											const tucked_counter = card_ele.parentElement.parentElement;
+											const tucked_counter_original_zIndex = tucked_counter.style.zIndex;
+											tucked_counter.style.zIndex = `${-700 + i + 2}`;
+											changed_z_indices.push([tucked_counter, tucked_counter_original_zIndex]);
+											anims.push(this.animationPromise.bind(this, card_ele, 'asset_tucked_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+											type_moved[type]++;
+										}
+										
 									}
-									else { // tucked card
-										const card_ele = dojo.place(gameui.format_block('jstpl_asset_card', {
-											CARD_ID : expected_id,
-											EXTRA_CLASSES : 'played_asset flipped',
-											acX : 0,
-											acY : 0,
-										}), tucked_counter);
-										const args = [card_ele, slot];
-										slot.append(card_ele);
+								}
+								for (const [id, type_arg] of Object.entries(type_board['tucked'])) {
+									const card_ele = $(`asset_card_${id}`);
+									if (card_ele) {
+										const in_hand = card_ele.parentElement.parentElement.id === 'assets_wrap';
+										const args = [card_ele, tucked_counter_img];
+										const card_origin = card_ele.parentElement;
+										tucked_counter_img.append(card_ele);
 										const dest_width = card_ele.getBoundingClientRect().width;
 										const dest_height = card_ele.getBoundingClientRect().height;
-										tucked_counter.append(card_ele);
+										card_origin.append(card_ele);
 										card_ele.style.setProperty('--dw', `${dest_width}px`);
 										card_ele.style.setProperty('--dh', `${dest_height}px`);
-										anims.push(this.animationPromise.bind(null, card_ele, 'asset_tucked_to_board', 'anim', this.moveToNewParent(), false, true, ...args));
+										if (in_hand) {
+											anims.push(this.animationPromise.bind(this, card_ele, 'asset_hand_to_tucked', 'anim', this.moveToNewParent(), true, false, ...args));
+										} else {
+											anims.push(this.animationPromise.bind(this, card_ele, 'asset_board_to_tucked', 'anim', this.moveToNewParent(), true, false, ...args));
+										}
 									}
-									type_moved[type]++;
+								}
+							}
+							for (const [type, num] of Object.entries(type_moved)) {
+								if (num > 0) {
+									const type_num_ele = $(`asset_board_${player_id}`).querySelector(`.board_${type}_counter > .asset_counter_num`);
+									const current_num = Number(type_num_ele.innerHTML);
+									type_num_ele.innerHTML = current_num - num;
 								}
 							}
 						}
-						for (const [type, num] of Object.entries(type_moved)) {
-							if (num > 0) {
-								const type_num_ele = $(`asset_board_${player_id}`).querySelector(`.board_${type}_counter > .asset_counter_num`);
-								const current_num = Number(type_num_ele.innerHTML);
-								type_num_ele.innerHTML = current_num - num;
+					}
+					await Promise.all(anims.map(func => { return func(); }))
+					.then(() => {
+						for (const player_id of Object.keys(board_assets)) {
+							const player = gameui.gamedatas.players[player_id];
+							const character_id = player.character;
+	            			const character = gameui.gamedatas.characters[character_id];
+							const player_board = board_assets[player_id];
+							for (const type of Object.keys(player_board)) {
+								const tucked_num = Object.keys(gameui.gamedatas.board_assets[player_id][type]['tucked']).length;
+								const tucked_counter = $(`${character.name}_${type}_counter`);
+								if (tucked_num && tucked_counter && tucked_counter.style.display === '') {
+									tucked_counter.style.display = 'block';
+								}
+								else if (tucked_counter && tucked_counter.style.display === 'block') {
+									if (tucked_num == 0) { tucked_counter.style.display = ''; }
+									else { 
+										const tucked_num_ele = dojo.query(`#${tucked_counter.id} > .asset_counter_num`);
+										tucked_num_ele.innerHTML = String(tucked_num);
+									}
+								}
 							}
 						}
-					}
-					await Promise.all(anims.map(func => { return func(); }));
+					})
+					.then(() => {
+						for (const [ele, zIndex] of changed_z_indices) { ele.style.zIndex = zIndex; }
+					});
 				}
 				else { // shouldn't animate
 
 					for (const player_id of Object.keys(board_assets)) {
 
-						const player_board = board_assets[player_id];
-						const board_ele = $(`asset_board_${player_id}`);
-						const type_moved = {'gear' : 0, 'face' : 0, 'crack' : 0, 'slab' : 0};
-						for (const type of Object.keys(player_board)) {
+						if (this.notAZombie(player_id)) {
+							const player = gameui.gamedatas.players[player_id];
+							const character_id = player.character;
+	            			const character = gameui.gamedatas.characters[character_id];
+							const player_board = board_assets[player_id];
+							const board_ele = $(`asset_board_${player_id}`);
+							const type_moved = {'gear' : 0, 'face' : 0, 'crack' : 0, 'slab' : 0};
+							for (const type of Object.keys(player_board)) {
 
-							const type_board = player_board[type];
-							for (let i=1; i<=5; i++) {
+								const type_board = player_board[type];
+								for (let i=1; i<=5; i++) {
 
-								const slot = board_ele.querySelector(`.${type}_${i}`);
-								const expected_id = type_board[i] ? Object.keys(type_board[i])[0] : null;
-								const current_id = slot && slot.firstElementChild ? slot.firstElementChild.id.slice(-3).replace(/^\D+/g, '') : null;
-								if (expected_id != current_id) {
+									const slot = board_ele.querySelector(`.${type}_${i}`);
+									const expected_id = type_board[i] ? Object.keys(type_board[i])[0] : null;
+									const current_id = slot && slot.firstElementChild ? slot.firstElementChild.id.slice(-3).replace(/^\D+/g, '') : null;
 
-									let expected_card = $(`asset_card_${expected_id}`);
-									if (expected_card) { slot.append(expected_card); }
-									else if (expected_card != null) {
-										dojo.place(gameui.format_block('jstpl_asset_card', {
-											CARD_ID : expected_id,
-											EXTRA_CLASSES : 'played_asset flipped',
-											acX : 0,
-											acY : 0,
-										}), slot);
+									if (expected_id !== current_id) {
+										let expected_card = $(`asset_card_${expected_id}`);
+										if (expected_card) { slot.append(expected_card); }
+										else if (expected_id != null) {
+											dojo.place(gameui.format_block('jstpl_asset_card', {
+												CARD_ID : expected_id,
+												EXTRA_CLASSES : 'played_asset flipped',
+												acX : 0,
+												acY : 0,
+											}), slot);
+											type_moved[type]++;
+										}
 									}
-									type_moved[type]++;
+								}
+
+								const tucked_num = Object.keys(gameui.gamedatas.board_assets[player_id][type]['tucked']).length;
+								const tucked_counter = $(`${character.name}_${type}_counter`);
+								if (tucked_num && tucked_counter && tucked_counter.style.display === '') {
+									tucked_counter.style.display = 'block';
+								}
+								else if (tucked_counter && tucked_counter.style.display === 'block') {
+									if (tucked_num == 0) { tucked_counter.style.display = ''; }
+									else { 
+										const tucked_num_ele = dojo.query(`#${tucked_counter.id} > .asset_counter_num`);
+										tucked_num_ele.innerHTML = String(tucked_num);
+									}
 								}
 							}
-						}
-						for (const [type, num] of Object.entries(type_moved)) {
-							if (num > 0) {
-								const type_num_ele = $(`asset_board_${player_id}`).querySelector(`.board_${type}_counter > .asset_counter_num`);
-								const current_num = Number(type_num_ele.innerHTML);
-								type_num_ele.innerHTML = current_num - num;
+							for (const [type, num] of Object.entries(type_moved)) {
+								if (num > 0) {
+									const type_num_ele = $(`asset_board_${player_id}`).querySelector(`.board_${type}_counter > .asset_counter_num`);
+									const current_num = Number(type_num_ele.innerHTML);
+									type_num_ele.innerHTML = current_num - num;
+								}
 							}
 						}
 					}
@@ -3144,27 +3752,6 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        	return count;
 	        },
 
-	        updateBoardAssets: function(player_id) {
-
-	        	dojo.query(`#asset_board_${player_id} .played_asset`).forEach(ele => {
-
-	        		const id = ele.id.slice(-3).replace(/^\D+/g, '');
-	        		const type_arg = gameui.gamedatas.asset_identifier[id];
-	        		const type = this.getAssetType(type_arg);
-	        		const technique = this.getAssetTechnique(type_arg);
-	        		const slot = ele.parentElement.id.slice(-1);
-
-	        		gameui.gamedatas.board_assets[player_id][type][slot] = {};
-		        	gameui.gamedatas.board_assets[player_id][type][slot][id] = type_arg;
-	        		if (!ele.classList.contains('flipped')) {
-		        		if (player_id == gameui.player_id && technique) { gameui.gamedatas.resource_tracker['asset_board']['techniques'][technique]++; }
-	        		}
-	        		else {
-	        			gameui.gamedatas.board_assets[player_id][type]['flipped'][slot] = true;
-	        		}
-	        	});
-	        },
-
 	        decrementTuckedNum: function(num_ele) {
 
                 const old_num = Number(num_ele.innerHTML);
@@ -3176,18 +3763,18 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				switch (type_arg) {
 
 					// any time tokens
-					case '1': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaRerack');	break;
-					case '4': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaEnergyDrink'); break;
-					case '7': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaSimulClimb'); break;
-					case '9': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaBomberAnchor'); break;
+					case '1': ele.firstElementChild.onclick = gameui.onSummitBetaRerack.bind(gameui); break;
+					case '4': ele.firstElementChild.onclick = gameui.onSummitBetaEnergyDrink.bind(gameui); break;
+					case '7': ele.firstElementChild.onclick = gameui.onSummitBetaSimulClimb.bind(gameui); break;
+					case '9': ele.firstElementChild.onclick = gameui.onSummitBetaBomberAnchor.bind(gameui); break;
 
 					// specific time tokens
-					case '2': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaBorrowedRack'); break;
-					case '3': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaJumar'); break;
-					case '5': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaExtraWater'); break;
-					case '8': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaGuidebook'); break;
-					case '10': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaJesusPiece'); break;
-					case '11': dojo.connect(ele.firstElementChild, 'onclick', gameui, 'onSummitBetaLuckyChalkbag'); break;
+					case '2': ele.firstElementChild.onclick = gameui.onSummitBetaBorrowedRack.bind(gameui); break;
+					case '3': ele.firstElementChild.onclick = gameui.onSummitBetaJumar.bind(gameui); break;
+					case '5': ele.firstElementChild.onclick = gameui.onSummitBetaExtraWater.bind(gameui); break;
+					case '8': ele.firstElementChild.onclick = gameui.onSummitBetaGuidebook.bind(gameui); break;
+					case '10': ele.firstElementChild.onclick = gameui.onSummitBetaJesusPiece.bind(gameui); break;
+					case '11': ele.firstElementChild.onclick = gameui.onSummitBetaLuckyChalkbag.bind(gameui); break;
 				}
 			},
 
@@ -3311,7 +3898,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								break;
 
 							case 'select_opponent':
-								if (type_arg == 10) {
+								if (type_arg == 10 && $('climbing_discard_straightened').firstElementChild) {
 									ele.firstElementChild.style.display = 'inline-block';
 									ele.classList.add('selectable_token');
 									enabled++;
@@ -3359,6 +3946,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			resetStateOnSummitBeta: function(summit_beta_type_arg=null, current_state=gameui.gamedatas.current_state) {
 
+				if ($('show_hide_card_button') && $('show_hide_card_button').classList.contains('shown')) {
+					$('show_hide_card_button').click();
+				}
 				gameui.removeActionButtons();
 				dojo.query('#asset_deck > .draw_button').forEach(ele => { ele.remove(); });
 				dojo.query('#asset_deck > #draw_num').forEach(ele => { ele.remove(); });
@@ -3366,7 +3956,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 				let sb_token = null;
 				if (summit_beta_type_arg) {
-					const id = Object.keys(gameui.gamedatas.hand_summit_beta_tokens).find(key => gameui.gamedatas.hand_summit_beta_tokens[key] === summit_beta_type_arg);
+					const id = Object.keys(gameui.gamedatas.token_identifier).find(key => gameui.gamedatas.token_identifier[key] === summit_beta_type_arg);
                     sb_token = $(`summit_beta_${id}`);
 				}
 
@@ -3392,6 +3982,12 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							ele.classList.remove('selected_pitch');
 							ele.classList.add('available_pitch');
 						});
+						dojo.query('.selected_token').forEach(ele => {
+							if (ele !== sb_token) {
+								ele.classList.remove('selected_token', 'selectable_token');
+								ele.parentElement.classList.remove('selected_token_wrap');
+							}
+						});
 						break;
 					
 					case 'selectPortaledge':
@@ -3406,11 +4002,29 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						break;
 				}
 				
-				for (const i in gameui.trade_handlers) { dojo.disconnect(gameui.trade_handlers[i]); }
-				for (const i in gameui.asset_selection_handlers) { dojo.disconnect(gameui.asset_selection_handlers[i]); }
-				for (const i in gameui.asset_handlers) { dojo.disconnect(gameui.asset_handlers[i]); }
-				if ($('climbing_slot').firstElementChild) { $('climbing_slot').style.display = ''; }
+				for (const ele of gameui.trade_handlers) { ele.onclick = null; }
+				gameui.trade_handlers = [];
+				for (const ele of gameui.asset_selection_handlers) { ele.onclick = null; }
+				gameui.asset_selection_handlers = [];
+				for (const ele of gameui.asset_handlers) { ele.onclick = null; }
+				gameui.asset_handlers = [];
 				gameui.unnecessary_requirements = 0;
+			},
+
+			getHandSummitBetaTokens: function(asArray = false) {
+				if (asArray) {
+					// Return a stable list of IDs based on the sequence key (1, 2...)
+					const tracker = gameui.gamedatas.player_token_tracker;
+					return Object.keys(tracker)
+						.sort((a, b) => parseInt(a) - parseInt(b))
+						.map(key => tracker[key]);
+				}
+				let hand_sb_tokens = {};
+				for (const id of Object.values(gameui.gamedatas.player_token_tracker)) {
+					const type_arg = gameui.gamedatas.token_identifier[id];
+					hand_sb_tokens[id] = type_arg;
+				}
+				return hand_sb_tokens;
 			},
 
 			discardPlayedSummitBetaTokens: async function(summit_beta_type_args=false) {
@@ -3424,10 +4038,6 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						for (let token_ele of dojo.query('#assets_wrap .summit_beta')) {
 
 							if (token_ele.classList.contains('selected_token')) {
-
-								const token_id = token_ele.id.slice(-3).replace(/^\D+/g, '');
-								delete gameui.gamedatas.hand_summit_beta_tokens[token_id];
-
 								if (dojo.query(`#${token_ele.id} > #sb_skills_wrapper`).length === 1) { $('sb_skills_wrapper').remove(); }
 
 								if (this.shouldAnimate()) {
@@ -3436,7 +4046,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 									token_ele.firstElementChild.classList.remove('click', 'cursor');
 									const args = [token_ele, $('summit_discard')];
 
-									this.updateTitlebar(_('Discarding Summit Beta token(s)'));
+									this.updateTitlebar(_('Discarding Summit Beta Token/s'));
 									await this.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.moveToNewParent(), false, true, ...args);
 									if (current_sb_token === total_sb_tokens) { resolve(); }
 									else { current_sb_token++; }
@@ -3486,10 +4096,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								sbX : token.x_y[0],
 								sbY : token.x_y[1],
 							}), hand_counter);
+							this.summitBetaTooltip(token_ele.id, type_arg);
 		
 							if (this.shouldAnimate()) {
 		
-								this.updateTitlebar(_('Discarding Summit Beta token(s)'));
+								this.updateTitlebar(_('Discarding Summit Beta Token/s'));
 								const destination = $(`token_display_${idx}`);
 								destination.append(token_ele);
 								const end_pos = token_ele.getBoundingClientRect();
@@ -3556,7 +4167,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				else if ($('risk_it_button') && dojo.query('.requirement_border').length === 0 && gameui.character_id != '8') {
 
 					$('risk_it_button').remove();
-					gameui.addActionButton('confirm_requirements_button', _('Confirm'), 'onConfirmRequirements', null, false, 'white');
+					gameui.addActionButton('confirm_requirements_button', _('Climb'), 'onConfirmRequirements', null, false, 'white');
 					const button = $('confirm_requirements_button');
 					button.classList.add('disabled');
 					$('generalactions').insertBefore(button, $('generalactions').firstChild);
@@ -3595,10 +4206,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
                         button.classList.remove('disabled');
                         dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
                         if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-							`<span id="risk_it_message">
-								<span id="ri_line1">You may</span>
-								<span id="ri_line2">risk it</span>
-							</span>`
+							`<span id="risk_it_message">${_('You may<br>risk it')}</span>`
 						); }
 						return false;
                     }
@@ -3738,7 +4346,6 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			checkConfirmButton: function(selected_resources, pitch_requirements) {
 
-				// dojo.query('#bad_selection_message').forEach(ele => { ele.remove(); });
 				const confirm_button = $('confirm_requirements_button') ? $('confirm_requirements_button') : $('risk_it_button');
 
                 if ($('confirm_requirements_button')) {
@@ -3792,6 +4399,214 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				});
 			},
 
+			deckReshuffle: async function() {
+				return new Promise(async (resolve) => {
+
+					this.updateTitlebar(_('Shuffling the Asset Deck'));
+					
+					const deck = $('asset_deck');
+					const discard = $('asset_discard');
+					const discard_top = discard.firstElementChild;
+
+					if (this.shouldAnimate()) {
+
+						const discard_top_id = discard_top.id.slice(-3).replace(/^\D+/g, '');
+						const discard_top_type_arg = gameui.gamedatas.asset_identifier[discard_top_id];
+						const discard_top_asset = gameui.gamedatas.asset_cards[discard_top_type_arg];
+
+						discard_top.remove();
+						const flip_card = dojo.place(gameui.format_block('jstpl_flip_card', {
+							card_id : discard_top_id,
+							extra_classes : '',
+							back_type : 'asset asset_back_for_flip',
+							front_type : 'asset',
+							cX : discard_top_asset.x_y[0],
+							cY : discard_top_asset.x_y[1],
+						}), discard);
+						flip_card.firstElementChild.style.transform = 'rotateY(180deg)';
+
+						await this.animationPromise(flip_card.firstElementChild, 'unflip_transform', 'anim', null, false, true);
+						flip_card.remove();
+
+						for (let i=1; i<=7; i++) {
+
+							const card_back_block = gameui.format_block('jstpl_asset_card', {
+								CARD_ID : `temp_${i}`,
+								EXTRA_CLASSES : 'shuffle_back',
+								acX : 0,
+								acY : 0,
+							});
+
+							const card_back = dojo.place(card_back_block, discard);
+							card_back.style.visibility = 'visible';
+							card_back.style.position = 'absolute';
+						}
+
+						const shuffle_backs = dojo.query('.shuffle_back');
+						let a_pair = Math.random() < 0.5;
+						let b_pair = Math.random() < 0.5;
+						let c_pair = Math.random() < 0.5;
+						if (!a_pair && !b_pair && !c_pair) {
+							const num = Math.floor(Math.random() * 3)
+							switch (num) {
+								case 0: a_pair = true; break;
+								case 1: b_pair = true; break;
+								case 2: c_pair = true; break;
+							}
+						}
+
+						discard.style.zIndex = '7';
+						for (let i=0; i<=shuffle_backs.length-1; i++) {
+
+							const card_back = shuffle_backs[i];
+							const card_rect = card_back.getBoundingClientRect();
+							let yTarget = card_rect.width / 2 + card_rect.width / 2 * Math.random();
+							if (i === 5 || i === 6) {
+								yTarget = card_rect.width * 0.8;
+							}
+							if ([0, 2, 4, 6].includes(i)) { yTarget *= -1; }
+
+							card_back.style.zIndex = `${i+1}`;
+							card_back.style.setProperty('--yTarget', `${-yTarget}px`);
+							card_back.style.setProperty('--z', `${i+1}`)
+
+							switch (true) {
+
+								case i === 1 && a_pair: card_back.style.setProperty('--z', 2); break;
+								case i === 2 && a_pair: card_back.style.setProperty('--z', 1); break;
+								case i === 3 && b_pair: card_back.style.setProperty('--z', 4); break;
+								case i === 4 && b_pair: card_back.style.setProperty('--z', 3); break;
+								case i === 5: 			card_back.style.setProperty('--z', 6); break;
+								case i === 6: 			card_back.style.setProperty('--z', 5); break;
+							}
+
+							if ([0, 2, 4, 6].includes(i)) { this.animationPromise(card_back, 'deck_reshuffle_L', 'anim', null, false, true); }
+							else { this.animationPromise(card_back, 'deck_reshuffle_R', 'anim', null, false, true); }
+							
+							await (async function() { return new Promise(resolve => setTimeout(resolve, 30)) })();
+
+							if (i === 6) {
+								await (async function() { return new Promise(resolve => setTimeout(resolve, 1000)) })();
+								discard.innerHTML = '';
+								deck.style.zIndex = '1070';
+								const card_back = dojo.place(gameui.format_block('jstpl_asset_card', {
+									CARD_ID : `temp_back`,
+									EXTRA_CLASSES : '',
+									acX : 0,
+									acY : 0,
+								}), discard);
+								const args = [card_back, deck, 2];
+								await this.animationPromise(card_back, 'asset_discard_to_deck', 'anim', this.moveToNewParent(), false, true, ...args);
+								await (async function() { return new Promise(resolve => setTimeout(resolve, 500)) })();
+								discard.style.zIndex = '';
+								deck.style.zIndex = '';
+								resolve();
+							}
+						}
+					}
+
+					else { // shouldn't animate
+						discard.innerHTML = '';
+						resolve();
+					}
+				});
+			},
+
+			sbReshuffle: async function() {
+				return new Promise(async (resolve) => {
+
+					const sb_discard = $('summit_discard');
+					const sb_pile = $('summit_pile');
+
+					if (this.shouldAnimate()) {
+						this.updateTitlebar(_('Refilling the Summit Beta Pile'));
+						sb_discard.style.zIndex = '210';
+						sb_pile.style.zIndex = '210';
+
+						const discard_top = sb_discard.firstElementChild;
+						const discard_id = discard_top.id.slice(-3).replace(/^\D+/g, '');
+						const discard_type_arg = gameui.gamedatas.token_identifier[discard_id];
+						const discard_info = gameui.gamedatas.summit_beta_tokens[discard_type_arg];
+						discard_top.remove();
+						const discard_flip = dojo.place(gameui.format_block('jstpl_flip_card', {
+							card_id : discard_id,
+							extra_classes : '',
+							back_type : 'summit_beta summit_back_for_flip',
+							front_type : 'summit_beta',
+							cX : discard_info.x_y[0],
+							cY : discard_info.x_y[1],
+						}), sb_discard);
+						discard_flip.firstElementChild.style.transform = 'rotateY(180deg)';
+						await this.animationPromise(discard_flip.firstElementChild, 'flip_summit_beta_face_down', 'anim', null, true, false);
+						discard_flip.remove();
+
+						for (let i=1; i<=5; i++) {
+							let temp_back = dojo.place(gameui.format_block('jstpl_summit_beta', {
+								TOKEN_ID : `temp_${i}`,
+								sbX : 0,
+								sbY : 0,
+							}), sb_discard);
+							temp_back.classList.add('shuffle_back');
+							temp_back.firstElementChild.remove();
+						}
+
+						const shuffle_backs = dojo.query('.shuffle_back');
+						let a_pair = Math.random() < 0.5;
+						let b_pair = Math.random() < 0.5;
+						if (!a_pair && !b_pair) {
+							const num = Math.floor(Math.random() * 2);
+							switch (num) {
+								case 0: a_pair = true; break;
+								case 1: b_pair = true; break;
+							}
+						}
+						for (let i=0; i<=shuffle_backs.length-1; i++) {
+
+							const token_back = shuffle_backs[i];
+							const token_rect = token_back.getBoundingClientRect();
+							let xTarget = token_rect.width / 2 + token_rect.width / 2 * Math.random();
+							if (i === 3 || i === 4) {
+								xTarget = token_rect.width * 0.8;
+							}
+							if ([0, 2, 4].includes(i)) { xTarget *= -1; }
+
+							token_back.style.zIndex = `${i+1}`;
+							token_back.style.setProperty('--xTarget', `${xTarget}px`);
+							token_back.style.setProperty('--z', `${i+1}`);
+
+							switch (true) {
+								case i === 1 && a_pair: token_back.style.setProperty('--z', 2); break;
+								case i === 2 && a_pair: token_back.style.setProperty('--z', 1); break;
+								case i === 3 && b_pair: token_back.style.setProperty('--z', 4); break;
+								case i === 4 && b_pair: token_back.style.setProperty('--z', 3); break;
+							}
+
+							if ([0, 2, 4].includes(i)) { this.animationPromise(token_back, 'sb_reshuffle_L', 'anim', null, false, true); }
+							else { this.animationPromise(token_back, 'sb_reshuffle_R', 'anim', null, false, true); }
+
+							await (async function() { return new Promise(resolve => setTimeout(resolve, 30)) })();
+
+							if (i===4) {
+								await (async function() { return new Promise(resolve => setTimeout(resolve, 1000)) })();
+								const last_back = shuffle_backs.pop();
+								shuffle_backs.forEach(ele => { ele.remove(); });
+								let args = [last_back, sb_pile];
+								await this.animationPromise(last_back, 'sb_discard_to_pile', 'anim', this.moveToNewParent(), true, false, ...args);
+								sb_pile.style.visibility = '';
+								sb_pile.style.zIndex = '';
+								sb_discard.style.zIndex = '';
+								resolve();
+							}
+						}
+					}
+					else { // shouldn't animate
+						sb_discard.firstElementChild.remove();
+						sb_pile.style.visibility = '';
+						resolve();
+					}
+				});
+			},
+
 			updatePanelAfterDiscard: function(player_id, opponent, player_resources, opponent_resources, player_hand_count, opponent_hand_count, all_card_ids) {
 
 				if (player_id == gameui.player_id) { this.updatePlayerResources(player_id, player_resources); }
@@ -3819,59 +4634,67 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 			},
 
+			assetDisplayToHandCalc: function(asset, slot) {
+				const asset_deck_draw = $('asset_deck_draw');
+				let hide_display = false;
+				if (asset_deck_draw.style.display !== 'flex') {
+					asset_deck_draw.style.display = 'flex';
+					hide_display = true;
+				}
+				const asset_origin = asset.parentElement;
+				const display_origin = $('deck_draw_1');
+				display_origin.append(asset);
+				const display_origin_box = asset.getBoundingClientRect();
+				slot.append(asset);
+				const slot_box = asset.getBoundingClientRect();
+				asset_origin.append(asset);
+				asset.style.setProperty('--ow2h', `${display_origin_box.width}px`); // origin width to hand
+				asset.style.setProperty('--oh2h', `${display_origin_box.height}px`);
+				asset.style.setProperty('--dw2h', `${slot_box.width}px`);
+				asset.style.setProperty('--dh2h', `${slot_box.height}px`);
+				if (hide_display) { asset_deck_draw.style.display = ''; }
+			},
+
 			getPeeOffTheLedgeHexes: function() {
 
 				const player_id = gameui.getActivePlayerId();
 				const player_pitches = gameui.gamedatas.pitch_tracker[player_id];
-				const current_hex = player_pitches[player_pitches.length-1];
+				const current_hex = Number(player_pitches[player_pitches.length-1]);
 				const board = gameui.board;
+				const board_hexes = board === 'desert' ?
+					[ // desert board
+						[1, 2, 3, 4, 5, 6, 7, 8],
+						[9, 10, 11, 12, 13, 14, 15],
+						[16, 17, 18, 19, 20, 21],
+						[22, 23, 24, 25, 26],
+						[27, 28, 29, 30],
+					] :
+					[ // forest board
+						[1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+						[11, 12, 13, 14, 15, 16, 17, 18, 19],
+						[20, 21, 22, 23, 24, 25, 26, 27],
+						[28, 29, 30, 31, 32, 33, 34],
+						[35, 36, 37, 38, 39, 40],
+				];
+				let available_hexes = [];
 
-				let available_hexes;
-				switch (current_hex) {
+				let row_idx, hex_idx;
+				for (let r_idx=0; r_idx < board_hexes.length; r_idx++) {
+					const h_idx = board_hexes[r_idx].indexOf(current_hex);
+					if (h_idx !== -1) {
+						row_idx = r_idx;
+						hex_idx = h_idx;
+					}
+				}
 
-					case '1': available_hexes = board === 'desert' ?   [2] : [2]; break;
-					case '2': available_hexes = board === 'desert' ? [1,3] : [1,3]; break;
-					case '3': available_hexes = board === 'desert' ? [2,4] : [2,4]; break;
-					case '4': available_hexes = board === 'desert' ? [3,5] : [3,5]; break;
-					case '5': available_hexes = board === 'desert' ? [4,6] : [4,6]; break;
-					case '6': available_hexes = board === 'desert' ? [5,7] : [5,7]; break;
-					case '7': available_hexes = board === 'desert' ? [6,8] : [6,8]; break;
-					case '8': available_hexes = board === 'desert' ?   [7] : [7,9]; break;
-					case '9': available_hexes = board === 'desert' ? [1,2,10] : [8,10]; break;
-					case '10': available_hexes = board === 'desert' ? [2,3,9,11] : [9]; break;
-					case '11': available_hexes = board === 'desert' ? [3,4,10,12] : [1,2,12]; break;
-					case '12': available_hexes = board === 'desert' ? [4,5,11,13] : [2,3,11,13]; break;
-					case '13': available_hexes = board === 'desert' ? [5,6,12,14] : [3,4,12,14]; break;
-					case '14': available_hexes = board === 'desert' ? [6,7,13,15] : [4,5,13,15]; break;
-					case '15': available_hexes = board === 'desert' ? [7,8,14] : [5,6,14,16]; break;
-					case '16': available_hexes = board === 'desert' ? [9,10,17] : [6,7,15,17]; break;
-					case '17': available_hexes = board === 'desert' ? [10,11,16,18] : [7,8,16,18]; break;
-					case '18': available_hexes = board === 'desert' ? [11,12,17,19] : [8,9,17,19]; break;
-					case '19': available_hexes = board === 'desert' ? [12,13,18,20] : [9,10,18]; break;
-					case '20': available_hexes = board === 'desert' ? [13,14,19,21] : [11,12,21]; break;
-					case '21': available_hexes = board === 'desert' ? [14,15,20] : [12,13,20,22]; break;
-					case '22': available_hexes = board === 'desert' ? [16,17,23] : [13,14,21,23]; break;
-					case '23': available_hexes = board === 'desert' ? [17,18,22,24] : [14,15,22,24]; break;
-					case '24': available_hexes = board === 'desert' ? [18,19,23,25] : [15,16,23,25]; break;
-					case '25': available_hexes = board === 'desert' ? [19,20,24,26] : [16,17,24,26]; break;
-					case '26': available_hexes = board === 'desert' ? [20,21,25] : [17,18,25,27]; break;
-					case '27': available_hexes = board === 'desert' ? [22,23,28] : [18,19,26]; break;
-					case '28': available_hexes = board === 'desert' ? [23,24,27,29] : [20,21,29]; break;
-					case '29': available_hexes = board === 'desert' ? [24,25,28,30] : [21,22,28,30]; break;
-					case '30': available_hexes = board === 'desert' ? [25,26,29] : [22,23,29,31]; break;
-					case '31': available_hexes = board === 'desert' ? [27,28] : [23,24,30,32]; break;
-					case '32': available_hexes = board === 'desert' ? [29,30] : [24,25,31,33]; break;
-					case '33': available_hexes = [25,26,32,34]; break;
-					case '34': available_hexes = [26,27,33]; break;
-					case '35': available_hexes = [28,29,36]; break;
-					case '36': available_hexes = [29,30,35,37]; break;
-					case '37': available_hexes = [30,31,36,38]; break;
-					case '38': available_hexes = [31,32,37,39]; break;
-					case '39': available_hexes = [32,33,38,40]; break;
-					case '40': available_hexes = [33,34,39]; break;
-					case '41': available_hexes = [35,36]; break;
-					case '42': available_hexes = [37,38]; break;
-					case '43': available_hexes = [39,40]; break;
+				if (board === 'desert' && [31, 32].includes(current_hex)) {
+					for (let row of board_hexes) { available_hexes.push(...row); }
+				} else if (board === 'forest' && [41, 42, 43].includes(current_hex)) {
+					for (let row of board_hexes) { available_hexes.push(...row); }
+				} else {
+					if (hex_idx > 0) { available_hexes.push(board_hexes[row_idx][hex_idx-1]); } // left hex
+					if (hex_idx < board_hexes[row_idx].length-1) { available_hexes.push(board_hexes[row_idx][hex_idx+1]); } // right hex
+					for (let i=0; i < row_idx; i++) { available_hexes.push(...board_hexes[i]); }
 				}
 				return available_hexes;
 			},
@@ -3903,6 +4726,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			  
 				cell.style.fontSize = tempSpan.style.fontSize;
 				cell.textContent = text;
+			},
+
+			notAZombie(player_id) {
+				const zombie_players = gameui.gamedatas.zombie_players;
+				return !zombie_players.includes(player_id);
 			},
 		});
 	});

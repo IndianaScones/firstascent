@@ -1912,7 +1912,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'power',
-            'symbol_for_log' => 'Power',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -1949,8 +1948,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Bring it up to them:"),
         'effect_a' => clienttranslate("Lose 1 Water and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Swipe the gear:"),
-        'effect_b' => clienttranslate("Lose 1 Card and take 1 Gear Card from another player's
-                         Asset Board, then add it to your Board"),
+        'effect_b' => clienttranslate("Lose 1 Card and take 1 Gear Card from another player's Asset Board, then add it to your Board"),
         'x_y' => [200, 0],
         'height_top_a' => [10.7, 67.7],
         'height_top_b' => [16.2, 82.3],
@@ -1979,7 +1977,7 @@ $this->climbing_cards = [
             ],
             'types' => 'any',
             'steal_types' => 'gear',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'give_assets' => 0,
             'discard_num' => 1,
             'discard_type' => 'any_asset',
@@ -2008,7 +2006,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -2066,8 +2063,7 @@ $this->climbing_cards = [
         'name' => 'sandbagged',
         'description' => clienttranslate("Sandbagged"),
         'effect_a_flavor' => clienttranslate("Which Pitch is harder than everyone says it is?"),
-        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any
-                                       Pitch - any player climbing that Pitch will need that additional Asset"),
+        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any Pitch - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
         'effect_b' => '',
         'x_y' => [500, 0],
@@ -2098,7 +2094,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -2118,8 +2113,7 @@ $this->climbing_cards = [
         'name' => 'booty',
         'description' => clienttranslate("Booty!"),
         'effect_a_flavor' => clienttranslate("Take it:"),
-        'effect_a' => clienttranslate("Lose 1 Card from your hand and take 1 Gear Card from another
-                                       player's Asset Board, then add it to your Board"),
+        'effect_a' => clienttranslate("Lose 1 Card from your hand and take 1 Gear Card from another player's Asset Board, then add it to your Board"),
         'effect_b_flavor' => clienttranslate("Leave it:"),
         'effect_b' => clienttranslate("Lose 1 Gear Card and gain 1 Summit Beta Token"),
         'x_y' => [700, 0],
@@ -2138,7 +2132,7 @@ $this->climbing_cards = [
             ],
             'types' => 'any',
             'steal_types' => 'gear',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'card_in_hand' => true,
             'give_assets' => 0,
             'discard_num' => 1,
@@ -2165,10 +2159,9 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Set up a shiver bivy:"),
         'effect_a' => clienttranslate("Lose 1 Psych and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Break out the headlamps:"),
-        'effect_b' => clienttranslate("You and another player gain Technique Tokens of your choice
-                         (Power/Pain Tolerance/Balance/Precision)"),
-        'titlebar_message' => clienttranslate("gain a Technique Token"),
-        'titlebar_message_opponent' => clienttranslate("gain a Technique Token"),
+        'effect_b' => clienttranslate("You and another player gain Technique Tokens of your choice (Power/Pain Tolerance/Balance/Precision)"),
+        'titlebar_message' => clienttranslate("must select a climber to gain a Technique Token"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to gain a Technique Token"),
         'x_y' => [800, 0],
         'height_top_a' => [10.4, 68.4],
         'height_top_b' => [15.8, 82.8],
@@ -2258,7 +2251,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'balance',
-            'symbol_for_log' => 'Balance',
         ],
         'b_args' => [
             'cost' => 'updateWaterPsych',
@@ -2278,8 +2270,7 @@ $this->climbing_cards = [
         'name' => 'tricky_boulder_problem',
         'description' => clienttranslate("Tricky boulder problem"),
         'effect_a_flavor' => clienttranslate("Try a heel hook to a sloper:"),
-        'effect_a' => clienttranslate("Lose 2 Cards and gain any Technique Token 
-                         (Power/Pain Tolerance/Balance/Precision)"),
+        'effect_a' => clienttranslate("Lose 2 Cards and gain any Technique Token (Power/Pain Tolerance/Balance/Precision)"),
         'effect_b_flavor' => clienttranslate("Dyno up to a chalky jug:"),
         'effect_b' => clienttranslate("Lose 1 Water and gain 1 Face Card"),
         'x_y' => [100, 100],
@@ -2297,7 +2288,7 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'give_assets' => 0,
             'discard_num' => 2,
             'discard_type' => 'any_asset',
@@ -2322,8 +2313,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Take the kneebar and shake it out:"),
         'effect_a' => clienttranslate("Lose 1 Card and gain 1 Balance Token"),
         'effect_b_flavor' => clienttranslate("Skip the kneebar:"),
-        'effect_b' => clienttranslate("Lose 1 Water and gain 1 Skill Card 
-                         (Face/Crack/Slab)"),
+        'effect_b' => clienttranslate("Lose 1 Water and gain 1 Skill Card (Face/Crack/Slab)"),
         'x_y' => [200, 100],
         'height_top_a' => [10.5, 68.3],
         'height_top_b' => [15.8, 82.7],
@@ -2339,12 +2329,11 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'give_assets' => 0,
             'discard_num' => 1,
             'discard_type' => 'any_asset',
             'symbol_type' => 'balance',
-            'symbol_for_log' => 'Balance',
         ],
         'b_args' => [
             'cost' => 'updateWaterPsych',
@@ -2366,8 +2355,7 @@ $this->climbing_cards = [
         'name' => 'rope_sheath_is_cut',
         'description' => clienttranslate("Rope sheath is cut"),
         'effect_a_flavor' => clienttranslate("Ask rappellers if you can use their extra rope:"),
-        'effect_a' => clienttranslate("Take 1 Gear Card from another player's Asset Board and
-                         add it to your hand"),
+        'effect_a' => clienttranslate("Take 1 Gear Card from another player's Asset Board and add it to your hand"),
         'effect_b_flavor' => clienttranslate("Cut your rope down and be mindful of its shorter length:"),
         'effect_b' => clienttranslate("Lose 1 Gear Card and gain 1 Precision Token"),
         'x_y' => [300, 100],
@@ -2385,7 +2373,7 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'gear',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -2402,7 +2390,6 @@ $this->climbing_cards = [
             'discard_num' => 1,
             'discard_type' => 'gear',
             'symbol_type' => 'precision',
-            'symbol_for_log' => 'Precision',
         ],
     ],
 
@@ -2428,7 +2415,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'power',
-            'symbol_for_log' => 'Power',
         ],
         'b_args' => [
             'cost' => '',
@@ -2451,9 +2437,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Organize their chaotic rack:"),
         'effect_a' => clienttranslate("Lose 1 Psych and gain 1 Precision Token"),
         'effect_b_flavor' => clienttranslate("Go up with it looking like a junk show:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [500, 100],
         'height_top_a' => [10.7, 63.5],
         'height_top_b' => [20.5, 78.1],
@@ -2469,7 +2453,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'precision',
-            'symbol_for_log' => 'Precision',
         ],
         'b_args' => [
             'cost' => '',
@@ -2520,7 +2503,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
     ],
 
@@ -2530,8 +2512,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Push through the pain:"),
         'effect_a' => clienttranslate("Lose 1 Water and gain 1 Power Token"),
         'effect_b_flavor' => clienttranslate('Yell "TAKE!" and shake it out:'),
-        'effect_b' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab) 
-                         and gain 1 Water"),
+        'effect_b' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab) and gain 1 Water"),
         'x_y' => [700, 100],
         'height_top_a' => [10.7, 68.2],
         'height_top_b' => [15.9, 82.7],
@@ -2547,7 +2528,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'power',
-            'symbol_for_log' => 'Power',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -2588,7 +2568,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'power',
-            'symbol_for_log' => 'Power',
         ],
         'b_args' => [
             'cost' => '',
@@ -2627,7 +2606,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'power',
-            'symbol_for_log' => 'Power',
         ],
         'b_args' => [
             'cost' => 'discard',
@@ -2666,12 +2644,11 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'give_assets' => 0,
             'discard_num' => 1,
             'discard_type' => 'any_asset',
             'symbol_type' => 'balance',
-            'symbol_for_log' => 'Balance',
         ],
         'b_args' => [
             'cost' => 'updateWaterPsych',
@@ -2685,7 +2662,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'precision',
-            'symbol_for_log' => 'Precision',
         ],
     ],
 
@@ -2695,9 +2671,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Bail into the vegetated gully:"),
         'effect_a' => clienttranslate("Lose 1 Slab Card and gain 1 Psych"),
         'effect_b_flavor' => clienttranslate("Smear and pray like never before:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [100, 200],
         'height_top_a' => [10.7, 63.5],
         'height_top_b' => [20.5, 78.2],
@@ -2734,8 +2708,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Help them:"),
         'effect_a' => clienttranslate("Lose 1 Water and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Pass them by:"),
-        'effect_b' => clienttranslate("Lose 1 Card and take 1 Card from another player's Asset Board,
-                         then add it to your hand"),
+        'effect_b' => clienttranslate("Lose 1 Card and take 1 Card from another player's Asset Board, then add it to your hand"),
         'x_y' => [200, 200],
         'height_top_a' => [10.1, 68],
         'height_top_b' => [16.6, 82],
@@ -2763,7 +2736,7 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'steal_asset' => true,
             'give_assets' => 0,
             'discard_num' => 1,
@@ -2777,8 +2750,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Scurry up the next pitch to fart in solitude:"),
         'effect_a' => clienttranslate("Lose 1 Water and gain 1 Face Card"),
         'effect_b_flavor' => clienttranslate("Hold it in while your partner racks up:"),
-        'effect_b' => clienttranslate("Gain 1 Pain Tolerance Token and all other
-                         players gain 1 Gear Card"),
+        'effect_b' => clienttranslate("Gain 1 Pain Tolerance Token and all other players gain 1 Gear Card"),
         'x_y' => [300, 200],
         'height_top_a' => [15.5, 63.4],
         'height_top_b' => [15.8, 82.8],
@@ -2807,7 +2779,6 @@ $this->climbing_cards = [
             ],
             'bespoke' => true,
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
     ],
 
@@ -2817,10 +2788,9 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Console them:"),
         'effect_a' => clienttranslate("Give another player 2 Cards and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Tell them to buck up:"),
-        'effect_b' => clienttranslate("Lose 1 Psych and take 1 Card from another player's
-                         Asset Board, then add it to your hand"),
-        'titlebar_message' => clienttranslate("get 2 of your Asset Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 2 of their Asset Cards"),
+        'effect_b' => clienttranslate("Lose 1 Psych and take 1 Card from another player's Asset Board, then add it to your hand"),
+        'titlebar_message' => clienttranslate("must select a climber to get 2 of your Asset Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 2 of his Asset Cards"),
         'x_y' => [400, 200],
         'height_top_a' => [15.5, 63.4],
         'height_top_b' => [15.9, 82.7],
@@ -2849,7 +2819,7 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
         ],
 
     ],
@@ -2889,7 +2859,7 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'types' => 'any',
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'steal_asset' => true,
             'give_assets' => 0,
             'discard_num' => 1,
@@ -2922,7 +2892,6 @@ $this->climbing_cards = [
             'discard_num' => 1,
             'discard_type' => 'face',
             'symbol_type' => 'precision',
-            'symbol_for_log' => 'Precision',
         ],
         'b_args' => [
             'cost' => 'updateWaterPsych',
@@ -2963,7 +2932,6 @@ $this->climbing_cards = [
             'discard_num' => 1,
             'discard_type' => 'slab',
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
         'b_args' => [
             'cost' => '',
@@ -2978,7 +2946,7 @@ $this->climbing_cards = [
             ],
             'bespoke' => true,
             'types' => ['any'],
-            'types_message' => clienttranslate(""),
+            'types_message' => '',
             'card_in_hand' => true,
         ],
     ],
@@ -3005,7 +2973,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'balance',
-            'symbol_for_log' => 'Balance',
         ],
         'b_args' => [
             'cost' => '',
@@ -3029,8 +2996,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Fiddle with the gear:"),
         'effect_a' => clienttranslate("Put 1 Gear Card from your hand onto your Asset Board"),
         'effect_b_flavor' => clienttranslate("Say heck the gear and move on:"),
-        'effect_b' => clienttranslate("Lose 1 Psych and gain 1 Skill Card 
-                         (Face/Crack/Slab)"),
+        'effect_b' => clienttranslate("Lose 1 Psych and gain 1 Skill Card (Face/Crack/Slab)"),
         'x_y' => [900, 200],
         'height_top_a' => [15.4, 63.5],
         'height_top_b' => [15.6, 82.9],
@@ -3047,7 +3013,7 @@ $this->climbing_cards = [
             ],
             'bespoke' => true,
             'types' => ['gear'],
-            'types_message' => clienttranslate("Gear"),
+            'types_message' => clienttranslate("Gear") . ' ',
             'gear_in_hand' => true,
         ],
         'b_args' => [
@@ -3070,13 +3036,11 @@ $this->climbing_cards = [
         'name' => 'dropped_a_piece',
         'description' => clienttranslate("Dropped a piece"),
         'effect_a_flavor' => clienttranslate("Retrieve it:"),
-        'effect_a' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab) 
-                         and gain 1 Gear Card"),
+        'effect_a' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab) and gain 1 Gear Card"),
         'effect_b_flavor' => clienttranslate("Decide you don't need it"),
-        'effect_b' => clienttranslate("Give 1 Gear Card to another player and draw 1 Card
-                         from The Portaledge"),
-        'titlebar_message' => clienttranslate("get 1 of your Gear Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 1 of their Gear Cards"),
+        'effect_b' => clienttranslate("Give 1 Gear Card to another player and draw 1 Card from The Portaledge"),
+        'titlebar_message' => clienttranslate("must select a climber to get 1 of your Gear Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 1 of his Gear Cards"),
         'x_y' => [0, 300],
         'height_top_a' => [10.6, 68.3],
         'height_top_b' => [15.7, 82.9],
@@ -3233,9 +3197,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Go up the featureless slab:"),
         'effect_a' => clienttranslate("Lose 1 Psych and gain 1 Slab Card"),
         'effect_b_flavor' => clienttranslate("Go up the lichen-covered corner:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [400, 300],
         'height_top_a' => [10.7, 63.5],
         'height_top_b' => [20.6, 78],
@@ -3270,8 +3232,7 @@ $this->climbing_cards = [
         'name' => 'camera_crew',
         'description' => clienttranslate("Camera crew"),
         'effect_a_flavor' => clienttranslate("Which Pitch has a photographer hanging out on it?"),
-        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any
-                         Pitch - any player climbing that Pitch will need that additional Asset"),
+        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any Pitch - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
         'effect_b' => '',
         'x_y' => [500, 300],
@@ -3391,7 +3352,6 @@ $this->climbing_cards = [
                 'slab' => 0,
             ],
             'symbol_type' => 'pain_tolerance',
-            'symbol_for_log' => 'Pain Tolerance',
         ],
     ],
 
@@ -3419,7 +3379,7 @@ $this->climbing_cards = [
             ],
             'bespoke' => true,
             'types' => ['gear'],
-            'types_message' => clienttranslate("Gear"),
+            'types_message' => clienttranslate("Gear") . ' ',
             'gear_in_hand' => true,
         ],
         'b_args' => [
@@ -3441,8 +3401,7 @@ $this->climbing_cards = [
     '41' => [
         'name' => 'falcon_nest',
         'description' => clienttranslate("Falcon nest"),
-        'effect_a_flavor' => clienttranslate("Which Pitch has a short but difficult detour to avoid the
-                                nesting area?"),
+        'effect_a_flavor' => clienttranslate("Which Pitch has a short but difficult detour to avoid the nesting area?"),
         'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any
                          Pitch - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
@@ -3496,9 +3455,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Find a way around it:"),
         'effect_a' => clienttranslate("Lose 1 Psych and gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Keep climbing near it and hope you don't get stung:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                                       Checkmark: Gain 3 Cards from The Portaledge<br>
-                                       Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [200, 400],
         'height_top_a' => [10.7, 63.5],
         'height_top_b' => [20.6, 77.9],
@@ -3573,8 +3530,8 @@ $this->climbing_cards = [
         'effect_a' => clienttranslate("Lose 1 Psych and gain 1 Skill Card (Face/Crack/Slab)"),
         'effect_b_flavor' => clienttranslate("Wait it out:"),
         'effect_b' => clienttranslate("Give another player 2 Cards and gain 1 Summit Beta Token"),
-        'titlebar_message' => clienttranslate("get 2 of your Asset Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 2 of their Asset Cards"),
+        'titlebar_message' => clienttranslate("must select a climber to get 2 of your Asset Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 2 of his Asset Cards"),
         'x_y' => [400, 400],
         'height_top_a' => [10.6, 68.3],
         'height_top_b' => [15.8, 82.7],
@@ -3722,12 +3679,11 @@ $this->climbing_cards = [
         'name' => 'party_on_the_ledge',
         'description' => clienttranslate("Party on the ledge"),
         'effect_a_flavor' => clienttranslate("Share the bolted anchors with them:"),
-        'effect_a' => clienttranslate("You and another player lose 1 Psych 
-                         and each gain 1 Gear Card"),
+        'effect_a' => clienttranslate("You and another player lose 1 Psych and each gain 1 Gear Card"),
         'effect_b_flavor' => clienttranslate("Build an anchor around the corner:"),
         'effect_b' => clienttranslate("Lose 1 Gear Card and gain 1 Psych"),
-        'titlebar_message' => clienttranslate("share your bolted anchors"),
-        'titlebar_message_opponent' => clienttranslate("share their bolted anchors"),
+        'titlebar_message' => clienttranslate("must select a climber to share your bolted anchors"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to share his bolted anchors"),
         'x_y' => [800, 400],
         'height_top_a' => [15.4, 68.3],
         'height_top_b' => [10.8, 87.6],
@@ -3764,9 +3720,7 @@ $this->climbing_cards = [
         'name' => 'pee_off_the_ledge',
         'description' => clienttranslate("Pee off the ledge"),
         'effect_a_flavor' => clienttranslate("When you gotta go, you gotta go!"),
-        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any
-                         Pitch next to you or below you - any player climbing that Pitch
-                         will need that additional Asset"),
+        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any Pitch next to you or below you - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
         'effect_b' => '',
         'x_y' => [900, 400],
@@ -3781,9 +3735,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Build a gear nest in case you miss:"),
         'effect_a' => clienttranslate("Lose 1 Gear Card and gain 1 Psych"),
         'effect_b_flavor' => clienttranslate("Go for it!"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from the Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from the Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [0, 500],
         'height_top_a' => [10.7, 68.1],
         'height_top_b' => [15.9, 82.7],
@@ -3859,8 +3811,8 @@ $this->climbing_cards = [
                          (Face/Crack/Slab)"),
         'effect_b_flavor' => clienttranslate("Ask your partner to lead it:"),
         'effect_b' => clienttranslate("Give another player 2 Cards and draw 1 Card from The Portaledge"),
-        'titlebar_message' => clienttranslate("get 2 of your Asset Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 2 of their Asset Cards"),
+        'titlebar_message' => clienttranslate("must select a climber to get 2 of your Asset Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 2 of his Asset Cards"),
         'x_y' => [200, 500],
         'height_top_a' => [10.8, 68.2],
         'height_top_b' => [15.5, 83],
@@ -3897,10 +3849,8 @@ $this->climbing_cards = [
     '54' => [
         'name' => 'bring_the_wide_gear',
         'description' => clienttranslate("Bring the wide gear"),
-        'effect_a_flavor' => clienttranslate("Which Pitch has a wide crack that wasn't marked in
-                                the guidebook?"),
-        'effect_a' => clienttranslate("Choose a Pitch and add 1 Gear Token to it - any player
-                         climbing that Pitch will need that additional Asset"),
+        'effect_a_flavor' => clienttranslate("Which Pitch has a wide crack that wasn't marked in the guidebook?"),
+        'effect_a' => clienttranslate("Choose a Pitch and add 1 Gear Token to it - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
         'effect_b' => '',
         'x_y' => [300, 500],
@@ -3913,18 +3863,16 @@ $this->climbing_cards = [
         'name' => 'sun_beats_down',
         'description' => clienttranslate("Sun beats down"),
         'effect_a_flavor' => clienttranslate("Is it hot as heck today?"),
-        'effect_a' => clienttranslate("Every player on a sunny Pitch (light colored tiles) 
-                         loses 1 Water"),
+        'effect_a' => clienttranslate("Every player on a sunny Pitch (light colored tiles) loses 1 Water"),
         'effect_b_flavor' => clienttranslate("Is it chilly as heck today?"),
-        'effect_b' => clienttranslate("Every player on a sunny Pitch (light colored tiles)
-                         gains 1 Psych"),
+        'effect_b' => clienttranslate("Every player on a sunny Pitch (light colored tiles) gains 1 Psych"),
         'x_y' => [400, 500],
         'height_top_a' => [14.8, 63.4],
         'height_top_b' => [16.2, 82.3],
         'a_args' => [
             'cost' => '',
             'benefit' => 'updateWaterPsych',
-            'water' => -1,
+            'water' => 0,
             'psych' => 0,
             'assets' => [
                 'gear' => 0,
@@ -3939,7 +3887,7 @@ $this->climbing_cards = [
             'cost' => '',
             'benefit' => 'updateWaterPsych',
             'water' => 0,
-            'psych' => 1,
+            'psych' => 0,
             'assets' => [
                 'gear' => 0,
                 'face' => 0,
@@ -3991,8 +3939,7 @@ $this->climbing_cards = [
         'name' => 'missed_the_belay',
         'description' => clienttranslate("Missed the belay"),
         'effect_a_flavor' => clienttranslate("Climb to the bolted anchor section:"),
-        'effect_a' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab)
-                         and gain 1 Gear Card"),
+        'effect_a' => clienttranslate("Lose 1 Skill Card (Face/Crack/Slab) and gain 1 Gear Card"),
         'effect_b_flavor' => clienttranslate("Build a sketchy anchor where you are:"),
         'effect_b' => clienttranslate("Lose 1 Gear Card and draw a Card from The Spread"),
         'x_y' => [600, 500],
@@ -4036,9 +3983,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Plug a piece and hang until it slithers away:"),
         'effect_a' => clienttranslate("Lose 1 Gear Card and gain 1 Water"),
         'effect_b_flavor' => clienttranslate("Quickly scurry around it:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [700, 500],
         'height_top_a' => [10.8, 63.4],
         'height_top_b' => [20.8, 78],
@@ -4188,9 +4133,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Sew it up to protect your follower:"),
         'effect_a' => clienttranslate("Lose 1 Gear Card and gain 1 Psych"),
         'effect_b_flavor' => clienttranslate("Run it out and hope they don't fall:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [100, 600],
         'height_top_a' => [10.7, 63.4],
         'height_top_b' => [21, 77.9],
@@ -4225,9 +4168,7 @@ $this->climbing_cards = [
         'name' => 'rockfall',
         'description' => clienttranslate("Rockfall!"),
         'effect_a_flavor' => clienttranslate("A crucial hold broke off!"),
-        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to
-                         any Pitch - any player climbing that Pitch will need
-                         that additional Asset"),
+        'effect_a' => clienttranslate("Add 1 Skill Token (Face/Crack/Slab) to any Pitch - any player climbing that Pitch will need that additional Asset"),
         'effect_b_flavor' => '',
         'effect_b' => '',
         'x_y' => [200, 600],
@@ -4242,9 +4183,7 @@ $this->climbing_cards = [
         'effect_a_flavor' => clienttranslate("Hang for a bit to figure it out:"),
         'effect_a' => clienttranslate("Lose 1 Face Card and gain 1 Water"),
         'effect_b_flavor' => clienttranslate("Launch into the sequence and hope for the best:"),
-        'effect_b' => clienttranslate("Roll the Risk Die<br>
-                         Checkmark: Gain 3 Cards from The Portaledge<br>
-                         Cards or Card and Psych: Give those Assets to another player"),
+        'effect_b' => clienttranslate("Roll the Risk Die<br>Checkmark: Gain 3 Cards from The Portaledge<br>Cards or Card and Psych: Give those Assets to another player"),
         'x_y' => [300, 600],
         'height_top_a' => [10.7, 63.4],
         'height_top_b' => [21, 77.8],
@@ -4283,8 +4222,8 @@ $this->climbing_cards = [
         'effect_b_flavor' => clienttranslate("Ignore it and keep climbing:"),
         'effect_b' => clienttranslate("Lose 1 Psych and gain 1 Skill Card 
                          (Face/Crack/Slab)"),
-        'titlebar_message' => clienttranslate("get 1 of your Asset Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 1 of their Asset Cards"),
+        'titlebar_message' => clienttranslate("must select a climber to get 1 of your Asset Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 1 of his Asset Cards"),
         'x_y' => [400, 600],
         'height_top_a' => [15.7, 63.3],
         'height_top_b' => [16.1, 82.7],
@@ -4401,8 +4340,8 @@ $this->climbing_cards = [
         'effect_a' => clienttranslate("Give another player 2 Cards and draw 2 Cards from The Portaledge"),
         'effect_b_flavor' => clienttranslate("Warm up on a sunny ledge:"),
         'effect_b' => clienttranslate("Every player on a sunny Pitch gains 1 Psych"),
-        'titlebar_message' => clienttranslate("get 2 of your Asset Cards"),
-        'titlebar_message_opponent' => clienttranslate("get 2 of their Asset Cards"),
+        'titlebar_message' => clienttranslate("must select a climber to get 2 of your Asset Cards"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to get 2 of his Asset Cards"),
         'x_y' => [700, 600],
         'height_top_a' => [15.5, 68.2],
         'height_top_b' => [11.5, 87.5],
@@ -4424,7 +4363,7 @@ $this->climbing_cards = [
             'cost' => '',
             'benefit' => 'updateWaterPsych',
             'water' => 0,
-            'psych' => 1,
+            'psych' => 0,
             'assets' => [
                 'gear' => 0,
                 'face' => 0,
@@ -4443,8 +4382,8 @@ $this->climbing_cards = [
         'effect_a' => clienttranslate("Choose another player to gain 1 Summit Beta Token"),
         'effect_b_flavor' => clienttranslate("Accept your phone's fate and keep climbing:"),
         'effect_b' => clienttranslate("Lose 1 Psych and gain 1 Card from The Portaledge"),
-        'titlebar_message' => clienttranslate("retrieve your phone"),
-        'titlebar_message_opponent' => clienttranslate("retrieve their phone"),
+        'titlebar_message' => clienttranslate("must select a climber to retrieve your phone"),
+        'titlebar_message_opponent' => clienttranslate("must select a climber to retrieve his phone"),
         'x_y' => [800, 600],
         'height_top_a' => [15.5, 63.5],
         'height_top_b' => [16.3, 82.7],
@@ -4520,7 +4459,7 @@ $this->personal_objectives = [
         'name' => 'rocky_mountains_tour',
         'description' => clienttranslate("Rocky Mountains Tour"),
         'text' => clienttranslate('Climb 3 Pitches in and around the Rocky Mountains'),
-        'mark' => clienttranslate('Marked with a white triangle'),
+        'mark' => clienttranslate('Marked with a full white triangle'),
         'log_tt_tops' => [
             'title' => '1.8%',
             'title_hr' => '6%',
@@ -4541,8 +4480,6 @@ $this->personal_objectives = [
         'pitch_names' => ["Black Elk", "Red Rider", "Rebuffat's Arete", "Edge of Time", "Irene's Arete",
                           "Bulldog Arete", "Black Snake", "Bishop Jaggers"],
         'pitch_ids' => ['28', '32', '4', '8', '16', '31', '19', '14'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 25,
         'x_y' => [0, 0],
     ],
 
@@ -4571,8 +4508,6 @@ $this->personal_objectives = [
         'pitch_names' => ["Bird Cage", "Black Elk", "Lonesome Dove", "Bulldog Arete",
                           "Black Snake", "Bee Sting Corner", "Dinkus Dog"],
         'pitch_ids' => ['13', '28', '34', '31', '19', '18', '1'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 24.9,
         'x_y' => [100, 0],
     ],
 
@@ -4580,7 +4515,7 @@ $this->personal_objectives = [
         'name' => 'call_it_like_you_see_it',
         'description' => clienttranslate("Call it Like You See it"),
         'text' => clienttranslate('Climb 3 Pitches with the type of route in its name'),
-        'mark' => clienttranslate('Marked with a white diamond'),
+        'mark' => clienttranslate('Marked with a full white diamond'),
         'log_tt_tops' => [
             'title' => '1.8%',
             'title_hr' => '6%',
@@ -4602,8 +4537,6 @@ $this->personal_objectives = [
                       'bee_sting_corner', 'teflon_corner'],
         'pitch_names' => ["Roof", "Arete", "Slab", "Crack", "Flake", "Corner"],
         'pitch_ids' => ['2', '7', '24', '4', '16', '31', '9', '38', '5', '20', '12', '3', '18', '41'],
-        'starting_check_top' => 37,
-        'opponent_view_check_top' => 31.2,
         'x_y' => [200, 0],
     ],
 
@@ -4634,8 +4567,6 @@ $this->personal_objectives = [
                           "Edge of Time", "Flight of the Gumby", "Lonesome Dove", "Bulldog Arete",
                           "No Place Like Home", "Red Rider"],
         'pitch_ids' => ['29', '25', '38', '8', '17', '34', '31', '40', '32'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 25.2,
         'x_y' => [300, 0],
     ],
 
@@ -4664,8 +4595,6 @@ $this->personal_objectives = [
         'pitch_names' => ["Black Elk", "Desert Gold", "Red Rider", "Scarlet Begonias",
                           "Black Snake", "Screaming Yellow Zonkers"],
         'pitch_ids' => ['28', '39', '32', '42', '19', '25'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 25.2,
         'x_y' => [400, 0],
     ],
 
@@ -4673,7 +4602,7 @@ $this->personal_objectives = [
         'name' => 'southern_rock',
         'description' => clienttranslate("Southern Rock"),
         'text' => clienttranslate('Climb 3 Pitches located in Southeastern states'),
-        'mark' => clienttranslate('Marked with a white circle'),
+        'mark' => clienttranslate('Marked with a full white circle'),
         'log_tt_tops' => [
             'title' => '1.8%',
             'title_hr' => '6%',
@@ -4694,8 +4623,6 @@ $this->personal_objectives = [
         'pitch_names' => ["Tierrany", "Flight of the Gumby", "No Place Like Home", "Bee Sting Corner",
                           "Dinkus Dog", "Closer to the Heart"],
         'pitch_ids' => ['29', '17', '40', '18', '1', '15'],
-        'starting_check_top' => 26.3,
-        'opponent_view_check_top' => 20.5,
         'x_y' => [500, 0],
     ],
 
@@ -4725,8 +4652,6 @@ $this->personal_objectives = [
         'pitch_names' => ["Fiddler on the Roof", "Desert Gold", "Half-a-Finger", "Rebuffat's Arete",
                           "Flight of the Gumby", "Bulldog Arete", "No Place Like Home", "Black Snake"],
         'pitch_ids' => ['7', '39', '6', '4', '17', '31', '40', '19'],
-        'starting_check_top' => 26.3,
-        'opponent_view_check_top' => 20.4,
         'x_y' => [0, 100],
     ],
 
@@ -4757,8 +4682,6 @@ $this->personal_objectives = [
                           "Abracadaver", "Belly Full of Bad Berries", "Tooth or Consequences",
                           "Old Man", "Leap Year Flake", "Flakes of Wrath", "Scarlet Begonias"],
         'pitch_ids' => ['7', '39', '23', '22', '30', '43', '33', '10', '5', '20', '42'],
-        'starting_check_top' => 26.3,
-        'opponent_view_check_top' => 20.3,
         'x_y' => [100, 100],
     ],
 
@@ -4789,8 +4712,6 @@ $this->personal_objectives = [
                           "Rebuffat's Arete", "Irene's Arete", "Corrugation Corner",
                           "Teflon Corner", "Chapel Pond Slab", "Bishop Jaggers"],
         'pitch_ids' => ['2', '13', '24', '11', '4', '16', '3', '41', '9', '14'],
-        'starting_check_top' => 26.3,
-        'opponent_view_check_top' => 20.3,
         'x_y' => [200, 100],
     ],
 
@@ -4798,7 +4719,7 @@ $this->personal_objectives = [
         'name' => 'social_butterfly',
         'description' => clienttranslate("Social Butterfly"),
         'text' => clienttranslate('Climb 3 Pitches with a person in its name'),
-        'mark' => clienttranslate('Marked with a white square'),
+        'mark' => clienttranslate('Marked with a full white square'),
         'log_tt_tops' => [
             'title' => '1.8%',
             'title_hr' => '6%',
@@ -4813,14 +4734,12 @@ $this->personal_objectives = [
             'text' => '',
             'mark' => ' padding-right: 4%;',
         ],
-        'score' => 3,
+        'score' => 5,
         'pitches' => ['rogers_roof', 'bonnies_roof', 'rebuffats_arete', 'irenes_arete', 
                       'dr_rubos_wild_ride', 'the_don_juan_wall', 'bishop_jaggers'],
         'pitch_names' => ["Roger's Roof", "Bonnie's Roof", "Rebuffat's Arete", "Irene's Arete",
                           "Dr. Rubo's Wild Ride", "The Don Juan Wall", "Bishop Jaggers"],
         'pitch_ids' => ['2', '24', '4', '16', '22', '26', '14'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 25,
         'x_y' => [300, 100],
     ],
 
@@ -4851,8 +4770,6 @@ $this->personal_objectives = [
                           "Fickle Finger of Fate", "Heart of the Country", "Closer to the Heart",
                           "Tooth or Consequences"],
         'pitch_ids' => ['6', '23', '27', '43', '21', '35', '15', '33'],
-        'starting_check_top' => 31,
-        'opponent_view_check_top' => 25,
         'x_y' => [400, 100],
     ],
 
@@ -4881,13 +4798,15 @@ $this->personal_objectives = [
         'pitch_names' => ["Leap Year Flake", "Scarlet Begonias", "Irene's Arete", "Flight of the Gumby",
                           "Black Snake", "Psychic Turbulence", "Teflon Corner"],
         'pitch_ids' => ['5', '42', '16', '17', '19', '37', '41'],
-        'starting_check_top' => 26.3,
-        'opponent_view_check_top' => 20.4,
         'x_y' => [500, 100],
     ],
 ];
 
 $this->characters = [
+    '0' => [
+        'name' => 'zombie',
+    ],
+    
     '1' => [
         'name' => 'rope_gun',
         'description' => clienttranslate("Rope Gun"),
@@ -4895,8 +4814,7 @@ $this->characters = [
         'ability' => clienttranslate('You may use 1 less Water on each Pitch you climb.'),
         'water_psych' => 4,
         'home_crag' => clienttranslate('Red Rock'), //bolded
-        'native_lands' => clienttranslate('Newe (Western Shoshone), Nuwuvi (Southern Paiute), and 
-                          Nüwüwü (Chemeheuvi) Ancestral Land'), //italicized
+        'native_lands' => clienttranslate('Newe (Western Shoshone), Nuwuvi (Southern Paiute), and Nüwüwü (Chemeheuvi) Ancestral Land'), //italicized
         'x_y' => [0, 300],
         'ab_x_y' => [200, 100],
         'mx_y' => [200, 0],
@@ -4904,8 +4822,6 @@ $this->characters = [
             'board' => [0, 0],
             'panel' => [100, 0],
         ],
-        /*'nb_x_y' => [0, 41.27],*/
-        'nb_x_y' => [0, 300],
         'color' => '1d7dad',
         'color_name' => 'blue',
         'permanent_asset_slots' => 5,
@@ -4915,8 +4831,7 @@ $this->characters = [
         'name' => 'free_soloist',
         'description' => clienttranslate("Free Soloist"),
         'flavor' => clienttranslate('You don\'t climb with gear'),
-        'ability' => clienttranslate('for each Gear Card that is required for a Pitch, substitute with any
-                     Skill Card. Gain 1 extra Asset every time you rest.'),
+        'ability' => clienttranslate('for each Gear Card that is required for a Pitch, substitute with any Skill Card. Gain 1 extra Asset every time you rest.'),
         'water_psych' => 6,
         'home_crag' => clienttranslate('Yosemite'),
         'native_lands' => clienttranslate('Me-Wuk, Numu (Northern Paiute), and Western Mono/Monache Ancestral Land'),
@@ -4927,8 +4842,6 @@ $this->characters = [
             'board' => [0, 0],
             'panel' => [100, 0],
         ],
-        /*'nb_x_y' => [14.26, 41.27],*/
-        'nb_x_y' => [0, 100],
         'color' => '1d7dad',
         'color_name' => 'blue',
         'permanent_asset_slots' => 6,
@@ -4938,12 +4851,10 @@ $this->characters = [
         'name' => 'the_dirtbag',
         'description' => clienttranslate("The Dirtbag"),
         'flavor' => clienttranslate('You\'ve picked up a lot of booty gear'),
-        'ability' => clienttranslate('on each Pitch, you may substitute 1 Gear Card for 1 of the
-                     other required Assets'),
+        'ability' => clienttranslate('on each Pitch, you may substitute 1 Gear Card for 1 of the other required Assets'),
         'water_psych' => 4,
         'home_crag' => clienttranslate('Joshua Tree'),
-        'native_lands' => clienttranslate('Cahuilla, Newe (Western Shoshone), and Yuhaviatam/Maarenga\'yam
-                          (Serrano) Ancestral Land'),
+        'native_lands' => clienttranslate('Cahuilla, Newe (Western Shoshone), and Yuhaviatam/Maarenga\'yam (Serrano) Ancestral Land'),
         'x_y' => [200, 300],
         'ab_x_y' => [0, 100],
         'mx_y' => [400, 0],
@@ -4951,8 +4862,6 @@ $this->characters = [
             'board' => [0, 100],
             'panel' => [200, 100],
         ],
-        /*'nb_x_y' => [28.57, 41.21],*/
-        'nb_x_y' => [200, 200],
         'color' => 'be3d27',
         'color_name' => 'red',
         'permanent_asset_slots' => 6,
@@ -4973,8 +4882,6 @@ $this->characters = [
             'board' => [0, 100],
             'panel' => [200, 100],
         ],
-        /*'nb_x_y' => [42.84, 41.21],*/
-        'nb_x_y' => [100, 300],
         'color' => 'be3d27',
         'color_name' => 'red',
         'permanent_asset_slots' => 6,
@@ -4995,8 +4902,6 @@ $this->characters = [
             'board' => [0, 200],
             'panel' => [0, 0],
         ],
-        /*'nb_x_y' => [57.15, 41.22],*/
-        'nb_x_y' => [100, 100],
         'color' => 'd6a228',
         'color_name' => 'yellow',
         'permanent_asset_slots' => 6,
@@ -5006,8 +4911,7 @@ $this->characters = [
         'name' => 'young_prodigy',
         'description' => clienttranslate("Young Prodigy"),
         'flavor' => clienttranslate('You pick up new skills quickly but are still getting used to placing gear'),
-        'ability' => clienttranslate('you need only 3 Cards to earn a Permanent Skill Token, but 5 Cards to
-                     earn a Permanent Gear Token.'),
+        'ability' => clienttranslate('you need only 3 Cards to earn a Permanent Skill Token, but 5 Cards to earn a Permanent Gear Token'),
         'water_psych' => 4,
         'home_crag' => clienttranslate('Local climbing gym'),
         'native_lands' => '',
@@ -5018,8 +4922,6 @@ $this->characters = [
             'board' => [0, 200],
             'panel' => [0, 0],
         ],
-        /*'nb_x_y' => [71.42, 41.22],*/
-        'nb_x_y' => [200, 300],
         'color' => 'd6a228',
         'color_name' => 'yellow',
         'permanent_asset_slots' => 4,
@@ -5041,8 +4943,6 @@ $this->characters = [
             'board' => [0, 500],
             'panel' => [200, 0],
         ],
-        /*'nb_x_y' => [85.74, 41.22],*/
-        'nb_x_y' => [200, 0],
         'color' => '4d5760',
         'color_name' => 'black',
         'permanent_asset_slots' => 6,
@@ -5053,8 +4953,7 @@ $this->characters = [
         'name' => 'phil',
         'description' => clienttranslate("Phil"),
         'flavor' => clienttranslate('You love to push yourself'),
-        'ability' => clienttranslate('you must roll the Risk Die on every Pitch you climb. Start with 
-                     2 Summit Beta Tokens, and gain 1 extra Asset every time you rest.'),
+        'ability' => clienttranslate('you must roll the Risk Die on every Pitch you climb. Start with 2 Summit Beta Tokens, and gain 1 extra Asset every time you rest.'),
         'water_psych' => 7,
         'home_crag' => clienttranslate('El Dorado Canyon'),
         'native_lands' => clienttranslate('Arapaho, Cheyenne, and Ute Ancestral Land'),
@@ -5065,8 +4964,6 @@ $this->characters = [
             'board' => [0, 500],
             'panel' => [200, 0],
         ],
-        /*'nb_x_y' => [100, 41.22],*/
-        'nb_x_y' => [200, 100],
         'color' => '4d5760',
         'color_name' => 'black',
         'permanent_asset_slots' => 6,
@@ -5087,8 +4984,6 @@ $this->characters = [
             'board' => [0, 300],
             'panel' => [0, 100],
         ],
-        /*'nb_x_y' => [0, 20.5],*/
-        'nb_x_y' => [0, 0],
         'color' => '517f3e',
         'color_name' => 'green',
         'permanent_asset_slots' => 6,
@@ -5098,12 +4993,10 @@ $this->characters = [
         'name' => 'cool-headed_crimper',
         'description' => clienttranslate("Cool-Headed Crimper"),
         'flavor' => clienttranslate('You stay cool under pressure, no matter what comes your way.'),
-        'ability' => clienttranslate('After climbing each Pitch, draw 2 Climbing Cards and choose 1
-                     to resolve. Discard the other.'),
+        'ability' => clienttranslate('After climbing each Pitch, draw 2 Climbing Cards and choose 1 to resolve. Discard the other.'),
         'water_psych' => 6,
         'home_crag' => clienttranslate('Sedona'),
-        'native_lands' => clienttranslate('Hohokam, Hopitutskwa, Ndee/Nnēē: (Western Apache), Pueblos,
-                          and Yavapaiv Apache Ancestral Land'),
+        'native_lands' => clienttranslate('Hohokam, Hopitutskwa, Ndee/Nnēē: (Western Apache), Pueblos, and Yavapaiv Apache Ancestral Land'),
         'x_y' => [100, 400],
         'ab_x_y' => [300, 200],
         'mx_y' => [0, 0],
@@ -5111,8 +5004,6 @@ $this->characters = [
             'board' => [0, 300],
             'panel' => [0, 100],
         ],
-        /*'nb_x_y' => [14.26, 20.5],*/
-        'nb_x_y' => [100, 200],
         'color' => '517f3e',
         'color_name' => 'green',
         'permanent_asset_slots' => 6,
@@ -5133,8 +5024,6 @@ $this->characters = [
             'board' => [0, 400],
             'panel' => [100, 100],
         ],
-        /*'nb_x_y' => [28.57, 20.55],*/
-        'nb_x_y' => [100, 0],
         'color' => '7c2b87',
         'color_name' => 'purple',
         'permanent_asset_slots' => 4,
@@ -5144,7 +5033,7 @@ $this->characters = [
         'name' => 'buff_boulderer',
         'description' => clienttranslate("Buff Boulderer"),
         'flavor' => clienttranslate('You have no problem with difficult moves'),
-        'ability' => clienttranslate('use 1 fewer Asset to climb any 4 Point Pitch, and use 2 fewer Assets to climb any 5 Point Pitch.'),
+        'ability' => clienttranslate('use 1 fewer Asset to climb any 4 Point Pitch, and use 2 fewer Assets to climb any 5 Point Pitch'),
         'water_psych' => 6,
         'home_crag' => clienttranslate('Bishop'),
         'native_lands' => clienttranslate('Eastern Mono/Monache, Newe (Western Shoshone), and Numu (Northern Paiute) Ancestral Land'),
@@ -5155,8 +5044,6 @@ $this->characters = [
             'board' => [0, 400],
             'panel' => [100, 100],
         ],
-        /*'nb_x_y' => [42.84, 20.55],*/
-        'nb_x_y' => [0, 200],
         'color' => '7c2b87',
         'color_name' => 'purple',
         'permanent_asset_slots' => 6,

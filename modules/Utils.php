@@ -1,5 +1,28 @@
 <?php
 
+// global constants
+
+    // translated terms
+    define('COMMON_TRANSLATIONS', [
+        'GEAR' => clienttranslate('Gear'),
+        'FACE' => clienttranslate('Face'),
+        'CRACK' => clienttranslate('Crack'),
+        'SLAB' => clienttranslate('Slab'),
+        'PRECISION' => clienttranslate('Precision'),
+        'BALANCE' => clienttranslate('Balance'),
+        'PAIN_TOLERANCE' => clienttranslate('Pain Tolerance'),
+        'POWER' => clienttranslate('Power'),
+        'SUNNY' => clienttranslate('Sunny'),
+        'SHADED' => clienttranslate('Shaded'),
+        'ARETE' => clienttranslate('Arete'),
+        'CORNER' => clienttranslate('Corner'),
+        'SLAB' => clienttranslate('Slab'),
+        'FLAKE' => clienttranslate('Flake'),
+        'ROOF' => clienttranslate('Roof'),
+        'CRACK' => clienttranslate('Crack'),
+        'WILD' => clienttranslate('Wild'),
+    ]);
+
 trait UtilTrait {
 
     //////////////////////////////////////////////////////////////////////////////
@@ -204,8 +227,7 @@ trait UtilTrait {
 
     function adjacentInArray($arr, $val1, $val2) {
 
-        for ($i=0; $i<count($arr); $i++) {
-
+        for ($i=0; $i<count($arr)-1; $i++) {
             if (($arr[$i] === $val1 && $arr[$i+1] === $val2) || ($arr[$i] === $val2 && $arr[$i+1] === $val1)) {
                 return true;
             }
@@ -225,6 +247,22 @@ trait UtilTrait {
     function getHandAssets($player_id) {
         $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset' AND card_location='$player_id'";
         return self::getCollectionFromDb($sql, true);
+    }
+
+    function nextRound() {
+        $draw_step = $this->getGlobalVariable('draw_step');
+        $this->setGlobalVariable('draw_step', 10);
+        $this->setGlobalVariable('x_cards', 3);
+        $this->setGlobalVariable('finished_drawing', []);
+        $this->incStat(1, "rounds");
+        if ($draw_step < 10) {
+            $this->setGlobalVariable('round', 1);
+            $this->setGlobalVariable('phase', clienttranslate('Climb'));
+            $this->gamestate->nextState('climbOrRest');
+        }
+        else if ($draw_step >= 10) {
+            $this->gamestate->nextState('nextRound');
+        }
     }
 
     function getBoardAssets($player_id) {
@@ -275,9 +313,140 @@ trait UtilTrait {
         $this->setGlobalVariable('board_assets', $board_assets);
     }
 
+    function findLowestEmptySlot($board) {
+        for ($i=1; $i<=4; $i++) {
+            if (empty($board[$i])) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
+    function hasFaceDown($board) {
+        for($i=1; $i<=4; $i++) {
+            if (!empty($board[$i]) && $board['flipped'][$i] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    function findHighestFaceDownSlot($board) {
+        for ($i=4; $i>=1; $i--) {
+            if (!empty($board[$i]) && $board['flipped'][$i] === true) {
+                return $i;
+            }
+        }
+        return null;
+    }
+
+    function hasFaceUpGap($board) {
+        $lowest_face_down_slot = null;
+        
+        // 1. Find the lowest slot occupied by a face-down card (flipped === true).
+        for ($i = 1; $i <= 4; $i++) {
+            if (!empty($board[$i]) && $board['flipped'][$i] === true) {
+                $lowest_face_down_slot = $i;
+                break;
+            }
+        }
+        
+        // If no face-down cards exist, the board is all face-up (handled by the main logic).
+        if ($lowest_face_down_slot === null) {
+            return false;
+        }
+        
+        // 2. Check for empty slots (gaps) between the lowest face-down card and Slot 4.
+        // Face-up cards should be packed from lowest_face_down_slot + 1 up to 4.
+        for ($i = $lowest_face_down_slot + 1; $i <= 4; $i++) {
+            if (empty($board[$i])) {
+                // Found a gap. Now check if a face-up card exists *above* the gap.
+                for ($j = $i + 1; $j <= 4; $j++) {
+                    if (!empty($board[$j]) && $board['flipped'][$j] === false) {
+                        return true; // Gap found between face-up cards that needs to be filled.
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    function shiftFaceUpCardsUp($player_id, $type, $board) {
+        $shifted = false;
+        
+        // This process needs to iterate until no more shifts are necessary (Bubble sort approach).
+        do {
+            $shifted = false;
+            for ($i = 1; $i <= 3; $i++) {
+                // Check for a gap at $i, with a face-up card immediately above it.
+                if (empty($board[$i])) {
+                    // Look for the next face-up card to shift down into the gap.
+                    for ($j = $i + 1; $j <= 4; $j++) {
+                        if (!empty($board[$j]) && $board['flipped'][$j] === false) {
+                            // Found a face-up card ($j) to shift down into the empty slot ($i).
+                            $board[$i] = $board[$j];
+                            $board['flipped'][$i] = $board['flipped'][$j];
+                            
+                            // Clear the old slot ($j).
+                            unset($board[$j]);
+                            $board['flipped'][$j] = null;
+                            
+                            $shifted = true;
+                            break; // Break inner loop to restart check from $i=1.
+                        }
+                    }
+                }
+            }
+        } while ($shifted);
+
+        // After filling gaps, update the board_assets global variable if necessary,
+        // though the caller will handle the full set if $board_assets is passed by value.
+        // For simplicity, we return the cleaned $board array.
+        return $board;
+    }
+
     function getHandSummitBetaTokens($player_id) {
-        $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='summit_beta' AND card_location='$player_id'";
-        return self::getCollectionFromDb($sql, true);
+        $player_token_tracker = $this->getGlobalVariable('hand_token_tracker', true)[$player_id];
+        $token_identifier = $this->getGlobalVariable('token_identifier', true);
+        $hand_sb_tokens = [];
+        foreach (array_values($player_token_tracker) as $id) {
+            $type_arg = $token_identifier[$id];
+            $hand_sb_tokens[$id] = $type_arg;
+        }
+        return $hand_sb_tokens;
+    }
+
+    function addHandSummitBeta(array $player_token_tracker, $token_id): array {
+        // If the array is empty, start at 1
+        if (empty($player_token_tracker)) {
+            $nextKey = 1;
+        } else {
+            // Find the highest existing key and add 1
+            $nextKey = max(array_keys($player_token_tracker)) + 1;
+        }
+
+        $player_token_tracker[$nextKey] = $token_id;
+        return $player_token_tracker;
+    }
+
+    function removeHandSummitBeta(array $player_token_tracker, $token_id): array {
+        // Find the key associated with the value
+        $key = array_search($token_id, $player_token_tracker);
+
+        // Only proceed if the value was actually found
+        if ($key !== false) {
+            unset($player_token_tracker[$key]);
+        }
+
+        $reindexed = array_values($player_token_tracker);
+        
+        // Handle the edge case of an empty array to avoid range() errors
+        if (empty($reindexed)) {
+            return [];
+        }
+
+        return array_combine(range(1, count($reindexed)), $reindexed);
     }
 
     function getAssetType($type_arg) {
@@ -330,7 +499,9 @@ trait UtilTrait {
                     else if ($to_board) {
                         $techniques = $resource_tracker[$player_id]['asset_board']['techniques'];
                         $resource_tracker[$player_id]['asset_board']['skills'][$type]++;
-                        if ($technique) { $resource_tracker[$player_id]['asset_board']['techniques'][$technique]++; }
+                        if ($technique && !in_array($asset, $flipped_and_tucked_type_args)) {
+                            $resource_tracker[$player_id]['asset_board']['techniques'][$technique]++;
+                        }
                     }
                 }
 
@@ -406,6 +577,16 @@ trait UtilTrait {
         $this->setGlobalVariable('water_psych_tracker', $water_psych_tracker);
     }
 
+    function deckAutoReshuffle() {
+        $this->setGlobalVariable('deck_reshuffle', true);
+    }
+
+    function summitBetaReshuffle() {
+        $this->cards_and_tokens->moveAllCardsInLocation('summit_beta_discard', 'summit_beta_supply');
+        $this->cards_and_tokens->shuffle('summit_beta_supply');
+        $this->setGlobalVariable('summit_beta_reshuffle', true);
+    }
+
     function drawFromPortaledge($player_id, $type, $card_idx, $remaining_cards) {
 
         $deck = 'porta' . $type;
@@ -451,6 +632,17 @@ trait UtilTrait {
             $refill_portaledge = $this->getGlobalVariable('refill_portaledge', true);
             $refill_portaledge[$deck] = [$discard_num, $card_idx];
             $this->setGlobalVariable('refill_portaledge', $refill_portaledge);
+            $discard_top_id = $this->cards_and_tokens->getCardOnTop('discard')['id'] ?? null;
+            $discard_refill_ids = array_column($discard_to_ledge, 'card_id');
+            if (in_array($discard_top_id, $discard_refill_ids)) {
+                $asset_discard = $this->getGlobalVariable('asset_discard', true);
+                foreach ($asset_discard as $id => $type_arg) {
+                    if (!in_array($id, $discard_refill_ids)) {
+                        $this->cards_and_tokens->playCard($id);
+                        break;
+                    }
+                }
+            }
 
             for ($i=0; $i<=6; $i++) {
                 $id = $type_to_ledge[$i]['card_id'];
@@ -491,10 +683,12 @@ trait UtilTrait {
 
     function getCurrentPitch($player_id) {
 
-        $pitch_tracker = $this->getGlobalVariable('pitch_tracker', true)[$player_id];
-        $current_hex = end($pitch_tracker);
+        $pitch_sets = $this->getGlobalVariable('pitch_sets', true);
+        $player_sets = $pitch_sets[$player_id];
+        if (empty($player_sets)) { return '0'; }
+        $current_hex = end($player_sets)[1];
         $pitch_identifier = $this->getGlobalVariable('pitch_identifier', true);
-        $current_pitch = $current_hex != '0' ? $pitch_identifier[$current_hex] : null;
+        $current_pitch = $current_hex !== '0' ? $pitch_identifier[$current_hex] : null;
 
         return $current_pitch;
     }
@@ -535,7 +729,11 @@ trait UtilTrait {
                     $current_pitch = $this->getCurrentPitch($player_id);
                     if ($current_pitch) {
                         $pitch_info = $this->pitches[$current_pitch];
-                        if ($pitch_info['shade'] === 0 || $pitch_info['shade'] === 2) { $sunny_players[] = $player_id; }
+                        if ($pitch_info['shade'] === 0) { $sunny_players[] = $player_id; }
+                        else if ($current_pitch === '36') {
+                            $trifecta_routes = $this->getGlobalVariable('trifecta_routes', true);
+                            if ($trifecta_routes[$player_id]['exposure'] === 'sunny') { $sunny_players[] = $player_id; }
+                        }
                     }
                 }
 
@@ -551,9 +749,13 @@ trait UtilTrait {
                             unset($sunny_players[$player_idx]);
                             $sunny_players = array_values($sunny_players);
 
+                            $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
                             $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                             $jesus_piece_id = array_search('10', $hand_sb_tokens);
                             $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                            $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                            $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                            $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                             $this->incStat(1, "played_summit_beta_tokens", $player_id);
                         }
 
@@ -562,6 +764,7 @@ trait UtilTrait {
                 }
 
                 else if ($card_type_arg == '68' || $choice == 'b') {
+
                     foreach ($sunny_players as $player_id) { 
                         $this->updateResourceTracker($player_id, 'add', null, 1);
                     }
@@ -569,42 +772,56 @@ trait UtilTrait {
 
                 $sunny_players_resources[$player_id] = $this->getGlobalVariable('water_psych_tracker', true)[$player_id];
 
-                $log_message = '';
+                $log_message = [
+                    'log' => '',
+                    'args' => []
+                ];
                 foreach ($sunny_players as $player_id) {
                     $player_name = $players[$player_id]['name'];
-                    $log_message .= $player_name . ', ';
+                    $log_message['log'] .= $player_name . ', ';
                 }
-                $log_message = substr($log_message, 0, -2);
-                if (count($sunny_players) < 3) { $log_message = str_replace(',', '', $log_message); }
-                $last_space = strrpos($log_message, " ");
-                if (count($sunny_players) > 1) { $log_message = substr_replace($log_message, " and ", $last_space, 0); }
+                $log_message['log'] = substr($log_message['log'], 0, -2);
+                if (count($sunny_players) < 3) { $log_message['log'] = str_replace(',', '', $log_message['log']); }
+                $last_space = strrpos($log_message['log'], " ");
+                if (count($sunny_players) > 1) { $log_message['log'] = substr_replace($log_message['log'], ' ' . clienttranslate('and') . ' ', $last_space, 0); }
 
                 if ($card_type_arg == '55' && $choice == 'a') {
-                    $log_message .= count($sunny_players) > 1 ? ' are on a sunny Pitch and lose 1 Water' : ' is on a sunny Pitch and loses 1 Water';
-                    $water_or_psych = 'water';
+                    $log_message['log'] .= count($sunny_players) > 1 
+                        ? ' ' . clienttranslate('are on a sunny Pitch and lose 1 Water')
+                        : ' ' . clienttranslate('is on a sunny Pitch and loses 1 Water');
+                    $water_or_psych = clienttranslate('Water');
                 }
 
                 else if ($card_type_arg == '68' || $choice == 'b') {
-                    $log_message .= count($sunny_players) > 1 ? ' are on a sunny Pitch and gain 1 Psych' : ' is on a sunny Pitch and gains 1 Psych';
-                    $water_or_psych = 'psych';
+                    $log_message['log'] .= count($sunny_players) > 1
+                    ? ' ' . clienttranslate('are on a sunny Pitch and gain 1 Psych')
+                    : ' ' . clienttranslate('is on a sunny Pitch and gains 1 Psych');
+                    $water_or_psych = clienttranslate('Psych');
                 }
                 
-                if (count($sunny_players) === 0) { $log_message = 'No players are on a sunny Pitch'; }
-                self::notifyAllPlayers("sunnyPitch", clienttranslate($log_message), array(
+                if (count($sunny_players) === 0) { $log_message['log'] = clienttranslate('No players are on a sunny Pitch'); }
+                self::notifyAllPlayers("sunnyPitch", '${log_message}', array(
                     'log_message' => $log_message,
                     'sunny_players' => $sunny_players,
                     'sunny_players_resources' => $sunny_players_resources,
-                    'water_or_psych' => $water_or_psych,
+                    'water_or_psych' => strtolower($water_or_psych),
+                    'i18n' => ['log_message'],
                 ));
                 break;
         }
         $this->setGlobalVariable('climbing_card_info', array());
     }
 
-    function sortAssetBoardByFlipped(array $type): array
+    function sortAssetBoardByFlipped(string $player_id, array $type): array
     {
         $cards = [];
-        for ($i = 1; $i <= 4; $i++) {
+        $character_type_arg = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
+        $slot_count = 4;
+        if ($character_type_arg === '6') { // Young Prodigy
+            if ($type === 'gear') { $slot_count = 5; }
+            else { $slot_count = 3; }
+        }
+        for ($i = 1; $i <= $slot_count; $i++) {
             $key = (string) $i;
             if (isset($type[$key])) {
                 $cards[$key] = $type[$key];
@@ -612,7 +829,7 @@ trait UtilTrait {
         }
 
         $flippedStatus = [];
-        for ($i = 1; $i <= 4; $i++) {
+        for ($i = 1; $i <= $slot_count; $i++) {
             $key = (string) $i;
             $flippedStatus[$key] = isset($type['flipped'][$key]) ? (bool) $type['flipped'][$key] : false;
         }
@@ -636,11 +853,11 @@ trait UtilTrait {
 
         $finalSortedCards = [];
         $finalSortedFlipped = [];
-        $newKeys = ['1', '2', '3', '4'];
+        $newKeys = array_map('strval', range(1, $slot_count));
         $index = 0;
 
         foreach ($sortedCards as $key => $card) {
-            if ($index < 4) {
+            if ($index < $slot_count) {
                 $finalSortedCards[$newKeys[$index]] = $card;
                 $finalSortedFlipped[$newKeys[$index]] = $sortedFlipped[$key];
                 $index++;
@@ -655,6 +872,59 @@ trait UtilTrait {
 
         return $final;
     }
+
+    function formatLogList(array $logs) {
+        $num_items = count($logs);
+        if ($num_items === 0) {
+            return '';
+        } elseif ($num_items === 1) {
+            return $logs[0];
+        } elseif ($num_items === 2) {
+            return $logs[0] . ' ' . clienttranslate('and') . ' ' . $logs[1];
+        } else {
+            $last_item = array_pop($logs);
+            return implode(', ', $logs) . ', ' . clienttranslate('and') . ' ' . $last_item;
+        }
+    }
+
+    function buildLogAction($log_string, $args = []) {
+        return [
+            'log' => $log_string,
+            'args' => $args
+        ];
+    }
+
+    function formatLogTitles(array $titles) {
+        $logs = [];
+        $args = [];
+        $i = 0;
+        if (array_is_list($titles)) {
+            foreach($titles as $title) {
+                $logs[] = '${title' . $i . '}';
+                $args['title' . $i] = $title;
+                $args['i18n'][] = 'title' . $i;
+                $i++;
+            }
+        } else {
+            foreach($titles as $type => $amount) {
+                $logs[] = '${amount' . $i . '} ${type' . $i . '}';
+                $args['amount' . $i] = $amount;
+                $args['type' . $i] = COMMON_TRANSLATIONS[strtoupper($type)];
+                $args['i18n'][] = 'type' . $i;
+                $i++;
+            }
+        }
+        $final_titles_string = $this->formatLogList($logs);
+        return $this->buildLogAction($final_titles_string, $args);
+    }
+
+   function isPlayerZombie($player_id) {
+       $players = $this->loadPlayersBasicInfos();
+       if (! isset($players[$player_id]))
+           throw new \BgaSystemException("Player $player_id is not playing here");
+       
+       return ($players[$player_id]['player_zombie'] == 1);
+   }
 
     public function debug_goToState(int $state=98) {
         $this->gamestate->jumpToState($state);

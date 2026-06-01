@@ -15,7 +15,8 @@
 <div id="character_selection_ratio" class="character_selection_ratio">
     <div class="character_selection_ratio_child">
         <div id="character_selection"></div>
-        <div id="show_character"></div>
+        <div id="selection_dimmer"></div>
+        <div id="selected_character"></div>
     </div>
 </div>
 
@@ -71,6 +72,7 @@
             </div>
 
             <div id="asset_deck_draw">
+                <div id="deck_draw_9" class="draw_wrap"></div>
                 <div id="deck_draw_8" class="draw_wrap"></div>
                 <div id="deck_draw_7" class="draw_wrap"></div>
                 <div id="deck_draw_6" class="draw_wrap"></div>
@@ -82,6 +84,9 @@
             </div>
 
             <div id="spread_draw">
+                <div id="spread_draw_9" class="spread_wrap"></div>
+                <div id="spread_draw_8" class="spread_wrap"></div>
+                <div id="spread_draw_7" class="spread_wrap"></div>
                 <div id="spread_draw_6" class="spread_wrap"></div>
                 <div id="spread_draw_5" class="spread_wrap"></div>
                 <div id="spread_draw_4" class="spread_wrap"></div>
@@ -121,6 +126,10 @@
     <div id="hand_ratio_child">
         <div id="myhand_wrap">
             <div id="assets_wrap"></div>
+            <div id="objectives_wrap">
+                <div id="personal_objective_1_wrap" class="personal_objective_wrap"></div>
+                <div id="personal_objective_2_wrap" class="personal_objective_wrap"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -129,6 +138,14 @@
 <div id="character_zone" style="position: relative;">
 </div>
 
+<button id="reference_cards">?</button>
+<div id="reference_popup">
+    <div id="ref_popup_close">X</div>
+    <div id="ref_1" class="reference"></div>
+    <div id="ref_2" class="reference"></div>
+</div>
+
+<div id="sprite_preloader"></div>
 
 <script type="text/javascript">
 
@@ -140,8 +157,6 @@ let jstpl_character_area='<div id="player_${player}" class="character_area" styl
     width: 100%; left: 0px; margin-top: 10px;"><h3 id="character_area_${player_name}" class="player_name_board" style="color: \
     #${color}; text-align: center;">${player_name}</h3><div class="character_ratio"><div \
     class="character_ratio_child"></div></div></div>';
-let jstpl_namebox='<div id="namebox_${type}" class="namebox" style="background-position: -${charX}% \
-    -${charY}%;"></div>';
 let jstpl_character='<div id="character_${type}" class="character" style="background-position: -${charX}% \
     -${charY}%; ${extra_style}"> \
     <div id="${character}_w0" class="cube_wrap cb_w_0"></div> \
@@ -301,7 +316,7 @@ let jstpl_summit_pile='<div id="summit_pile" class="summit_beta summit_pile_back
 let jstpl_summit_discard='<div id="summit_discard" class="summit_discard" style="top: ${summit_discard_top}%; left: \
     ${summit_discard_left}%;"></div>';
 let jstpl_climbing_deck='<div id="climbing_deck" class="climbing climbing_deck_back" style="top: ${climbing_deck_top}%; left: \
-    ${climbing_deck_left}%;"><div id="climbing_straightened"></div></div>';
+    ${climbing_deck_left}%;"><div id="climbing_deck_straightened"</div>';
 let jstpl_climbing_discard='<div id="climbing_discard" style="top: ${climbing_discard_top}%; left: ${climbing_discard_left}%;"> \
     <div id="climbing_discard_straightened"></div><div id="climbing_discard_90"</div></div>'
 let jstpl_asset_deck='<div id="asset_deck" class="asset asset_deck_back" style="top: ${asset_deckX}%; left: \
@@ -337,19 +352,17 @@ let jstpl_pitch='<div id="pitch_${location}_border" class="pitch_border"></div> 
 let jstpl_log_item='<span id="${num}_item_tooltip_${item_key}" class="${item_type} item_tooltip">${item_name}</span>';
 
 // colored player name
-let jstpl_colored_name='<span id="colored_name_${player_id}" class="colored_name_span" style="font-weight: bold; color: #${color};">${player_name}</span>';
+let jstpl_colored_name='<span id="${player_id}_span" class="name_span" style="font-weight: bold; color: ${color};">${player_name}</span>';
 
 // miscellany
 
 let jstpl_starting_player='<div id="starting_player"></div>';
 let jstpl_personal_objective='<div id="personal_objective_${poId}" class="personal_objective" style=" \
-    background-position: -${poX}% -${poY}%;"></div>';
+    background-position: -${poX}% -${poY}%;"> \
+    <div id="tracker_${poId}" class="po_tracker">0/3</div> \
+    </div>';
 let jstpl_spread_slot='<div id="spread_slot${SLOT_NUM}" class="spread" style="top: ${spreadX}%; left: \
     ${spreadY}%;"></div>';
-let jstpl_references='<div id="ref_row"> \
-    <div id="ref_1" class="reference"></div> \
-    <div id="ref_2" class="reference"></div> \
-    </div>';
 let jstpl_water_and_psych='<div id="${player_id}_water_and_psych" class="cp_panel water_psych_panel"> \
     <div id="water_icon_${player_id}" class="water_psych water"></div> \
     <span id="water_num_${player_id}" class="panel_num resource">0</span> \

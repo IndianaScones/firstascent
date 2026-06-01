@@ -42,6 +42,7 @@
         self::setAjaxMode();
         $deck_assets = self::getArg("deck_assets", AT_posint);
         $spread_assets_raw = self::getArg("spread_assets", AT_numberlist);
+        $spread_slots_raw = self::getArg("spread_slots", AT_numberlist);
         $simul_climb = self::getArg("simul_climb", AT_bool) ?? false;
 
         if (substr($spread_assets_raw, -1) == ',') {
@@ -53,7 +54,16 @@
             $spread_assets = explode(',', $spread_assets_raw);
         }
 
-        $this->game->confirmAssets($deck_assets, $spread_assets, $simul_climb);
+        if (substr($spread_slots_raw, -1) == ',') {
+            $spread_slots_raw = substr($spread_slots_raw, 0, -1);
+        }
+        if ($spread_slots_raw == '') {
+            $spread_slots = array();
+        } else {
+            $spread_slots = explode(',', $spread_slots_raw);
+        }
+
+        $this->game->confirmAssets($deck_assets, $spread_assets, $spread_slots, $simul_climb);
         self::ajaxResponse();
     }
 
@@ -78,6 +88,8 @@
         $selected_summit_betas_raw = self::getArg("selected_summit_betas", AT_numberlist);
         $selected_hex = self::getArg("selected_hex", AT_posint);
         $selected_pitch = self::getArg("selected_pitch", AT_posint);
+        $trifecta_selections = self::getArg("trifecta_selections", AT_alphanum);
+        $trifecta_arr = explode(' ', $trifecta_selections);
         $extra_water = self::getArg("extra_water", AT_bool);
 
         if ($selected_resources_raw == '') { $selected_resources = array(); }
@@ -106,7 +118,7 @@
             $selected_summit_betas = explode(',', $selected_summit_betas_raw);
         }
 
-        $this->game->confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water);
+        $this->game->confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water);
         self::ajaxResponse();
     }
 
@@ -131,6 +143,8 @@
         $selected_summit_betas_raw = self::getArg("selected_summit_betas", AT_numberlist);
         $selected_hex = self::getArg("selected_hex", AT_posint);
         $selected_pitch = self::getArg("selected_pitch", AT_posint);
+        $trifecta_selections = self::getArg("trifecta_selections", AT_alphanum);
+        $trifecta_arr = explode(' ', $trifecta_selections);
         $extra_water = self::getArg("extra_water", AT_bool);
 
         if ($selected_resources_raw == '') { $selected_resources = array(); }
@@ -159,7 +173,13 @@
             $selected_summit_betas = explode(',', $selected_summit_betas_raw);
         }
 
-        $this->game->riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water);
+        $this->game->riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water);
+        self::ajaxResponse();
+    }
+
+    public function confirmBail() {
+        self::setAjaxMode();
+        $this->game->confirmBail();
         self::ajaxResponse();
     }
 
