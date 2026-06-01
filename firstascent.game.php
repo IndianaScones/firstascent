@@ -12,11 +12,10 @@
   */
 
 
-require_once( APP_GAMEMODULE_PATH.'module/table/table.game.php' );
 require_once('modules/utils.php');
 
 
-class FirstAscent extends Table
+class FirstAscent extends Bga\GameFramework\Table
 {
     use UtilTrait;
 
@@ -37,13 +36,10 @@ class FirstAscent extends Table
         // init deck for transient assets
         $this->cards_and_tokens = self::getNew('module.common.deck');
         $this->cards_and_tokens->init('cards_and_tokens');   
+        $this->cards_and_tokens->autoreshuffle = true;
+        $this->cards_and_tokens->autoreshuffle_custom = array('asset_deck' => 'discard');
+        $this->cards_and_tokens->autoreshuffle_trigger = array('obj' => $this, 'method' => 'deckAutoReshuffle');
 	}
-	
-    protected function getGameName( )
-    {
-		// Used for translations and stuff. Please do not modify.
-        return "firstascent";
-    }	
 
     /*
         setupNewGame:
@@ -83,6 +79,7 @@ class FirstAscent extends Table
         }
         $this->setGlobalVariable('player_names_and_colors', $player_names_and_colors);
 
+        $this->setGlobalVariable('trifecta_routes', []);
         $this->setGlobalVariable('finished_climbing', []);
         $this->setGlobalVariable('finished_portaledge', []);
         $this->setGlobalVariable('pitch_asset_tokens', []);
@@ -99,9 +96,14 @@ class FirstAscent extends Table
         $this->setGlobalVariable('risk_pitches', []);
         $this->setGlobalVariable('risked_requirements', []);
         $this->setGlobalVariable('climbing_card_info', []);
+        $this->setGlobalVariable('deck_reshuffle', false);
+        $this->setGlobalVariable('summit_beta_reshuffle', false);
+        $this->setGlobalVariable('zombie_players', []);
         
+        $bailed_pitch = [];
         $score_tracker = [];
         foreach ($players as $player_id => $player) {
+            $bailed_pitch[$player_id] = null;
             $score_tracker[$player_id] = array(
                 'pitches' => 0,
                 'objectives' => 0,
@@ -109,6 +111,7 @@ class FirstAscent extends Table
                 'summit' => 0
             );
         }
+        $this->setGlobalVariable('bailed_pitch', $bailed_pitch);
         $this->setGlobalVariable('score_tracker', $score_tracker);
 
         $starting_player = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no` = '1'");
@@ -156,17 +159,20 @@ class FirstAscent extends Table
 
         // Initialize pitch and ledge_teleport and rope_overlap trackers and ledge
         $pitch_tracker = [];
+        $pitch_sets = [];
         $ledge_teleports = [];
         $rope_overlaps = [];
         $permanent_asset_tracker = [];
         foreach($players as $player_id => $player) {
             $pitch_tracker[$player_id] = ['0'];
+            $pitch_sets[$player_id] = [];
             $ledge_teleports[$player_id] = [];
             $rope_overlaps[$player_id] = [];
             $permanent_asset_tracker[$player_id] = [];
         }
         $ledge = $board === 'desert' ? range(16, 26) : range(20, 34);
         $this->setGlobalVariable('pitch_tracker', $pitch_tracker);
+        $this->setGlobalVariable('pitch_sets', $pitch_sets);
         $this->setGlobalVariable('ledge_teleports', $ledge_teleports);
         $this->setGlobalVariable('ledge', $ledge);
         $this->setGlobalVariable('rope_overlaps', $rope_overlaps);
@@ -278,6 +284,13 @@ class FirstAscent extends Table
         }
         $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
 
+        // Initialize hand_token_tracker
+        $hand_token_tracker = [];
+        foreach($players as $player_id => $player) {
+            $hand_token_tracker[$player_id] = [];
+        }
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
+
     // Set up cards and tokens
 
         // add climbing cards
@@ -291,12 +304,12 @@ class FirstAscent extends Table
         }
         $this->cards_and_tokens->createCards($climbing_cards, 'climbing_deck');
         $this->cards_and_tokens->shuffle('climbing_deck');
-        // $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 63");
-        // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 50");
-        // $testing3 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 8");
-        // $testing4 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 39");
-        // $testing5 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 30");
-        // $testing6 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 40");
+        // $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 13");
+        // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 4");
+        // $testing3 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 19");
+        // $testing4 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 30");
+        // $testing5 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 9");
+        // $testing6 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 8");
         // $testing7 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 14");
         // $testing8 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 3");
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing8, 'climbing_deck', true);
@@ -320,8 +333,8 @@ class FirstAscent extends Table
         $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
         // $this->cards_and_tokens->pickCardsForLocation(1, 'summit_beta_supply', 'summit_beta_discard');
         $this->cards_and_tokens->shuffle('summit_beta_supply');
-        // $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=9");
-        // $testingSB2 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=2");
+        // $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=2");
+        // $testingSB2 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=8");
         // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB2, 'summit_beta_supply', true);
         // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
 
@@ -413,17 +426,29 @@ class FirstAscent extends Table
             $this->cards_and_tokens->moveCard($new_card['id'], 'the_spread');
             $polychrome = $this->checkSpread();
         }
+        $spread_assets = self::getCollectionFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'");
+        $spread_slot = 1;
+        foreach (array_values($spread_assets) as $asset) {
+            $card_id = $asset['card_id'];
+            $this->DbQuery("UPDATE cards_and_tokens SET card_location_arg='$spread_slot' WHERE card_id='$card_id'");
+            $spread_slot++;
+        }
 
     // Set up board
 
         // set up shared objectives
-
-        $shared_objectives_ids = range(1,16);
-        shuffle($shared_objectives_ids);
-        $current_shared_objectives = array_slice($shared_objectives_ids, 0, 3);
+        $shared_objectives_pool = [ [1, 2], [3, 4], [5, 6], [7, 8], [9, 10], [11, 12], [13, 14], [15, 16] ];
+        shuffle($shared_objectives_pool);
+        $current_shared_objectives = [];
+        for ($i=1; $i<=3; $i++) {
+            $current_objective_tile = array_pop($shared_objectives_pool);
+            shuffle($current_objective_tile);
+            $current_objective = array_pop($current_objective_tile);
+            $current_shared_objectives[] = $current_objective;
+        }
 
         // testing
-        // $current_shared_objectives = [10, 11, 16];
+        // $current_shared_objectives = [16, 11, 10];
 
         $this->setGlobalVariable('current_shared_objectives', $current_shared_objectives);
 
@@ -460,14 +485,14 @@ class FirstAscent extends Table
                     break;
 
                 case 3: // stay in the shade
-                    $shaded_pitches = ['1', '4', '5', '7', '8', '10', '11', '12', '14', '17', '19', '22', '25', '28', '30', '36', '38', '39', '42', '43'];
+                    $shaded_pitches = ['1', '4', '5', '7', '8', '10', '11', '12', '14', '17', '19', '22', '25', '28', '30', '38', '39', '42', '43'];
                     $shared_objective = [
                         'pitches' => $shaded_pitches,
                     ];
                     break;
 
                 case 4: // stay in the sun
-                    $sunny_pitches = ['2', '3', '6', '9', '13', '15', '16', '18', '20', '21', '23', '24', '26', '27', '29', '31', '32', '33', '34', '35', '36', '37', '40', '41'];
+                    $sunny_pitches = ['2', '3', '6', '9', '13', '15', '16', '18', '20', '21', '23', '24', '26', '27', '29', '31', '32', '33', '34', '35', '37', '40', '41'];
                     $shared_objective = [
                         'pitches' => $sunny_pitches,
                     ];
@@ -531,6 +556,7 @@ class FirstAscent extends Table
                         $this->DbQuery("UPDATE player SET player_score=player_score+4 WHERE player_id='$player_id'");
                         $score_tracker[$player_id]['objectives'] += 4;
                         $this->incStat(1, "shared_objectives_met", $player_id);
+                        $this->incStat(4, "shared_objectives_points", $player_id);
                     }
                     $this->setGlobalVariable('score_tracker', $score_tracker);
                     break;
@@ -590,7 +616,11 @@ class FirstAscent extends Table
         foreach ($shared_objectives_tracker as $id => $info) {
             $name = $this->shared_objectives[(string)$id]['name'];
             $this->initStat('player', $name, 0);
-            if ($name === "the_elitist") { $this->incStat(4, "the_elitist", $player_id); }
+            if ($name === "the_elitist") {
+                foreach ($players as $elitist_id => $player) {
+                    $this->incStat(4, "the_elitist", $elitist_id);
+                }
+            }
         }
         $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
 
@@ -693,18 +723,18 @@ class FirstAscent extends Table
         }
 
         // TESTING
-        if (!in_array('2', $available_characters)) {
+        if (!in_array('10', $available_characters)) {
             array_shift($available_characters);
-            $available_characters[] = '2';
+            $available_characters[] = '10';
         }
-        // if (!in_array('10', $available_characters)) {
+        // if (!in_array('12', $available_characters)) {
         //     array_shift($available_characters);
-        //     $available_characters[] = '10';
+        //     $available_characters[] = '12';
         // }
 
         $this->setGlobalVariable('available_characters', $available_characters);
         $this->setGlobalVariable('round', '0');
-        $this->setGlobalVariable('phase', 'Setup');
+        $this->setGlobalVariable('phase', clienttranslate('Setup'));
 
         // Create personal objective pile
         $personal_objective_deck = range(1, 12);
@@ -786,9 +816,13 @@ class FirstAscent extends Table
         $result['available_characters'] = $this->getGlobalVariable('available_characters');
         $result['personal_objectives'] = $this->personal_objectives;
         $result['water_psych_tracker'] = $this->getGlobalVariable('water_psych_tracker');
+        $result['bailed_pitch'] = $this->getGlobalVariable('bailed_pitch', true);
+        $result['score_tracker'] = $this->getGlobalVariable('score_tracker', true);
+
+        $result['empty_summit_beta_pile'] = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply') ? false : true;
 
         // Get starting Spread and discard pile
-        $result['spread'] = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='the_spread'", true);
+        $result['spread'] = self::getCollectionFromDB("SELECT card_id, card_type_arg, card_location_arg FROM cards_and_tokens WHERE card_location='the_spread'");
         $asset_discard = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_location='discard'", true);
         $result['asset_discard'] = $asset_discard;
         $this->setGlobalVariable('asset_discard', $asset_discard);
@@ -798,9 +832,9 @@ class FirstAscent extends Table
             $result['current_personal_objectives'] = (isset($this->getGlobalVariable('personal_objectives', true)[$current_player_id])) ? $this->getGlobalVariable('personal_objectives', true)[$current_player_id] : null;
             $result['personal_objectives_tracker'] = (isset($this->getGlobalVariable('personal_objectives_tracker', true)[$current_player_id])) ? $this->getGlobalVariable('personal_objectives_tracker', true)[$current_player_id] : null;
             $result["hand_assets"] = $this->getHandAssets($current_player_id);
-            $result["hand_summit_beta_tokens"] = $this->getHandSummitBetaTokens($current_player_id);
             $result["hand_symbol_tokens"] = $this->getGlobalVariable('resource_tracker', true)[$current_player_id]['symbol_tokens'];
             $result['resource_tracker'] = $this->getGlobalVariable('resource_tracker', true)[$current_player_id];
+            $result['player_token_tracker'] = $this->getGlobalVariable('hand_token_tracker', true)[$current_player_id];
         }
 
         if ($this->gamestate->state()['name'] === 'gameEnd') {
@@ -818,6 +852,7 @@ class FirstAscent extends Table
         $result['phase'] = $this->getGlobalVariable('phase');
         
         $result['pitch_tracker'] = $this->getGlobalVariable('pitch_tracker', true);
+        $result['pitch_sets'] = $this->getGlobalVariable('pitch_sets', true);
         $result['pitches_rope_order'] = $this->getGlobalVariable('pitches_rope_order', true);
         $result['ledge_teleports'] = $this->getGlobalVariable('ledge_teleports', true);
         $result['headwall_revealed'] = $this->getGlobalVariable('headwall_revealed');
@@ -831,6 +866,7 @@ class FirstAscent extends Table
         $result['asset_identifier'] = $this->getGlobalVariable('asset_identifier', true);
         $result['token_identifier'] = $this->getGlobalVariable('token_identifier', true);
         $result['climbing_card_identifier'] = $this->getGlobalVariable('climbing_card_identifier', true);
+        $result['trifecta_routes'] = $this->getGlobalVariable('trifecta_routes', true);
 
         $result['climbing_card_info'] = $this->getGlobalVariable('climbing_card_info', true);
 
@@ -856,6 +892,8 @@ class FirstAscent extends Table
 
         $result['riskSummitBetaFace'] = $this->getGlobalVariable('riskSummitBetaFace');
         $result['crimper_cards'] = $this->getGlobalVariable('crimper_cards', true);
+
+        $result['zombie_players'] = $this->getGlobalVariable('zombie_players', true);
 
         return $result;
     }
@@ -949,7 +987,12 @@ class FirstAscent extends Table
             'player_id' => $player_id,
             'character' => $this->characters[$character]['description'],
             'character_div' => "character_{$character}",
-            'character_num' => $character
+            'character_num' => $character,
+            'player_names_and_colors' => $player_names_and_colors,
+            'i18n' => ['character'],
+        ));
+        self::notifyAllPlayers("dealOpponentObjectives", "", array(
+            'player_id' => $player_id,
         ));
         self::notifyPlayer($player_id, "dealPersonalObjectives", "", array(
             'current_personal_objectives' => $current_personal_objectives
@@ -959,9 +1002,10 @@ class FirstAscent extends Table
     }
 
 
-    function confirmAssets($deck_assets=0, $spread_assets=[], $simul_climb = false) {
+    function confirmAssets($deck_assets=0, $spread_assets=[], $spread_slots = [], $simul_climb = false) {
         self::checkAction('confirmAssets');
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
         $deck_assets = intval($deck_assets);
         $this->setGlobalVariable('confirm_assets', $this->getGlobalVariable('resource_tracker', true));
 
@@ -975,7 +1019,6 @@ class FirstAscent extends Table
         }
         if ($this->getGlobalVariable('x_cards') === 1) { $this->setGlobalVariable('x_cards', 3); }
 
-        $spread_assets_for_log = '';
         if ($spread_assets) {
             $spread_assets_db = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $spread_assets)).")");
             $spread_card_types = [];
@@ -986,16 +1029,15 @@ class FirstAscent extends Table
             // Move selected spread cards to hand
             $this->cards_and_tokens->moveCards($spread_assets, $player_id);
 
+            // create spread string for log
+            $spread_titles = [];
             for ($i=1; $i<=count($spread_assets); $i++) {
                 $type = $spread_card_types[$i-1];
-
-                // spread message for log
-                $asset_title = $this->asset_cards[$type]['description'];
-                if ($i === 1) { $spread_assets_for_log .= "[{$asset_title}({$type})]"; }
-                elseif (count($spread_assets) === 2 && $i === 2) { $spread_assets_for_log .= " and [{$asset_title}({$type})]"; }
-                elseif ($i === count($spread_assets)) { $spread_assets_for_log .= ", and [{$asset_title}({$type})]"; }
-                else { $spread_assets_for_log .= ", [{$asset_title}({$type})]"; }
+                $asset_description = $this->asset_cards[$type]['description'];
+                $formatted_asset_title = '[' . $asset_description . '(' . $type . ')]';
+                $spread_titles[] = $formatted_asset_title;
             }
+            $spread_titles_for_log = $this->formatLogTitles($spread_titles);
 
             // update resource_tracker
             $this->updateResourceTracker($player_id, 'add', null, null, $spread_card_types);
@@ -1012,30 +1054,46 @@ class FirstAscent extends Table
         // update resource_tracker
         $this->updateResourceTracker($player_id, 'add', null, null, $deck_card_types);
 
-        $deck_assets_for_log = '';
+        // create deck string for log
+        $deck_titles = [];
         for ($i=1; $i<=count($deck_card_types); $i++) {
             $type = $deck_card_types[$i-1];
-            $asset_title = $this->asset_cards[$type]['description'];
-            if ($i === 1) { $deck_assets_for_log .= "[{$asset_title}({$type})]"; }
-            elseif (count($deck_card_types) === 2 && $i === 2) { $deck_assets_for_log .= " and [{$asset_title}({$type})]"; }
-            elseif ($i === count($deck_card_types)) { $deck_assets_for_log .= ", and [{$asset_title}({$type})]"; }
-            else { $deck_assets_for_log .= ", [{$asset_title}({$type})]"; }
+            $asset_description = $this->asset_cards[$type]['description'];
+            $formatted_asset_title = '[' . $asset_description . '(' . $type . ')]';
+            $deck_titles[] = $formatted_asset_title;
         }
+        $deck_titles_for_log = $this->formatLogTitles($deck_titles);
 
+        // update player resources
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
 
         // Refill the spread
-        $empty_slots = count($spread_assets);
-        $spread_assets_arr = $this->cards_and_tokens->pickCardsForLocation($empty_slots, 'asset_deck', 'the_spread') ?? [];
-        $last_drawn_asset = $spread_assets_arr[array_key_last($spread_assets_arr)] ?? null;
+        $spread_assets_arr = [];
+        $last_key = array_key_last($spread_slots);
+        $last_drawn_asset = null;
+        $last_drawn_slot = null;
+        foreach ($spread_slots as $key => $slot) {
+            $new_asset = $this->cards_and_tokens->pickCardForLocation('asset_deck', 'the_spread', $slot);
+            $spread_assets_arr[] = $new_asset;
+            if ($key === $last_key) {
+                $last_drawn_asset = $new_asset;
+                $last_drawn_slot = $slot;
+            }
+        }
         $monochrome = 0; // the number of cards that have to be replaced to achieve polychromy
         $polychrome = $this->checkSpread();
+        $replacement_card = null;
         while ($polychrome != true) {
             $monochrome++;
             $this->cards_and_tokens->insertCardOnExtremePosition($last_drawn_asset['id'], 'discard', true);
-            $spread_assets_arr[] = $this->cards_and_tokens->pickCardForLocation('asset_deck', 'the_spread');
+            if ($replacement_card) {
+                $this->cards_and_tokens->insertCardOnExtremePosition($replacement_card['id'], 'discard', true);
+            }
+            $replacement_card = $this->cards_and_tokens->pickCardForLocation('asset_deck', 'the_spread', $last_drawn_slot);
+            $spread_assets_arr[] = $replacement_card;
             $polychrome = $this->checkSpread();
         }
+        $new_spread = self::getCollectionFromDB("SELECT card_id, card_type_arg, card_location_arg FROM cards_and_tokens WHERE card_location='the_spread'");
 
         // For resizeHand()
         $new_cards = array_merge($deck_card_ids, $spread_assets);
@@ -1045,71 +1103,108 @@ class FirstAscent extends Table
         $climbing_card_info = $climbing_card ? $this->getGlobalVariable('climbing_card_info', true) : null;
 
         // create log message
-        $log_message = $simul_climb ? '${player_name} uses +Simul Climb(7)+ and takes ' : '${player_name} takes ';
-        if ($spread_assets) { $log_message .= '${spread_assets_for_log} from the Spread'; }
-        $log_message_opponent = $log_message;
-        if ($spread_assets && $deck_assets > 0) {
-            $log_message .= ' and ${deck_assets_for_log} from the deck';
-            $log_message_opponent .= ' and ${deck_num} asset/s from the deck';
-        } else if (!$spread_assets && $deck_assets > 0) {
-            $log_message .= '${deck_assets_for_log} from the deck';
-            $log_message_opponent .= '${deck_num} asset/s from the deck';
+        $player_log_msg = ['log' => '', 'args' => ['player_name' => $player_name]];
+        if ($simul_climb) {
+            $player_log_msg['log'] .= clienttranslate('${player_name} uses +Simul Climb(7)+ and takes ');
+        } else {
+            $player_log_msg['log'] .= clienttranslate('${player_name} takes ');
         }
 
-        self::notifyAllPlayers("confirmOpponentAssets", clienttranslate($log_message_opponent), array(
-                'player_name' => self::getActivePlayerName(),
+        // handle spread assets
+        if (!empty($spread_assets)) {
+            $player_log_msg['log'] .= clienttranslate('${spread_titles_for_log} from the Spread');
+            $player_log_msg['args']['spread_titles_for_log'] = $spread_titles_for_log;
+            $player_log_msg['args']['i18n'][] = 'spread_titles_for_log';
+        }
+
+        $opponent_log_msg = $player_log_msg;
+
+        // handle deck assets
+        if ($deck_assets > 0) {
+            // player message
+            if (!empty($spread_assets)) {
+                $player_log_msg['log'] .= ' ' . clienttranslate('and') . ' ';
+                $opponent_log_msg['log'] .= ' ' . clienttranslate('and') . ' ';
+            }
+            $player_log_msg['log'] .= clienttranslate('${deck_titles_for_log} from the deck');
+            $player_log_msg['args']['deck_titles_for_log'] = $deck_titles_for_log;
+            $player_log_msg['i18n'][] = 'deck_titles_for_log';
+            // opponent message
+            $opponent_log_msg['log'] .= clienttranslate('${deck_num_taken} Asset/s from the deck');
+            $opponent_log_msg['args']['deck_num_taken'] = $deck_assets;
+        }
+
+        if ($simul_climb) {
+            $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
+            $simul_climb_id = array_search('7', $hand_sb_tokens);
+            $this->cards_and_tokens->insertCardOnExtremePosition($simul_climb_id, 'summit_beta_discard', true);
+            $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+            $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $simul_climb_id);
+            $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+            $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
+            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+        }
+
+        self::notifyAllPlayers("confirmOpponentAssets", '${opponent_log_msg}', array(
+                'opponent_log_msg' => $opponent_log_msg,
+                'player_name' => $player_name,
                 'spread_assets' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,
                 'hand_count' => count($this->getHandAssets($player_id)),
+                'new_spread' => $new_spread,
                 'spread_assets_arr' => $spread_assets_arr,
                 'monochrome' => $monochrome,
                 'last_drawn_asset' => $last_drawn_asset,
-                'spread_assets_for_log' => $spread_assets_for_log,
+                'spread_titles_for_log' => $spread_titles_for_log ?? [],
                 'player_resources' => $player_resources,
                 'climbing_card' => $climbing_card,
                 'simul_climb' => $simul_climb,
+                'deck_reshuffle' => $this->getGlobalVariable('deck_reshuffle'),
                 'preserve' => ['player_id'],
+                'i18n' => ['opponent_log_msg'],
         ));
 
-        self::notifyPlayer($player_id, "confirmYourAssets", clienttranslate($log_message), array(
-                'player_name' => self::getActivePlayerName(),
+        self::notifyPlayer($player_id, "confirmYourAssets", '${player_log_msg}', array(
+                'player_log_msg' => $player_log_msg,
+                'player_name' => $player_name,
                 'spread_assets' => $spread_card_types,
                 'spread_card_ids' => $spread_assets,
                 'deck_assets' => $deck_card_types,
                 'deck_num' => $deck_assets,
                 'player_id' => $player_id,
                 'hand_count' => count($this->getHandAssets($player_id)),
+                'new_spread' => $new_spread,
                 'spread_assets_arr' => $spread_assets_arr,
                 'monochrome' => $monochrome,
                 'last_drawn_asset' => $last_drawn_asset,
                 'deck_assets_arr' => $deck_assets_arr,
-                'spread_assets_for_log' => $spread_assets_for_log,
-                'deck_assets_for_log' => $deck_assets_for_log,
+                'spread_titles_for_log' => $spread_titles_for_log ?? [],
+                'deck_titles_for_log' => $deck_titles_for_log,
                 'player_resources' => $player_resources,
+                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                 'new_cards' => $new_cards,
                 'deck_card_ids' => $deck_card_ids,
                 'climbing_card' => $climbing_card,
                 'simul_climb' => $simul_climb,
+                'deck_reshuffle' => $this->getGlobalVariable('deck_reshuffle'),
+                'i18n' => ['player_log_msg'],
         ));
 
+        $this->setGlobalVariable('deck_reshuffle', false);
         if ($climbing_card && !$simul_climb) {
             $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
             $this->setGlobalVariable('climbing_card_info', array());
             $this->gamestate->nextState('nextClimb');
         }
         else if ($simul_climb) {
-            $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
-            $simul_climb_id = array_search('7', $hand_sb_tokens);
-            $this->cards_and_tokens->insertCardOnExtremePosition($simul_climb_id, 'summit_beta_discard', true);
-            $this->incStat(1, "played_summit_beta_tokens", $player_id);
             return;
         }
         else { $this->gamestate->nextState('nextDraw'); }
     }
 
-    function confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water) {
+    function confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
 
         self::checkAction('confirmRequirements');
         $player_id = self::getActivePlayerId();
@@ -1122,15 +1217,37 @@ class FirstAscent extends Table
 
         // new pitch and rope
         $pitch_tracker = $this->getGlobalVariable('pitch_tracker', true);
-        array_push($pitch_tracker[$player_id], $selected_hex);
+        $player_tracker = $pitch_tracker[$player_id];
+        array_push($player_tracker, $selected_hex);
+        $pitch_tracker[$player_id] = $player_tracker;
         $this->setGlobalVariable('pitch_tracker', $pitch_tracker);
+
+        $pitch_sets = $this->getGlobalVariable('pitch_sets', true);
+        $player_sets = $pitch_sets[$player_id];
+        $previous_hex = end($player_sets)[1] ?? '0';
+        $pitch_sets[$player_id][] = [$previous_hex, $selected_hex];
+        $this->setGlobalVariable('pitch_sets', $pitch_sets);
+
         $pitches_rope_order = $this->getGlobalVariable('pitches_rope_order', true);
         array_push($pitches_rope_order[$selected_hex], $player_id);
         $this->setGlobalVariable('pitches_rope_order', $pitches_rope_order);
 
+        // Trifecta
+        if ($trifecta_arr !== ['']) {
+            $trifecta_routes = $this->getGlobalVariable('trifecta_routes', true);
+            $trifecta_routes[$player_id] = [
+                'exposure' => $trifecta_arr[0],
+                'type' => $trifecta_arr[1]
+            ];
+            $this->setGlobalVariable('trifecta_routes', $trifecta_routes);
+            $pitch_type = $trifecta_arr[1];
+        }
+
         // track shared objectives
         $shared_objectives_tracker = $this->getGlobalVariable('shared_objectives_tracker', true);
         $shared_objective_points = 0;
+        $trifecta_exposure = $trifecta_arr[0] ?? null;
+        $trifecta_type = $trifecta_arr[1] ?? null;
         foreach ($shared_objectives_tracker as $num_id => $info) {
             $id = strval($num_id);
             switch ($id) {
@@ -1154,15 +1271,17 @@ class FirstAscent extends Table
 
                 case '3':
                 case '4':
-                    if (in_array($selected_pitch, $info['pitches'])) {
-                        $info['player_counts'][$player_id]++;
-                        $shared_objective_points += 1;
-                        $shared_objectives_tracker[$id] = $info;
-                        if ($info['player_counts'][$player_id] === 1) { $this->incStat(1, "shared_objectives_met", $player_id); }
-                        switch ($id) {
-                            case '3': $this->incStat(1, "stay_in_the_shade", $player_id); break;
-                            case '4': $this->incStat(1, "stay_in_the_sun", $player_id); break;
-                        }
+                    if (in_array($selected_pitch, $info['pitches']) ||
+                        ($id === '3' && $trifecta_exposure === 'shaded') ||
+                        ($id === '4' && $trifecta_exposure === 'sunny')) {
+                            $info['player_counts'][$player_id]++;
+                            $shared_objective_points += 1;
+                            $shared_objectives_tracker[$id] = $info;
+                            if ($info['player_counts'][$player_id] === 1) { $this->incStat(1, "shared_objectives_met", $player_id); }
+                            switch ($id) {
+                                case '3': $this->incStat(1, "stay_in_the_shade", $player_id); break;
+                                case '4': $this->incStat(1, "stay_in_the_sun", $player_id); break;
+                            }
                     }
                     break;
 
@@ -1172,22 +1291,28 @@ class FirstAscent extends Table
                 case '8':
                 case '13':
                 case '14':
-                    if (in_array($selected_pitch, $info['pitches'])) {
-                        $info['player_counts'][$player_id]++;
-                        if ($info['player_counts'][$player_id] === 3) {
-                            $info['players_met'][] = $player_id;
-                            $shared_objective_points += 4;
-                            $this->incStat(1, "shared_objectives_met", $player_id);
-                            switch ($id) {
-                                case '5': $this->incStat(4, "jolly_jammer", $player_id); break;
-                                case '6': $this->incStat(4, "smear_campaign", $player_id); break;
-                                case '7': $this->incStat(4, "star_stemmer", $player_id); break;
-                                case '8': $this->incStat(4, "exposure_junkie", $player_id); break;
-                                case '13': $this->incStat(4, "flake_freak", $player_id); break;
-                                case '14': $this->incStat(4, "pull-up_champion", $player_id); break;
+                    if (in_array($selected_pitch, $info['pitches']) ||
+                        ($id === '5' && $trifecta_type === 'crack') ||
+                        ($id === '6' && $trifecta_type === 'slab') ||
+                        ($id === '7' && $trifecta_type === 'corner') ||
+                        ($id === '8' && $trifecta_type === 'arete') ||
+                        ($id === '13' && $trifecta_type === 'flake') ||
+                        ($id === '14' && $trifecta_type === 'roof')) {
+                            $info['player_counts'][$player_id]++;
+                            if ($info['player_counts'][$player_id] === 3) {
+                                $info['players_met'][] = $player_id;
+                                $shared_objective_points += 4;
+                                $this->incStat(1, "shared_objectives_met", $player_id);
+                                switch ($id) {
+                                    case '5': $this->incStat(4, "jolly_jammer", $player_id); break;
+                                    case '6': $this->incStat(4, "smear_campaign", $player_id); break;
+                                    case '7': $this->incStat(4, "star_stemmer", $player_id); break;
+                                    case '8': $this->incStat(4, "exposure_junkie", $player_id); break;
+                                    case '13': $this->incStat(4, "flake_freak", $player_id); break;
+                                    case '14': $this->incStat(4, "pull-up_champion", $player_id); break;
+                                }
                             }
-                        }
-                        $shared_objectives_tracker[$id] = $info;
+                            $shared_objectives_tracker[$id] = $info;
                     }
                     break;
 
@@ -1352,15 +1477,15 @@ class FirstAscent extends Table
         $pitch_value_stat = 'climbed_' . $pitch_value_num . '_star';
         $this->incStat(1, $pitch_value_stat, $player_id);
 
-        $previous_hex = $pitch_tracker[$player_id][count($pitch_tracker[$player_id])-2] ?? '0';
         $ledge = $this->getGlobalVariable('ledge', true);
         $cutoff_arr = $board === 'desert' ? ['21', '22'] : ['27', '28'];
         $current_arr = [$previous_hex, $selected_hex];
+        sort($current_arr);
         $ledge_teleports = false;
 
         if (in_array($previous_hex, $ledge) 
             && in_array($selected_hex, $ledge) 
-            && ( abs($selected_hex - $previous_hex) > 1 || sort($current_arr) === $cutoff_arr) ) {
+            && ( abs($selected_hex - $previous_hex) > 1 || $current_arr === $cutoff_arr) ) {
 
                 $ledge_teleports = $this->getGlobalVariable('ledge_teleports', true);
                 $ledge_teleports[$player_id][] = $selected_hex;
@@ -1383,17 +1508,8 @@ class FirstAscent extends Table
             $this->setGlobalVariable('rope_overlaps', $rope_overlaps);
         }
 
-        // Rope Gun
-        // if ($requirements['water'] > 0 && $character_id === '1') { $requirements['water']--; }
-
-        // Overstoker
-        // if ($overstoker) {
-        //     $requirements['psych']++;
-        //     $current_water = $this->getGlobalVariable('resource_tracker', true)[$player_id]['water'];
-        //     if ($requirements['water'] == $current_water + 1) { $requirements['water']--; }
-        // }
-
         // play required resources
+        $requirement_titles = [];
         if ($selected_resources) {
             sort($selected_resources);
             $selected_resources_db = self::getCollectionFromDB("SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_id IN (".implode(',', array_map('intval', $selected_resources)).")");
@@ -1402,7 +1518,6 @@ class FirstAscent extends Table
                 array_push($selected_resource_types, $asset['card_type_arg']);
             } 
 
-            $requirements_arr_for_log = [];
             $board_assets = $this->getGlobalVariable('board_assets', true);
 
             for ($i=1; $i<=count($selected_resources); $i++) {
@@ -1441,27 +1556,20 @@ class FirstAscent extends Table
                 }
                 $board_assets[$player_id][$type]["count"]++;
 
-                $asset_title = $this->asset_cards[$type_arg]['description'];
-                array_push($requirements_arr_for_log, "[{$asset_title}({$type_arg})]");
+                $asset_description = $this->asset_cards[$type_arg]['description'];
+                $formatted_asset_title = '[' . $asset_description . '(' . $type_arg . ')]';
+                $requirement_titles[] = $formatted_asset_title;
             }
             if ($requirements['water'] > 0 && !$extra_water) {
-                $water_for_log = $requirements['water'] . ' water';
-                array_push($requirements_arr_for_log, $water_for_log);
+                $water_for_log = $requirements['water'] . ' ' . clienttranslate('Water');
+                $requirement_titles[] = $water_for_log;
             }
             if ($requirements['psych'] > 0) {
-                $psych_for_log = $requirements['psych'] . ' psych';
-                array_push($requirements_arr_for_log, $psych_for_log);
+                $psych_for_log = $requirements['psych'] . ' ' . clienttranslate('Psych');
+                $requirement_titles[] = $psych_for_log;
             }
 
-            $requirements_for_log = '';
-            for ($i=0; $i<=count($requirements_arr_for_log)-1; $i++) {
-                if (count($requirements_arr_for_log) === 2 && $i === 0) { $requirements_for_log .= $requirements_arr_for_log[$i] . ' '; }
-                else if ($i < count($requirements_arr_for_log)-1) { $requirements_for_log .= $requirements_arr_for_log[$i] . ', '; }
-                else if (count($requirements_arr_for_log) > 1) { $requirements_for_log .= 'and ' . $requirements_arr_for_log[$i]; }
-                else if (count($requirements_arr_for_log) === 1) { $requirements_for_log .= $requirements_arr_for_log[$i]; }
-            }
-
-            // update resource_tracker
+            // update player resources
             $water = ($requirements['water'] != 0 && !$extra_water) ? $requirements['water'] : null;
             $psych = ($requirements['psych'] != 0) ? $requirements['psych'] : null;
             $this->updateResourceTracker($player_id, 'subtract', $water, $psych, $selected_resource_types, null, false, true);
@@ -1474,21 +1582,15 @@ class FirstAscent extends Table
             if ($requirements['water'] > 0 || $requirements['psych'] > 0) {
                 $requirements_arr_for_log = [];
                 if ($requirements['water'] > 0 && !$extra_water) {
-                    $water_for_log = $requirements['water'] . ' water';
-                    array_push($requirements_arr_for_log, $water_for_log);
+                    $water_for_log = $requirements['water'] . ' ' . clienttranslate('Water');
+                    $requirement_titles[] = $water_for_log;
                 }
                 if ($requirements['psych'] > 0) {
-                    $psych_for_log = $requirements['psych'] . ' psych';
-                    array_push($requirements_arr_for_log, $psych_for_log);
-                }
-                $requirements_for_log = '';
-                for ($i=0; $i<=count($requirements_arr_for_log)-1; $i++) {
-                    if (count($requirements_arr_for_log) === 2 && $i === 0) { $requirements_for_log .= $requirements_arr_for_log[$i] . ' '; }
-                    else if ($i < count($requirements_arr_for_log)-1) { $requirements_for_log .= $requirements_arr_for_log[$i] . ', '; }
-                    else if (count($requirements_arr_for_log) > 1) { $requirements_for_log .= 'and ' . $requirements_arr_for_log[$i]; }
-                    else if (count($requirements_arr_for_log) === 1) { $requirements_for_log .= $requirements_arr_for_log[$i]; }
+                    $psych_for_log = $requirements['psych'] . ' ' . clienttranslate('Psych');
+                    $requirement_titles[] = $psych_for_log;
                 }
 
+                // update player resources
                 $water = ($requirements['water'] != 0 && !$extra_water) ? $requirements['water'] : null;
                 $psych = ($requirements['psych'] != 0) ? $requirements['psych'] : null;
                 $this->updateResourceTracker($player_id, 'subtract', $water, $psych, [], null, false, true);
@@ -1496,7 +1598,7 @@ class FirstAscent extends Table
                 if ($psych) { $this->incStat($psych, "psych_spent", $player_id); }
             }
 
-            else { $requirements_for_log = 'nothing'; }
+            else { $requirement_titles_for_log = clienttranslate('nothing'); }
             
             $selected_resource_types = [];
             $selected_resources_db = [];
@@ -1504,33 +1606,46 @@ class FirstAscent extends Table
 
         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
         if ($selected_summit_betas) {
-
-            $requirements_for_log .= ' and ';
+            $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
             foreach ($selected_summit_betas as $type_arg) {
-
                 $token_id = array_search($type_arg, $hand_sb_tokens);
                 $this->cards_and_tokens->insertCardOnExtremePosition($token_id, 'summit_beta_discard', true);
+                $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $token_id);
+                $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                 $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
                 $token = $this->summit_beta_tokens[$type_arg];
                 $token_name = $token['description'];
-                $requirements_for_log .= '+' . $token_name . '(' . $type_arg . ')+, ';
+                $formatted_token_title = '+' . $token_name . '(' . $type_arg . ')+';
+                $requirement_titles[] = $formatted_token_title;
             }
-            $requirements_for_log = substr($requirements_for_log, 0, -2);
         }
+        if (empty($requirement_titles)) { $requirement_titles_for_log = clienttranslate('nothing'); }
+        else { $requirement_titles_for_log = $this->formatLogTitles($requirement_titles); }
 
-        $tokens_for_log = '';
+        $requirement_tokens = [];
         foreach ($selected_tokens as $type => $num) {
-            if ($num > 0) { $tokens_for_log .= $num . ' ' . ucfirst($type) . ', '; }
+            if ($num > 0) { $requirement_tokens[$type] = $num; }
         }
-        if ($tokens_for_log != '') {
-            $tokens_for_log = 'uses ' . $tokens_for_log;
-            $tokens_for_log = substr($tokens_for_log, 0, -2);
-            $tokens_for_log .= ' Permanent Asset Token(s) and ';
+        $i18n_for_notif = ['requirement_titles_for_log', 'pitch_for_log'];
+        $tokens_for_log = null;
+        if (empty($requirement_tokens)) {
+            $tokens_for_log = '';
+        } else {
+            $original_log_obj = $this->formatLogTitles($requirement_tokens);
+            $original_log_string = $original_log_obj['log'];
+            $original_args = $original_log_obj['args'];
+            $prefix_translated = clienttranslate('uses ');
+            $suffix_translated = clienttranslate(' Permanent Asset Token/s and ');
+            $new_combined_log_string = $prefix_translated . $original_log_string . $suffix_translated;
+            $tokens_for_log = $this->buildLogAction($new_combined_log_string, $original_args);
+            $i18n_for_notif[] = 'tokens_for_log';
         }
 
-        $pitch = $this->pitches[$selected_pitch]['description'];
-        $pitch_for_log = '{' . $pitch . '(' . $selected_pitch . ')}';
+        $pitch_title = $this->pitches[$selected_pitch]['description'];
+        $formatted_pitch_title = ['{' . $pitch_title . '(' . $selected_pitch . ')}'];
+        $pitch_for_log = $this->formatLogTitles($formatted_pitch_title);
 
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
         $player_water_psych = $this->getGlobalVariable('water_psych_tracker')->$player_id;
@@ -1553,11 +1668,16 @@ class FirstAscent extends Table
         $score_tracker[$player_id]['summit'] += $summit_points;
         $this->setGlobalVariable('score_tracker', $score_tracker);
 
-        self::notifyAllPlayers("confirmOpponentRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirements_for_log} and climbs ${pitch_for_log}'), array(
+        // unset bailed pitch
+        $bailed_pitch = $this->getGlobalVariable('bailed_pitch', true);
+        $bailed_pitch[$player_id] = null;
+        $this->setGlobalVariable('bailed_pitch', $bailed_pitch);
+
+        self::notifyAllPlayers("confirmOpponentRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
                 'player_name' => self::getActivePlayerName(),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
-                'requirements_for_log' => $requirements_for_log,
+                'requirement_titles_for_log' => $requirement_titles_for_log,
                 'pitch_for_log' => $pitch_for_log,
                 'player_id' => $player_id,
                 'selected_resource_types' => $selected_resource_types,
@@ -1570,20 +1690,24 @@ class FirstAscent extends Table
                 'new_points' => $new_points,
                 'shared_objectives_tracker' => $shared_objectives_tracker,
                 'pitch_rope_order' => $pitches_rope_order[$selected_hex],
+                'bailed_pitch' => $bailed_pitch,
+                'pitch_sets' => $pitch_sets,
                 'preserve' => ['player_id'],
+                'i18n' => $i18n_for_notif,
         ));
 
-        self::notifyPlayer($player_id, "confirmYourRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirements_for_log} and climbs ${pitch_for_log}'), array(
+        self::notifyPlayer($player_id, "confirmYourRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
                 'player_name' => self::getActivePlayerName(),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
-                'requirements_for_log' => $requirements_for_log,
+                'requirement_titles_for_log' => $requirement_titles_for_log,
                 'pitch_for_log' => $pitch_for_log,
                 'selected_pitch' => $selected_pitch,
                 'player_id' => $player_id,
                 'selected_resource_types' => $selected_resource_types,
                 'selected_resources' => $selected_resources,
                 'player_resources' => $player_resources,
+                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                 'hand_count' => count($this->getHandAssets($player_id)),
                 'water_psych_requirements' => $water_psych_requirements,
                 'selected_resources_db' => $selected_resources_db,
@@ -1591,14 +1715,38 @@ class FirstAscent extends Table
                 'new_points' => $new_points,
                 'shared_objectives_tracker' => $shared_objectives_tracker,
                 'pitch_rope_order' => $pitches_rope_order[$selected_hex],
+                'bailed_pitch' => $bailed_pitch,
+                'pitch_sets' => $pitch_sets,
+                'i18n' => $i18n_for_notif,
         ));
+
+        // Trifecta selections for log
+        if ($trifecta_arr !== ['']) {
+            $trifecta_log_message = [
+                'log' => clienttranslate('${player_name} climbs a ${exposure} ${type} Trifecta'),
+                'args' => [
+                    'player_name' => self::getActivePlayerName(),
+                    'exposure' => COMMON_TRANSLATIONS[strtoupper($trifecta_arr[0])],
+                    'type' => COMMON_TRANSLATIONS[strtoupper($trifecta_arr[1])],
+                    'i18n' => ['exposure', 'type']
+                ]
+            ];
+            self::notifyAllPlayers('log_only', '${trifecta_log_message}', [
+                'trifecta_log_message' => $trifecta_log_message,
+                'i18n' => ['trifecta_log_message']
+            ]);
+        }
 
         // check for and resolve Spider Stick
         if (in_array('12', array_values($hand_sb_tokens)) && $this->pitches[$selected_pitch]['value'] < 3) {
-
+            
             $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
             $spider_stick_id = array_search('12', $hand_sb_tokens);
             $this->cards_and_tokens->insertCardOnExtremePosition($spider_stick_id, 'summit_beta_discard', true);
+            $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+            $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $spider_stick_id);
+            $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+            $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
             $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
             $asset_board_token_tracker = $this->getGlobalVariable('asset_board_token_tracker', true);
@@ -1609,11 +1757,16 @@ class FirstAscent extends Table
             $score_tracker = $this->getGlobalVariable('score_tracker', true);
             $score_tracker[$player_id]['tokens'] += 2;
             $this->setGlobalVariable('score_tracker', $score_tracker);
+            $new_points_tokens = $this->getGlobalVariable('asset_board_token_tracker', true)[$player_id]['points_tokens'];
 
             self::notifyAllPlayers("useSpiderStick", clienttranslate('${player_name} uses +Spider Stick(12)+ while climbing a 1 or 2 point Pitch and gains a 2-Point Token'), [
                 'player_name' => self::getActivePlayerName(),
                 'player_id' => $player_id,
                 'token_id' => array_search('12', $this->getGlobalVariable('token_identifier', true)),
+                'new_points_tokens' => $new_points_tokens,
+            ]);
+            self::notifyPlayer($player_id, "updatePlayerTokenTracker", '', [
+                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
             ]);
         }
 
@@ -1630,6 +1783,7 @@ class FirstAscent extends Table
                     'climbing_card_info_2' => $climbing_card_info_2,
             ]);
             $this->undoSavepoint();
+            if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
             $this->gamestate->nextState('crimperClimbingCards');
         }
 
@@ -1644,6 +1798,7 @@ class FirstAscent extends Table
             $this->setGlobalVariable('risk_it_info', []);
             $this->setGlobalVariable('risked_requirements', []);
             $this->undoSavepoint();
+            if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
             if (in_array($climbing_card_type_arg, ['2', '6', '36', '41', '50', '54', '63'])) {
 
                 $this->gamestate->nextState('addTokenToPitch');
@@ -1652,16 +1807,20 @@ class FirstAscent extends Table
         }
     }
 
-    function riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water) {
+    function riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
         self::checkAction('riskIt');
         $player_id = self::getActivePlayerId();
         $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true)[$player_id];
+        $cards_in_hand = array_sum($resource_tracker['skills']);
         $resource_tracker['skills']['any_asset'] = array_sum($resource_tracker['skills']);
         $resource_tracker['skills']['any_skill'] = array_sum($resource_tracker['skills']) - $resource_tracker['skills']['gear'] - $resource_tracker['skills']['any_asset'];
         $pitch_requirements = $requirements;
         $this->setGlobalVariable('risk_it', true);
-        $this->setGlobalVariable('risked_assets', $selected_resources);
+        $risked_assets = ['selected_resources' => $selected_resources];
+        $risked_assets['selected_summit_betas'] = $selected_summit_betas;
+        $risked_assets['selected_tokens'] = $selected_tokens;
+        $this->setGlobalVariable('risked_assets', $risked_assets);
         $pitch_tracker = $this->getGlobalVariable('pitch_tracker')->$player_id;
         $current_pitch = end($pitch_tracker);
         $board = $this->getGlobalVariable('board');
@@ -1669,19 +1828,29 @@ class FirstAscent extends Table
         $this->setGlobalVariable('risk_pitches', $risk_pitches);
         $this->incStat(1, "risky_climbs", $player_id);
 
+        $player_name = self::getActivePlayerName();
         $pitch = $this->pitches[$selected_pitch]['description'];
-        $pitch_for_log = '{' . $pitch . '(' . $selected_pitch . ')}';
-        $risk_log = '${player_name} takes a risk in attempting ${pitch_for_log}';
+        $formatted_pitch_title = ['{' . $pitch . '(' . $selected_pitch . ')}'];
+        $pitch_for_log = $this->formatLogTitles($formatted_pitch_title);
+        $risk_log = [
+            'log' => clienttranslate('${player_name} takes a risk in attempting ${pitch_for_log}'),
+            'args' => [
+                'player_name' => $player_name,
+                'pitch_for_log' => $pitch_for_log,
+                'i18n' => ['pitch_for_log']
+            ]
+        ];
 
-        self::notifyAllPlayers("riskShowAssets", clienttranslate($risk_log), array(
+        self::notifyAllPlayers("riskShowAssets", '${risk_log}', array(
             'player_name' => self::getActivePlayerName(),
-            'pitch_for_log' => $pitch_for_log,
             'player_id' => $player_id,
             'selected_resources' => $selected_resources,
+            'risk_log' => $risk_log,
+            'i18n' => ['risk_log'],
         ));
 
         $face_rolled = bga_rand(1, 3);
-        // $face_rolled = 3;
+        // $face_rolled = 1;
 
         $requirements_num = 0;
         foreach ($pitch_requirements as $type => $num) {
@@ -1708,30 +1877,29 @@ class FirstAscent extends Table
                 $requirements_num++;
             }
         }
-        $hand_cards = array_sum($resource_tracker['skills']);
         $board_cards = array_sum($resource_tracker['asset_board']['skills']);
-        $available_cards = $hand_cards + $board_cards;
+        $available_cards = $cards_in_hand + $board_cards - count($selected_resources);
 
         switch($face_rolled) {
 
-            case 1: $die_log = '${player_name} rolls a checkmark and successfully climbs the pitch'; break;
+            case 1: $die_log = clienttranslate('${player_name} rolls a checkmark and successfully climbs the pitch'); break;
             case 2: 
                 if ($available_cards >= 2) {
-                    $die_log = '${player_name} rolls -2 Cards and will choose an opponent and give them 2 Asset Cards';
+                    $die_log = clienttranslate('${player_name} rolls -2 Cards and will choose an opponent and give them 2 Asset Cards');
                 }
                 else {
-                    $die_log = '${player_name} rolls -2 Cards but does not have 2 cards to give. They must retreat and will draw only 1 card during the next Rerack Phase';
+                    $die_log = clienttranslate('${player_name} rolls -2 Cards but does not have 2 cards to give. He must retreat and will draw only 1 card during the next Rerack Phase');
                 }
                 break;
             case 3: 
                 if ($available_cards >= 1 && $resource_tracker['psych'] >= 1 + $requirements['psych']) {
-                    $die_log = '${player_name} rolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych';
+                    $die_log = clienttranslate('${player_name} rolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych');
                 }
                 else {
                     if ($resource_tracker['psych'] === $requirements['psych']) {
-                        $die_log = '${player_name} rolls -1 Card and -1 Psych but they would need that Psych to climb the pitch. They must retreat and will draw only 1 card during the next Rerack Phase';
+                        $die_log = clienttranslate('${player_name} rolls -1 Card and -1 Psych but he would need that Psych to climb the pitch. He must retreat and will draw only 1 card during the next Rerack Phase');
                     } else {
-                        $die_log = '${player_name} rolls -1 Card and -1 Psych but they do not have the required resources. They must retreat and will draw only 1 card during the next Rerack Phase';
+                        $die_log = clienttranslate('${player_name} rolls -1 Card and -1 Psych but he does not have the required resources. He must retreat and will draw only 1 card during the next Rerack Phase');
                     }
                 }
                 break;
@@ -1747,14 +1915,15 @@ class FirstAscent extends Table
             'risk_summit_beta' => $risk_summit_beta,
         ));
 
-        self::notifyAllPlayers("log_only", clienttranslate($die_log), array(
+        self::notifyAllPlayers("log_only", $die_log, array(
             'player_name' => self::getActivePlayerName(),
+            'die_log' => $die_log,
         ));
 
         if ($face_rolled === 1) { // checkmark
 
             $this->setGlobalVariable('risked_assets', []);
-            $this->confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water);
+            $this->confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water);
         }
 
         else if ($face_rolled === 2) { // 2 cards
@@ -1762,15 +1931,17 @@ class FirstAscent extends Table
             if (!empty(array_intersect(['1', '4', '7', '11'], $hand_sb_tokens))) {
 
                 $this->setGlobalVariable('face_rolled', 2);
-                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water]);
+                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water]);
                 $this->setGlobalVariable('riskSummitBetaFace', 2);
+                if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                 $this->gamestate->nextState('riskSummitBeta');
             }
 
             else if ($available_cards >= 2) {
 
-                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water]);
+                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water]);
                 $this->setGlobalVariable('risk_it_info', [2]);
+                if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                 $this->gamestate->nextState('selectOpponent');
             }
 
@@ -1793,15 +1964,17 @@ class FirstAscent extends Table
             if (!empty(array_intersect(['1', '4', '7', '11'], $hand_sb_tokens))) {
                 
                 $this->setGlobalVariable('face_rolled', 3);
-                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water]);
+                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water]);
                 $this->setGlobalVariable('riskSummitBetaFace', 3);
+                if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                 $this->gamestate->nextState('riskSummitBeta');
             }
 
             else if ($available_cards >= 1 && $resource_tracker['psych'] >= 1 + $requirements['psych']) {
 
-                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $extra_water]);
+                $this->setGlobalVariable('risked_requirements', [$requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water]);
                 $this->setGlobalVariable('risk_it_info', [3]);
+                if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                 $this->gamestate->nextState('selectOpponent');
             }
 
@@ -1818,6 +1991,39 @@ class FirstAscent extends Table
                 $this->gamestate->nextState('nextClimb');
             }
         }
+    }
+
+    function confirmBail() {
+        self::checkAction('confirmBail');
+        
+        $player_id = self::getActivePlayerId();
+        $bailed_pitch = $this->getGlobalVariable('bailed_pitch', true);
+        $pitch_tracker = $this->getGlobalVariable('pitch_tracker')->$player_id;
+        $pitch_sets = $this->getGlobalVariable('pitch_sets', true);
+        $player_sets = $pitch_sets[$player_id];
+        $previous_hex = end($player_sets)[1];
+
+        $this->updateResourceTracker($player_id, 'subtract', 1, 1);
+
+        if (count($pitch_tracker) < 3) {
+            $bailed_pitch[$player_id] = '0';
+        } else {
+            $bailed_pitch[$player_id] = $pitch_tracker[count($pitch_tracker)-2];
+        }
+        $this->setGlobalVariable('bailed_pitch', $bailed_pitch);
+
+        $player_sets[] = [$previous_hex, $bailed_pitch[$player_id]];
+        $pitch_sets[$player_id] = $player_sets;
+        $this->setGlobalVariable('pitch_sets', $pitch_sets);
+
+        self::notifyAllPlayers('confirmBail', clienttranslate('${player_name} bails out. He loses 1 Water and 1 Psych and will not take any Assets during the next Rerack Phase'), [
+            'player_name' => self::getActivePlayerName(),
+            'player_id' => $player_id,
+            'bailed_pitch' => $bailed_pitch[$player_id],
+            'pitch_sets' => $pitch_sets,
+        ]);
+
+        $this->gamestate->nextState('nextClimb');
     }
 
     function confirmTrade($traded_resources, $portaledge_to_draw) {
@@ -1850,12 +2056,19 @@ class FirstAscent extends Table
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
         $hand_count = count($this->getHandAssets($player_id));
         $refill_portaledge = $this->getGlobalVariable('refill_portaledge', true);
-        $drawn_for_log = ucfirst($portaledge_to_draw);
-        $discard_for_log = ucfirst($discard_type);
+        $drawn_for_log = COMMON_TRANSLATIONS[strtoupper($portaledge_to_draw)];
+        $discard_for_log = COMMON_TRANSLATIONS[strtoupper($discard_type)];
         $drawn_name = $this->asset_cards[$drawn_type_arg]['description'];
-        $drawn_private = "[{$drawn_name}({$drawn_type_arg})]";
+        $drawn_private = [
+            'log' => "[{$drawn_name}({$drawn_type_arg})]",
+            'args' => [
+                'drawn_name' => $drawn_name,
+                'drawn_type_arg' => $drawn_type_arg,
+                'i18n' => ['drawn_name'],
+            ]
+        ];
 
-        self::notifyAllPlayers('confirmTradePublic', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws 1 ${drawn_for_log} Asset from The Portaledge'), [
+        self::notifyAllPlayers('confirmTradePublic', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws 1 ${drawn_for_log} Asset from the Portaledge'), [
             'player_name' => self::getActivePlayerName(),
             'discard_for_log' => $discard_for_log,
             'drawn_for_log' => $drawn_for_log,
@@ -1866,10 +2079,12 @@ class FirstAscent extends Table
             'last_card' => $last_card,
             'refill_portaledge' => $refill_portaledge,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
             'preserve' => ['player_id'],
+            'i18n' => ['discard_for_log', 'drawn_for_log'],
         ]);
 
-        self::notifyPlayer($player_id, 'confirmTradePrivate', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws ${drawn_private} from The Portaledge'), [
+        self::notifyPlayer($player_id, 'confirmTradePrivate', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws ${drawn_private} from the Portaledge'), [
             'player_name' => self::getActivePlayerName(),
             'discard_for_log' => $discard_for_log,
             'drawn_private' => $drawn_private,
@@ -1881,6 +2096,8 @@ class FirstAscent extends Table
             'last_card' => $last_card,
             'refill_portaledge' => $refill_portaledge,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
+            'i18n' => ['discard_for_log', 'drawn_private'],
         ]);
     }
 
@@ -1976,7 +2193,9 @@ class FirstAscent extends Table
 
             $portaledge_type_arg = [$portaledge_draw['type_arg']];
             $portaledge_name = $this->asset_cards[$portaledge_type_arg[0]]['description'];
-            $portaledge_draw_for_log = clienttranslate(", gaining [${portaledge_name}(${portaledge_type_arg[0]})]");
+            $formatted_portaledge_name = ['[' . $portaledge_name . '(' . $portaledge_type_arg[0] . ')]'];
+            $portaledge_draw_for_log = $this->formatLogTitles($formatted_portaledge_name);
+            $portaledge_draw_for_log['log'] = ', ' . clienttranslate('gaining') . ' ' . $portaledge_draw_for_log['log'];
             $portaledge_type = $type;
         } }
 
@@ -1997,19 +2216,42 @@ class FirstAscent extends Table
         if (array_key_exists('spread_draw', $choice_args)) { $climbing_card_info['spread_draw'] = true; }
 
         // gaining a summit beta token
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
         $gain_summit_beta_token = ($choice_args['benefit'] === 'summitBetaToken') ? true : false;
         if ($gain_summit_beta_token) {
+
+            $pile_remaining = count($this->cards_and_tokens->getCardsInLocation('summit_beta_supply'));
+            if ($pile_remaining === 0) {
+                $this->summitBetaReshuffle();
+            }
             $summit_beta_token = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', $player_id);
+            $player_token_tracker = $this->addHandSummitBeta($hand_token_tracker[$player_id], $summit_beta_token['id']);
+            $hand_token_tracker[$player_id] = $player_token_tracker;
+            $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
+            $last_token = $pile_remaining > 1 ? false : true;
             $summit_beta_type_arg = $summit_beta_token['type_arg'];
             $summit_beta_name = $this->summit_beta_tokens[$summit_beta_type_arg]['description'];
-            $summit_beta_for_log = '+' . $summit_beta_name . '(' . $summit_beta_type_arg . ')+';
+            $summit_beta_for_log = [
+                'log' => '+' . '${summit_beta_name}' . '(' . '${summit_beta_type_arg}' . ')+',
+                'args' => [
+                    'summit_beta_name' => $summit_beta_name,
+                    'summit_beta_type_arg' => $summit_beta_type_arg,
+                    'i18n' => ['summit_beta_name']
+                ]
+            ];
         }
 
         // gaining a symbol token
         $gain_symbol_token = ($choice_args['benefit'] === 'symbolToken') ? true : false;
         if ($gain_symbol_token) {
             $symbol_type = $choice_args['symbol_type'];
-            $symbol_for_log = $choice_args['symbol_for_log'];
+            $symbol_for_log = [
+                'log' => '${symbol_type}',
+                'args' => [
+                    'symbol_type' => COMMON_TRANSLATIONS[strtoupper($choice_args['symbol_type'])],
+                    'i18n' => ['symbol_type']
+                ]
+            ];
         }
 
         // selecting an opponent
@@ -2041,13 +2283,44 @@ class FirstAscent extends Table
         // conditions above, resolutions below
         // *****
 
+        $player_name = self::getActivePlayerName();
         $climbing_card_name = $climbing_card['description'];
-        $climbing_card_for_log = '/' . $climbing_card_name . '(' . $card_type . ')\\';
+        $climbing_card_for_log = [
+            'log' => '/' . '${climbing_card_name}' . '(' . '${card_type}' . ')\\',
+            'args' => [
+                'climbing_card_name' => $climbing_card_name,
+                'card_type' => $card_type,
+                'i18n' => ['climbing_card_name']
+            ]
+        ];
         $choice_flavor_for_log = $climbing_card['effect_' . $choice . '_flavor'];
         $choice_effect_for_log = $climbing_card['effect_' . $choice];
-        $climbing_log_all = '${climbing_card_for_log}: ${player_name} chooses ${choice_flavor} ${choice_effect}';
-        $climbing_log = $portaledge_draw ? $climbing_log_all . $portaledge_draw_for_log : $climbing_log_all;
-        if ($portaledge_draw) { $climbing_log = $climbing_log_all . $portaledge_draw_for_log; }
+        $climbing_log_all = [
+            'log' => '${climbing_card_for_log}: ${player_name} chooses ${choice_flavor} ${choice_effect}',
+            'args' => [
+                'climbing_card_for_log' => $climbing_card_for_log,
+                'player_name' => $player_name,
+                'choice_flavor' => $choice_flavor_for_log,
+                'choice_effect' => $choice_effect_for_log,
+                'i18n' => ['climbing_card_for_log', 'choice_flavor', 'choice_effect']
+            ]
+        ];
+        if ($portaledge_draw) {
+            $combined_args = $portaledge_draw_for_log['args'] ?? [];
+            foreach ($climbing_log_all['args'] as $key => $value) {
+                if ($key === 'i18n') {
+                    $combined_args['i18n'] = array_merge($combined_args['i18n'], $value);
+                } else {
+                    $combined_args[$key] = $value;
+                }
+            }
+            $climbing_log = [
+                'log' => $climbing_log_all['log'] . $portaledge_draw_for_log['log'],
+                'args' => $combined_args
+            ];
+        } else {
+            $climbing_log = $climbing_log_all;
+        }
 
         $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
         $hand_count = count($this->getHandAssets($player_id));
@@ -2068,11 +2341,9 @@ class FirstAscent extends Table
                     'discard_num' => $discard_num,
                     'final_state' => 'discardAssets',
                 ));
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                 $this->setGlobalVariable('climbing_card_private', $climbing_card_private);
@@ -2081,11 +2352,9 @@ class FirstAscent extends Table
 
             case $select_opponent:
 
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                 $this->gamestate->nextState('selectOpponent');
@@ -2099,11 +2368,9 @@ class FirstAscent extends Table
                     $climbing_card_private = ['portaledge_type_arg' => $portaledge_type_arg];
                     $climbing_card_info['portaledge_id'] = $portaledge_draw['id'];
                 }
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
 
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
@@ -2121,11 +2388,9 @@ class FirstAscent extends Table
                 }
 
                 $climbing_card_info['discard_num'] = $discard_num;
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                 if ($choice_args['benefit'] == 'summitBetaToken') { $this->setGlobalVariable('climbing_card_private', $climbing_card_private); }
@@ -2134,22 +2399,24 @@ class FirstAscent extends Table
 
             case $steal_asset:
 
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
 
                 if ($jesus_piece) {
                     self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
-                        'player_name' => self::getActivePlayerName(),
+                        'player_name' => $player_name,
                         'player_id' => $player_id,
                     ));
 
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     $jesus_piece_id = array_search('10', $hand_sb_tokens);
                     $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                    $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                    $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                    $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $this->incStat(1, "played_summit_beta_tokens", $player_id);
                 }
 
@@ -2179,23 +2446,25 @@ class FirstAscent extends Table
                     'portaledge_num' => $portaledge_num,
                     'final_state' => 'selectPortaledge',
                 ));
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
 
                 if ($jesus_piece) {
                     self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
-                        'player_name' => self::getActivePlayerName(),
+                        'player_name' => $player_name,
                         'player_id' => $player_id,
                     ));
 
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     $jesus_piece_id = array_search('10', $hand_sb_tokens);
                     $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                    $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                    $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                    $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $this->incStat(1, "played_summit_beta_tokens", $player_id);
                 }
                 
@@ -2209,7 +2478,7 @@ class FirstAscent extends Table
 
             case $risk_die:
                 $face_rolled = bga_rand(1, 3);
-                // $face_rolled = 2;
+                // $face_rolled = 1;
 
                 $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                 $lucky_chalkbag = array_search('11', $hand_sb_tokens) ? true : false;
@@ -2222,11 +2491,9 @@ class FirstAscent extends Table
                 $climbing_card_info['face_rolled'] = $face_rolled;
                 $available_assets = count($this->getHandAssets($player_id)) + count($this->getBoardAssets($player_id));
 
-                self::notifyAllPlayers("log_only", clienttranslate($climbing_log_all), array(
-                    'player_name' => self::getActivePlayerName(),
-                    'climbing_card_for_log' => $climbing_card_for_log,
-                    'choice_flavor' => $choice_flavor_for_log,
-                    'choice_effect' => $choice_effect_for_log,
+                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                    'climbing_log_all' => $climbing_log_all,
+                    'i18n' => ['climbing_log_all'],
                 ));
 
                 if ($face_rolled === 1) { // checkmark
@@ -2234,7 +2501,7 @@ class FirstAscent extends Table
                     $climbing_card_info['portaledge_num'] = 3;
                     $climbing_card_info['final_state'] = 'selectPortaledge';
                     self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls a checkmark and will draw 3 cards from the Portaledge'), array(
-                        'player_name' => self::getActivePlayerName(),
+                        'player_name' => $player_name,
                     ));
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                     $this->gamestate->nextState('selectPortaledge');
@@ -2243,27 +2510,29 @@ class FirstAscent extends Table
                 else if ($face_rolled === 2) { // -2 cards
 
                     if ($available_assets > 1) { $die_log = clienttranslate('${player_name} rolls -2 Cards and will choose an opponent and give them 2 Asset Cards'); }
-                    else if ($available_assets < 2) { $die_log = clienttranslate('${player_name} rolls -2 Cards but does not have 2 cards to give. They will draw only 1 card during the next Rerack Phase'); }
+                    else if ($available_assets < 2) { $die_log = clienttranslate('${player_name} rolls -2 Cards but does not have 2 cards to give. He will draw only 1 card during the next Rerack Phase'); }
 
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     if (array_search('11', $hand_sb_tokens)) {
                         self::notifyAllPlayers("log_only", $die_log, array(
-                            'player_name' => self::getActivePlayerName(),
+                            'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                         $this->setGlobalVariable('riskSummitBetaFace', 2);
+                        if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                         $this->gamestate->nextState('riskSummitBeta');
                     }
 
                     else if ($available_assets > 1) {
                         $climbing_card_info['discard_num'] = 2;
-                        $climbing_card_info['titlebar_message_opponent'] = 'get 2 of his Asset Cards';
-                        $climbing_card_info['titlebar_message'] = 'get 2 of your Asset Cards';
+                        $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 2 of his Asset Cards');
+                        $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 2 of your Asset Cards');
                         $climbing_card_info['give_opponent'] = true;
                         self::notifyAllPlayers("log_only", $die_log, array(
-                            'player_name' => self::getActivePlayerName(),
+                            'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
+                        if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                         $this->gamestate->nextState('selectOpponent');
 
                     } else if ($available_assets < 2) {
@@ -2271,7 +2540,7 @@ class FirstAscent extends Table
                         $rerack_1[] = $player_id;
                         $this->setGlobalVariable('rerack_1', $rerack_1);
                         self::notifyAllPlayers("log_only", $die_log, array(
-                                'player_name' => self::getActivePlayerName(),
+                                'player_name' => $player_name,
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                         $this->setGlobalVariable('climbing_card_info', array());
@@ -2285,27 +2554,29 @@ class FirstAscent extends Table
                     if (array_search('11', $hand_sb_tokens)) {
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                         $this->setGlobalVariable('riskSummitBetaFace', 3);
+                        if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                         $this->gamestate->nextState('riskSummitBeta');
                     }
 
                     else if ($available_assets > 0 && $player_psych > 0) {
                         $climbing_card_info['discard_num'] = 1;
                         $climbing_card_info['give_psych'] = true;
-                        $climbing_card_info['titlebar_message_opponent'] = 'get 1 of his Asset Cards and 1 of his Psych';
-                        $climbing_card_info['titlebar_message'] = 'get 1 of your Asset Cards and 1 of your Psych';
+                        $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 1 of his Asset Cards and 1 of his Psych');
+                        $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 1 of your Asset Cards and 1 of your Psych');
                         $climbing_card_info['give_opponent'] = true;
                         self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych'), array(
-                                'player_name' => self::getActivePlayerName(),
+                                'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
+                        if ($this->tableOptions->isRealTime()) { $this->giveExtraTime($player_id); }
                         $this->gamestate->nextState('selectOpponent');
 
                     } else if ($available_assets < 1 || $player_psych < 1) {
                         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
                         $rerack_1[] = $player_id;
                         $this->setGlobalVariable('rerack_1', $rerack_1);
-                        self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych but they do not have the required resources. They will draw only 1 card during the next Rerack Phase'), array(
-                                'player_name' => self::getActivePlayerName(),
+                        self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych but he does not have the required resources. He will draw only 1 card during the next Rerack Phase'), array(
+                                'player_name' => $player_name,
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                         $this->setGlobalVariable('climbing_card_info', array());
@@ -2316,12 +2587,10 @@ class FirstAscent extends Table
 
             case $bespoke:
 
-                foreach(array_keys($this->getGlobalVariable('player_names_and_colors', true)) as $id) {
-                    self::notifyPlayer($id, "log_only", clienttranslate($climbing_log_all), array(
-                        'player_name' => self::getActivePlayerName(),
-                        'climbing_card_for_log' => $climbing_card_for_log,
-                        'choice_flavor' => $choice_flavor_for_log,
-                        'choice_effect' => $choice_effect_for_log,
+                foreach(array_keys($names_and_colors) as $id) {
+                    self::notifyPlayer($id, "log_only", '${climbing_log_all}', array(
+                        'climbing_log_all' => $climbing_log_all,
+                        'i18n' => ['climbing_log_all'],
                     ));
                 }
 
@@ -2352,7 +2621,7 @@ class FirstAscent extends Table
 
                         $drawn_gear_cards = [];
                         $opponents = [];
-                        foreach(array_keys($this->getGlobalVariable('player_names_and_colors', true)) as $id) {
+                        foreach(array_keys($names_and_colors) as $id) {
                             if ($id != self::getActivePlayerId()) {
 
                                 $last_card = [];
@@ -2366,14 +2635,21 @@ class FirstAscent extends Table
                                 $this->updateResourceTracker($id, 'add', null, null, $new_asset_type_arg);
 
                                 $drawn_gear_cards[$id] = array('id' => $new_asset['id'], 'type_arg' => $new_asset['type_arg']);
-                                $asset_for_log = clienttranslate("[${new_asset_name}(${new_asset_type_arg[0]})]");
+                                $asset_for_log = [
+                                    'log' => "[${new_asset_name}(${new_asset_type_arg[0]})]",
+                                    'args' => [
+                                        'new_asset_name' => $new_asset_name,
+                                        'new_asset_type_arg' => $new_asset_type_arg,
+                                        'i18n' => ['new_asset_name']
+                                    ]
+                                ];
                                 $assets_for_log[$id] = $asset_for_log;
-                                $opponents[$id] = $this->getGlobalVariable('player_names_and_colors', true)[$id]['name'];
+                                $opponents[$id] = $names_and_colors[$id]['name'];
                             }
                         }
 
                         if ($climbing_card_info['type_arg'] == 24) {
-                            foreach(array_keys($this->getGlobalVariable('player_names_and_colors', true)) as $id) {
+                            foreach(array_keys($names_and_colors) as $id) {
                                 if ($id != $player_id) {
                                     self::notifyPlayer($id, "confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                                         'player_name' => self::getActivePlayerName(),
@@ -2382,17 +2658,20 @@ class FirstAscent extends Table
                                         'symbol_type' => $symbol_type,
                                         'climbing_card_type_arg' => $climbing_card_info['type_arg'],
                                         'preserve' => ['player_id'],
+                                        'i18n' => ['symbol_for_log'],
                                     ));
                                 }
                             }
 
-                            self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token and all opponents draw a Gear card from the Portaledge'), array(
+                            self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} token and all opponents draw a Gear card from the Portaledge'), array(
                                     'player_name' => self::getActivePlayerName(),
                                     'symbol_for_log' => $symbol_for_log,
                                     'symbol_type' => $symbol_type,
                                     'player_id' => $player_id,
                                     'player_resources' => $player_resources,
+                                    'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                                     'climbing_card_type_arg' => $climbing_card_info['type_arg'],
+                                    'i18n' => ['symbol_for_log'],
                             ));
                         }
 
@@ -2400,33 +2679,49 @@ class FirstAscent extends Table
                             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                         ));
 
-                        foreach(array_keys($this->getGlobalVariable('player_names_and_colors', true)) as $id) {
+                        $players_info = $this->getGlobalVariable('player_names');
+                        foreach(array_keys($names_and_colors) as $id) {
                             if ($id != $player_id) {
                                 $asset_for_log = $assets_for_log[$id];
                                 
-                                $other_opponents = "";
-                                $other_opponents_names = [];
+                                $current_player_name = $opponents[$id];
+                                $other_opponents = ['log' => '', 'args' => []];
+                                $i = 0;
+                                $other_opponents_num = count(array_keys($names_and_colors))-2;
                                 foreach($opponents as $opponent_id => $opponent_name) {
-                                    if ($opponent_id != $id) { $other_opponents_names[] = $opponent_name; }
-                                }
-                                $other_opponent_num = count($opponents) - 1;
-                                for ($i=0; $i<=$other_opponent_num-1; $i++) {
-                                    $other_opponents .= '@' . $other_opponents_names[$i] . '@';
-                                    if ($i < $other_opponent_num-1 && $other_opponent_num > 2) { $other_opponents .= ','; }
-                                    $other_opponents .= ' ';
-                                    if ($i == $other_opponent_num-2) { $other_opponents .= 'and '; }
+                                    if ($opponent_id != $id) {
+                                        $other_opponents['log'] .= '@'. $opponent_name . '@';
+                                        if ($i < $other_opponents_num-1 && $other_opponents_num > 2) { $other_opponents['log'] .= ','; }
+                                        $other_opponents['log'] .= ' ';
+                                        if ($i == $other_opponents_num-2) { $other_opponents['log'] .= clienttranslate('and') . ' '; }
+                                        $other_opponents['args']['$opponent_' . $i] = $opponent_name;
+                                        $i++;
+                                    }
                                 }
 
-                                $log_message = '${player_name} draws ${asset_for_log} from the Portaledge';
-                                if ($other_opponent_num > 0) { $log_message .= '. ${other_opponents} also draw a Gear card from the Portaledge'; }
+                                $log_message = [
+                                    'log' => clienttranslate('${player_name} draws ${asset_for_log} from the Portaledge'),
+                                    'args' => [
+                                        'player_name' => $current_player_name,
+                                        'asset_for_log' => $asset_for_log,
+                                        'i18n' => ['asset_for_log']
+                                    ]
+                                ];
+                                if ($other_opponents_num > 0) {
+                                    $log_message['log'] .= clienttranslate('. ${other_opponents} also draw/s a Gear card from the Portaledge');
+                                    $log_message['args']['other_opponents'] = $other_opponents;
+                                    $log_message['args']['i18n'][] = 'other_opponents';
+                                }
 
-                                self::notifyPlayer($id, "climbingCards15And24Private", clienttranslate($log_message), array(
-                                    'player_name' => $this->getGlobalVariable('player_names_and_colors', true)[$id]['name'],
-                                    'asset_for_log' => $asset_for_log,
-                                    'other_opponents' => clienttranslate($other_opponents),
+                                self::notifyPlayer($id, "climbingCards15And24Private", '${log_message}', array(
+                                    'player_name' => $player_name,
+                                    'log_message' => $log_message,
+                                    'other_opponents' => $other_opponents,
                                     'new_asset_id' => $drawn_gear_cards[$id]['id'],
                                     'new_asset_type_arg' => $drawn_gear_cards[$id]['type_arg'],
                                     'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                                    'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
+                                    'i18n' => ['log_message'],
                                 ));
                             }
                         }
@@ -2464,14 +2759,19 @@ class FirstAscent extends Table
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     $jesus_piece_id = array_search('10', $hand_sb_tokens);
                     $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                    $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                    $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                    $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $this->incStat(1, "played_summit_beta_tokens", $player_id);
                 }
 
-                self::notifyAllPlayers("confirmClimbingChoiceOpponent", clienttranslate($climbing_log_all), array(
+                self::notifyAllPlayers("confirmClimbingChoiceOpponent", '${climbing_log_all}', array(
                     'player_name' => self::getActivePlayerName(),
                     'climbing_card_for_log' => $climbing_card_for_log,
                     'choice_flavor' => $choice_flavor_for_log,
                     'choice_effect' => $choice_effect_for_log,
+                    'climbing_log_all' => $climbing_log_all,
                     'player_id' => $player_id,
                     'choice_args' => $choice_args,
                     'cost' => $cost,
@@ -2485,7 +2785,9 @@ class FirstAscent extends Table
                     'last_card' => $last_card,
                     'refill_portaledge' => $refill_portaledge,
                     'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                    'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                     'preserve' => ['player_id'],
+                    'i18n' => ['climbing_log_all'],
                 ));
                 self::notifyPlayer($player_id, "confirmClimbingChoice", '', array(
                     'player_id' => $player_id,
@@ -2496,21 +2798,25 @@ class FirstAscent extends Table
                     'portaledge_draw' => $portaledge_draw,
                     'portaledge_type_arg' => $portaledge_type_arg,
                     'player_resources' => $player_resources,
+                    'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                     'hand_count' => $hand_count,
                     'gain_symbol_token' => $gain_symbol_token,
                     'gain_summit_beta_token' => $gain_summit_beta_token,
                     'last_card' => $last_card,
                     'refill_portaledge' => $refill_portaledge,
                     'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                    'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                 ));
-                self::notifyPlayer($player_id, "confirmClimbingChoiceLog", clienttranslate($climbing_log), array(
+                self::notifyPlayer($player_id, "confirmClimbingChoiceLog", '${climbing_log}', array(
                     'player_name' => self::getActivePlayerName(),
                     'climbing_card_for_log' => $climbing_card_for_log,
+                    'climbing_log' => $climbing_log,
                     'choice_flavor' => $choice_flavor_for_log,
                     'choice_effect' => $choice_effect_for_log,
                     'portaledge_draw_for_log' => $portaledge_draw_for_log,
                     'portaledge_name' => $portaledge_name,
                     'portaledge_type_arg' => $portaledge_type_arg,
+                    'i18n' => ['climbing_log'],
                 ));
 
                 if ($jesus_piece && !($card_type === '65' && $choice === 'a')) {
@@ -2522,6 +2828,10 @@ class FirstAscent extends Table
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     $jesus_piece_id = array_search('10', $hand_sb_tokens);
                     $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                    $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                    $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                    $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $this->incStat(1, "played_summit_beta_tokens", $player_id);
                 }
                 if ($jesus_piece && $card_type === '12' && $choice === 'a') { // Tricky Boulder Problem
@@ -2558,10 +2868,12 @@ class FirstAscent extends Table
 
                             case '25':
                             case '45':
-                                self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta token'), array(
+                                self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                                         'player_name' => self::getActivePlayerName(),
                                         'player_id' => $player_id,
                                         'opponent_id' => false,
+                                        'last_token' => $last_token,
+                                        'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
                                         'preserve' => ['player_id', 'opponent_id'],
                                 ));
             
@@ -2569,10 +2881,14 @@ class FirstAscent extends Table
                                         'player_name' => self::getActivePlayerName(),
                                         'player_id' => $player_id,
                                         'opponent_id' => false,
-                                        'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
+                                        'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                                         'summit_beta_token' => $climbing_card_private['summit_beta_token'],
-                                        'summit_beta_for_log' => $climbing_card_private['summit_beta_for_log'],
+                                        'summit_beta_for_log' => $summit_beta_for_log,
+                                        'last_token' => $last_token,
+                                        'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                                        'i18n' => ['summit_beta_for_log'],
                                 ));
+                                $this->setGlobalVariable('summit_beta_reshuffle', false);
                                 $this->cards_and_tokens->insertCardOnExtremePosition($card_id, 'climbing_discard', true);
                                 $this->setGlobalVariable('climbing_card_info', array());
                                 $this->gamestate->nextState('nextClimb');
@@ -2588,10 +2904,12 @@ class FirstAscent extends Table
                 }
 
                 if ($gain_summit_beta_token) {
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta token'), array(
+                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
@@ -2599,10 +2917,14 @@ class FirstAscent extends Table
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
-                            'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                             'summit_beta_token' => $summit_beta_token,
                             'summit_beta_for_log' => $summit_beta_for_log,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                            'i18n' => ['summit_beta_for_log'],
                     ));
+                    $this->setGlobalVariable('summit_beta_reshuffle', false);
                 }
 
                 if ($gain_symbol_token) {
@@ -2616,6 +2938,7 @@ class FirstAscent extends Table
                             'symbol_type' => $symbol_type,
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
                             'preserve' => ['player_id'],
+                            'i18n' => ['symbol_for_log'],
                     ));
 
                     self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
@@ -2624,7 +2947,9 @@ class FirstAscent extends Table
                             'symbol_type' => $symbol_type,
                             'player_id' => $player_id,
                             'player_resources' => $player_resources,
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
+                            'i18n' => ['symbol_for_log'],
                     ));
                 }
 
@@ -2697,7 +3022,7 @@ class FirstAscent extends Table
                         $board_assets[$player_id][$card_type]['flipped'][$slot] = true;
                         unset($board_assets[$player_id][$card_type]['tucked'][$random_tucked_id]);
                         $type_arr = $board_assets[$player_id][$card_type];
-                        $board_assets[$player_id][$card_type] = $this->sortAssetBoardByFlipped($type_arr);
+                        $board_assets[$player_id][$card_type] = $this->sortAssetBoardByFlipped($player_id, $type_arr);
                     }
                 }
             }
@@ -2761,72 +3086,83 @@ class FirstAscent extends Table
         }
 
         // log message
-        $log_message_private = '';
-        $log_message_public = '';
+        $log_message_private = [
+            'log' => '',
+            'args' => []
+        ];
+        $log_message_public = [
+            'log' => '',
+            'args' => []
+        ];
 
         if (($climbing_card_info && $climbing_card_info['give_opponent'] === true) || $risk_it_info) {
             $this->cards_and_tokens->moveCards($hand_card_arr, $opponent_id);
             $this->cards_and_tokens->moveCards($board_card_arr, $opponent_id);
             $this->cards_and_tokens->moveCards($tucked_card_ids, $opponent_id);
 
-            $log_message_private .= 'gives ';
-            $log_message_public .= 'gives ';
+            $log_message_private['log'] .= clienttranslate('gives') . ' ';
+            $log_message_public['log'] .= clienttranslate('gives') . ' ';
         }
         else {
-            $this->cards_and_tokens->moveCards($hand_card_arr, 'discard');
-            $this->cards_and_tokens->moveCards($board_card_arr, 'discard');
-            $this->cards_and_tokens->moveCards($tucked_card_ids, 'discard');
+            foreach ($hand_card_arr as $card) { $this->cards_and_tokens->playCard($card); }
+            foreach ($board_card_arr as $card) { $this->cards_and_tokens->playCard($card); }
+            foreach ($tucked_card_ids as $card) { $this->cards_and_tokens->playCard($card); }
 
-            $log_message_private .= 'loses ';
-            $log_message_public .= 'loses ';
+            $log_message_private['log'] .= clienttranslate('loses') . ' ';
+            $log_message_public['log'] .= clienttranslate('loses') . ' ';
         }
 
         if (count($hand_card_arr) > 0) {
+            $hand_discard_titles = [];
             for ($i=0; $i<count($hand_card_arr); $i++) {
                 $card_id = $hand_card_arr[$i];
                 $card_type = $this->getGlobalVariable('asset_identifier', true)[$card_id];
                 $card = $this->asset_cards[$card_type];
                 $card_title = $card['description'];
-
-                $log_message_private .= $i > 0 && $i == count($hand_card_arr)-1 ? 'and ' : '';
-                $log_message_private .= "[{$card_title}({$card_type})] ";
+                $formatted_card_title = '[' . $card_title . '(' . $card_type . ')]';
+                $hand_discard_titles[] = $formatted_card_title;
             }
-            $log_message_private .= 'from his hand';
-            $log_message_public .= count($hand_card_arr) . " Asset cards from his hand";
+            $hand_discard_for_log = $this->formatLogTitles($hand_discard_titles);
+            $log_message_private['log'] .= clienttranslate('${hand_discard_for_log} from his hand');
+            $log_message_private['args']['hand_discard_for_log'] = $hand_discard_for_log;
+            $log_message_private['args']['i18n'][] = 'hand_discard_for_log';
+            $log_message_public['log'] .= count($hand_card_arr) . ' ' . clienttranslate('Asset cards from his hand');
         }
             
         if (count($board_and_tucked_ids) > 0) {
-            $log_message_private .= count($hand_card_arr) > 0 ? ', and ' : '';
-            $log_message_public .= count($hand_card_arr) > 0 ? ', and ' : '';
+            $log_message_private['log'] .= count($hand_card_arr) > 0 ? ', ' . clienttranslate('and') . ' ' : '';
+            $log_message_public['log'] .= count($hand_card_arr) > 0 ? ', ' . clienttranslate('and') . ' ' : '';
 
+            $board_discard_titles = [];
             for ($i=0; $i<count($board_and_tucked_ids); $i++) {
                 $card_id = $board_and_tucked_ids[$i];
                 $card_type = $this->getGlobalVariable('asset_identifier', true)[$card_id];
                 $card = $this->asset_cards[$card_type];
                 $card_title = $card['description'];
-
-                $log_message_private .= $i > 0 && $i == count($board_and_tucked_ids)-1 ? 'and ' : '';
-                $log_message_private .= "[{$card_title}({$card_type})] ";
-                $log_message_private .= $i < count($hand_card_arr)-1 ? ', ' : ' ';
-                $log_message_public .= $i > 0 && $i == count($board_and_tucked_ids)-1 ? 'and ' : '';
-                $log_message_public .= "[{$card_title}({$card_type})] ";
-                $log_message_public .= $i < count($hand_card_arr)-1 ? ', ' : ' ';
+                $formatted_card_title = '[' . $card_title . '(' . $card_type . ')]';
+                $board_discard_titles[] = $formatted_card_title;
             }
-            $log_message_private .= 'from his asset board';
-            $log_message_public .= 'from his asset board';
+            $board_discard_for_log = $this->formatLogTitles($board_discard_titles);
+            $log_message_private['log'] .= clienttranslate('${board_discard_for_log} from his Asset Board');
+            $log_message_private['args']['board_discard_for_log'] = $board_discard_for_log;
+            $log_message_private['args']['i18n'][] = 'board_discard_for_log';
+            $log_message_public['log'] .= clienttranslate('${board_discard_for_log} from his Asset Board');
+            $log_message_public['args']['board_discard_for_log'] = $board_discard_for_log;
+            $log_message_public['args']['i18n'][] = 'board_discard_for_log';
         }
 
         if (($climbing_card_info && array_key_exists('give_psych', $climbing_card_info))
           || ($risk_it_info && $risk_it_info[0] === 3)) {
-            $log_message_private .= ' and 1 Psych';
-            $log_message_public .= ' and 1 Psych';
+            $log_message_private['log'] .= ' ' . clienttranslate('and 1 Psych');
+            $log_message_public['log'] .= ' ' . clienttranslate('and 1 Psych');
         }
 
-
-        $log_message_private .= ($climbing_card_info && $climbing_card_info['give_opponent'] === true)
-                              || $risk_it_info ? " to @${opponent_name}@" : '';
-        $log_message_public .= ($climbing_card_info && $climbing_card_info['give_opponent'] === true)
-                              || $risk_it_info ? " to @${opponent_name}@" : '';
+        if (($climbing_card_info && $climbing_card_info['give_opponent'] === true) || $risk_it_info) {
+            $log_message_private['log'] .= ' ' . clienttranslate('to @${opponent_name}@');
+            $log_message_private['args']['opponent_name'] = $opponent_name;
+            $log_message_public['log'] .= ' ' . clienttranslate('to @${opponent_name}@');
+            $log_message_public['args']['opponent_name'] = $opponent_name;
+        }
 
         if (count($hand_card_arr) > 0) { $this->updateResourceTracker($player_id, 'subtract', null, null, $hand_card_type_arr); }
         if (count($board_and_tucked_ids) > 0) { $this->updateResourceTracker($player_id, 'subtract', null, null, $board_and_tucked_type_args, null, true, false, $flipped_and_tucked_type_args); }
@@ -2857,7 +3193,7 @@ class FirstAscent extends Table
 
         $board_assets = $this->getGlobalVariable('board_assets', true);
 
-        self::notifyAllPlayers("confirmAssetsForDiscardPublic", clienttranslate('${player_name} ${log_message_opponents}'), array(
+        self::notifyAllPlayers("confirmAssetsForDiscardPublic", '${player_name} ${log_message_opponents}', array(
             'player_name' => self::getActivePlayerName(),
             'log_message_opponents' => $log_message_opponents,
             'hand_card_ids_for_public' => $hand_card_ids_for_public,
@@ -2877,11 +3213,13 @@ class FirstAscent extends Table
             'opponent_hand_count' => $opponent_hand_count,
             'give_psych' => $give_psych,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
             'bomber_anchor' => $this->getGlobalVariable('bomber_anchor'),
             'preserve' => ['player_id', 'opponent'],
+            'i18n' => ['log_message_opponents'],
         ));
 
-        self::notifyPlayer($player_id, "confirmAssetsForDiscardPrivate", clienttranslate('${player_name} ${log_message_private}'), array(
+        self::notifyPlayer($player_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
             'player_name' => self::getActivePlayerName(),
             'log_message_private' => $log_message_private,
             'hand_card_ids' => $hand_card_arr,
@@ -2896,16 +3234,19 @@ class FirstAscent extends Table
             'opponent_name' => $opponent_name,
             'opponent_color' => $opponent_color,
             'player_resources' => $player_resources,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
             'player_hand_count' => $hand_count,
             'opponent_water_psych' => $opponent_water_psych,
             'opponent_hand_count' => $opponent_hand_count,
             'give_psych' => $give_psych,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
             'bomber_anchor' => $this->getGlobalVariable('bomber_anchor'),
+            'i18n' => ['log_message_private'],
         ));
 
         if (($climbing_card_info && $climbing_card_info['give_opponent']) || $risk_it_info) {
-            self::notifyPlayer($opponent_id, "confirmAssetsForDiscardPrivate", clienttranslate('${player_name} ${log_message_private}'), array(
+            self::notifyPlayer($opponent_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
                 'player_name' => self::getActivePlayerName(),
                 'log_message_private' => $log_message_private,
                 'hand_card_ids' => $hand_card_arr,
@@ -2921,11 +3262,13 @@ class FirstAscent extends Table
                 'opponent_color' => $opponent_color,
                 'opponent_water_psych' => $opponent_water_psych,
                 'opponent_resources' => $opponent_resources,
+                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$opponent_id],
                 'player_hand_count' => $hand_count,
                 'opponent_hand_count' => $opponent_hand_count,
                 'give_psych' => $give_psych,
                 'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                 'bomber_anchor' => $this->getGlobalVariable('bomber_anchor'),
+                'i18n' => ['log_message_private'],
             ));
         }
 
@@ -2944,10 +3287,14 @@ class FirstAscent extends Table
                         $this->gamestate->nextState('stealFromAssetBoard');
                     } else {
                         $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
-                        self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta token'), array(
+                        $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
+                        $last_token = $pile_remaining ? false : true;
+                        self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'opponent_id' => false,
+                                'last_token' => $last_token,
+                                'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
                                 'preserve' => ['player_id', 'opponent_id'],
                         ));
 
@@ -2955,10 +3302,14 @@ class FirstAscent extends Table
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'opponent_id' => false,
-                                'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
+                                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                                 'summit_beta_token' => $climbing_card_private['summit_beta_token'],
                                 'summit_beta_for_log' => $climbing_card_private['summit_beta_for_log'],
+                                'last_token' => $last_token,
+                                'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                                'i18n' => ['summit_beta_for_log'],
                         ));
+                        $this->setGlobalVariable('summit_beta_reshuffle', false);
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                         $this->setGlobalVariable('climbing_card_info', array());
                         $this->setGlobalVariable('climbing_card_private', array());
@@ -2983,7 +3334,13 @@ class FirstAscent extends Table
                 case 27:
                 case 28:
                     $symbol_type = $choice_args['symbol_type'];
-                    $symbol_for_log = $choice_args['symbol_for_log'];
+                    $symbol_for_log = [
+                        'log' => '${symbol_type}',
+                        'args' => [
+                            'symbol_type' => COMMON_TRANSLATIONS[strtoupper($symbol_type)],
+                            'i18n' => ['symbol_type']
+                        ]
+                    ];
                     $this->updateResourceTracker($player_id, 'add', null, null, [], $symbol_type);
                     $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
 
@@ -2994,6 +3351,7 @@ class FirstAscent extends Table
                             'symbol_type' => $symbol_type,
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
                             'preserve' => ['player_id'],
+                            'i18n' => ['symbol_for_log'],
                     ));
 
                     self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
@@ -3002,7 +3360,9 @@ class FirstAscent extends Table
                             'symbol_type' => $symbol_type,
                             'player_id' => $player_id,
                             'player_resources' => $player_resources,
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
+                            'i18n' => ['symbol_for_log'],
                     ));
 
                     $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
@@ -3014,10 +3374,14 @@ class FirstAscent extends Table
                 case 32:
                 case 45:
                     $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta token'), array(
+                    $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
+                    $last_token = $pile_remaining ? false : true;
+                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
@@ -3025,11 +3389,14 @@ class FirstAscent extends Table
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
-                            'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                             'summit_beta_token' => $climbing_card_private['summit_beta_token'],
                             'summit_beta_for_log' => $climbing_card_private['summit_beta_for_log'],
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                            'i18n' => ['summit_beta_for_log'],
                     ));
-
+                    $this->setGlobalVariable('summit_beta_reshuffle', false);
                     $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                     $this->setGlobalVariable('climbing_card_info', array());
                     $this->gamestate->nextState('nextClimb');
@@ -3039,7 +3406,7 @@ class FirstAscent extends Table
                 case 31:
                 case 46:
                 case 48:
-                    if ($choice_args['benefit'] != 'portaledgeChoose') {
+                    if ($choice_args['benefit'] !== 'portaledgeChoose') {
                         switch ($climbing_card_info['type_arg']) {
                             case 7:
                                 $portaledge_deck = 'portaSlab';
@@ -3065,9 +3432,15 @@ class FirstAscent extends Table
 
                         $portaledge_type_arg = [$portaledge_draw['type_arg']];
                         $portaledge_name = $this->asset_cards[$portaledge_type_arg[0]]['description'];
-                        $portaledge_draw_for_log = clienttranslate("[${portaledge_name}(${portaledge_type_arg[0]})]");
-                        $portaledge_type_for_log = ucfirst($portaledge_type);
-
+                        $portaledge_draw_for_log = [
+                            'log' => '[' . $portaledge_name . '(' . $portaledge_type_arg[0] . ')]',
+                            'args' => [
+                                'portaledge_name' => $portaledge_name,
+                                'portaledge_type_arg' => $portaledge_type_arg,
+                                'i18n' => ['portaledge_name']
+                            ]
+                        ];
+                        $portaledge_type_for_log = COMMON_TRANSLATIONS[strtoupper($portaledge_type)];
 
                         $auto_portaledge = $portaledge_type_arg ?? [];
                         $this->updateResourceTracker($player_id, 'add', null, null, $auto_portaledge);
@@ -3083,7 +3456,9 @@ class FirstAscent extends Table
                                 'last_card' => $last_card,
                                 'refill_portaledge' => $refill_portaledge,
                                 'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                                'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                                 'preserve' => ['player_id'],
+                                'i18n' => ['portaledge_type_for_log'],
                         ));
                         self::notifyPlayer($player_id, "automaticPortaledge", clienttranslate('${player_name} draws ${portaledge_draw_for_log} from the Portaledge'), array(
                                 'player_name' => self::getActivePlayerName(),
@@ -3092,10 +3467,13 @@ class FirstAscent extends Table
                                 'portaledge_draw_for_log' => $portaledge_draw_for_log,
                                 'portaledge_type_arg' => $portaledge_type_arg,
                                 'player_resources' => $player_resources,
+                                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                                 'hand_count' => $hand_count,
                                 'last_card' => $last_card,
                                 'refill_portaledge' => $refill_portaledge,
                                 'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                                'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
+                                'i18n' => ['portaledge_draw_for_log'],
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                         $this->setGlobalVariable('climbing_card_info', array());
@@ -3104,7 +3482,7 @@ class FirstAscent extends Table
                         break;
                     } else if ($choice_args['benefit'] === 'portaledgeChoose') {
 
-                            $climbing_card_info['portaledge_num'] = $climbing_card_info['type_arg'] == '68' ? 2 : 1;
+                            $climbing_card_info['portaledge_num'] = 1;
                             $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                             $this->gamestate->nextState('selectPortaledge');
                             break;
@@ -3124,8 +3502,15 @@ class FirstAscent extends Table
 
                         $portaledge_type_arg = [$portaledge_draw['type_arg']];
                         $portaledge_name = $this->asset_cards[$portaledge_type_arg[0]]['description'];
-                        $portaledge_draw_for_log = clienttranslate("[${portaledge_name}(${portaledge_type_arg[0]})]");
-                        $portaledge_type = 'gear';
+                        $portaledge_draw_for_log = [
+                            'log' => '[' . $portaledge_name . '(' . $portaledge_type_arg[0] . ')]',
+                            'args' => [
+                                'portaledge_name' => $portaledge_name,
+                                'portaledge_type_arg' => $portaledge_type_arg,
+                                'i18n' => ['portaledge_name']
+                            ]
+                        ];
+                        $portaledge_type = COMMON_TRANSLATIONS['GEAR'];
 
                         $auto_portaledge = $portaledge_type_arg ?? [];
                         $this->updateResourceTracker($player_id, 'add', null, null, $auto_portaledge);
@@ -3149,10 +3534,12 @@ class FirstAscent extends Table
                                 'portaledge_draw_for_log' => $portaledge_draw_for_log,
                                 'portaledge_type_arg' => $portaledge_type_arg,
                                 'player_resources' => $player_resources,
+                                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                                 'hand_count' => $hand_count,
                                 'last_card' => $last_card,
                                 'refill_portaledge' => $refill_portaledge,
                                 'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                                'i18n' => ['portaledge_draw_for_log'],
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                         $this->setGlobalVariable('climbing_card_info', array());
@@ -3212,6 +3599,8 @@ class FirstAscent extends Table
         self::checkAction('confirmSelectedOpponent');
         $player_id = self::getActivePlayerId();
         $names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
+        $player_name = self::getActivePlayerName();
+        $opponent_name = $opponent_id === 'jesus_piece' ? null : $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['name'];
 
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
         $risk_it_info = $this->getGlobalVariable('risk_it_info', true);
@@ -3222,16 +3611,72 @@ class FirstAscent extends Table
             $this->setGlobalVariable('climbing_card_info', array());
 
             self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
-                'player_name' => self::getActivePlayerName(),
+                'player_name' => $player_name,
                 'player_id' => $player_id,
             ));
 
             $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
             $jesus_piece_id = array_search('10', $hand_sb_tokens);
             $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+            $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+            $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+            $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+            $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
             $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-            $this->gamestate->nextState('nextClimb');
+            switch ($climbing_card_info['type_arg']) {
+
+                case 25:
+                case 45:
+                    $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
+                    $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
+                    $last_token = $pile_remaining ? false : true;
+                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                            'player_name' => self::getActivePlayerName(),
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                            'preserve' => ['player_id', 'opponent_id'],
+                    ));
+
+                    self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                            'player_name' => self::getActivePlayerName(),
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
+                            'summit_beta_token' => $climbing_card_private['summit_beta_token'],
+                            'summit_beta_for_log' => $climbing_card_private['summit_beta_for_log'],
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                            'i18n' => ['summit_beta_for_log'],
+                    ));
+                    $this->setGlobalVariable('summit_beta_reshuffle', false);
+                    $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
+                    $this->setGlobalVariable('climbing_card_info', array());
+                    $this->gamestate->nextState('nextClimb');
+                    break;
+
+                case 31:
+                case 53:
+                case 68:
+                    $climbing_card_info['portaledge_num'] = $climbing_card_info['type_arg'] == '68' ? 2 : 1;
+                    $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
+                    $this->gamestate->nextState('selectPortaledge');
+                    break;
+
+                case 65:
+                    self::notifyAllPlayers("updateWaterPsych", '', array(
+                        'player_id' => $player_id,
+                        'water_psych_for_climbing' => $climbing_card_info['water_psych_for_climbing'],
+                    ));
+                    $this->gamestate->nextState('nextClimb');
+                    break;
+
+                default:
+                    $this->gamestate->nextState('nextClimb');
+                    break;
+            }
         }
 
         else if ($climbing_card_info && $climbing_card_info['type_arg']) {
@@ -3280,7 +3725,14 @@ class FirstAscent extends Table
                     $portaledge_type_arg = $climbing_card_private['portaledge_type_arg'];
                     $portaledge_id = $climbing_card_info['portaledge_id'];
                     $portaledge_name = $this->asset_cards[$portaledge_type_arg[0]]['description'];
-                    $card_for_log_player = clienttranslate("[${portaledge_name}(${portaledge_type_arg[0]})]");
+                    $card_for_log_player = [
+                        'log' => '[' . $portaledge_name . '(' . $portaledge_type_arg[0] . ')]',
+                        'args' => [
+                            'portaledge_name' => $portaledge_name,
+                            'portaledge_type_arg' => $portaledge_type_arg[0],
+                            'i18n' => ['portaledge_name']
+                        ]
+                    ];
                     $hand_count = count($this->getHandAssets($player_id));
 
                     if (!$jesus_party) {
@@ -3297,17 +3749,46 @@ class FirstAscent extends Table
                     $portaledge_type_arg_opponent = [$portaledge_draw_opponent['type_arg']];
                     $portaledge_id_opponent = $portaledge_draw_opponent['id'];
                     $portaledge_name_opponent = $this->asset_cards[$portaledge_type_arg_opponent[0]]['description'];
-                    $card_for_log_opponent = clienttranslate("[${portaledge_name_opponent}(${portaledge_type_arg_opponent[0]})]");
+                    $card_for_log_opponent = [
+                        'log' => '[${portaledge_name_opponent}(${portaledge_type_arg_opponent})]',
+                        'args' => [
+                            'portaledge_name_opponent' => $portaledge_name_opponent,
+                            'portaledge_type_arg_opponent' => $portaledge_type_arg_opponent[0],
+                            'i18n' => ['portaledge_name_opponent']
+                        ]
+                    ];
                     $hand_count_opponent = count($this->getHandAssets($opponent_id));
                     $opponent_psych = $this->getGlobalVariable('resource_tracker', true)[$opponent_id]['psych'];
                     $minus_psych = $opponent_psych >= 1 ? -1 : 0;
 
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                     $this->updateResourceTracker($opponent_id, 'add', null, $minus_psych, $portaledge_type_arg_opponent);
-
-                    $party_log_private = clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card');
-                    $party_log_me = clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card. ${player_name} draws ${card_for_log_player}');
-                    $party_log_opponent = clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card. ${player_name1} draws ${card_for_log_opponent}');
+                    
+                    $party_log_private = [
+                        'log' => clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card'),
+                        'args' => [
+                            'player_name' => $player_name,
+                            'player_name1' => $opponent_name
+                        ]
+                    ];
+                    $party_log_me = [
+                        'log' => clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card. ${player_name} draws ${card_for_log_player}'),
+                        'args' => [
+                            'player_name' => $player_name,
+                            'player_name1' => $opponent_name,
+                            'card_for_log_player' => $card_for_log_player,
+                            'i18n' => ['card_for_log_player']
+                        ]
+                    ];
+                    $party_log_opponent = [
+                        'log' => clienttranslate('${player_name} and ${player_name1} lose a Psych and gain a Gear Card. ${player_name1} draws ${card_for_log_opponent}'),
+                        'args' => [
+                            'player_name' => $player_name,
+                            'player_name1' => $opponent_name,
+                            'card_for_log_opponent' => $card_for_log_opponent,
+                            'i18n' => ['card_for_log_opponent']
+                        ]
+                    ];
 
                     if ($jesus_party) {
                         self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
@@ -3318,18 +3799,45 @@ class FirstAscent extends Table
                         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                         $jesus_piece_id = array_search('10', $hand_sb_tokens);
                         $this->cards_and_tokens->insertCardOnExtremePosition($jesus_piece_id, 'summit_beta_discard', true);
+                        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                        $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
+                        $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+                        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-                        $party_log_private = clienttranslate('${player_name1} loses a Psych and they and ${player_name} gain a Gear Card');
-                        $party_log_me = clienttranslate('${player_name1} loses a Psych and they and ${player_name} gain a Gear Card. ${player_name} draws ${card_for_log_player}');
-                        $party_log_opponent = clienttranslate('${player_name1} loses a Psych and they and ${player_name} gain a Gear Card. ${player_name1} draws ${card_for_log_opponent}');
+                        $party_log_private = [
+                            'log' => clienttranslate('${player_name1} loses a Psych and he and ${player_name} gain a Gear Card'),
+                            'args' => [
+                                'player_name1' => $player_name1,
+                                'player_name' => $player_name
+                            ]
+                        ];
+                        $party_log_me = [
+                            'log' => clienttranslate('${player_name1} loses a Psych and he and ${player_name} gain a Gear Card. ${player_name} draws ${card_for_log_player}'),
+                            'args' => [
+                                'player_name1' => $opponent_name,
+                                'player_name' => $player_name,
+                                'card_for_log_player' => $card_for_log_player,
+                                'i18n' => ['card_for_log_player']
+                            ]
+                        ];
+                        $party_log_opponent = [
+                            'log' => clienttranslate('${player_name1} loses a Psych and he and ${player_name} gain a Gear Card. ${player_name1} draws ${card_for_log_opponent}'),
+                            'args' => [
+                                'player_name1' => $opponent_name,
+                                'player_name' => $player_name,
+                                'card_for_log_opponent' => $card_for_log_opponent,
+                                'i18n' => ['card_for_log_opponent']
+                            ]
+                        ];
                     }
                     $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
                     $opponent_resources = $this->getGlobalVariable('resource_tracker', true)[$opponent_id];
 
-                    self::notifyAllPlayers("shareEffectPublic", $party_log_private, array(
+                    self::notifyAllPlayers("shareEffectPublic", '${party_log_private}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
+                            'party_log_private' => $party_log_private,
                             'player_id' => $player_id,
                             'opponent_id' => $opponent_id,
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
@@ -3339,17 +3847,21 @@ class FirstAscent extends Table
                             'last_card' => $last_card,
                             'refill_portaledge' => $refill_portaledge,
                             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                             'jesus_party' => $jesus_party,
                             'preserve' => ['player_id', 'opponent_id'],
+                            'i18n' => ['party_log_private'],
                     ));
 
-                    self::notifyPlayer($player_id, "shareEffectPrivate", $party_log_me, array(
+                    self::notifyPlayer($player_id, "shareEffectPrivate", '${party_log_me}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
                             'card_for_log_player' => $card_for_log_player,
+                            'party_log_me' => $party_log_me,
                             'player_id' => $player_id,
                             'opponent_id' => $opponent_id,
                             'player_resources' => $player_resources,
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                             'climbing_card_type_arg' => $climbing_card_info['type_arg'],
                             'hand_count_player' => $hand_count,
                             'hand_count_opponent' => $hand_count_opponent,
@@ -3359,13 +3871,16 @@ class FirstAscent extends Table
                             'last_card' => $last_card,
                             'refill_portaledge' => $refill_portaledge,
                             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                             'jesus_party' => $jesus_party,
+                            'i18n' => ['party_log_me'],
                     ));
 
-                    self::notifyPlayer($opponent_id, "shareEffectPrivate", $party_log_opponent, array(
+                    self::notifyPlayer($opponent_id, "shareEffectPrivate", '${party_log_opponent}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
                             'card_for_log_opponent' => $card_for_log_opponent,
+                            'party_log_opponent' => $party_log_opponent,
                             'player_id' => $player_id,
                             'opponent_id' => $opponent_id,
                             'player_resources' => $opponent_resources,
@@ -3379,6 +3894,7 @@ class FirstAscent extends Table
                             'refill_portaledge' => $refill_portaledge,
                             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                             'jesus_party' => $jesus_party,
+                            'i18n' => ['party_log_opponent'],
                     ));
                     $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                     $this->setGlobalVariable('climbing_card_info', array());
@@ -3431,17 +3947,32 @@ class FirstAscent extends Table
                     break;
 
                 case 69:
+                    $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
                     $summit_beta_token = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', $opponent_id);
+                    $opponent_token_tracker = $this->addHandSummitBeta($hand_token_tracker[$opponent_id], $summit_beta_token['id']);
+                    $hand_token_tracker[$opponent_id] = $opponent_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $opponent_name = $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['name'];
                     $summit_beta_type_arg = $summit_beta_token['type_arg'];
                     $summit_beta_name = $this->summit_beta_tokens[$summit_beta_type_arg]['description'];
-                    $summit_beta_for_log = '+' . $summit_beta_name . '(' . $summit_beta_type_arg . ')+';
+                    $summit_beta_for_log = [
+                        'log' => '+' . '${summit_beta_name}' . '(' . '${summit_beta_type_arg}' . ')+',
+                        'args' => [
+                            'summit_beta_name' => $summit_beta_name,
+                            'summit_beta_type_arg' => $summit_beta_type_arg,
+                            'i18n' => ['summit_beta_name']
+                        ]
+                    ];
+                    $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
+                    $last_token = $pile_remaining ? false : true;
 
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} chooses ${player_name1} to gain a Summit Beta token'), array(
+                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} chooses ${player_name1} to gain a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $opponent_name,
                             'player_id' => $player_id,
                             'opponent_id' => $opponent_id,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
@@ -3450,11 +3981,14 @@ class FirstAscent extends Table
                             'player_name1' => $opponent_name,
                             'player_id' => $player_id,
                             'opponent_id' => $opponent_id,
-                            'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
+                            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$opponent_id],
                             'summit_beta_token' => $summit_beta_token,
                             'summit_beta_for_log' => $summit_beta_for_log,
+                            'last_token' => $last_token,
+                            'summit_beta_reshuffle' => $this->getGlobalVariable('summit_beta_reshuffle'),
+                            'i18n' => ['summit_beta_for_log'],
                     ));
-
+                    $this->setGlobalVariable('summit_beta_reshuffle', false);
                     $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
                     $this->setGlobalVariable('climbing_card_info', array());
                     $this->gamestate->nextState('nextClimb');
@@ -3480,8 +4014,14 @@ class FirstAscent extends Table
             if ($portaledge_to_draw[$i] > 0 && $i <= 3) { $draw_types++; }
         }
 
-        $cards_for_log_public = '';
-        $cards_for_log_private = '';
+        $cards_for_log_public = [
+            'log' => '',
+            'args' => []
+        ];
+        $cards_for_log_private = [
+            'log' => '',
+            'args' => []
+        ];
 
         $type_arg_arr = [];
         $id_arr = [];
@@ -3490,6 +4030,8 @@ class FirstAscent extends Table
         $last_card = [];
         $card_idx = 1;
 
+        $card_titles_for_private = [];
+        $card_types_for_public = [];
         for ($i=0; $i<=count($portaledge_to_draw)-1; $i++) {
             $type_to_draw = '';
             switch (true) {
@@ -3503,7 +4045,7 @@ class FirstAscent extends Table
 
                 $type = strtolower($type_to_draw);
                 $draw_num = $portaledge_to_draw[$i];
-                $new_asset_types[strtolower($type_to_draw)] = intval($draw_num);
+                $new_asset_types[$type] = intval($draw_num);
                 $deck_location = 'porta' . $type_to_draw;
                 for ($j=1; $j<=$draw_num; $j++) {
 
@@ -3511,50 +4053,59 @@ class FirstAscent extends Table
                     if (count($remaining_cards) === 1) { $last_card[$type] = $card_idx; }
 
                     $new_asset = $this->drawFromPortaledge($player_id, $type, $card_idx, $remaining_cards);
-                    $card_idx ++;
+                    $card_idx++;
                     $type_arg = $new_asset['type_arg'];
                     $type_arg_arr[] = $type_arg;
                     $id = $new_asset['id'];
                     $id_arr[] = $id;
                     $name = $this->asset_cards[$type_arg]['description'];
                     $name_for_log = "[{$name}({$type_arg})]";
-                    $cards_for_log_private .= $name_for_log . ', ';
+                    $card_titles_for_private[] = $name_for_log;
                 }
-                $cards_for_log_public .= $draw_num . ' ' . $type_to_draw . ', ';
+                $card_types_for_public[COMMON_TRANSLATIONS[strtoupper($type)]] = $draw_num;
             }
         }
 
-        $cards_for_log_private = substr($cards_for_log_private, 0, -2) ?: '';
-        if ($total_draw > 1 && $draw_types > 0) {
-            $last_left_bracket_private = strrpos($cards_for_log_private, "[");
-            $cards_for_log_private = substr_replace($cards_for_log_private, " and ", $last_left_bracket_private, 0);
-            if ($total_draw === 2) { $cards_for_log_private = str_replace(',', '', $cards_for_log_private); }
+        $cards_for_log_private = $this->formatLogTitles($card_titles_for_private);
+        if (!empty($card_titles_for_private)) {
+            $cards_for_log_private['log'] .= ' ' . clienttranslate('from the Portaledge');
+        } else {
+            $cards_for_log_private = '';
         }
-        $cards_for_log_private .= ' from The Portaledge';
-
-        $cards_for_log_public = substr($cards_for_log_public, 0, -2) ?: '';
-        if ($draw_types > 1) {
-            $last_space_public = strrpos($cards_for_log_public, " ");
-            $penultimate_space_public = strrpos($cards_for_log_public, " ", $last_space_public - strlen($cards_for_log_public) -1 );
-            $cards_for_log_public = substr_replace($cards_for_log_public, " and ", $penultimate_space_public, 0);
-            if ($total_draw === 2) { $cards_for_log_public = str_replace(',', '', $cards_for_log_public); }
+        $cards_for_log_public = $this->formatLogTitles($card_types_for_public);
+        if (!empty($card_types_for_public)) {
+            $cards_for_log_public['log'] .= ' ' . clienttranslate('card/s from the Portaledge');
+        } else {
+            $cards_for_log_public = '';
         }
-        $cards_for_log_public .= ' card(s) from The Portaledge';
 
         // check for water and psych if resting
         $water = count($portaledge_to_draw) === 6 ? $portaledge_to_draw[4] : 0;
         $psych = count($portaledge_to_draw) === 6 ? $portaledge_to_draw[5] : 0;
 
-        $resting_water_psych = '';
-        if ($water > 0 && $draw_types === 0) { $resting_water_psych = $water . ' Water'; }
-        else if ($water > 0) { $resting_water_psych = ', and ' . $water . ' Water'; }
-        if ($water > 0 && $psych > 0) { $resting_water_psych .= ' and ' . $psych . ' Psych'; }
-        else if ($psych > 0 && $draw_types === 0) { $resting_water_psych = $psych . ' Psych'; }
-        else if ($psych > 0) { $resting_water_psych = ', and ' . $psych . ' Psych'; }
+        $resting_water_psych = ['log' => '', 'args' => []];
+        if ($water > 0 && $draw_types === 0) {
+            $resting_water_psych['log'] = clienttranslate('${water} Water');
+            $resting_water_psych['args'] = ['water' => $water];
+        } else if ($water > 0) {
+            $resting_water_psych['log'] = ' ' . clienttranslate('and ${water} Water');
+            $resting_water_psych['args'] = ['water' => $water];
+        }
+        if ($water > 0 && $psych > 0) {
+            $resting_water_psych['log'] .= ' ' . clienttranslate('and ${psych} Psych');
+            $resting_water_psych['args']['psych'] = $psych;
+        } else if ($psych > 0 && $draw_types === 0) {
+            $resting_water_psych['log'] .= clienttranslate('${psych} Psych');
+            $resting_water_psych['args']['psych'] = $psych;
+        } else if ($psych > 0) {
+            $resting_water_psych['log'] = ' ' . clienttranslate('and ${psych} Psych');
+            $resting_water_psych['args'] = ['psych' => $psych];
+        }
+        if ($resting_water_psych['log'] === '') { $resting_water_psych = ''; }
 
         $state_name = $this->gamestate->state()['name'];
-        if ($state_name === 'selectPortaledge' || $this->getGlobalVariable('bomber_anchor')) { $operation = 'draws'; }
-        else if ($state_name === 'resting') { $operation = 'rests, gaining'; }
+        if ($state_name === 'selectPortaledge' || $this->getGlobalVariable('bomber_anchor')) { $operation = clienttranslate('draws'); }
+        else if ($state_name === 'resting') { $operation = clienttranslate('rests, gaining'); }
 
         $this->updateResourceTracker($player_id, 'add', $water, $psych, $type_arg_arr);
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
@@ -3577,8 +4128,10 @@ class FirstAscent extends Table
             'last_card' => $last_card,
             'refill_portaledge' => $refill_portaledge,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
             'bomber_anchor' => $this->getGlobalVariable('bomber_anchor'),
             'preserve' => ['player_id'],
+            'i18n' => ['operation', 'cards_for_log_public', 'resting_water_psych'],
         ));
 
         self::notifyPlayer($player_id, "confirmPortaledge", clienttranslate('${player_name} ${operation} ${cards_for_log_private}${resting_water_psych}'), array(
@@ -3591,13 +4144,16 @@ class FirstAscent extends Table
             'new_asset_ids' => $id_arr,
             'new_asset_type_args' => $type_arg_arr,
             'player_resources' => $player_resources,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
             'water' => $water,
             'psych' => $psych,
             'hand_count' => $hand_count,
             'last_card' => $last_card,
             'refill_portaledge' => $refill_portaledge,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+            'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
             'bomber_anchor' => $this->getGlobalVariable('bomber_anchor'),
+            'i18n' => ['operation', 'cards_for_log_private', 'resting_water_psych'],
         ));
 
         $this->setGlobalVariable('refill_portaledge', []);
@@ -3608,24 +4164,25 @@ class FirstAscent extends Table
 
             if (isset($climbing_card_info['portaledge_all'])) {
 
-                if (count($climbing_card_info['finished_portaledge'])+1 < $this->getPlayersNumber()) {
+                $zombie_players = $this->getGlobalVariable('zombie_players', true);
+                if (count($climbing_card_info['finished_portaledge']) + count($zombie_players) + 1 < $this->getPlayersNumber()) {
 
                     $climbing_card_info['finished_portaledge'][] = $player_id;
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                     $this->gamestate->nextState('portaledgeAll');
 
-                } else if (count($climbing_card_info['finished_portaledge'])+1 == $this->getPlayersNumber()) {
+                } else if (count($climbing_card_info['finished_portaledge']) + count($zombie_players) + 1 == $this->getPlayersNumber()) {
 
                     $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
-                    $this->setGlobalVariable('finished_portaledge', []);
-                    $this->setGlobalVariable('climbing_card_info', []);
+                    $this->setGlobalVariable('finished_portaledge', array());
+                    $this->setGlobalVariable('climbing_card_info', array());
                     $this->gamestate->nextState('nextClimb');
                 }
 
             } else {
 
                 $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
-                $this->setGlobalVariable('climbing_card_info', []);
+                $this->setGlobalVariable('climbing_card_info', array());
                 $this->gamestate->nextState('nextClimb');
             }
 
@@ -3638,8 +4195,10 @@ class FirstAscent extends Table
     function confirmAddTokenToPitch($asset_token_type, $pitch_type_arg, $selected_pitch_id) {
         self::checkAction('confirmAddTokenToPitch');
         $this->pitches[$pitch_type_arg]['requirements'][$asset_token_type]++;
-        $pitch_name = $this->pitches[$pitch_type_arg]['description'];
-        $pitch_for_log = '{' . $pitch_name . '(' . $pitch_type_arg . ')}';
+        $pitch_title = $this->pitches[$pitch_type_arg]['description'];
+        $formatted_pitch_title = ['{' . $pitch_title . '(' . $pitch_type_arg . ')}'];
+        $pitch_for_log = $this->formatLogTitles($formatted_pitch_title);
+        $asset_type = COMMON_TRANSLATIONS[strtoupper($asset_token_type)];
 
         $pitch_asset_tokens = $this->getGlobalVariable('pitch_asset_tokens', true);
         if (array_key_exists($pitch_type_arg, $pitch_asset_tokens)) { $pitch_asset_tokens[$pitch_type_arg][] = $asset_token_type; }
@@ -3648,14 +4207,15 @@ class FirstAscent extends Table
 
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
 
-        self::notifyAllPlayers("confirmAddTokenToPitch", clienttranslate('${player_name} adds a ${asset_type} Token to ${pitch_for_log}'), array(
+        self::notifyAllPlayers("confirmAddTokenToPitch", clienttranslate('${player_name} adds a ${asset_type} token to ${pitch_for_log}'), array(
             'player_id' => self::getActivePlayerId(),
             'player_name' => self::getActivePlayerName(),
-            'asset_type' => ucfirst($asset_token_type),
+            'asset_type' => $asset_type,
             'pitch_for_log' => $pitch_for_log,
             'pitch_type_arg' => $pitch_type_arg,
             'selected_pitch_id' => $selected_pitch_id,
             'pitch_requirements' => $this->pitches[$pitch_type_arg]['requirements'],
+            'i18n' => ['asset_type', 'pitch_for_log'],
         ));
 
         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
@@ -3666,12 +4226,12 @@ class FirstAscent extends Table
     function confirmAssetToAssetBoard($selected_resource) {
         self::checkAction('confirmAssetToAssetBoard');
         $player_id = self::getActivePlayerId();
-        $card_type_arg = $this->getGlobalVariable('asset_identifier', true)[$selected_resource];
-        $resource_type = $this->asset_cards[$card_type_arg]['skills'];
-        $asset_title = $this->asset_cards[$card_type_arg]['description'];
-        $this->updateResourceTracker($player_id, 'subtract', null, null, [$card_type_arg], null, false, true);
+        $asset_type_arg = $this->getGlobalVariable('asset_identifier', true)[$selected_resource];
+        $asset_type = $this->asset_cards[$asset_type_arg]['skills'];
+        $asset_title = $this->asset_cards[$asset_type_arg]['description'];
+        $this->updateResourceTracker($player_id, 'subtract', null, null, [$asset_type_arg], null, false, true);
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
-        foreach ($resource_type as $key=>$value) {
+        foreach ($asset_type as $key=>$value) {
             if ($value) { $type = $key; }
         }
 
@@ -3679,13 +4239,15 @@ class FirstAscent extends Table
         $asset_count = $board_assets[$player_id][$type]["count"];
 
         if ($asset_count >= 4) {
-            $vacated_card = $board_assets[$player_id][$type][4];
+            $board_type = $board_assets[$player_id][$type];
+            $new_slot = $this->hasFaceDown($board_type) ? $this->findHighestFaceDownSlot($board_type) : 4;
+            $vacated_card = $board_assets[$player_id][$type][$new_slot];
             $board_assets[$player_id][$type]['tucked'][array_keys($vacated_card)[0]] = array_values($vacated_card)[0];
-            $board_assets[$player_id][$type][4] = [$selected_resource => $card_type_arg];
-            $board_assets[$player_id][$type]['flipped'][4] = false;
+            $board_assets[$player_id][$type][$new_slot] = [$selected_resource => $asset_type_arg];
+            $board_assets[$player_id][$type]['flipped'][$new_slot] = false;
         }
         else if ($asset_count < 4) {
-            $board_assets[$player_id][$type][$asset_count+1][$selected_resource] = $card_type_arg;
+            $board_assets[$player_id][$type][$asset_count+1][$selected_resource] = $asset_type_arg;
             $board_assets[$player_id][$type]["flipped"][$asset_count+1] = false;
         }
         $board_assets[$player_id][$type]["count"]++;
@@ -3693,8 +4255,8 @@ class FirstAscent extends Table
 
         $this->cards_and_tokens->insertCardOnExtremePosition($selected_resource, "{$player_id}_played_{$type}", true);
         $hand_count = count($this->getHandAssets($player_id));
-
-        $resource_for_log = "[{$asset_title}({$card_type_arg})]";
+        $formatted_asset_title = ['[' . $asset_title . '(' . $asset_type_arg . ')]'];
+        $resource_for_log = $this->formatLogTitles($formatted_asset_title);
 
         self::notifyAllPlayers("confirmAssetToAssetBoardOpponent", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
             'player_name' => self::getActivePlayerName(),
@@ -3702,10 +4264,11 @@ class FirstAscent extends Table
             'resource_for_log' => $resource_for_log,
             'player_id' => $player_id,
             'card_id' => $selected_resource,
-            'card_type_arg' => $card_type_arg,
+            'asset_type_arg' => $asset_type_arg,
             'card_type' => $type,
             'hand_count' => $hand_count,
             'preserve' => ['player_id'],
+            'i18n' => ['resource_for_log'],
         ));
 
         self::notifyPlayer($player_id, "confirmAssetToAssetBoard", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
@@ -3714,10 +4277,12 @@ class FirstAscent extends Table
             'resource_for_log' => $resource_for_log,
             'player_id' => $player_id,
             'card_id' => $selected_resource,
-            'card_type_arg' => $card_type_arg,
+            'asset_type_arg' => $asset_type_arg,
             'card_type' => $type,
             'player_resources' => $player_resources,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
             'hand_count' => $hand_count,
+            'i18n' => ['resource_for_log'],
         ));
 
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
@@ -3734,85 +4299,208 @@ class FirstAscent extends Table
         $to_board = (array_key_exists('to_board', $climbing_card_info)) ? true : false;
 
         if ($selected_resource) {
-            $card_type_arg = $this->getGlobalVariable('asset_identifier', true)[$selected_resource];
-            $type = $this->getAssetType($card_type_arg);
+            $asset_type_arg = $this->getGlobalVariable('asset_identifier', true)[$selected_resource];
+            $type = $this->getAssetType($asset_type_arg);
             $random_tucked_id = '';
             if (!$to_board) { $this->cards_and_tokens->moveCard($selected_resource, $player_id); }
             else if ($to_board) { $this->cards_and_tokens->moveCard($selected_resource, "$player_id" . '_played_' . "$type"); }
 
+            // find out if stolen card was flipped or not before replacing on asset board with tucked card
+            foreach ($board_assets[$opponent_id][$type] as $key => $val) {
+                if (gettype($val) == "array" && isset($val[$selected_resource])) {
+                    $stolen_slot = $key;
+                    $stolen_face_down = $board_assets[$opponent_id][$type]['flipped'][$stolen_slot];
+                    break;
+                }
+            }
+
             // replace empty board slot with a tucked card if available
-            if (count($board_assets[$player_id][$type]['tucked']) > 0) {
-                $random_tucked_id = array_rand($board_assets[$player_id][$card_type]['tucked']);
-                $random_tucked_type_arg = $this->getGlobalVariable('asset_identifier', true)[$random_tucked_id];
-                foreach ($board_assets[$player_id][$type] as $key => $val) {
-                    if (in_array(['1', '2', '3', '4']) && isset($val[$selected_resource])) {
+            if (count($board_assets[$opponent_id][$type]['tucked']) > 0) {
+                $untucked_id = array_rand($board_assets[$opponent_id][$type]['tucked']);
+                $untucked_type_arg = $this->getGlobalVariable('asset_identifier', true)[$untucked_id];
+                $character_type_arg = $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['character'];
+                $slot_count = 4;
+                if ($character_type_arg === '6') { // Young Prodigy
+                    if ($type === 'gear') { $slot_count = 5; }
+                    else { $slot_count = 3; }
+                }
+                $type_keys = array_map('strval', range(1, $slot_count));
+                foreach ($board_assets[$opponent_id][$type] as $key => $val) {
+                    if (in_array($key, $type_keys) && isset($val[$selected_resource])) {
                         $slot = $key;
                     }
                 }
-                $board_assets[$player_id][$type][$slot][$random_tucked_id] = $random_tucked_type_arg;
-                $board_assets[$player_id][$type]['flipped'][$slot] = true;
-                unset($board_assets[$player_id][$type]['tucked'][$random_tucked_id]);
-                $type_arr = $board_assets[$player_id][$card_type];
-                $board_assets[$player_id][$card_type] = $this->sortAssetBoardByFlipped($type_arr);
+                $board_assets[$opponent_id][$type][$slot][$untucked_id] = $untucked_type_arg;
+                $board_assets[$opponent_id][$type]['flipped'][$slot] = true;
+                unset($board_assets[$opponent_id][$type]['tucked'][$untucked_id]);
+                $type_arr = $board_assets[$opponent_id][$type];
+                $board_assets[$opponent_id][$type] = $this->sortAssetBoardByFlipped($player_id, $type_arr);
             }
         }
         else if ($tucked_card_type) {
-            $random_tucked_id = array_rand($board_assets[$player_id][$card_type]['tucked']);
-            $card_type_arg = $tucked_cards[$random_tucked_id];
-            $type = $this->getAssetType($card_type_arg);
+            $tucked_cards = $board_assets[$opponent_id][$tucked_card_type]['tucked'];
+            $random_tucked_id = array_rand($tucked_cards);
+            $asset_type_arg = $tucked_cards[$random_tucked_id];
+            $type = $this->getAssetType($asset_type_arg);
+            $stolen_face_down = true;
 
-            unset($board_assets[$player_id][$type]['tucked'][$random_tucked_id]);
-            $board_assets[$player_id][$type]['count']--;
+            unset($board_assets[$opponent_id][$type]['tucked'][$random_tucked_id]);
+            $board_assets[$opponent_id][$type]['count']--;
             if (!$to_board) { $this->cards_and_tokens->moveCard($random_tucked_id, $player_id); }
             else if ($to_board) { $this->cards_and_tokens->moveCard($random_tucked_id, "$player_id" . '_played_' . "$type"); }
         }
     
-        $asset_title = $this->asset_cards[$card_type_arg]['description'];
-        $card_for_log = "[{$asset_title}({$card_type_arg})]";
+        $asset_title = $this->asset_cards[$asset_type_arg]['description'];
+        $formatted_asset_title = ['[' . $asset_title . '(' . $asset_type_arg . ')]'];
+        $asset_for_log = $this->formatLogTitles($formatted_asset_title);
         $names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
         $opponent_name = $names_and_colors[$opponent_id]['name'];
         $opponent_color = $names_and_colors[$opponent_id]['color'];
-
-        $card_id = $selected_resource ?? $random_tucked_id;
+        $card_id = $selected_resource !== '' ? $selected_resource : $random_tucked_id;
 
         foreach ($board_assets[$opponent_id][$type] as $key => $val) {
             if (gettype($val) == "array" && in_array($card_id, array_keys($val))) {
-                unset($board_assets[$opponent_id][$type][$key][$selected_resource]);
-                if ($card_id == $selected_resource) { $board_assets[$opponent_id][$type]['flipped'][$key] = null; }
+                unset($board_assets[$opponent_id][$type][$key][$card_id]);
+                if ($card_id == $selected_resource && !isset($untucked_id)) {
+                    $board_assets[$opponent_id][$type]['flipped'][$key] = null;
+                }
             }
         }
         $board_assets[$opponent_id][$type]["count"]--;
 
         if ($to_board) {
-            $asset_count = $board_assets[$player_id][$type]["count"];
-            if ($asset_count >= 4) {
-                $vacated_card = $board_assets[$player_id][$type][4];
-                $board_assets[$player_id][$type]["tucked"][array_keys($vacated_card)[0]] = array_values($vacated_card)[0];
-                $board_assets[$player_id][$type][4] = [$selected_resource => $card_type_arg];
-                $board_assets[$player_id][$type]['flipped'][4] = false;
+            $board_type = $board_assets[$player_id][$type];
+            $asset_count = $board_type["count"];
+            $visible_slots_full = true;
+            for ($i = 1; $i <= 4; $i++) {
+                if (empty($board_type[$i])) {
+                    $visible_slots_full = false;
+                    break;
+                }
             }
-            else if ($asset_count < 4) {
-                $board_assets[$player_id][$type][$asset_count+1][$selected_resource] = $card_type_arg;
-                $board_assets[$player_id][$type]['flipped'][$asset_count+1] = false;
+            $stolen_asset = [$card_id => $asset_type_arg];
+            $is_tucked = false;
+            $target_slot = null;
+
+            // if stolen card is face-up
+            if (!$stolen_face_down) {
+                if (!$visible_slots_full) {
+                    $target_slot = $this->findLowestEmptySlot($board_type);
+                } else {
+                    if ($this->hasFaceDown($board_type)) {
+                        // identify highest face-down card to tuck
+                        $highest_face_down_slot = $this->findHighestFaceDownSlot($board_type);
+                        $vacated_card = $board_type[$highest_face_down_slot];
+
+                        // tuck card
+                        $board_assets[$player_id][$type]['tucked'][array_keys($vacated_card)[0]] = array_values($vacated_card)[0];
+
+                        // clear vacated slot
+                        unset($board_assets[$player_id][$type][$highest_face_down_slot]);
+                        $board_assets[$player_id][$type]['flipped'][$highest_face_down_slot] = null;
+
+                        $board_type = $board_assets[$player_id][$type];
+
+                        // shift above face-up cards down a slot
+                        for ($i=$highest_face_down_slot+1; $i<=4; $i++) {
+                            if (isset($board_assets[$player_id][$type][$i])) {
+                                $board_assets[$player_id][$type][$i-1] = $board_assets[$player_id][$type][$i];
+                                $board_assets[$player_id][$type]['flipped'][$i-1] = $board_assets[$player_id][$type]['flipped'][$i];
+                                // clear slot
+                                unset($board_assets[$player_id][$type][$i]);
+                                $board_assets[$player_id][$type]['flipped'][$i] = null;
+                            }
+                        }
+
+                        $board_type = $board_assets[$player_id][$type];
+
+                        // stolen card goes to newly created empty slot
+                        $target_slot = $this->findLowestEmptySlot($board_type);
+
+                    } else {
+                        // 4 cards in slots, all face-up: stolen card goes to tucked
+                        $board_assets[$player_id][$type]['tucked'][array_keys($stolen_asset)[0]] = array_values($stolen_asset)[0];
+                        $is_tucked = true;
+                    }
+                }
+
+            } else { // stolen card is face-down
+                if ($visible_slots_full) { // new card goes to tucked
+                    $board_assets[$player_id][$type]['tucked'][array_keys($stolen_asset)[0]] = array_values($stolen_asset)[0];
+                    $is_tucked = true;
+                } else {
+                    // Board has space AND already has face-down cards (The NEW scenario)
+    
+                    // 1. Find the highest slot index of any existing face-up card.
+                    $highest_face_up_slot = 0;
+                    $lowest_face_up_slot = 5; // Use 5 as an initial value > 4
+                    
+                    for ($i = 1; $i <= 4; $i++) {
+                        // Use the opponent's board for $board_type, as that's what was passed in the original code.
+                        // Assuming $board_type is refreshed after the initial state check.
+                        if (!empty($board_type[$i]) && $board_type['flipped'][$i] === false) {
+                            $highest_face_up_slot = max($highest_face_up_slot, $i);
+                            $lowest_face_up_slot = min($lowest_face_up_slot, $i);
+                        }
+                    }
+                    
+                    // 2. Perform an upward shift (highest index to lowest index) of ONLY the Face-Up cards.
+                    // This creates a gap immediately below the lowest Face-Up card.
+                    
+                    // In your scenario: highest_face_up_slot is 3, lowest_face_up_slot is 3.
+                    // The loop iterates from i=3 down to i=3.
+                    if ($highest_face_up_slot > 0) { 
+                        for ($i = $highest_face_up_slot; $i >= $lowest_face_up_slot; $i--) {
+                            if (!empty($board_type[$i]) && $board_type['flipped'][$i] === false) { 
+                                
+                                // IMPORTANT CHECK: Ensure the target slot (i+1) is not outside the board or occupied by a FD card
+                                if ($i < 4 && (empty($board_type[$i + 1]) || $board_type['flipped'][$i + 1] === false)) {
+                                    
+                                    // Shift the FU card from i to i+1
+                                    $board_assets[$player_id][$type][$i + 1] = $board_assets[$player_id][$type][$i];
+                                    $board_assets[$player_id][$type]['flipped'][$i + 1] = false;
+                                    
+                                    // Clear the old slot
+                                    unset($board_assets[$player_id][$type][$i]);
+                                    $board_assets[$player_id][$type]['flipped'][$i] = null;
+                                } else if ($i == 4 && !empty($board_type[$i])) {
+                                    // Safety break if a FU card is already at slot 4 and we attempt to shift it further
+                                    continue; 
+                                }
+                            }
+                        }
+                    }
+                    
+                    // 3. Find the new lowest empty slot (which will be the one vacated by the lowest FU card).
+                    $board_type = $board_assets[$player_id][$type];
+                    $target_slot = $this->findLowestEmptySlot($board_type); // Should now return 3
+                }
             }
-            $board_assets[$player_id][$type]["count"]++;
+
+            // final placement
+            if (!$is_tucked) {
+                $board_assets[$player_id][$type][$target_slot] = $stolen_asset;
+                $board_assets[$player_id][$type]['flipped'][$target_slot] = $stolen_face_down;
+            }
+            $board_assets[$player_id][$type]['count']++;
         }
+
         $this->setGlobalVariable('board_assets', $board_assets);
         $this->repositionAssetBoard($opponent_id);
         $board_assets = $this->getGlobalVariable('board_assets', true);
         $hand_count = count($this->getHandAssets($player_id));
 
-        $flipped_type_arg = $flipped ? [$card_type_arg] : [];
-        if ($selected_resource) { $this->updateResourceTracker($opponent_id, 'subtract', null, null, [$card_type_arg], null, true, false, $flipped_type_arg); }
-        if (!$to_board) { $this->updateResourceTracker($player_id, 'add', null, null, [$card_type_arg]); }
-        else if ($to_board) { $this->updateResourceTracker($player_id, 'add', null, null, [$card_type_arg], null, false, true); }
+        $flipped_type_arg = $flipped ? [$asset_type_arg] : [];
+        if ($selected_resource) { $this->updateResourceTracker($opponent_id, 'subtract', null, null, [$asset_type_arg], null, true, false, $flipped_type_arg); }
+        if (!$to_board) { $this->updateResourceTracker($player_id, 'add', null, null, [$asset_type_arg]); }
+        else if ($to_board) { $this->updateResourceTracker($player_id, 'add', null, null, [$asset_type_arg], null, false, true, $flipped_type_arg); }
         $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
 
-        $to_board_for_log = $to_board ? ' and adds it to his Asset Board' : '';
+        $to_board_for_log = $to_board ? ' ' . clienttranslate('and adds it to his Asset Board') : '';
 
-        self::notifyAllPlayers('confirmStealFromAssetBoardOpponent', clienttranslate('${player_name} steals ${card_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
+        self::notifyAllPlayers('confirmStealFromAssetBoardOpponent', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
             'player_name' => self::getActivePlayerName(),
-            'card_for_log' => $card_for_log,
+            'asset_for_log' => $asset_for_log,
             'to_board_for_log' => $to_board_for_log,
             'to_board' => $to_board,
             'board_assets' => $board_assets,
@@ -3824,11 +4512,12 @@ class FirstAscent extends Table
             'random_tucked_id' => $random_tucked_id,
             'hand_count' => $hand_count,
             'preserve' => ['player_id'],
+            'i18n' => ['asset_for_log', 'to_board_for_log'],
         ));
 
-        self::notifyPlayer($player_id, 'confirmStealFromAssetBoard', clienttranslate('${player_name} steals ${card_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
+        self::notifyPlayer($player_id, 'confirmStealFromAssetBoard', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
             'player_name' => self::getActivePlayerName(),
-            'card_for_log' => $card_for_log,
+            'asset_for_log' => $asset_for_log,
             'to_board_for_log' => $to_board_for_log,
             'to_board' => $to_board,
             'board_assets' => $board_assets,
@@ -3840,6 +4529,8 @@ class FirstAscent extends Table
             'random_tucked_id' => $random_tucked_id,
             'hand_count' => $hand_count,
             'player_resources' => $player_resources,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
+            'i18n' => ['asset_for_log', 'to_board_for_log'],
         ));
 
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
@@ -3851,17 +4542,27 @@ class FirstAscent extends Table
     function confirmChooseSummitBetaToken($selected_token_id, $opponent_token_id, $opponent_id) {
         self::checkAction('confirmChooseSummitBetaToken');
 
-        $this->cards_and_tokens->moveCard($selected_token_id, self::getActivePlayerId());
+        $player_id = self::getActivePlayerId();
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+
+        $this->cards_and_tokens->moveCard($selected_token_id, $player_id);
+        $player_token_tracker = $this->addHandSummitBeta($hand_token_tracker[$player_id], $selected_token_id);
         $this->cards_and_tokens->moveCard($opponent_token_id, $opponent_id);
+        $opponent_token_tracker = $this->addHandSummitBeta($hand_token_tracker[$opponent_id], $opponent_token_id);
+        $hand_token_tracker[$player_id] = $player_token_tracker;
+        $hand_token_tracker[$opponent_id] = $opponent_token_tracker;
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
         $player_token_type_arg = $this->getGlobalVariable('token_identifier', true)[$selected_token_id];
         $player_token_name = $this->summit_beta_tokens[$player_token_type_arg]['description'];
-        $player_token_for_log = '+' . $player_token_name . '(' . $player_token_type_arg . ')+';
+        $formatted_player_token_name = ['+' . $player_token_name . '(' . $player_token_type_arg . ')+'];
+        $player_token_for_log = $this->formatLogTitles($formatted_player_token_name);
 
         $player_name1 = $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['name'];
         $opponent_token_type_arg = $this->getGlobalVariable('token_identifier', true)[$opponent_token_id];
         $opponent_token_name = $this->summit_beta_tokens[$opponent_token_type_arg]['description'];
-        $opponent_token_for_log = '+' . $opponent_token_name . '(' . $opponent_token_type_arg . ')+';
+        $formatted_opponent_token_name = ['+' . $opponent_token_name . '(' . $opponent_token_type_arg . ')+'];
+        $opponent_token_for_log = $this->formatLogTitles($formatted_opponent_token_name);
 
         $player_id = self::getActivePlayerId();
         $player_name = self::getActivePlayerName();
@@ -3876,9 +4577,11 @@ class FirstAscent extends Table
             'opponent_token_type_arg' => $opponent_token_type_arg,
             'player_id' => $player_id,
             'opponent_id' => $opponent_id,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
+            'i18n' => ['player_token_for_log', 'opponent_token_for_log'],
         ));
 
-        self::notifyPlayer($opponent_id, "confirmChooseSummitBetaTokenOpponent", clienttranslate('${player_name} kept a Summit Beta Token and gave ${opponent_token_for_log} to ${player_name1}'), array(
+        self::notifyPlayer($opponent_id, "confirmChooseSummitBetaTokenOpponent", clienttranslate('${player_name} kept a Summit Beta token and gave ${opponent_token_for_log} to ${player_name1}'), array(
             'player_name' => $player_name,
             'player_name1' => $player_name1,
             'player_token_for_log' => null,
@@ -3889,9 +4592,11 @@ class FirstAscent extends Table
             'opponent_token_type_arg' => $opponent_token_type_arg,
             'player_id' => $player_id,
             'opponent_id' => $opponent_id,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$opponent_id],
+            'i18n' => ['opponent_token_for_log'],
         ));
 
-        self::notifyAllPlayers("confirmChooseSummitBetaTokenPublic", clienttranslate('${player_name} kept a Summit Beta Token and gave a Summit Beta Token to ${player_name1}'), array(
+        self::notifyAllPlayers("confirmChooseSummitBetaTokenPublic", clienttranslate('${player_name} kept a Summit Beta token and gave a Summit Beta token to ${player_name1}'), array(
             'player_name' => $player_name,
             'player_name1' => $player_name1,
             'player_token_for_log' => null,
@@ -3914,8 +4619,15 @@ class FirstAscent extends Table
         self::checkAction('confirmChooseTechniqueToken');
 
         $player_id = self::getActivePlayerId();
-        $symbol_for_log = $technique_token_type == 'pain_tolerance' ? 'Pain Tolerance' : ucfirst($technique_token_type);
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
+        $choice_args = $climbing_card_info['choice_args'];
+        $symbol_for_log = [
+            'log' => '${symbol_type}',
+            'args' => [
+                'symbol_type' => COMMON_TRANSLATIONS[strtoupper($technique_token_type)],
+                'i18n' => ['symbol_type']
+            ]
+        ];
         $climbing_card_type_arg = $climbing_card_info['type_arg'];
         $this->updateResourceTracker($player_id, 'add', null, null, [], $technique_token_type);
         $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
@@ -3927,6 +4639,7 @@ class FirstAscent extends Table
                 'symbol_type' => $technique_token_type,
                 'climbing_card_type_arg' => $climbing_card_info['type_arg'],
                 'preserve' => ['player_id'],
+                'i18n' => ['symbol_for_log'],
         ));
 
         self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
@@ -3935,7 +4648,9 @@ class FirstAscent extends Table
                 'symbol_type' => $technique_token_type,
                 'player_id' => $player_id,
                 'player_resources' => $player_resources,
+                'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
                 'climbing_card_type_arg' => $climbing_card_info['type_arg'],
+                'i18n' => ['symbol_for_log'],
         ));
 
         if ($climbing_card_type_arg == 12) {
@@ -3966,14 +4681,16 @@ class FirstAscent extends Table
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
         $climbing_card_type_arg = $climbing_card_info['type_arg'];
         $climbing_card_name = $this->climbing_cards[$climbing_card_type_arg]['description'];
-        $climbing_card_for_log = '/' . $climbing_card_name . '(' . $climbing_card_type_arg . ')\\';
+        $formatted_climbing_card_name = ['/' . $climbing_card_name . '(' . $climbing_card_type_arg . ')\\'];
+        $climbing_card_for_log = $this->formatLogTitles($formatted_climbing_card_name);
 
-        self::notifyAllPlayers('passedClimbingCard', clienttranslate('${player_name} could not choose either option and passed on ${climbing_card}'), array(
+        self::notifyAllPlayers('passedClimbingCard', clienttranslate('${player_name} could not choose either option and passed on ${climbing_card_for_log}. He will only draw 1 card during the Rerack phase'), [
                 'player_name' => self::getActivePlayerName(),
-                'climbing_card' => $climbing_card_for_log,
-        ));
+                'climbing_card_for_log' => $climbing_card_for_log,
+                'i18n' => ['climbing_card_for_log'],
+        ]);
 
-        $this->setGlobalVariable('climbing_card_info', []);
+        $this->setGlobalVariable('climbing_card_info', array());
         $this->gamestate->nextState('nextClimb');
     }
 
@@ -4005,17 +4722,18 @@ class FirstAscent extends Table
         $this->cards_and_tokens->moveCards($reracked_assets, $player_id);
         $hand_count = count($this->getHandAssets($player_id));
 
-        $rerack_log = '${player_name} uses +Rerack(1)+ and gains ';
-
         $id_1 = $reracked_assets[0];
         $type_arg_1 = $this->getGlobalVariable('asset_identifier', true)[$id_1];
         $asset_1 = $this->asset_cards[$type_arg_1];
-        $name_1 = $asset_1['description'];
+        $asset_name_1 = $asset_1['description'];
+        $formatted_asset_name_1 = '[' . $asset_name_1 . '(' . $type_arg_1 . ')]';
 
         $id_2 = $reracked_assets[1];
         $type_arg_2 = $this->getGlobalVariable('asset_identifier', true)[$id_2];
         $asset_2 = $this->asset_cards[$type_arg_2];
-        $name_2 = $asset_2['description'];
+        $asset_name_2 = $asset_2['description'];
+        $formatted_asset_name_2 = '[' . $asset_name_2 . '(' . $type_arg_2 . ')]';
+        $assets_for_log = $this->formatLogTitles([$formatted_asset_name_1, $formatted_asset_name_2]);
 
         $reracked_asset_type_args = [$type_arg_1, $type_arg_2];
         $this->updateResourceTracker($player_id, 'add', null, null, $reracked_asset_type_args);
@@ -4024,30 +4742,39 @@ class FirstAscent extends Table
         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
         $rerack_id = array_search('1', $hand_sb_tokens);
         $this->cards_and_tokens->insertCardOnExtremePosition($rerack_id, 'summit_beta_discard', true);
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+        $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $rerack_id);
+        $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-        self::notifyAllPlayers('confirmRerackPublic', clienttranslate('${player_name} uses +Rerack(1)+ and gains [${name_1}(${type_arg_1})] and [${name_2}(${type_arg_2})] from the discard pile'), [
+        self::notifyAllPlayers('confirmRerackPublic', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
-            'name_1' => $name_1,
+            'name_1' => $asset_name_1,
             'type_arg_1' => $type_arg_1,
-            'name_2' => $name_2,
+            'name_2' => $asset_name_2,
             'type_arg_2' => $type_arg_2,
+            'assets_for_log' => $assets_for_log,
             'reracked_assets' => $reracked_assets,
             'hand_count' => $hand_count,
             'preserve' => ['player_id'],
+            'i18n' => ['assets_for_log'],
         ]);
 
-        self::notifyPlayer($player_id, 'confirmRerackPrivate', clienttranslate('${player_name} uses +Rerack(1)+ and gains [${name_1}(${type_arg_1})] and [${name_2}(${type_arg_2})] from the discard pile'), [
+        self::notifyPlayer($player_id, 'confirmRerackPrivate', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
             'player_name' => self::getActivePlayerName(),
-            'name_1' => $name_1,
+            'name_1' => $asset_name_1,
             'type_arg_1' => $type_arg_1,
-            'name_2' => $name_2,
+            'name_2' => $asset_name_2,
             'type_arg_2' => $type_arg_2,
+            'assets_for_log' => $assets_for_log,
             'reracked_assets' => $reracked_assets,
             'hand_count' => $hand_count,
             'player_resources' => $player_resources,
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
+            'i18n' => ['assets_for_log'],
         ]);
     }
 
@@ -4059,11 +4786,18 @@ class FirstAscent extends Table
         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
         $energy_drink_id = array_search('4', $hand_sb_tokens);
         $this->cards_and_tokens->insertCardOnExtremePosition($energy_drink_id, 'summit_beta_discard', true);
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+        $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $energy_drink_id);
+        $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
         self::notifyAllPlayers('confirmEnergyDrink', clienttranslate('${player_name} uses +Energy Drink(4)+ and gains 1 Water and 1 Psych'), [
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
+        ]);
+        self::notifyPlayer($player_id, 'updatePlayerTokenTracker', '', [
+            'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
         ]);
     }
 
@@ -4075,6 +4809,10 @@ class FirstAscent extends Table
         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
         $bomber_anchor_id = array_search('9', $hand_sb_tokens);
         $this->cards_and_tokens->insertCardOnExtremePosition($bomber_anchor_id, 'summit_beta_discard', true);
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+        $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $bomber_anchor_id);
+        $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
         self::notifyAllPlayers('log_only', clienttranslate('${player_name} uses +Bomber Anchor(9)+'), [
@@ -4094,8 +4832,10 @@ class FirstAscent extends Table
         self::checkAction('confirmLuckyChalkbag');
 
         $this->setGlobalVariable('riskSummitBetaFace', null);
+        
 
         $player_id = self::getActivePlayerId();
+        $player_name = self::getActivePlayerName();
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true)[$player_id];
         $available_psych = $resource_tracker['psych'];
         $face_rolled = bga_rand(1, 3);
@@ -4146,28 +4886,35 @@ class FirstAscent extends Table
             $available_cards = count($this->getHandAssets($player_id)) + count($this->getBoardAssets($player_id));
         }
 
-        function dieLog($face_rolled, $available_cards, $available_psych, $use_case) {
+        $player_name = self::getActivePlayerName();
+        function dieLog($face_rolled, $available_cards, $available_psych, $use_case, $player_name) {
 
+            $die_log = [
+                'log' => '',
+                'args' => [
+                    'player_name' => $player_name
+                ]
+            ];
             switch($face_rolled) {
 
                 case 1:
-                    if ($use_case === 'risk_it') { $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls a checkmark and successfully climbs the pitch'; }
-                    else if ($use_case === 'climbing_card') { $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls a checkmark and will draw 3 cards from the Portaledge'; }
+                    if ($use_case === 'risk_it') { $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls a checkmark and successfully climbs the pitch'); }
+                    else if ($use_case === 'climbing_card') { $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls a checkmark and will draw 3 cards from the Portaledge'); }
                     break;
                 case 2: 
                     if ($available_cards >= 2) {
-                        $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls -2 Cards and will choose an opponent and give them 2 Asset Cards';
+                        $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls -2 Cards and will choose an opponent and give them 2 Asset Cards');
                     }
                     else {
-                        $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls -2 Cards but does not have 2 cards to give. They fail to climb the pitch and will draw only 1 card during the next Rerack Phase';
+                        $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls -2 Cards but does not have 2 cards to give. He fails to climb the pitch and will draw only 1 card during the next Rerack Phase');
                     }
                     break;
                 case 3: 
                     if ($available_cards >= 1 && $available_psych >= 1) {
-                        $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych';
+                        $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych');
                     }
                     else {
-                        $die_log = '${player_name} uses +Lucky Chalkbag(11)+, rerolls -1 Card and -1 Psych but they do not have the required resources. They will draw only 1 card during the next Rerack Phase';
+                        $die_log['log'] = clienttranslate('${player_name} uses +Lucky Chalkbag(11)+, rerolls -1 Card and -1 Psych but he does not have the required resources. He will draw only 1 card during the next Rerack Phase');
                     }
                     break;
             }
@@ -4176,6 +4923,11 @@ class FirstAscent extends Table
         }
 
         $token_id = array_search('11', $this->getGlobalVariable('token_identifier', true));
+        $this->cards_and_tokens->insertCardOnExtremePosition($token_id, 'summit_beta_discard', true);
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+        $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $token_id);
+        $hand_token_tracker[$player_id] = $updated_player_token_tracker;
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
@@ -4191,9 +4943,10 @@ class FirstAscent extends Table
             'lucky_chalkbag' => false,
         ));
 
-        $die_log = dieLog($face_rolled, $available_cards, $resource_tracker['psych'], $use_case);
-        self::notifyAllPlayers("log_only", clienttranslate($die_log), array(
-            'player_name' => self::getActivePlayerName(),
+        $die_log = dieLog($face_rolled, $available_cards, $resource_tracker['psych'], $use_case, $player_name);
+        self::notifyAllPlayers("log_only", '${die_log}', array(
+            'die_log' => $die_log,
+            'i18n' => ['die_log'],
         ));
             
         if ($use_case === 'risk_it') {
@@ -4265,8 +5018,8 @@ class FirstAscent extends Table
                 if ($available_cards > 1) {
 
                     $climbing_card_info['discard_num'] = 2;
-                    $climbing_card_info['titlebar_message_opponent'] = 'get 2 of his Asset Cards';
-                    $climbing_card_info['titlebar_message'] = 'get 2 of your Asset Cards';
+                    $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 2 of his Asset Cards');
+                    $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 2 of your Asset Cards');
                     $climbing_card_info['give_opponent'] = true;
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                     $this->gamestate->nextState('selectOpponent');
@@ -4289,8 +5042,8 @@ class FirstAscent extends Table
 
                     $climbing_card_info['discard_num'] = 1;
                     $climbing_card_info['give_psych'] = true;
-                    $climbing_card_info['titlebar_message_opponent'] = 'get 1 of his Asset Cards and 1 of his Psych';
-                    $climbing_card_info['titlebar_message'] = 'get 1 of your Asset Cards and 1 of your Psych';
+                    $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 1 of his Asset Cards and 1 of his Psych');
+                    $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 1 of your Asset Cards and 1 of your Psych');
                     $climbing_card_info['give_opponent'] = true;
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
                     $this->gamestate->nextState('selectOpponent');
@@ -4378,13 +5131,15 @@ class FirstAscent extends Table
         $crimper_cards = $this->getGlobalVariable('crimper_cards', true);
         $discard_type_arg = $this->getGlobalVariable('climbing_card_identifier', true)[$discard_id];
         $discard_card = $this->climbing_cards[$discard_type_arg];
-        $discard_name = $discard_card['description'];
+        $discard_title = $discard_card['description'];
         $chosen_type_arg = $this->getGlobalVariable('climbing_card_identifier', true)[$chosen_id];
         $chosen_card = $this->climbing_cards[$chosen_type_arg];
-        $chosen_name = $chosen_card['description'];
+        $chosen_title = $chosen_card['description'];
 
-        $discard_for_log = '/' . $discard_name . '(' . $discard_type_arg . ')\\';
-        $chosen_for_log = '/' . $chosen_name . '(' . $chosen_type_arg . ')\\';
+        $formatted_discard_title = ['/' . $discard_title . '(' . $discard_type_arg . ')\\'];
+        $discard_for_log = $this->formatLogTitles($formatted_discard_title);
+        $formatted_chosen_title = ['/' . $chosen_title . '(' . $chosen_type_arg . ')\\'];
+        $chosen_for_log = $this->formatLogTitles($formatted_chosen_title);
         self::notifyAllPlayers("confirmCrimperClimbingCard", clienttranslate('${player_name} chooses ${chosen_for_log} and discards ${discard_for_log}'), [
             'player_name' => self::getActivePlayerName(),
             'chosen_for_log' => $chosen_for_log,
@@ -4392,6 +5147,7 @@ class FirstAscent extends Table
             'chosen_id' => $chosen_id,
             'discard_id' => $discard_id,
             'chosen_type_arg' => $chosen_type_arg,
+            'i18n' => ['chosen_for_log', 'discard_for_log'],
         ]);
 
         if ($crimper_cards[0]['id'] == $chosen_id) { $climbing_card_info = $crimper_cards[0]; }
@@ -4441,7 +5197,8 @@ class FirstAscent extends Table
     function argClimbOrRest() {
         $current_player = self::getActivePlayerId();
         $pitch_tracker = $this->getGlobalVariable('pitch_tracker')->$current_player;
-        $current_pitch = end($pitch_tracker);
+        $bailed_pitch = $this->getGlobalVariable('bailed_pitch')->$current_player;
+        $current_pitch = $bailed_pitch ?? end($pitch_tracker);
         $board = $this->getGlobalVariable('board');
         $round = $this->getGlobalVariable('round');
         $phase = $this->getGlobalVariable('phase');
@@ -4465,12 +5222,27 @@ class FirstAscent extends Table
             $titlebar_message = null;
             $player_name1 = $climbing_card_info['opponent_name'] ?? null;
 
-            if ($player_name1) { $titlebar_message = "give {$discard_num} Asset card(s) to @{$player_name1}@"; }
-            else if ($discard_type === 'any_skill') { $titlebar_message = "lose 1 Face, Crack, or Slab card"; }
-            else if ($discard_type === 'any_asset') {
-                $titlebar_message = $climbing_card_info['type_arg'] == 12 ? 'lose 2 Asset cards' : "lose 1 Asset card";
+            $titlebar_message = [ 'log' => [], 'args' => [] ];
+            if ($player_name1) {
+                $titlebar_message['log'] = clienttranslate('must give ${discard_num} Asset card/s to @${player_name1}@');
+                $titlebar_message['args'] = [
+                    'discard_num' => $discard_num,
+                    'player_name1' => $player_name1,
+                ];
             }
-            else { $titlebar_message = "lose {$discard_num} {$discard_type} card/s"; }
+            else if ($discard_type === 'any_skill') { $titlebar_message['log'] = clienttranslate('must lose 1 Face, Crack, or Slab card'); }
+            else if ($discard_type === 'any_asset') {
+                $titlebar_message['log'] = $climbing_card_info['type_arg'] == 12 ? 
+                    clienttranslate('must lose 2 Asset cards') : clienttranslate('must lose 1 Asset card');
+            }
+            else {
+                $titlebar_message['log'] = clienttranslate('must lose ${discard_num} ${discard_type} card/s');
+                $titlebar_message['args'] = [
+                    'discard_num' => $discard_num,
+                    'discard_type' => COMMON_TRANSLATIONS[strtoupper($discard_type)],
+                    'i18n' => ['discard_type'],
+                ];
+            }
 
             return array(
                 "discard_type" => $discard_type,
@@ -4487,7 +5259,13 @@ class FirstAscent extends Table
             $discard_num = 2;
             $opponent_id = $risk_it_info[1];
             $player_name1 = $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['name'];
-            $titlebar_message = "give {$discard_num} Asset card(s) to @{$player_name1}@";
+            $titlebar_message = [
+                'log' => clienttranslate('must give ${discard_num} Asset card/s to @${player_name1}@'),
+                'args' => [
+                    'discard_num' => $discard_num,
+                    'player_name1' => $player_name1,
+                ],
+            ];
 
             return array(
                 "discard_type" => $discard_type,
@@ -4504,7 +5282,11 @@ class FirstAscent extends Table
             $discard_num = 1;
             $opponent_id = $risk_it_info[1];
             $player_name1 = $this->getGlobalVariable('player_names_and_colors', true)[$opponent_id]['name'];
-            $titlebar_message = "give {$discard_num} Asset card(s) to @{$player_name1}@";
+            $titlebar_message['log'] = clienttranslate('must give ${discard_num} Asset card/s to @${player_name1}@');
+            $titlebar_message['args'] = [
+                'discard_num' => $discard_num,
+                'player_name1' => $player_name1,
+            ];
 
             return array(
                 "discard_type" => $discard_type,
@@ -4522,13 +5304,23 @@ class FirstAscent extends Table
 
         if ($climbing_card_info) {
             $climbing_card_type = $climbing_card_info['type_arg'];
-            if (array_key_exists('titlebar_message_opponent', $climbing_card_info)) { $titlebar_message_opponent = $climbing_card_info['titlebar_message_opponent']; }
-            if (array_key_exists('titlebar_message', $climbing_card_info)) { $titlebar_message = $climbing_card_info['titlebar_message']; }
-            if (array_key_exists('titlebar_message_opponent', $this->climbing_cards[$climbing_card_type])) {
-                $titlebar_message_opponent = $this->climbing_cards[$climbing_card_type]['titlebar_message_opponent'];
+            $msg = $climbing_card_info['titlebar_message'] ?? false;
+            $msg = $this->climbing_cards[$climbing_card_type]['titlebar_message'] ?? $msg;
+            $opponent_msg = $climbing_card_info['titlebar_message_opponent'] ?? false;
+            $opponent_msg = $this->climbing_cards[$climbing_card_type]['titlebar_message_opponent'] ?? $opponent_msg;
+            if ($msg) {
+                $titlebar_message['log'] = '${msg}';
+                $titlebar_message['args'] = [
+                    'i18n' => ['msg'],
+                    'msg' => $msg,
+                ];
             }
-            if (array_key_exists('titlebar_message', $this->climbing_cards[$climbing_card_type])) {
-                $titlebar_message = $this->climbing_cards[$climbing_card_type]['titlebar_message'];
+            if ($opponent_msg) {
+                $titlebar_message_opponent['log'] = '${opponent_msg}';
+                $titlebar_message_opponent['args'] = [
+                    'i18n' => ['opponent_msg'],
+                    'opponent_msg' => $opponent_msg,
+                ];
             }
 
             return array(
@@ -4540,8 +5332,8 @@ class FirstAscent extends Table
 
         else if ($risk_it_info[0] === 2) { // "risk it" climbing attempt -2 cards
 
-            $titlebar_message_opponent = 'get 2 of his Asset Cards';
-            $titlebar_message = 'get 2 of your Asset Cards';
+            $titlebar_message_opponent = clienttranslate('must select an opponent to get 2 of his Asset Cards');
+            $titlebar_message = clienttranslate('must select an opponent to get 2 of your Asset Cards');
 
             return array(
                 "climbing_card_info" => $climbing_card_info,
@@ -4552,8 +5344,8 @@ class FirstAscent extends Table
 
         else if ($risk_it_info[0] ===3) { // "risk it" climbing attempt -1 card, -1 psych
 
-            $titlebar_message_opponent = 'get 1 of his Asset Cards and 1 of his Psych';
-            $titlebar_message = 'get 1 of your Asset Cards and 1 of your Psych';
+            $titlebar_message_opponent = clienttranslate('must select an opponent to get 1 of his Asset Cards and 1 of his Psych');
+            $titlebar_message = clienttranslate('must select an opponent to get 1 of your Asset Cards and 1 of your Psych');
 
             return array(
                 "climbing_card_info" => $climbing_card_info,
@@ -4564,14 +5356,57 @@ class FirstAscent extends Table
     }
 
     function argSelectPortaledge() {
+        // ensure there are enough cards between the portaledge deck, asset deck, and asset discard
+        $remaining_cards = ['gear' => 0, 'face' => 0, 'crack' => 0, 'slab' => 0];
+        $remaining_deck = self::getObjectListFromDb("SELECT card_location, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
+        $remaining_discard = self::getObjectListFromDb("SELECT card_location, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='discard'");
+        foreach ($remaining_cards as $type => $value) {
+            $sortType = function ($asset) use ($type) {
+                switch ($type) {
+                    case 'gear':
+                        return ($asset['card_type_arg'] >= 22);
+                    case 'face':
+                        return ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21);
+                    case 'crack':
+                        return ($asset['card_type_arg'] <= 7);
+                    case 'slab':
+                        return ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14);
+                    default:
+                        return false;
+                }
+            };
+            $portaledge_deck = 'porta' . $type;
+            $deck_loc = 'porta' . ucfirst($type);
+            $remaining_portaledge = self::getCollectionFromDb("SELECT card_id FROM cards_and_tokens WHERE card_location='$deck_loc'");
+            $rem_deck_type = array_filter($remaining_deck, $sortType);
+            $rem_discard_type = array_filter($remaining_discard, $sortType);
+            $available_type = count($remaining_portaledge) + count($rem_deck_type) + count($rem_discard_type);
+            $remaining_cards[$type] = $available_type;
+        }
+
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
-        $portaledge_num = $climbing_card_info['portaledge_num'];
-        $portaledge_types = $climbing_card_info['portaledge_types'] ?? null;
-        return array(
-            "climbing_card_info" => $climbing_card_info,
-            "portaledge_num" => $portaledge_num,
-            "portaledge_types" => $portaledge_types,
-        );
+        if ($climbing_card_info) {
+            $portaledge_num = $climbing_card_info['portaledge_num'];
+            $portaledge_types = $climbing_card_info['portaledge_types'] ?? null;
+            $portaledge_message = [
+                'log' => clienttranslate('must take ${portaledge_num} card(s) from the Portaledge'),
+                'args' => [ 'portaledge_num' => $portaledge_num ],
+            ];
+            return array(
+                "climbing_card_info" => $climbing_card_info,
+                "portaledge_num" => $portaledge_num,
+                "portaledge_types" => $portaledge_types,
+                'portaledge_message' => $portaledge_message,
+                "remaining_cards" => $remaining_cards,
+            );
+        }
+        else {
+            $portaledge_message = [];
+            return array(
+                'portaledge_message' => $portaledge_message,
+                'remaining_cards' => $remaining_cards,
+            );
+        }
     }
 
     function argAddTokenToPitch() {
@@ -4586,20 +5421,43 @@ class FirstAscent extends Table
     function argAddAssetToAssetBoard() {
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
         $types = $climbing_card_info['types'];
-        $types_message = $climbing_card_info['types_message'];
+        $types_message = array_key_exists('types_message', $climbing_card_info) ? $climbing_card_info['types_message'] : '';
+        $add_to_board_message = [
+            'log' => clienttranslate('must select a ${types_message}card from your hand'),
+            'args' => [
+                'i18n' => ['types_message'],
+                'types_message' => $types_message,
+            ],
+        ];
+        $add_to_board_opponent_message = [
+            'log' => clienttranslate('must select a ${types_message}card from his hand'),
+            'args' => [
+                'i18n' => ['types_message'],
+                'types_message' => $types_message,
+            ],
+        ];
         return array(
             "climbing_card_info" => $climbing_card_info,
             "types" => $types,
-            "types_message" => $types_message,
+            "add_to_board_message" => $add_to_board_message,
+            'add_to_board_opponent_message' => $add_to_board_opponent_message,
         );
     }
 
     function argStealFromAssetBoard() {
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
-        $types = $climbing_card_info['types'] == 'any' ? "" : "gear";
+        $types = $climbing_card_info['types'] == 'any' ? "" : clienttranslate('Gear');
+        $steal_message = [
+            'log' => clienttranslate('must select a ${types} card from an opponent\'s Asset Board'),
+            'args' => [
+                'i18n' => ['types'],
+                'types' => $types
+            ],
+        ];
         return array(
             'types' => $types,
             'climbing_card_info' => $climbing_card_info,
+            'steal_message' => $steal_message,
         );
     }
 
@@ -4616,6 +5474,16 @@ class FirstAscent extends Table
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
         return array(
             'climbing_card_info' => $climbing_card_info,
+        );
+    }
+
+    function argResting() {
+        $player_id = $this->getActivePlayerId();
+        $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
+        $rest_num = in_array($character_id, ['2', '8']) ? '6' : '5';
+
+        return array(
+            'rest_num' => $rest_num,
         );
     }
 
@@ -4654,7 +5522,8 @@ class FirstAscent extends Table
 
     function stNextCharacterSelect() {
 
-        if (count($this->getGlobalVariable('available_characters')) > 1) {
+        $zombie_players = $this->getGlobalVariable('zombie_players', true);
+        if (count($this->getGlobalVariable('available_characters')) > 1 + count($zombie_players)) {
             $player_id = self::activePrevPlayer();
             self::giveExtraTime($player_id);
             $this->gamestate->nextState('nextSelection');
@@ -4663,51 +5532,70 @@ class FirstAscent extends Table
             // Phil
             foreach ($this->getGlobalVariable('player_names_and_colors', true) as $player_id => $info) {
 
-                $character_id = $info['character'];
-                if ($character_id == '8') {
-                    $summit_beta_1 = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', strval($player_id));
-                    $sb_1_type_arg = $summit_beta_1['type_arg'];
-                    $sb_1_name = $this->summit_beta_tokens[$sb_1_type_arg]['description'];
-                    $summit_beta_2 = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', strval($player_id));
-                    $sb_2_type_arg = $summit_beta_2['type_arg'];
-                    $sb_2_name = $this->summit_beta_tokens[$sb_2_type_arg]['description'];
+                if (!in_array($player_id, $zombie_players)) {
+                    $character_id = $info['character'];
+                    if ($character_id == '8') {
+                        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+                        $summit_beta_1 = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', strval($player_id));
+                        $sb_1_id = $summit_beta_1['id'];
+                        $sb_1_type_arg = $summit_beta_1['type_arg'];
+                        $hand_token_tracker[$player_id]['1'] = $sb_1_id;
+                        $sb_1_name = $this->summit_beta_tokens[$sb_1_type_arg]['description'];
+                        $formatted_sb_1_name = '+' . $sb_1_name . '(' . $sb_1_type_arg . ')+';
+                        $first_token = $hand_token_tracker[$player_id];
+                        $summit_beta_2 = $this->cards_and_tokens->pickCardForLocation('summit_beta_supply', strval($player_id));
+                        $sb_2_id = $summit_beta_2['id'];
+                        $sb_2_type_arg = $summit_beta_2['type_arg'];
+                        $hand_token_tracker[$player_id]['2'] = $sb_2_id;
+                        $sb_2_name = $this->summit_beta_tokens[$sb_2_type_arg]['description'];
+                        $formatted_sb_2_name = '+' . $sb_2_name . '(' . $sb_2_type_arg . ')+';
+                        $summit_beta_for_log = $this->formatLogTitles([$formatted_sb_1_name, $formatted_sb_2_name]);
+                        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains 2 Summit Beta Tokens'), array(
-                        'player_name' => $info['name'],
-                        'player_id' => $player_id,
-                        'opponent_id' => false,
-                        'preserve' => ['player_id', 'opponent_id'],
-                    ));
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", '', array(
-                        'player_id' => $player_id,
-                        'opponent_id' => false,
-                        'preserve' => ['player_id', 'opponent_id'],
-                    ));
-                    
-                    self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains +${sb_1_name}(${sb_1_type_arg})+ and +${sb_2_name}(${sb_2_type_arg})+'), array(
-                        'player_name' => $info['name'],
-                        'player_id' => $player_id,
-                        'opponent_id' => false,
-                        'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
-                        'summit_beta_token' => $summit_beta_1,
-                        'sb_1_name' => $sb_1_name,
-                        'sb_1_type_arg' => $sb_1_type_arg,
-                        'sb_2_name' => $sb_2_name,
-                        'sb_2_type_arg' => $sb_2_type_arg,
-                    ));
-                    self::notifyPlayer($player_id, "confirmSummitBeta", '', array(
-                        'player_name' => self::getActivePlayerName(),
-                        'player_id' => $player_id,
-                        'opponent_id' => false,
-                        'hand_summit_beta_tokens' => $this->getHandSummitBetaTokens($player_id),
-                        'summit_beta_token' => $summit_beta_2,
-                    ));
+                        self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains 2 Summit Beta Tokens'), array(
+                            'player_name' => $info['name'],
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'last_token' => false,
+                            'summit_beta_reshuffle' => false,
+                            'preserve' => ['player_id', 'opponent_id'],
+                        ));
+                        self::notifyAllPlayers("confirmSummitBetaOpponent", '', array(
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'last_token' => false,
+                            'summit_beta_reshuffle' => false,
+                            'preserve' => ['player_id', 'opponent_id'],
+                        ));
+                        
+                        self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                            'player_name' => $info['name'],
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'player_token_tracker' => $first_token,
+                            'summit_beta_token' => $summit_beta_1,
+                            'summit_beta_for_log' => $summit_beta_for_log,
+                            'last_token' => false,
+                            'summit_beta_reshuffle' => false,
+                            'i18n' => ['summit_beta_for_log'],
+                        ));
+                        self::notifyPlayer($player_id, "confirmSummitBeta", '', array(
+                            'player_name' => self::getActivePlayerName(),
+                            'player_id' => $player_id,
+                            'opponent_id' => false,
+                            'player_token_tracker' => $hand_token_tracker[$player_id],
+                            'summit_beta_token' => $summit_beta_2,
+                            'last_token' => false,
+                            'summit_beta_reshuffle' => false,
+                        ));
+                    }
                 }
             }
-
+            $player_names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
+            self::notifyAllPlayers('updatePlayerNamesAndColors', '', ['player_names_and_colors' => $player_names_and_colors]);
             $active_player_id = $this->getActivePlayerId();
             self::giveExtraTime($active_player_id);
-            $this->setGlobalVariable('phase', 'Rack Up!');
+            $this->setGlobalVariable('phase', clienttranslate('Rack Up!'));
             $this->gamestate->nextState('drawAssets');
         }
     }
@@ -4715,52 +5603,87 @@ class FirstAscent extends Table
     function stNextDraw() {
 
         $player_id = self::activeNextPlayer();
-        self::giveExtraTime($player_id);
-
         $draw_step = $this->getGlobalVariable('draw_step');
-        $obj = $this;
-
-        function nextRound($obj) {
-            $draw_step = $obj->getGlobalVariable('draw_step');
-            $obj->setGlobalVariable('draw_step', 10);
-            $obj->setGlobalVariable('x_cards', 3);
-            $obj->setGlobalVariable('finished_drawing', []);
-            $obj->incStat(1, "rounds");
-            if ($draw_step < 10) {
-                $obj->setGlobalVariable('round', 1);
-                $obj->setGlobalVariable('phase', 'Climb');
-                $obj->gamestate->nextState('climbOrRest');
-            }
-            else if ($draw_step >= 10) { $obj->gamestate->nextState('nextRound'); }
-        }
-
         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
         $rested = $this->getGlobalVariable('rested', true);
+        $bailed_pitch = $this->getGlobalVariable('bailed_pitch', true);
 
         $player_count = $this->getPlayersNumber();
         $finished_drawing = $this->getGlobalVariable('finished_drawing', true);
 
         if (in_array($player_id, $rerack_1)) {
-
+            self::giveExtraTime($player_id);
             $this->setGlobalVariable('x_cards', 1);
             $this->setGlobalVariable('rerack_1', $rerack_1);
             $finished_drawing[] = $player_id;
             $this->setGlobalVariable('finished_drawing', $finished_drawing);
-            $this->setGlobalVariable('phase', 'Rerack');
+            $this->setGlobalVariable('phase', clienttranslate('Rerack'));
             $this->gamestate->nextState('drawAssets');
 
         } else if (in_array($player_id, $rested)) {
+            self::giveExtraTime($player_id);
             $key = array_search($player_id, $rested);
             unset($rested[$key]);
             $rested = array_values($rested);
             $this->setGlobalVariable('rested', $rested);
             $finished_drawing[] = $player_id;
             $this->setGlobalVariable('finished_drawing', $finished_drawing);
-            $this->setGlobalVariable('phase', 'Rerack');
+            $this->setGlobalVariable('phase', clienttranslate('Rerack'));
             $this->gamestate->nextState('resting');
-        
-        } else {
 
+        } else if ($bailed_pitch[$player_id] !== null) {
+            $finished_drawing[] = $player_id;
+            self::notifyAllPlayers('log_only', clienttranslate('${player_name} bailed out and does not gain any Assets during Rerack'), [
+                'player_name' => self::getActivePlayerName(),
+            ]);
+            switch ($draw_step) {
+                case 10:
+                    case 10:
+                    if (count($finished_drawing) < $player_count) {
+                        $this->setGlobalVariable('draw_step', 11);
+                        $finished_drawing[] = $player_id;
+                    }
+                    else { $this->nextRound(); }
+                    break;
+                case 11:
+                    if (count($finished_drawing) < $player_count) {
+                        $this->setGlobalVariable('draw_step', 12);
+                        $finished_drawing[] = $player_id;
+                    }
+                    else { $this->nextRound(); }                    
+                    break;
+                case 12: 
+                    if ($player_count > 2 && count($finished_drawing) < $player_count) {
+                        $this->setGlobalVariable('draw_step', 13);
+                        $finished_drawing[] = $player_id;
+                    }
+                    else { $this->nextRound(); }
+                    break;
+                case 13:
+                    if ($player_count > 3 && count($finished_drawing) < $player_count) {
+                        $this->setGlobalVariable('draw_step', 14);
+                        $finished_drawing[] = $player_id;
+                    }
+                    else { $this->nextRound(); }
+                    break;
+                case 14: 
+                    if ($player_count > 4 && count($finished_drawing) < $player_count) { 
+                        $this->setGlobalVariable('draw_step', 15);
+                        $finished_drawing[] = $player_id;
+                    }
+                    else { $this->nextRound(); }
+                    break;
+                case 15:
+                    $this->nextRound();
+                    break;
+            }
+            $state = $this->gamestate->state();
+            if ($state['name'] == 'nextDraw') {
+                $this->setGlobalVariable('finished_drawing', $finished_drawing);
+                if ($this->getGlobalVariable('draw_step') === 11) { $this->setGlobalVariable('phase', clienttranslate('Rerack')); }
+                $this->gamestate->nextState('nextDraw');
+            }
+        } else {
             switch ($draw_step) {
                 case 1:
                     $this->setGlobalVariable('draw_step', 2);
@@ -4770,68 +5693,69 @@ class FirstAscent extends Table
                         $this->setGlobalVariable('draw_step', 3);
                         $this->setGlobalVariable('x_cards', 6);
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 3;
                     if ($draw_step < $player_count) { 
                         $this->setGlobalVariable('draw_step', 4);
                         $this->setGlobalVariable('x_cards', 7);
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 4;
                     if ($draw_step < $player_count) { 
                         $this->setGlobalVariable('draw_step', 5);
                         $this->setGlobalVariable('x_cards', 8);
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 5:
-                    nextRound($obj);
+                    $this->nextRound();
                     break;
                 case 10:
                     if (count($finished_drawing) < $player_count) {
                         $this->setGlobalVariable('draw_step', 11);
                         $finished_drawing[] = $player_id;
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 11:
                     if (count($finished_drawing) < $player_count) {
                         $this->setGlobalVariable('draw_step', 12);
                         $finished_drawing[] = $player_id;
                     }
-                    else { nextRound($obj); }                    
+                    else { $this->nextRound(); }                    
                     break;
                 case 12: 
                     if ($player_count > 2 && count($finished_drawing) < $player_count) {
                         $this->setGlobalVariable('draw_step', 13);
                         $finished_drawing[] = $player_id;
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 13:
                     if ($player_count > 3 && count($finished_drawing) < $player_count) {
                         $this->setGlobalVariable('draw_step', 14);
                         $finished_drawing[] = $player_id;
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 14: 
                     if ($player_count > 4 && count($finished_drawing) < $player_count) { 
                         $this->setGlobalVariable('draw_step', 15);
                         $finished_drawing[] = $player_id;
                     }
-                    else { nextRound($obj); }
+                    else { $this->nextRound(); }
                     break;
                 case 15:
-                    nextRound($obj);
+                    $this->nextRound();
                     break;
             }
             $state = $this->gamestate->state();
             if ($state['name'] == 'nextDraw') {
                 $this->setGlobalVariable('finished_drawing', $finished_drawing);
-                if ($this->getGlobalVariable('draw_step') === 11) { $this->setGlobalVariable('phase', 'Rerack'); }
+                if ($this->getGlobalVariable('draw_step') === 11) { $this->setGlobalVariable('phase', clienttranslate('Rerack')); }
+                self::giveExtraTime($player_id);
                 $this->gamestate->nextState('drawAssets');
             }
         } 
@@ -4841,6 +5765,8 @@ class FirstAscent extends Table
 
         $current_climbing_card = $this->getUniqueValueFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='in_play'");
         if ($current_climbing_card) { $this->cards_and_tokens->insertCardOnExtremePosition($current_climbing_card, 'climbing_discard', true); }
+
+        self::notifyAllPlayers('cleanUpClimbOrRest', '', []);
 
         $finished_climbing = $this->getGlobalVariable('finished_climbing', true);
         $current_player = self::getActivePlayerId();
@@ -4855,10 +5781,9 @@ class FirstAscent extends Table
         }
 
         $all_player_ids = array_keys($this->getGlobalVariable('player_names_and_colors', true));
-
         if (count($finished_climbing) == count($all_player_ids) && count(array_diff($finished_climbing, $all_player_ids)) == 0) {
             $this->setGlobalVariable('finished_climbing', []);
-            $this->setGlobalVariable('phase', 'Follow');
+            $this->setGlobalVariable('phase', clienttranslate('Follow'));
 
             if ($this->getGlobalVariable('headwall_revealed') === false) { $this->checkForHeadwall(); }
 
@@ -4876,9 +5801,18 @@ class FirstAscent extends Table
 
     function stPortaledgeAll() {
 
-        $next_player = self::activeNextPlayer();
-        self::giveExtraTime($next_player);
-        $this->gamestate->nextState('selectPortaledge');
+        $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
+        $finished_portaledge = $climbing_card_info['finished_portaledge'];
+        $zombie_players = $this->getGlobalVariable('zombie_players', true);
+
+        if (count($finished_portaledge) + count($zombie_players) == $this->getPlayersNumber()) { // skip zombie players
+            $this->setGlobalVariable('climbing_card_info', array());
+            $this->gamestate->nextState('nextClimb');
+        } else {
+            $next_player = self::activeNextPlayer();
+            self::giveExtraTime($next_player);
+            $this->gamestate->nextState('selectPortaledge');
+        }
     }
 
     function stTechniqueOpponent() {
@@ -4904,170 +5838,365 @@ class FirstAscent extends Table
     }
 
     function stMatchingTechniques() {
-
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
         $names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
         $tokens_awarded = false;
         $asset_board_token_tracker = $this->getGlobalVariable('asset_board_token_tracker', true);
-        
-        $leftover_for_new_rubber = ['gear' => 0, 'face' => 0, 'crack' => 0, 'slab' => 0, 'wild' => 0];
-        
-        foreach(array_keys($names_and_colors) as $id) {
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
 
+        foreach(array_keys($names_and_colors) as $id) {
             $techniques = $resource_tracker[$id]['asset_board']['techniques'];
             arsort($techniques);
             $tokens = $resource_tracker[$id]['symbol_tokens'];
+            $initial_wild_techniques = $techniques['wild'];
+            $wild_techniques = $initial_wild_techniques;
+
             $gained_points = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
             $played_tokens = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
-            $wild_techniques = $techniques['wild'];
-            $used_new_rubber = false;
+            $techniques_types = ['precision', 'balance', 'pain_tolerance', 'power'];
+            $new_rubber_used = false;
+            
+            $hand_sb_tokens = $this->getHandSummitBetaTokens($id);
+            $new_rubber_available = array_search('6', $hand_sb_tokens);
+            
+            $potential_allocations = [];
 
-            foreach($techniques as $type => $value) {
+            // --- Phase 1: Calculate initial points from card icons alone and leftovers ---
+            $initial_leftovers = [];
+            foreach($techniques_types as $type) {
+                $value = $techniques[$type];
 
-                if ($type != 'wild') {
+                $points_from_cards = floor($value / 3);
+                $gained_points[$type] += $points_from_cards;
+                $initial_leftovers[$type] = $value % 3;
 
-                    $gained_points[$type] += floor($value / 3);
-                    $leftover_val = $value % 3;
+                // --- Phase 2A: Calculate potential gains for this type ---
+            
+                $tokens_of_type = $tokens[$type];
+                $remaining_for_next_set = 3 - $initial_leftovers[$type];
 
-                    if ($leftover_val > 0 && $leftover_val + $wild_techniques > 2) {
-
-                        $gained_points[$type]++;
-                        $wild_techniques -= 3 - $leftover_val;
-                        $leftover_val = 0;
+                if ($remaining_for_next_set > 0) {
+                    
+                    // ----------------------------------------------------
+                    // Potential Match 1: PRIORITY WILDS (Tokens -> Wilds -> Rubber)
+                    // *Actually the logic provided in prompt was Wilds -> Tokens -> Rubber
+                    // but we will keep your structure which worked for max wild usage
+                    // ----------------------------------------------------
+                    $wild_to_use_p1 = min($wild_techniques, $remaining_for_next_set);
+                    $remaining_after_wild = $remaining_for_next_set - $wild_to_use_p1;
+                    $tokens_to_use_p1 = min($tokens_of_type, $remaining_after_wild);
+                    
+                    $new_rubber_to_use_p1 = 0;
+                    if ($remaining_after_wild - $tokens_to_use_p1 > 0 && $new_rubber_available) {
+                        $new_rubber_to_use_p1 = 1;
                     }
 
-                    $leftover_val_and_wild = $leftover_val + $wild_techniques;
-                    $new_rubber = (in_array('6', array_values($this->getHandSummitBetaTokens($id))) && $used_new_rubber === false) ? 1 : 0;
-
-                    if ($leftover_val > 0 && $leftover_val_and_wild + $tokens[$type] + $new_rubber > 2) {
-
-                        $total_remaining = $leftover_val_and_wild + $tokens[$type] + $new_rubber;
-                        $used_new_rubber = $new_rubber ? $total_remaining % 3 === 0 : $used_new_rubber;
-                        $new_points = floor(($total_remaining) /3);
-                        $gained_points[$type] += $new_points;
-
-                        $played_tokens[$type] += $new_points * 3 - ($leftover_val_and_wild + $new_rubber);
-                        $tokens[$type] -= $played_tokens[$type];
-                        for ($i=1; $i<=$played_tokens[$type]; $i++) { $this->updateResourceTracker($id, 'subtract', null, null, [], $type); }
-
-                        $used_wild = $new_points * 3 - ($leftover_val + $played_tokens[$type]);
-                        $wild_techniques -= $used_wild;
+                    if ($wild_to_use_p1 + $tokens_to_use_p1 + $new_rubber_to_use_p1 == $remaining_for_next_set) {
+                        $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p1 == 0 && $new_rubber_to_use_p1 == 0);
+                        if (!$is_pure_wild_on_empty) {
+                            $potential_allocations[$type . '_wild_priority'] = [
+                                'type' => $type,
+                                'points' => 1,
+                                'tokens_used' => $tokens_to_use_p1,
+                                'wild_used' => $wild_to_use_p1,
+                                'new_rubber_used' => $new_rubber_to_use_p1,
+                                'is_wild_only' => false,
+                                'icons_needed' => $initial_leftovers[$type],
+                            ];
+                        }
                     }
-                }
-            }
-
-            if ($wild_techniques > 2) {
-                $gained_points['Wild'] = floor($wild_techniques / 3);
-                $wild_techniques -= $gained_points['Wild'] * 3;
-            }
-
-            foreach (array_keys($techniques) as $type) {
-
-                if ($type != 'wild') {
-
-                    $tokens_and_wild = $tokens[$type] + $wild_techniques;
-                    if ($tokens_and_wild > 2) {
-
-                        $new_points = floor(($tokens_and_wild) / 3);
-                        $gained_points[$type] += $new_points;
-
-                        $previous_tokens = $played_tokens[$type];
-                        $played_tokens[$type] += $new_points * 3 - $wild_techniques;
-                        $new_tokens = $played_tokens[$type] - $previous_tokens;
-                        for ($i=1; $i<=$new_tokens; $i++) { $this->updateResourceTracker($id, 'subtract', null, null, [], $type); }
-
-                        $used_wild = $new_points * 3 - $new_tokens;
-                        $wild_techniques -= $used_wild;
+                    
+                    // ----------------------------------------------------
+                    // Potential Match 2: PRIORITY TOKENS (Tokens -> Wilds -> Rubber)
+                    // ----------------------------------------------------
+                    $tokens_to_use_p2 = min($tokens_of_type, $remaining_for_next_set);
+                    $remaining_after_tokens = $remaining_for_next_set - $tokens_to_use_p2;
+                    $wild_to_use_p2 = min($wild_techniques, $remaining_after_tokens);
+                    
+                    $new_rubber_to_use_p2 = 0;
+                    if ($remaining_after_tokens - $wild_to_use_p2 > 0 && $new_rubber_available) {
+                        $new_rubber_to_use_p2 = 1;
                     }
-                }
-            }
 
-            if ($gained_points != ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0]) { // notifs if the player has gained any 2-point tokens (all players get same notif)
-
-                $tokens_awarded = true;
-                $token_num = array_sum(array_values($gained_points));
-                $asset_board_token_tracker[$id]['points_tokens'] += $token_num;
-                $log_message = '${player_name} used ';
-                $type_total = array_reduce(array_values($gained_points), function($ret, $val) { return $ret += $val > 0; });
-                $type_num = 1;
-                $new_points = 0;
-                foreach($gained_points as $type => $value) {
-                    if ($value > 0) {
-
-                        $techniques = $value * 3;
-
-                        $type_for_log = $type == 'pain_tolerance' ? 'Pain Tolerance' : ucfirst($type);
-                        $log_message .= "{$techniques} {$type_for_log}";
-
-                        if ($type_num < $type_total) { $log_message .= ', '; }
-                        if ($type_num == $type_total - 1) { $log_message .= 'and '; }
-                        if ($type_num == $type_total) { $log_message .= ' '; }
-                        $type_num++;
-
-                        $new_points += $value * 2;
-                        $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$id'");
-                        $score_tracker = $this->getGlobalVariable('score_tracker', true);
-                        $score_tracker[$id]['tokens'] += $new_points;
-                        $this->setGlobalVariable('score_tracker', $score_tracker);
-                    }
-                }
-
-                $log_message .= "Techniques";
-
-                if (array_sum(array_values($played_tokens)) > 0) {
-
-                    $log_message .= ', including ';
-                    $type_total = array_reduce(array_values($played_tokens), function($ret, $val) { return $ret += $val > 0; });
-                    $type_num = 1;
-                    foreach($played_tokens as $type => $value) {
-
-                        if ($value > 0) {
-
-                            $type_for_log = $type == 'pain_tolerance' ? 'Pain Tolerance' : ucfirst($type);
-                            $log_message .= "{$value} {$type_for_log}";
-
-                            if ($type_num < $type_total) { $log_message .= ', '; }
-                            if ($type_num == $type_total -1) { $log_message .= 'and '; }
-                            if ($type_num == $type_total) { $log_message .= ' '; }
-                            $type_num++;
-
-                            $resource_tracker[$id]['symbol_tokens'][$type]--;
+                    if ($tokens_to_use_p2 + $wild_to_use_p2 + $new_rubber_to_use_p2 == $remaining_for_next_set) {
+                        $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p2 == 0 && $new_rubber_to_use_p2 == 0);
+                        if (!$is_pure_wild_on_empty) {
+                             // Only add if distinct from P1
+                            if (!isset($potential_allocations[$type . '_wild_priority']) || 
+                                $tokens_to_use_p2 != $tokens_to_use_p1 || 
+                                $wild_to_use_p2 != $wild_to_use_p1 || 
+                                $new_rubber_to_use_p2 != $new_rubber_to_use_p1) {
+                                
+                                $potential_allocations[$type . '_token_priority'] = [
+                                    'type' => $type,
+                                    'points' => 1,
+                                    'tokens_used' => $tokens_to_use_p2,
+                                    'wild_used' => $wild_to_use_p2,
+                                    'new_rubber_used' => $new_rubber_to_use_p2,
+                                    'is_wild_only' => false,
+                                    'icons_needed' => $initial_leftovers[$type],
+                                ];
+                            }
                         }
                     }
 
-                    $log_message .= "Technique token(s)";
+                    // ----------------------------------------------------
+                    // Potential Match 3: PRIORITY RUBBER (Tokens -> Rubber -> Wilds)
+                    // This ensures we have a fallback option if Wilds are consumed elsewhere.
+                    // ----------------------------------------------------
+                    if ($new_rubber_available) {
+                        $tokens_to_use_p3 = min($tokens_of_type, $remaining_for_next_set);
+                        $remaining_after_tokens_p3 = $remaining_for_next_set - $tokens_to_use_p3;
+                        
+                        $new_rubber_to_use_p3 = 0;
+                        if ($remaining_after_tokens_p3 > 0) {
+                            $new_rubber_to_use_p3 = 1;
+                        }
+                        
+                        $remaining_after_rubber_p3 = $remaining_after_tokens_p3 - $new_rubber_to_use_p3;
+                        $wild_to_use_p3 = min($wild_techniques, $remaining_after_rubber_p3);
+
+                        if ($tokens_to_use_p3 + $new_rubber_to_use_p3 + $wild_to_use_p3 == $remaining_for_next_set) {
+                             $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p3 == 0 && $new_rubber_to_use_p3 == 0);
+                             
+                             if (!$is_pure_wild_on_empty) {
+                                // Check uniqueness against P1 and P2
+                                $is_unique = true;
+                                foreach (['_wild_priority', '_token_priority'] as $suffix) {
+                                    if (isset($potential_allocations[$type . $suffix])) {
+                                        $existing = $potential_allocations[$type . $suffix];
+                                        if ($existing['tokens_used'] == $tokens_to_use_p3 && 
+                                            $existing['wild_used'] == $wild_to_use_p3 && 
+                                            $existing['new_rubber_used'] == $new_rubber_to_use_p3) {
+                                            $is_unique = false;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if ($is_unique) {
+                                    $potential_allocations[$type . '_rubber_priority'] = [
+                                        'type' => $type,
+                                        'points' => 1,
+                                        'tokens_used' => $tokens_to_use_p3,
+                                        'wild_used' => $wild_to_use_p3,
+                                        'new_rubber_used' => $new_rubber_to_use_p3,
+                                        'is_wild_only' => false,
+                                        'icons_needed' => $initial_leftovers[$type],
+                                    ];
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // --- Phase 2B: Add potential Wilds-Only Match ---
+            $wild_only_points = floor($wild_techniques / 3);
+            if ($wild_only_points > 0) {
+                $potential_allocations['wild_only'] = [
+                    'type' => 'wild',
+                    'points' => $wild_only_points,
+                    'tokens_used' => 0,
+                    'wild_used' => $wild_only_points * 3,
+                    'new_rubber_used' => 0,
+                    'is_wild_only' => true,
+                    'icons_needed' => 0, // No card icons of specific type needed
+                ];
+            }
+
+            // --- Phase 2C: Determine optimal allocation by sorting ---
+            
+            uasort($potential_allocations, function($a, $b) {
+                
+                // Priority 1: New Rubber Used (Ascending) - Save New Rubber
+                if ($a['new_rubber_used'] != $b['new_rubber_used']) {
+                    return $a['new_rubber_used'] <=> $b['new_rubber_used'];
+                }
+                
+                // Priority 2: Tokens Used (Ascending) - Save Tokens
+                if ($a['tokens_used'] != $b['tokens_used']) {
+                    return $a['tokens_used'] <=> $b['tokens_used'];
                 }
 
-                if ($used_new_rubber && array_sum(array_values($played_tokens)) > 0) { $log_message .= " and +New Rubber(6)+"; }
-                else if ($used_new_rubber) { $log_message .= ", including +New Rubber(6)+"; }
+                // Priority 3: Specific Card Icons Used (Descending) - Prioritize clearing Card Leftovers
+                // A match that uses specific card icons (value > 0) should beat a Wild-Only match (value 0)
+                // provided they both use the same amount of tokens (checked above).
+                if ($a['icons_needed'] != $b['icons_needed']) {
+                    return $b['icons_needed'] <=> $a['icons_needed'];
+                }
 
-                if ($used_new_rubber) {
-                    $hand_sb_tokens = $this->getHandSummitBetaTokens($id);
+                // Priority 4: Wild Used (Descending) - Spend Wilds
+                // Now that we've prioritized specific cards, we prefer options that use Wilds 
+                // over options that might imply using tokens (though tokens are strictly handled in Prio 2).
+                if ($a['wild_used'] != $b['wild_used']) {
+                    return $b['wild_used'] <=> $a['wild_used'];
+                }
+                
+                // Priority 5: Points (Descending) - Maximize total points
+                return $b['points'] <=> $a['points'];
+            });
+
+            // --- Phase 3: Commit to the optimal allocation and update resources ---
+            
+            $committed_wild_used = 0;
+            $committed_tokens_used = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
+            $committed_card_icons_used = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
+
+            foreach ($potential_allocations as $key => $allocation) {
+                $type = $allocation['type'];
+                
+                $can_commit = true;
+                
+                // 1. Check Wild Techniques
+                if ($committed_wild_used + $allocation['wild_used'] > $initial_wild_techniques) {
+                    $can_commit = false;
+                }
+
+                // 2. Check New Rubber
+                if ($allocation['new_rubber_used'] && $new_rubber_used) {
+                    $can_commit = false;
+                }
+
+                // 3. Check Type-Specific Tokens
+                if (!$allocation['is_wild_only']) {
+                    $tokens_needed_for_match = $allocation['tokens_used'];
+                    $available_tokens_of_type = $tokens[$type] - $committed_tokens_used[$type];
+                    
+                    if ($tokens_needed_for_match > $available_tokens_of_type) {
+                        $can_commit = false;
+                    }
+                }
+                
+                // 4. Check Card Icons (CRITICAL for preventing double-counting card icons)
+                if (!$allocation['is_wild_only']) {
+                    $icons_needed = $allocation['icons_needed'];
+                    // Total icons available is the initial leftover (since points from sets of 3 were handled in Phase 1)
+                    $total_icons_available = $initial_leftovers[$type]; 
+                    
+                    if ($committed_card_icons_used[$type] + $icons_needed > $total_icons_available) {
+                        $can_commit = false;
+                    }
+                }
+
+
+                if ($can_commit) {
+                    // Commit this allocation!
+                    
+                    $committed_wild_used += $allocation['wild_used'];
+                    $new_rubber_used = $new_rubber_used || $allocation['new_rubber_used'];
+                    
+                    if (!$allocation['is_wild_only']) {
+                        $gained_points[$type] += $allocation['points'];
+                        $committed_tokens_used[$type] += $allocation['tokens_used'];
+                        $played_tokens[$type] += $allocation['tokens_used'];
+                        
+                        // Commit Card Icons
+                        $committed_card_icons_used[$type] += $allocation['icons_needed'];
+                        
+                    } else {
+                        $gained_points['wild'] = ($gained_points['wild'] ?? 0) + $allocation['points'];
+                    }
+                }
+            }
+            
+            $wild_techniques = $initial_wild_techniques - $committed_wild_used;
+            
+            // --- Phase 4: Final resource and point updates ---            
+            if (array_sum(array_values($gained_points)) > 0) { 
+                
+                $player_name = $names_and_colors[$id]['name'];
+                $tokens_awarded = true;
+                $total_gained_tokens = array_sum(array_values($gained_points));
+                $asset_board_token_tracker[$id]['points_tokens'] += $total_gained_tokens;
+                
+                $log_message = [
+                    'log' => clienttranslate('${player_name} used '),
+                    'args' => [
+                        'player_name' => $player_name
+                    ]
+                ];
+                
+                $new_points = 0;
+                $technique_arr_for_log = [];
+                
+                foreach($gained_points as $type => $value) {
+                    if ($value > 0) {
+                        $techniques_num = $value * 3;
+                        $technique_arr_for_log[$type] = $techniques_num;
+                        $new_points += $value * 2;
+                    }
+                }
+                
+                $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$id'");
+                $score_tracker = $this->getGlobalVariable('score_tracker', true);
+                $score_tracker[$id]['tokens'] += $new_points;
+                $this->setGlobalVariable('score_tracker', $score_tracker);
+
+                $techniques_for_log = $this->formatLogTitles($technique_arr_for_log);
+                $log_message['log'] .= clienttranslate('${techniques_for_log} Techniques');
+                $log_message['args']['techniques_for_log'] = $techniques_for_log;
+                $log_message['args']['i18n'][] = 'techniques_for_log';
+
+                if (array_sum(array_values($played_tokens)) > 0) {
+                    $log_message['log'] .= ', ' . clienttranslate('including') . ' ';
+                    $played_tokens_arr_for_log = [];
+                    foreach($played_tokens as $type => $value) {
+                        if ($value > 0) {
+                            $played_tokens_arr_for_log[$type] = $value;
+                            for ($i=1; $i<=$value; $i++) { $this->updateResourceTracker($id, 'subtract', null, null, [], $type); }
+                        }
+                    }
+                    $played_tokens_for_log = $this->formatLogTitles($played_tokens_arr_for_log);
+                    $log_message['log'] .= clienttranslate('${played_tokens_for_log} Technique Token/s');
+                    $log_message['args']['played_tokens_for_log'] = $played_tokens_for_log;
+                    $log_message['i18n'][] = 'played_tokens_for_log';
+                }
+
+                if ($new_rubber_used && array_sum(array_values($played_tokens)) > 0) { $log_message['log'] .= " and +New Rubber(6)+"; }
+                else if ($new_rubber_used) { $log_message['log'] .= ", including +New Rubber(6)+"; }
+
+                if ($new_rubber_used) {
                     $new_rubber_id = array_search('6', $hand_sb_tokens);
                     $this->cards_and_tokens->insertCardOnExtremePosition($new_rubber_id, 'summit_beta_discard', true);
+                    $updated_player_token_tracker = $this->removeHandSummitBeta($this->getGlobalVariable('hand_token_tracker', true)[$id], $new_rubber_id);
+                    $hand_token_tracker[$id] = $updated_player_token_tracker;
+                    $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
                     $this->incStat(1, "played_summit_beta_tokens", $id);
                 }
 
-                $numbermap = ['zero', 'one', 'two', 'three', 'four', 'five'];
-                $log_message .= " and gains {$numbermap[$token_num]} 2-Point Token(s)";
+                $numbermap = [
+                    clienttranslate('zero'), clienttranslate('one'), clienttranslate('two'),
+                    clienttranslate('three'), clienttranslate('four'), clienttranslate('five')
+                ];
+                $spelled_out_num = ($total_gained_tokens < count($numbermap)) ? $numbermap[$total_gained_tokens] : $total_gained_tokens;
+
+                $log_message['log'] .= ' ' . clienttranslate('and gains ${spelled_out_num} 2-Point Token/s');
+                $log_message['args']['spelled_out_num'] = $spelled_out_num;
+                $log_message['i18n'][] = 'spelled_out_num';
 
                 $this->incStat($new_points, "technique_token_points", $id);
 
-                self::notifyAllPlayers("matchingTechniques", clienttranslate($log_message), array(
-                        'player_id' => $id,
-                        'player_name' => $names_and_colors[$id]['name'],
-                        'player_color' => $names_and_colors[$id]['color'],
-                        'token_num' => $token_num,
-                        'played_tokens' => $played_tokens,
-                        'used_new_rubber' => $used_new_rubber,
-                        'new_points' => $new_points,
+                self::notifyAllPlayers("matchingTechniques", '${log_message}', array(
+                    'player_id' => $id,
+                    'player_name' => $names_and_colors[$id]['name'],
+                    'player_color' => $names_and_colors[$id]['color'],
+                    'token_num' => $total_gained_tokens,
+                    'played_tokens' => $played_tokens,
+                    'used_new_rubber' => $new_rubber_used,
+                    'new_points' => $new_points,
+                    'log_message' => $log_message,
+                    'i18n' => ['log_message'],
                 ));
+                self::notifyPlayer($id, "updatePlayerTokenTracker", '', [
+                    'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$id],
+                ]);
             }
 
             $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
         }
 
-        if (!$tokens_awarded) { self::notifyAllPlayers('noMatchingTechniques', clienttranslate('No 2-point tokens are awarded for matching Techniques'), []); }
+        if (!$tokens_awarded) { self::notifyAllPlayers('noMatchingTechniques', clienttranslate('No 2-Point Tokens are awarded for matching Techniques'), []); }
 
         $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
         $this->gamestate->nextState('flagPermanentAssets');
@@ -5079,31 +6208,34 @@ class FirstAscent extends Table
         $names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
         $available_tokens = [];
         $active_players = [];
+        $zombie_players = $this->getGlobalVariable('zombie_players', true);
         foreach($board_assets as $player => $board) {
 
-            $character_type_arg = $names_and_colors[$player]['character'];
-            $max_slots = $this->characters[$character_type_arg]['permanent_asset_slots'];
-            $filled_slots = $board_assets[$player]['gear']['permanent'] + $board_assets[$player]['face']['permanent'] +
-                            $board_assets[$player]['crack']['permanent'] + $board_assets[$player]['face']['permanent'];
-            $available_tokens[$player] = [];
-    
-            foreach($board as $type => $assets) {
+            if (!in_array($player, $zombie_players)) {
+                $character_type_arg = $names_and_colors[$player]['character'];
+                $max_slots = $this->characters[$character_type_arg]['permanent_asset_slots'];
+                $filled_slots = $board_assets[$player]['gear']['permanent'] + $board_assets[$player]['face']['permanent'] +
+                                $board_assets[$player]['crack']['permanent'] + $board_assets[$player]['slab']['permanent'];
+                $available_tokens[$player] = [];
+        
+                foreach($board as $type => $assets) {
 
-                if ($character_type_arg === '6') { // Young Prodigy
-                    $card_slots = $type === 'gear' ? 5 : 3;
-                }
-                else { $card_slots = 4; }
+                    if ($character_type_arg === '6') { // Young Prodigy
+                        $card_slots = $type === 'gear' ? 5 : 3;
+                    }
+                    else { $card_slots = 4; }
 
-                if ($assets['count'] >= $card_slots && $filled_slots < $max_slots) {
-                    if (!in_array($player, $active_players)) { $active_players[] = $player; }
-                    $available_tokens[$player][$type] = floor($assets['count'] / $card_slots);
+                    if ($assets['count'] >= $card_slots && $filled_slots < $max_slots) {
+                        if (!in_array($player, $active_players)) { $active_players[] = $player; }
+                        $available_tokens[$player][$type] = floor($assets['count'] / $card_slots);
+                    }
                 }
             }
         }
 
         $this->setGlobalVariable('available_permanent_assets', $available_tokens);
 
-        if ($active_players === []) { self::notifyAllPlayers('noPermanentAssets', clienttranslate('No players are eligible for Permanent Asset tokens'), []); }
+        if ($active_players === []) { self::notifyAllPlayers('noPermanentAssets', clienttranslate('No players are eligible for Permanent Asset Tokens'), []); }
 
         $this->gamestate->setPlayersMultiactive($active_players, "flipPlayedAssets", true);
         if ($active_players != []) { $this->gamestate->nextState('choosePermanentAssets'); }
@@ -5114,26 +6246,29 @@ class FirstAscent extends Table
         $board_assets = $this->getGlobalVariable('board_assets', true);
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true);
         $ids_to_flip = [];
+        $zombie_players = $this->getGlobalVariable('zombie_players', true);
 
         foreach ($board_assets as $player => $board) {
 
-            $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player]['character'];
-            foreach($board as $type => $assets) {
+            if (!in_array($player, $zombie_players)) {
+                $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player]['character'];
+                foreach($board as $type => $assets) {
 
-                if ($character_id === '6') { // Young Prodigy
-                    $slots = $type === 'gear' ? 5 : 3;
-                }
-                else { $slots = 4; }
+                    if ($character_id === '6') { // Young Prodigy
+                        $slots = $type === 'gear' ? 5 : 3;
+                    }
+                    else { $slots = 4; }
 
-                for ($i=1; $i<=$slots; $i++) {
+                    for ($i=1; $i<=$slots; $i++) {
 
-                    if ($assets['flipped'][$i] === false) {
+                        if ($assets['flipped'][$i] === false) {
 
-                        $ids_to_flip[] = array_keys($assets[$i])[0];
-                        $board_assets[$player][$type]['flipped'][$i] = true;
-                        $type_arg = array_values($assets[$i])[0];
-                        $technique = $this->getTechniqueType($type_arg, $player);
-                        if ($technique) { $resource_tracker[$player]['asset_board']['techniques'][$technique]--; }
+                            $ids_to_flip[] = array_keys($assets[$i])[0];
+                            $board_assets[$player][$type]['flipped'][$i] = true;
+                            $type_arg = array_values($assets[$i])[0];
+                            $technique = $this->getTechniqueType($type_arg, $player);
+                            if ($technique) { $resource_tracker[$player]['asset_board']['techniques'][$technique]--; }
+                        }
                     }
                 }
             }
@@ -5166,9 +6301,13 @@ class FirstAscent extends Table
         $asset_board_token_tracker = $this->getGlobalVariable('asset_board_token_tracker', true);
         $names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
         $permanent_asset_tracker = $this->getGlobalVariable('permanent_asset_tracker', true);
-        $shared_objective_points = 0;
+        $shared_objectives_tracker = $this->getGlobalVariable('shared_objectives_tracker', true);
+        $shared_objective_points = [];
 
-        $log_message = $gained_permanent_assets ? '' : 'No players chose to gain Permanent Asset tokens';
+        $log_message = [
+            'log' => $gained_permanent_assets ? '' : clienttranslate('No players chose to gain Permanent Asset Tokens'),
+            'args' => [],
+        ];
 
         $player_id1 = array_keys($gained_permanent_assets)[0] ?? null;
         $player_name1 = $names_and_colors[$player_id1]['name'] ?? null;
@@ -5193,9 +6332,9 @@ class FirstAscent extends Table
             $assets = array_filter($assets);
             $message_begun = false;
             $type_total = count(array_keys($assets));
-            $type_num = 1;
             $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
 
+            $type_and_nums_for_formatting = [];
             foreach($assets as $type => $num) {
 
                 // update trackers and stats for added permanent asset token
@@ -5256,25 +6395,38 @@ class FirstAscent extends Table
                 if (!$message_begun) {
                     $player_names[$player_id] = $names_and_colors[$player_id]['name'];
                     switch ($player_num) {
-                        case 1: $log_message .= '${player_name1} gains '; break;
-                        case 2: $log_message .= '${player_name2} gains '; break;
-                        case 3: $log_message .= '${player_name3} gains '; break;
-                        case 4: $log_message .= '${player_name4} gains '; break;
-                        case 5: $log_message .= '${player_name5} gains '; break;
+                        case 1:
+                            $log_message['log'] .= '${player_name1} ' . clienttranslate('gains') . ' ';
+                            $log_message['args']['player_name1'] = $player_name1;
+                            break;
+                        case 2:
+                            $log_message['log'] .= '${player_name2} ' . clienttranslate('gains') . ' ';
+                            $log_message['args']['player_name2'] = $player_name2;
+                            break;
+                        case 3:
+                            $log_message['log'] .= '${player_name3} ' . clienttranslate('gains') . ' ';
+                            $log_message['args']['player_name3'] = $player_name3;
+                            break;
+                        case 4:
+                            $log_message['log'] .= '${player_name4} ' . clienttranslate('gains') . ' ';
+                            $log_message['args']['player_name4'] = $player_name4;
+                            break;
+                        case 5:
+                            $log_message['log'] .= '${player_name5} ' . clienttranslate('gains') . ' ';
+                            $log_message['args']['player_name5'] = $player_name5;
+                            break;
                     }
                     $message_begun = true;
                 }
 
-                $type_for_log = ucfirst($type);
-                $log_message .= "{$num} {$type_for_log}";
-
-                if ($type_num < $type_total) { $log_message .= ', '; }
-                if ($type_num == $type_total -1) { $log_message .= 'and '; }
-                $type_num++;
+                $type_and_nums_for_formatting[$type] = $num;
             }
+            $player_gained_assets_for_log = $this->formatLogTitles($type_and_nums_for_formatting);
+            $arg_key = 'player_gained_assets_' . $player_id;
+            $log_message['log'] .= '${' . $arg_key . '}';
+            $log_message['args'][$arg_key] = $player_gained_assets_for_log;
 
             // track shared objectives
-            $shared_objectives_tracker = $this->getGlobalVariable('shared_objectives_tracker', true);
             foreach ($shared_objectives_tracker as $id => $info) {
                 switch ($id) {
 
@@ -5284,7 +6436,7 @@ class FirstAscent extends Table
                         if ($face_and_slab >= 4 && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
                             $this->DbQuery("UPDATE player SET player_score=player_score+8 WHERE player_id='$player_id'");
-                            $shared_objective_points = 8;
+                            $shared_objective_points[$player_id] = 8;
                             $shared_objectives_tracker[$id] = $info;
                             $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
                             $score_tracker = $this->getGlobalVariable('score_tracker', true);
@@ -5302,7 +6454,7 @@ class FirstAscent extends Table
                         if ($crack_and_gear >= 4 && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
                             $this->DbQuery("UPDATE player SET player_score=player_score+8 WHERE player_id='$player_id'");
-                            $shared_objective_points = 8;
+                            $shared_objective_points[$player_id] = 8;
                             $shared_objectives_tracker[$id] = $info;
                             $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
                             $score_tracker = $this->getGlobalVariable('score_tracker', true);
@@ -5316,12 +6468,12 @@ class FirstAscent extends Table
                 }
             }
 
-            if ($player_num == $player_total -1) { $log_message .= ' and '; }
+            if ($player_num == $player_total -1) { $log_message['log'] .= ' ' . clienttranslate('and') . ' '; }
             $player_num++;
         }
-        $log_message .= $gained_permanent_assets ? ' Permanent Asset token(s)' : '';
+        $log_message['log'] .= $gained_permanent_assets ? ' ' . clienttranslate('Permanent Asset Token/s') : '';
 
-        self::notifyAllPlayers('grantPermanentAssets', clienttranslate($log_message), array(
+        self::notifyAllPlayers('grantPermanentAssets', '${log_message}', array(
                 'player_name1' => $player_name1,
                 'player_name2' => $player_name2,
                 'player_name3' => $player_name3,
@@ -5329,8 +6481,13 @@ class FirstAscent extends Table
                 'player_name5' => $player_name5,
                 'gained_permanent_assets' => $gained_permanent_assets,
                 'discarded_assets' => $discarded_assets,
+                'board_assets' => $board_assets,
                 'shared_objective_points' => $shared_objective_points,
                 'shared_objectives_tracker' => $shared_objectives_tracker,
+                'asset_discard' => $this->getGlobalVariable('asset_discard', true),
+                'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
+                'log_message' => $log_message,
+                'i18n' => ['log_message'],
         ));
 
         $this->setGlobalVariable('gained_permanent_assets', []);
@@ -5347,7 +6504,8 @@ class FirstAscent extends Table
         $starting_player = $this->getGlobalVariable('starting_player');
         $player_order = $this->getGlobalVariable('player_order', true);
         $current_num = intval(array_search($starting_player, $player_order));
-        $new_num = $current_num < $this->getPlayersNumber() ? $current_num+1 : '1';
+        $new_num = $current_num > 1 ? $current_num-1 : $this->getPlayersNumber();
+        // $new_num = $current_num < $this->getPlayersNumber() ? $current_num+1 : '1';
         $new_starting_player = $player_order[$new_num];
 
         $this->setGlobalVariable('starting_player', $new_starting_player);
@@ -5355,12 +6513,12 @@ class FirstAscent extends Table
 
         $this->gamestate->changeActivePlayer($new_starting_player);
 
-        self::notifyAllPlayers('passStartingPlayer', '${player_name} is the new starting player', array(
+        self::notifyAllPlayers('passStartingPlayer', clienttranslate('${player_name} is the new starting player'), array(
             'player_name' => $player_names_and_colors[$new_starting_player]['name'],
             'new_starting_player' => $new_starting_player,
         ));
 
-        $this->setGlobalVariable('phase', 'Climb');
+        $this->setGlobalVariable('phase', clienttranslate('Climb'));
         $round = intval($this->getGlobalVariable('round')) + 1;
         $this->setGlobalVariable('round', strval($round));
 
@@ -5387,68 +6545,97 @@ class FirstAscent extends Table
         ]);
 
         foreach ($player_names_and_colors as $player_id => $player_info) {
-            $objective_points = 0;
-            $scored_objective_id = null;
-            foreach ($personal_objectives_tracker[$player_id] as $objective_id => $pitches) {
-                $objective = $this->personal_objectives[$objective_id];
-                $temp_points = count($pitches) >= 3 ? $objective['score'] : 0;
-                if ($temp_points > $objective_points) {
-                    $objective_points = $temp_points;
-                    $scored_objective_id = $objective_id;
+            if (!$this->isPlayerZombie($player_id)) {
+                $player_name = $player_info['name'];
+                $objective_points = 0;
+                $scored_objective_id = null;
+                foreach ($personal_objectives_tracker[$player_id] as $objective_id => $pitches) {
+                    $objective = $this->personal_objectives[$objective_id];
+                    $temp_points = count($pitches) >= 3 ? $objective['score'] : 0;
+                    if ($temp_points > $objective_points) {
+                        $objective_points = $temp_points;
+                        $scored_objective_id = $objective_id;
+                    }
+                    // else { $this->setStat(0, $objective['name'], $player_id); } // set stat for unscored personal objectives
                 }
-                // else { $this->setStat(0, $objective['name'], $player_id); } // set stat for unscored personal objectives
-            }
-            $score_tracker[$player_id]['objectives'] += $objective_points;
-            $scored_personal_objectives[$player_id] = $scored_objective_id;
-            if ($scored_objective_id) {
+                $score_tracker[$player_id]['objectives'] += $objective_points;
+                $scored_personal_objectives[$player_id] = $scored_objective_id;
+                if ($scored_objective_id) {
 
-                $personal_objective = $this->personal_objectives[$scored_objective_id];
-                $this->setStat($scored_objective_id, "personal_objective_scored", $player_id);
-                $this->setStat($personal_objective['score'], "personal_objective_points", $player_id);
-                // $this->setStat($personal_objective['score'], $personal_objective['name'], $player_id);
-            }
+                    $personal_objective = $this->personal_objectives[$scored_objective_id];
+                    $this->setStat($scored_objective_id, "personal_objective_scored", $player_id);
+                    $this->setStat($personal_objective['score'], "personal_objective_points", $player_id);
+                    $new_points = $personal_objective['score'];
+                    $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$player_id'");
+                    // $this->setStat($personal_objective['score'], $personal_objective['name'], $player_id);
+                }
 
-            // log message
-            $objectives_msg = '${player_name} ' ;
-            $held_objectives = array_keys($personal_objectives_tracker[$player_id]);
-            $objective_1_type_arg = $held_objectives[0];
-            $objective_2_type_arg = $held_objectives[1];
+                // log message
+                $objectives_msg = [
+                    'log' => '${player_name} ',
+                    'args' => [
+                        'player_name' => $player_name
+                    ]
+                ];
+                $held_objectives = array_keys($personal_objectives_tracker[$player_id]);
+                $objective_1_type_arg = $held_objectives[0];
+                $objective_2_type_arg = $held_objectives[1];
 
-            $objective_1_name = $this->personal_objectives[$objective_1_type_arg]['description'];
-            $objective_2_name = $this->personal_objectives[$objective_2_type_arg]['description'];
-            if ($objective_1_type_arg === $scored_objective_id) {
-                $objectives_msg .= 'scores ==${objective_1_name}(${objective_1_type_arg})== and ';
-            }
-            else if ($objective_1_type_arg !== $scored_objective_id) {
-                $objectives_msg .= 'held ==${objective_1_name}(${objective_1_type_arg})== and ';
-            }
-            if ($objective_2_type_arg === $scored_objective_id) {
-                $objectives_msg .= 'scores ==${objective_2_name}(${objective_2_type_arg})==';
-            }
-            else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg === $scored_objective_id) {
-                $objectives_msg .= 'held ==${objective_2_name}(${objective_2_type_arg})==';
-            }
-            else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg !== $scored_objective_id) {
-                $objectives_msg .= '==${objective_2_name}(${objective_2_type_arg})==';
-            }
+                $objective_1_name = $this->personal_objectives[$objective_1_type_arg]['description'];
+                $objective_2_name = $this->personal_objectives[$objective_2_type_arg]['description'];
+                $formatted_objective_1_name = ['==' . $objective_1_name . '(' . $objective_1_type_arg . ')=='];
+                $formatted_objective_2_name = ['==' . $objective_2_name . '(' . $objective_2_type_arg . ')=='];
+                $objective_1_for_log = $this->formatLogTitles($formatted_objective_1_name);
+                $objective_2_for_log = $this->formatLogTitles($formatted_objective_2_name);
+                if ($objective_1_type_arg === $scored_objective_id) {
+                    $objectives_msg['log'] .= clienttranslate('scores ${objective_1_for_log} and ');
+                    $objectives_msg['args']['objective_1_for_log'] = $objective_1_for_log;
+                    $objectives_msg['args']['i18n'][] = 'objective_1_for_log';
+                }
+                else if ($objective_1_type_arg !== $scored_objective_id) {
+                    $objectives_msg['log'] .= clienttranslate('held ${objective_1_for_log} and ');
+                    $objectives_msg['args']['objective_1_for_log'] = $objective_1_for_log;
+                    $objectives_msg['args']['i18n'][] = 'objective_1_for_log';
+                }
+                if ($objective_2_type_arg === $scored_objective_id) {
+                    $objectives_msg['log'] .= clienttranslate('scores ${objective_2_for_log}');
+                    $objectives_msg['args']['objective_2_for_log'] = $objective_2_for_log;
+                    $objectives_msg['args']['i18n'][] = 'objective_2_for_log';
+                }
+                else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg === $scored_objective_id) {
+                    $objectives_msg['log'] .= clienttranslate('held ${objective_2_for_log}');
+                    $objectives_msg['args']['objective_2_for_log'] = $objective_2_for_log;
+                    $objectives_msg['args']['i18n'][] = 'objectives_2_for_log';
+                }
+                else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg !== $scored_objective_id) {
+                    $objectives_msg['log'] .= '${objective_2_for_log}';
+                    $objectives_msg['args']['objective_2_for_log'] = $objective_2_for_log;
+                    $objectives_msg['args']['i18n'][] = 'objective_2_for_log';
+                }
 
-            self::notifyAllPlayers('log_only', clienttranslate($objectives_msg), [
-                'player_name' => self::getActivePlayerName(),
-                'objective_1_name' => $objective_1_name,
-                'objective_2_name' => $objective_2_name,
-                'objective_1_type_arg' => $objective_1_type_arg,
-                'objective_2_type_arg' => $objective_2_type_arg,
-            ]);
+                self::notifyAllPlayers('log_only', '${objectives_msg}', [
+                    'player_name' => self::getActivePlayerName(),
+                    'objective_1_name' => $objective_1_name,
+                    'objective_2_name' => $objective_2_name,
+                    'objective_1_type_arg' => $objective_1_type_arg,
+                    'objective_2_type_arg' => $objective_2_type_arg,
+                    'objectives_msg' => $objectives_msg,
+                    'i18n' => ['objectives_msg'],
+                ]);
+            }
         }
 
         $this->setGlobalVariable('scored_personal_objectives', $scored_personal_objectives);
+        $this->setGlobalVariable('score_tracker', $score_tracker);
 
         self::notifyAllPlayers('preGameEnd', '', [
             'score_tracker' => $score_tracker,
             'scored_personal_objectives' => $scored_personal_objectives,
-            'personal_objectives_tracker' => $personal_objectives_tracker
+            'personal_objectives_tracker' => $personal_objectives_tracker,
+            'objectives_msg' => $objectives_msg,
         ]);
 
+        // $this->gamestate->nextState('testEnd');
         $this->gamestate->nextState('gameEnd');
     }
     
@@ -5474,12 +6661,52 @@ class FirstAscent extends Table
 
     function zombieTurn( $state, $active_player )
     {
+        $zombie_players = $this->getGlobalVariable('zombie_players', true);
+        if (!in_array(strval($active_player), $zombie_players)) {
+            $zombie_players[] = strval($active_player);
+            self::notifyAllPlayers('addZombie', '', ['zombies' => $zombie_players]);
+        }
+        $this->setGlobalVariable('zombie_players', $zombie_players);
     	$statename = $state['name'];
     	
         if ($state['type'] === "activeplayer") {
             switch ($statename) {
+                case 'characterSelection':
+                    $player_names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
+                    $player_names_and_colors[$active_player]['color'] = '#' . $this->getPlayerColorById($active_player);
+                    $player_names_and_colors[$active_player]['character'] = '0';
+                    $this->setGlobalVariable('player_names_and_colors', $player_names_and_colors);
+                    $this->gamestate->nextState("zombiePass");
+                    break;
+
+                case 'drawAssets':
+                    if ($this->getGlobalVariable('climbing_card_info', true)) {
+                        $this->gamestate->nextState("zombiePassClimb");
+                    } else {
+                        $this->gamestate->nextState("zombiePassDraw");
+                    }
+                    break;
+
+                case 'selectPortaledge':
+                    $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
+                    if ($climbing_card_info && isset($climbing_card_info['portaledge_all'])) {
+                        $this->gamestate->nextState("zombiePassAll");
+                    } else {
+                        $this->gamestate->nextState("zombiePassSolo");
+                    }
+                    break;
+
+                case 'chooseTechniqueToken':
+                    $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
+                    if ($climbing_card_info && $climbing_card_info['type_arg'] === '9') {
+                        $this->gamestate->nextState("zombiePassOpponent");
+                    } else {
+                        $this->gamestate->nextState("zombiePassSolo");
+                    }
+                    break;
+
                 default:
-                    $this->gamestate->nextState( "zombiePass" );
+                    $this->gamestate->nextState("zombiePass");
                 	break;
             }
 

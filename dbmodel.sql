@@ -33,6 +33,8 @@
 -- Example 2: add a custom field to the standard "player" table
 -- ALTER TABLE `player` ADD `player_my_custom_field` INT UNSIGNED NOT NULL DEFAULT '0';
 
+SET SQL_MODE = '';
+
 ALTER TABLE `player` ADD `character` tinyint(2) DEFAULT NULL;
 
 CREATE TABLE IF NOT EXISTS `global_variables` (
