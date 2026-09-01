@@ -154,26 +154,28 @@ function (dojo, declare, aspect, BgaAutofit) {
             pre_loaded_sprites.insertAdjacentHTML('beforeend', ref_2_sprite);
             $('board').append(pre_loaded_sprites);
 
-            // attach the titlebar addon
-            if (!$('titlebar_addon')) {
-                const titlebar_addon = document.createElement('div');
-                titlebar_addon.id = 'titlebar_addon';
-                $('page-title').append(titlebar_addon);
-                const round_tracker = document.createElement('div');
-                const phase_tracker = document.createElement('div');
-                round_tracker.id = 'round_tracker';
-                phase_tracker.id = 'phase_tracker';
-                titlebar_addon.append(round_tracker);
-                titlebar_addon.append(phase_tracker);
-                this.utils.updateTitlebarAddon(gamedatas.round, 'round');
-                this.utils.updateTitlebarAddon(gamedatas.phase, 'phase');
-            }
+            // add titlebar_extras_wrapper
+            const page_title = $('page-title');
+            const titlebar_extras_wrapper = document.createElement('div');
+            titlebar_extras_wrapper.id = 'titlebar_extras_wrapper';
+            page_title.append(titlebar_extras_wrapper);
 
-            if (!$('toggles_wrap')) {
-                const toggles_wrap = document.createElement('div');
-                toggles_wrap.id = 'toggles_wrap';
-                $('titlebar_addon').append(toggles_wrap);
-            }
+            // add round and phase trackers
+            const progression_wrapper = document.createElement('div');
+            progression_wrapper.id = 'progression_wrapper';
+            titlebar_extras_wrapper.append(progression_wrapper);
+            const progression_bumper = document.createElement('div');
+            progression_bumper.id = 'progression_bumper';
+            const titlebar_wrapper = $('maintitlebar_content').firstElementChild;
+            titlebar_wrapper.prepend(progression_bumper);
+            const round_tracker = document.createElement('div');
+            const phase_tracker = document.createElement('div');
+            round_tracker.id = 'round_tracker';
+            phase_tracker.id = 'phase_tracker';
+            progression_wrapper.append(round_tracker);
+            progression_wrapper.append(phase_tracker);
+            this.utils.updateTitlebarAddon(gamedatas.round, 'round');
+            this.utils.updateTitlebarAddon(gamedatas.phase, 'phase');
 
             // Display the correct board for player count and set ledge pitches
 
@@ -539,22 +541,21 @@ function (dojo, declare, aspect, BgaAutofit) {
                 });
             }
             const climbing_slot = $('climbing_slot');
-            const phase_tracker = $('phase_tracker');
-            phase_tracker.parentElement.insertBefore(climbing_slot, phase_tracker.nextElementSibling);
+            titlebar_extras_wrapper.append(climbing_slot);
 
 
         // Reference cards
             const reference_button = $('reference_cards');
             const reference_popup = $('reference_popup');
             reference_button.onclick = (evt) => { this.onShowHideReferenceCards(evt); }
-            phase_tracker.parentElement.insertBefore(reference_popup, phase_tracker.nextElementSibling);
+            titlebar_extras_wrapper.append(reference_popup);
 
 
         // Trifecta type selection box
             if (!$('trifecta_box')) {
                 const trifecta_box = document.createElement('div');
                 trifecta_box.id = 'trifecta_box';
-                titlebar_addon.append(trifecta_box);
+                titlebar_extras_wrapper.append(trifecta_box);
 
                 const trifecta_title = document.createElement('div');
                 trifecta_title.id = 'trifecta_title';
@@ -646,7 +647,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const trifecta_title_clone = trifecta_title.cloneNode(true);
                 trifecta_title_clone.id = 'trifecta_title_clone';
                 trifecta_selected_box.append(trifecta_title_clone);
-                titlebar_addon.append(trifecta_selected_box);
+                titlebar_extras_wrapper.append(trifecta_selected_box);
                 
                 const trifecta_undo = document.createElement('div');
                 trifecta_undo.id = 'trifecta_undo_button';
@@ -661,7 +662,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             // place asset deck and discard
 
             let asset_deck_coords;
-            if (this.player_count <= 3) { asset_deck_coords = [0.1, 90.4]; } // Desert board
+            if (this.player_count <= 3) { asset_deck_coords = [-0.3, 90.6]; } // Desert board
             else { asset_deck_coords = [0.5, 89.85]; }                       // Forest board
             const asset_deck = dojo.place(this.format_block('jstpl_asset_deck', {
                 asset_deckX : asset_deck_coords[0],
@@ -677,12 +678,13 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (gamedatas.asset_discard_top_card) {
                 const asset_card_type_arg = gamedatas.asset_discard_top_card.type_arg;
                 const asset_card = gamedatas.asset_cards[asset_card_type_arg];
-                dojo.place(this.format_block('jstpl_asset_card', {
+                const discard_top_card = dojo.place(this.format_block('jstpl_asset_card', {
                     CARD_ID : gamedatas.asset_discard_top_card.id,
                     EXTRA_CLASSES : '',
                     acX : asset_card.x_y[0],
                     acY : asset_card.x_y[1],
                 }), 'asset_discard');
+                this.utils.assetTooltip(discard_top_card.id, asset_card_type_arg);
             }
             this.asset_discard = gamedatas.asset_discard;
 
@@ -690,7 +692,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             let spread_coords;
             if (this.player_count <= 3) {
-                spread_coords = [ [10.8, 90.4], [21.5, 90.4], [32.2, 90.4], [42.9, 90.4] ]; // Desert board
+                spread_coords = [ [10.8, 90.43], [21.5, 90.43], [32.2, 90.43], [42.9, 90.43] ]; // Desert board
             } else {spread_coords = [ [11.1, 89.86], [21.71, 89.86], [32.3, 89.86], [42.93, 89.86] ];}    // Forest board
             for (let i=0; i<=3; i++) {
                 dojo.place(this.format_block('jstpl_spread_slot', {
@@ -789,16 +791,13 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // 4. Finalize Layout
                 // Run resizeHand immediately at the end of setup rather than window.onload
                 this.utils.resizeHand();
-                if ($('final_round_msg')) { $('final_round_msg').classList.add('pulse'); }
 
                 window.onload = (evt) => {
                     this.utils.resizeHand();
-                    if ($('final_round_msg')) { $('final_round_msg').classList.add('pulse'); }
                 }
 
             } else {
                 $('hand_ratio').remove();
-                if ($('final_round_msg')) { $('final_round_msg').classList.add('pulse'); }
             }
  
         // Characters and Asset Boards
@@ -959,7 +958,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                         );
                     }
                     else if (character_name === 'cool-headed_crimper' && document.querySelector('#crimper_display')) { // for undo Climbing Card
-                        $('climbing_slot').parentElement.insertBefore($('crimper_display'), $('climbing_slot').nextElementSibling);
+                        $('climbing_slot').after($('crimper_display'));
                     }
 
                     dojo.place(this.format_block('jstpl_cube', {
@@ -1160,15 +1159,16 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const objective_2 = gamedatas.personal_objectives[objective_2_type_arg];
                 const po_coords_1 = objective_1['x_y'];
                 const po_coords_2 = objective_2['x_y'];
+
                 const objective_1_ele = dojo.place(this.format_block('jstpl_personal_objective', {
                     poId : objective_1_type_arg,
                     poX : po_coords_1[0],
-                    poY : po_coords_1[0],
+                    poY : po_coords_1[1],
                 }), 'personal_objective_1_wrap');
                 const objective_2_ele = dojo.place(this.format_block('jstpl_personal_objective', {
                     poId : objective_2_type_arg,
                     poX : po_coords_2[0],
-                    poY : po_coords_2[0],
+                    poY : po_coords_2[1],
                 }), 'personal_objective_2_wrap');
 
                 const po_tracker_1 = $(`personal_objective_${objective_1_type_arg}`).firstElementChild;
@@ -1186,16 +1186,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                 this.utils.personalObjectiveTooltip(`personal_objective_${objective_2_type_arg}`, objective_2_type_arg);
             }
 
-            // shared objective toggle
-            if (!$('shared_objectives_toggle')) {
-                const shared_objectives_toggle = document.createElement('div');
-                shared_objectives_toggle.id = 'shared_objectives_toggle';
-                shared_objectives_toggle.innerHTML = _('Show Shared<br>Objective Trackers');
-                shared_objectives_toggle.classList.add('addon_off', 'always_cursor', 'toggle');
-                dojo.place(shared_objectives_toggle, toggles_wrap, 'first');
-                shared_objectives_toggle.onclick = (evt) => { this.utils.toggleSharedObjectives(evt); }
-            }
             // shared objective completion marks
+            const shared_objectives_toggle = $('shared_objectives_toggle');
+            shared_objectives_toggle.onclick = () => { this.utils.toggleSharedObjectives(); }
             const shared_objectives_tracker = gamedatas.shared_objectives_tracker;
             this.utils.updateSharedObjectivesDisplay(shared_objectives_tracker);
 
@@ -1238,7 +1231,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const climbing_slot = $('climbing_slot');
                 const closePopup = () => {
                     $('show_hide_card_button').click();
-                    
+
                     this.utils.removeOutsideClickListener();
                 };
 
@@ -1338,20 +1331,11 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 dojo.place('<div id="second_summit_beta_token" class="summit_pile_back summit_back" style="position: absolute; left: 217%;"></div>', 'summit_pile');
                 $('summit_pile').style.zIndex = '201';
-                $('climbing_discard').style.zIndex = '202';
 
                 const token_1_info = gamedatas.chooseSummitBetaToken[0];
                 const token_2_info = gamedatas.chooseSummitBetaToken[1];
                 const token_1 = gamedatas.summit_beta_tokens[token_1_info.type_arg];
                 const token_2 = gamedatas.summit_beta_tokens[token_2_info.type_arg];
-
-                const styles = {
-                    width: '200%',
-                    height: '200%',
-                    top: '57%',
-                    left: '0',
-                    marginLeft: '0'
-                }
     
                 if (this.isCurrentPlayerActive()) {
                     const token_1_ele = dojo.place(this.format_block('jstpl_summit_beta', {
@@ -1359,15 +1343,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                         sbX : token_1['x_y'][0],
                         sbY : token_1['x_y'][1],
                     }), 'summit_pile');
+                    token_1_ele.classList.add('choose_sb');
     
                     const token_2_ele = dojo.place(this.format_block('jstpl_summit_beta', {
                         TOKEN_ID : token_2_info.id,
                         sbX : token_2['x_y'][0],
                         sbY : token_2['x_y'][1],
                     }), 'second_summit_beta_token');
-    
-                    Object.assign(token_1_ele.style, styles);
-                    Object.assign(token_2_ele.style, styles);
+                    token_2_ele.classList.add('choose_sb');
                 }
     
                 else {
@@ -1379,6 +1362,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                         cX : token_1['x_y'][0],
                         cY : token_1['x_y'][1],
                     }), 'summit_pile');
+                    token_flip_1.classList.add('choose_sb');
         
                     const token_flip_2 = dojo.place(this.format_block('jstpl_flip_card', {
                         card_id : token_2_info.id,
@@ -1388,9 +1372,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                         cX : token_2['x_y'][0],
                         cY : token_2['x_y'][1],
                     }), 'second_summit_beta_token');
-
-                    Object.assign(token_flip_1.style, styles);
-                    Object.assign(token_flip_2.style, styles);
+                    token_flip_2.classList.add('choose_sb');
                 }
             }
 
@@ -1444,7 +1426,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // set popup to close if user clicks x or outside of element
                 const closePopup = () => {
                     $('show_hide_card_button').click();
-                    
+
                     this.utils.removeOutsideClickListener();
                 };
 
@@ -1454,31 +1436,23 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 // final round
             if (Object.values(gamedatas.pitch_tracker).some(arr => arr.length === 9) && gamedatas.gamestate.name !== 'gameEnd') {
-                if (!$('final_round_msg')) {
-                    const final_round_wrapper = document.createElement('div');
-                    final_round_wrapper.id = 'final_round_wrapper';
-                    const final_round_msg = document.createElement('div');
-                    final_round_msg.id = 'final_round_msg';
-                    final_round_msg.innerHTML = _('Final Round');
-                    const titlebar_addon = $('titlebar_addon');
-                    const climbing_slot = $('climbing_slot');
-                    final_round_wrapper.append(final_round_msg);
-                    titlebar_addon.insertBefore(final_round_wrapper, climbing_slot);
+                if (!$('bga-last-turn-banner')) {
+                    this.bga.gameArea.addLastTurnBanner(
+                        _('This is the final round!')
+                    );
                 }
             }
 
                 // end of game final situation
             if (gamedatas.current_state === 'gameEnd') {
-                const titlebar_addon = $('titlebar_addon');
-                const toggles_wrap = $('toggles_wrap');
-                toggles_wrap.style.width = '61vmin';
                 const opponents_objectives_tracker = gamedatas.opponents_objectives_tracker;
                 const scored_personal_objectives = gamedatas.scored_personal_objectives;
                 const score_tracker = gamedatas.score_tracker;
                 
+                // scorecard
                 const scorecard = document.createElement('div');
                 scorecard.id = 'scorecard';
-                titlebar_addon.append(scorecard);
+                titlebar_extras_wrapper.append(scorecard);
                 $('climbing_dimmer').classList.add('dim_bg');
                 const table = document.createElement('table');
                 table.id = 'score_table';
@@ -1528,22 +1502,22 @@ function (dojo, declare, aspect, BgaAutofit) {
                 scorecard_toggle.id = 'scorecard_toggle';
                 scorecard_toggle.innerHTML = _('Hide<br>Scorecard');
                 scorecard_toggle.classList.add('addon_on', 'always_cursor', 'toggle');
-                const personal_objectives_toggle = $('personal_objectives_toggle');
-                toggles_wrap.insertBefore(scorecard_toggle, personal_objectives_toggle);
-                scorecard_toggle.onclick = (evt) => { this.utils.toggleScorecard(evt); }
+                titlebar_extras_wrapper.append(scorecard_toggle);
+                scorecard_toggle.onclick = () => { this.utils.toggleScorecard(); }
 
+                // opponents' objectives box
                 const opponent_objectives_box = document.createElement('div');
                 opponent_objectives_box.id = 'opponent_objectives_box';
                 opponent_objectives_box.style.display = 'none';
-                titlebar_addon.append(opponent_objectives_box);
+                $('titlebar_extras_wrapper').append(opponent_objectives_box);
                 let pos_num = 1;
 
                 const opponent_objectives_toggle = document.createElement('div');
                 opponent_objectives_toggle.id = 'opponent_objectives_toggle';
                 opponent_objectives_toggle.innerHTML = _('Show Opponent<br>Objectives');
                 opponent_objectives_toggle.classList.add('addon_off', 'always_cursor', 'toggle');
-                toggles_wrap.insertBefore(opponent_objectives_toggle, scorecard_toggle);
-                opponent_objectives_toggle.onclick = (evt) => { this.utils.toggleOpponentObjectives(evt); }
+                titlebar_extras_wrapper.append(opponent_objectives_toggle);
+                opponent_objectives_toggle.onclick = () => { this.utils.toggleOpponentObjectives(); }
 
                 opponent_objectives_toggle.click();
                 for (const [player_id, objectives] of Object.entries(opponents_objectives_tracker)) {
@@ -1576,7 +1550,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                             const po_num = po_pitches.length < 3 ? po_pitches.length : 3;
                             po_tracker.innerHTML = `${po_num}/3`;
                             if (po_num === 3) { po_tracker.style.color = 'green'; }
-                            po_tracker.style.fontSize = '0.7em';
                             this.utils.personalObjectiveTooltip(obj_ele.id, objective_id);
                         }
                         pos_num++;
@@ -1596,6 +1569,25 @@ function (dojo, declare, aspect, BgaAutofit) {
                     }
                 }            
             }
+
+            //// utility listeners
+
+            // lowers risk die placement when scrolled to the top of the screen on mobile
+            const die_wrapper = $('die_wrapper');
+            const scroll_threshold = 150;
+
+            window.addEventListener('scroll', () => {
+                if (window.scrollY < scroll_threshold) {
+                    die_wrapper.classList.add('die_pushed_down');
+                } else {
+                    die_wrapper.classList.remove('die_pushed_down');
+                }
+            }, { passive : true });
+
+            // calls resizeHand() when screen is changed from portrait to landscape or vice-versa
+            window.matchMedia("(orientation: portrait)").addEventListener("change", () => {
+                this.utils.resizeHand();
+            });
 
             //// Tooltips
 
@@ -1729,6 +1721,17 @@ function (dojo, declare, aspect, BgaAutofit) {
                 titlebar_children_observer.observe(general_actions, { childList: true });
             }
 
+            // keep #progression_bumper the same width as #progression_wrapper
+            const wrapper = $('progression_wrapper');
+            const bumper = $('progression_bumper');
+
+            const progression_observer = new ResizeObserver(entries => {
+                for (let entry of entries) {
+                    bumper.style.width = `${entry.contentRect.width}px`;
+                }
+            });
+            progression_observer.observe(wrapper);
+
 
             /*******PHP DEBUGGING*******/
 
@@ -1851,6 +1854,12 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                         // number of cards to be drawn
                         this.cards_to_draw = args.args.x_cards;
+                        
+                        // put counter in the titlebar
+                        const draw_counter = document.createElement('div');
+                        draw_counter.id = 'draw_counter';
+                        draw_counter.innerHTML = `0/${this.cards_to_draw}`;
+                        $('generalactions').append(draw_counter);
                     }
                     break;
 
@@ -1894,13 +1903,17 @@ function (dojo, declare, aspect, BgaAutofit) {
                         } else {
                             for (let pitch_num of available_pitches) {
                                 if (!pitch_tracker.includes(`${pitch_num}`)) {
+                                    const pitch = $(`pitch_${pitch_num}`);
+                                    const unoccupied = pitch.querySelector('.meeple') == null ? true : false;
                                     const border_ele = $(`pitch_${pitch_num}_border`);
                                     const click_ele = $(`pitch_${pitch_num}_click`);
-                                    border_ele.classList.add('available_pitch');
-                                    click_ele.classList.add('cursor');
-                                    const bound_handler = this.onSelectPitch.bind(gameui);
-                                    click_ele.onclick = bound_handler;
-                                    this.pitch_handlers.push(click_ele);
+                                    if (unoccupied) {
+                                        border_ele.classList.add('available_pitch');
+                                        click_ele.classList.add('cursor');
+                                        const bound_handler = this.onSelectPitch.bind(gameui);
+                                        click_ele.onclick = bound_handler;
+                                        this.pitch_handlers.push(click_ele);
+                                    }
                                 }
                             }
                         }
@@ -1908,14 +1921,25 @@ function (dojo, declare, aspect, BgaAutofit) {
                     }
                     break;
 
-                case 'climbingCard':
+                case 'climbingCard': { // create an explicit scope due to duplicated closePopup() from case crimperClimbingCards
 
                     if (this.isCurrentPlayerActive()) {
                         this.utils.enableSummitBetaTokens();
                         this.utils.checkClimbingChoices();
                     }
                     this.utils.resizeHand();
+
+                    // set popup to close if user clicks x or outside of element
+                    const closePopup = () => {
+                        $('show_hide_card_button').click();
+
+                        this.utils.removeOutsideClickListener();
+                    };
+
+                    // start listener
+                    this.utils.setupOutsideClickListener($('climbing_slot'), closePopup);
                     break;
+                }
 
                 case 'resting':
                     (async () => {
@@ -1933,6 +1957,13 @@ function (dojo, declare, aspect, BgaAutofit) {
                             const psych_minus = $('rest_psych_minus_click');
                             const psych_plus = $('rest_psych_plus_click');
                             const water_psych_clicks_arr = [water_minus, water_plus, psych_minus, psych_plus];
+
+                            // put counter in the titlebar
+                            const rest_num = ['2', '8'].includes(this.character_id) ? 6 : 5;
+                            const draw_counter = document.createElement('div');
+                            draw_counter.id = 'draw_counter';
+                            draw_counter.innerHTML = `0/${rest_num}`;
+                            $('generalactions').append(draw_counter);
 
                             dojo.query('#rest_water_psych *').forEach(ele => { ele.style.display = 'block'; });
                             water_minus.style.display = 'none';
@@ -2019,6 +2050,12 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                     if (this.isCurrentPlayerActive()) {
 
+                        // put counter in the titlebar
+                        const discard_counter = document.createElement('div');
+                        discard_counter.id = 'discard_counter';
+                        discard_counter.innerHTML = `0/${this.discard_num}`;
+                        $('generalactions').append(discard_counter);
+
                         this.utils.enableSummitBetaTokens();
                         dojo.query('.hand_asset_wrap > .asset').forEach(ele => {
                             const id = ele.id.slice(-3).replace(/^\D+/g, '');
@@ -2102,6 +2139,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 
                                 this.utils.enableSummitBetaTokens();
 
+                                // put counter in the titlebar
+                                if (this.portaledge_num) {
+                                    const draw_counter = document.createElement('div');
+                                    draw_counter.id = 'draw_counter';
+                                    draw_counter.innerHTML = `0/${this.portaledge_num}`;
+                                    $('generalactions').append(draw_counter);
+                                }
+
                                 dojo.query('.portaledge').forEach(deck => {
                                     const deck_type = deck.id.slice(5);
                                     if (!this.portaledge_types || this.portaledge_types.includes(deck_type)) {
@@ -2127,6 +2172,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                         deck_plus_one.onclick = bound_handler;
                                         this.portaledge_selection_handlers.push(deck_minus_one);
                                         this.portaledge_selection_handlers.push(deck_plus_one);
+                                        deck_minus_one.style.display = 'none';
                                     }
                                 });
                             }
@@ -2275,7 +2321,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     if (this.isCurrentPlayerActive()) { this.utils.enableSummitBetaTokens('risk_summit_beta'); }
                     break;
 
-                case 'crimperClimbingCards':
+                case 'crimperClimbingCards': { // create an explicit scope due to duplicated closePopup() from case climbingCard
                     const drawn_climbing = document.querySelectorAll('.drawn_climbing');
                     const card_1 = drawn_climbing[0];
                     const card_2 = drawn_climbing[1];
@@ -2287,7 +2333,21 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                         this.utils.enableSummitBetaTokens();
                     }
+
+                    const crimper_display_1 = document.getElementById('crimper_display_1');
+                    const crimper_display_2 = document.getElementById('crimper_display_2');
+
+                    // set popup to close if user clicks x or outside of element
+                    const closePopup = () => {
+                        $('show_hide_card_button').click();
+
+                        this.utils.removeOutsideClickListener();
+                    };
+
+                    // start listener
+                    this.utils.setupOutsideClickListener([crimper_display_1, crimper_display_2], closePopup);
                     break;
+                }
             }
 
         },
@@ -2298,6 +2358,8 @@ function (dojo, declare, aspect, BgaAutofit) {
         onLeavingState: function( stateName )
         {
             console.log( 'Leaving state: '+stateName );
+
+            this.utils.removeOutsideClickListener();
             
             switch( stateName ) {
                 case 'characterSelection':
@@ -2892,9 +2954,9 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             // set popup to close if user clicks x or outside of element
             const closePopup = () => {
-                reference_popup.style.display = 'none';
+                reference_popup.style.display = '';
                 climbing_dimmer.classList.remove('dim_bg');
-                
+
                 this.utils.removeOutsideClickListener();
             };
 
@@ -2903,7 +2965,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (close_button) { close_button.onclick = () => closePopup(); }
 
             // start listener
-            this.utils.setupOutsideClickListener(reference_popup, closePopup);
+            this.utils.setupOutsideClickListener(reference_popup, closePopup, true);
         },
 
         onSelectCharacter: function(evt) {
@@ -2982,7 +3044,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     [...$('character_selection').children].forEach(ele => {
                         ele.style.pointerEvents = '';
                     });
-                    
+
                     this.utils.removeOutsideClickListener();
                 };
 
@@ -3011,19 +3073,21 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectAsset: function(evt) {
             dojo.stopEvent(evt);
 
+            const selection = evt.currentTarget;
+            if (selection.classList.contains('asset') && !selection.classList.contains('selectable')) { return; }
+
             const deck_classes = $('asset_deck').classList;
             const deck_draw_str = deck_classes.item(deck_classes.length - 1);
             let deck_draw_num = Number(deck_draw_str) || 0;
             let spread_draw_num = dojo.query('.selected_asset').length;
             const spread = $('the_spread');
 
-            if (evt.currentTarget.id == 'plus_one') {
+            if (selection.id == 'plus_one') {
                 if (deck_draw_num + spread_draw_num + 1 === this.cards_to_draw) {
                     $('plus_one').style.display = 'none';
                     spread.querySelectorAll('.asset').forEach(ele => {
                         if (!ele.classList.contains('selected_asset')) {
                             ele.classList.remove('cursor', 'selectable');
-                            ele.style.pointerEvents = 'none';
                         }
                     });
                 }
@@ -3040,13 +3104,12 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
                 deck_draw_num++;
 
-            } else if (evt.currentTarget.id == 'minus_one') {
+            } else if (selection.id == 'minus_one') {
                 if (deck_draw_num + spread_draw_num - 1 <= this.cards_to_draw) {
                     $('plus_one').style.display = '';
                     spread.querySelectorAll('.asset').forEach(ele => {
                         if (!ele.classList.contains('selectable')) {
                             ele.classList.add('cursor', 'selectable');
-                            ele.style.pointerEvents = '';
                         }
                     });
                 }
@@ -3073,7 +3136,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                         spread.querySelectorAll('.asset').forEach(ele => {
                             if (!ele.classList.contains('selectable')) {
                                 ele.classList.add('cursor', 'selectable');
-                                ele.style.pointerEvents = '';
                             }
                         });
                     }
@@ -3086,17 +3148,21 @@ function (dojo, declare, aspect, BgaAutofit) {
                         spread.querySelectorAll('.asset').forEach(ele => {
                             if (!ele.classList.contains('selected_asset')) {
                                 ele.classList.remove('cursor', 'selectable');
-                                ele.style.pointerEvents = 'none';
                             }
                         });
                     }
                 }
             }
 
+            const draw_counter = $('draw_counter');
+            draw_counter.innerHTML = `${deck_draw_num + spread_draw_num}/${this.cards_to_draw}`;
+
             if ((deck_draw_num + spread_draw_num === this.cards_to_draw) && $('confirm_button').classList.contains('disabled')) { 
                 $('confirm_button').classList.remove('disabled');
+                draw_counter.style.color = 'blue';
             } else if ((deck_draw_num + spread_draw_num != this.cards_to_draw) && !$('confirm_button').classList.contains('disabled')) {
                 $('confirm_button').classList.add('disabled');
+                draw_counter.style.color = '';
             }
         },
 
@@ -3105,12 +3171,15 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             let spread_to_draw = '';
             let spread_slots = '';
-            dojo.query('.selected_asset').forEach((ele) => {
+            dojo.query('.selected_asset').forEach(ele => {
                 const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
                 spread_to_draw += `${asset_id},`;
                 const slot = ele.parentElement.id.slice(-1);
                 spread_slots += `${slot},`;
             });
+
+            const draw_counter = $('draw_counter');
+            if (draw_counter) { draw_counter.remove(); }
 
             const deck_classes = $('asset_deck').classList;
             const deck_to_draw = Number(deck_classes[deck_classes.length - 1]) || 0;
@@ -3187,110 +3256,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                         const check_requirements = this.utils.checkRequirements();
                         const pitch_requirements = check_requirements[1];
                         this.pitch_requirements = pitch_requirements;
-
-                        const available_face = this.resources['skills']['face'] + this.resources['permanent_skills']['face'];
-                        const available_crack = this.resources['skills']['crack'] + this.resources['permanent_skills']['crack'];
-                        const available_slab = this.resources['skills']['slab'] + this.resources['permanent_skills']['slab'];
-
-                        let requirements_met = 0;
-                        const all_skills = available_face + available_crack + available_slab;
-                        const skill_requirements = pitch_requirements['face'] + pitch_requirements['crack'] + pitch_requirements['slab'] + pitch_requirements['any_skill'];
-                        for (const [type, value] of Object.entries(pitch_requirements)) {
-
-                            if (type == 'any_skill' && value > 0) {
-
-                                let extra_skills = 0;
-                                const extra_face = available_face - pitch_requirements['face'];
-                                const extra_crack = available_crack - pitch_requirements['crack'];
-                                const extra_slab = available_slab - pitch_requirements['slab'];
-                                for (const extra of [extra_face, extra_crack, extra_slab]) {
-                                    if (extra > 0) { extra_skills += extra; }
-                                }
-                                const missing_requirements = extra_skills - value;
-                                if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
-                            }
-
-                            else if (['gear', 'face', 'crack', 'slab'].includes(type) && value > 0) {
-
-                                const missing_requirements = (this.resources['skills'][type] + this.resources['permanent_skills'][type]) - value;
-                                if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
-                            }
-
-                            else if (type === 'water' && value > 0) {
-                                const missing_requirements = this.resources['water'] - pitch_requirements.water; 
-                                if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
-                            }
-                            else if (type === 'psych' && value > 0) {
-                                const missing_requirements = this.resources['psych'] - pitch_requirements.psych; 
-                                if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
-                            }
-                        }
-
-                        // Dirtbag
-                        if (this.character_id === '3' && requirements_met > 0 && this.resources['skills']['gear'] + this.resources['permanent_skills']['gear'] > pitch_requirements['gear']) {
-                            requirements_met--;
-                        }
-
-                        // Overstoker
-                        if (this.character_id === '5' && this.resources['psych'] > pitch_requirements['psych']) {
-                            requirements_met--;
-                        }
-
-                        // Phil
-                        if (this.character_id === '8' && requirements_met === 0) {
-                            requirements_met = 1;
-                            this.phil = true;
-                        }
-
-                        // Crag Mama
-                        if (this.character_id === '9') {
-                            const cutoff = this.board === 'desert' ? 21 : 27;
-                            if (hex_num <= cutoff) {
-                                const face = this.resources['skills']['face'] + this.resources['permanent_skills']['face'] - pitch_requirements['face'];
-                                const crack = this.resources['skills']['crack'] + this.resources['permanent_skills']['crack'] - pitch_requirements['crack'];
-                                const slab = this.resources['skills']['slab'] + this.resources['permanent_skills']['crack'] - pitch_requirements['slab'];
-
-                                if ([face, crack, slab].some(num => num < 0)) {
-                                    requirements_met--;
-                                }
-                            }
-                        }
-
-                        // Bionic Woman
-                        if (this.character_id === '11') {
-
-                            const face = this.resources['skills']['face'] + this.resources['permanent_skills']['face'] - pitch_requirements['face'];
-                            const crack = this.resources['skills']['crack'] + this.resources['permanent_skills']['crack'] - pitch_requirements['crack'];
-                            const slab = this.resources['skills']['slab'] + this.resources['permanent_skills']['crack'] - pitch_requirements['slab'];
-                            const total = face + crack + slab - pitch_requirements['any_skill'];
-
-                            if (total >= 0 && [face, crack, slab].some(num => num < 0)) {
-                                requirements_met--;
-                            }
-                        }
-
-                        // Buff Boulderer
-                        if (this.character_id === '12') {
-
-                            const value = this.gamedatas.pitches[pitch_num]['value'];
-                            if (value === 4) { requirements_met--; }
-                            else if (value === 5) { requirements_met -= 2; }
-                        }
-
-                        // If the pitch has been previously climbed by other players
-                        let already_climbed = 0;
-                        let selected_pitch = dojo.query('.selected_pitch')[0].nextElementSibling;
-                        let selected_hex = selected_pitch.id.slice(-2).replace(/^\D+/g, '');
-                        for (const [player, pitch_list] of Object.entries(this.gamedatas.pitch_tracker)) {
-                            if (player != this.player_id && pitch_list.includes(`${selected_hex}`)) {
-                                already_climbed++;
-                            }
-                        }
-                        requirements_met -= already_climbed;
-
-                        if (requirements_met <= 0) { requirements_met = true; }
-                        else if (requirements_met > 1) { requirements_met = false; }
-                        if (this.character_id === '8' && requirements_met === true) { requirements_met = 1; } // Phil
+                        const requirements_met = this.utils.checkPotential();
 
                         this.utils.displayRequirements(this.resources, pitch_requirements);
 
@@ -3330,7 +3296,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                     id: 'trifecta_show_button',
                                     tooltip: _('Show Trifecta options'),
                                 });
-                                
+
                                 this.utils.removeOutsideClickListener();
                             };
 
@@ -3656,7 +3622,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                 for (const ele of this.trade_handlers) { ele.onclick = null; }
                 this.trade_handlers = [];
                 this.restoreServerGameState();
+                $('trade_button').classList.remove('disabled');
             }), null, false, 'red');
+
+            // put counter in the titlebar
+            const draw_counter = document.createElement('div');
+            draw_counter.id = 'draw_counter';
+            draw_counter.innerHTML = '0/3';
+            $('generalactions').append(draw_counter);
 
             const available_types = this.utils.tradeEnabled();
             dojo.query('#assets_wrap .asset').forEach(ele => {
@@ -3681,6 +3654,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const id = asset_ele.id.slice(-3).replace(/^\D+/g, '');
             const type_arg = this.gamedatas.asset_identifier[id];
             const asset_type = this.utils.getAssetType(type_arg);
+            const draw_counter = $('draw_counter');
 
             dojo.query('#bad_selection_message').forEach(ele => { ele.remove(); });
 
@@ -3737,11 +3711,15 @@ function (dojo, declare, aspect, BgaAutofit) {
                 if (trade_type != asset_type) { trade_requirements = false; }
             });
 
+            draw_counter.innerHTML = `${selected_cards.length}/3`;
+
             const confirm_button = $('confirm_button');
             if (trade_requirements && confirm_button.classList.contains('disabled')) {
                 confirm_button.classList.remove('disabled');
+                draw_counter.style.color = 'blue';
             } else if (!confirm_button.classList.contains('disabled')) {
                 confirm_button.classList.add('disabled');
+                draw_counter.style.color = '';
             }
         },
 
@@ -3751,6 +3729,9 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.utils.clicksOff();
             for (const ele of this.trade_handlers) { ele.onclick = null; }
             this.trade_handlers = [];
+            let cards_to_discard = [];
+            let original_z_indices = [];
+            const discard_pile = $('asset_discard');
 
             this.selected_cards = dojo.query('.selected_resource');
             dojo.query('#assets_wrap .asset').forEach(ele => {
@@ -3759,14 +3740,25 @@ function (dojo, declare, aspect, BgaAutofit) {
             });
 
             this.removeActionButtons();
-
-            let cards_to_discard = [];
+            const draw_counter = $('draw_counter');
+            if (draw_counter) { draw_counter.remove(); }
 
             this.selected_cards.forEach(ele => {
 
+                const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
+                original_z_indices.push([ele, ele.style.zIndex]);
+                original_z_indices.push([ele.parentElement, ele.parentElement.style.zIndex]);
                 ele.style.zIndex = '10';
                 ele.parentElement.style.zIndex = '10';
-                const args = [ele, $('asset_discard'), 3, 'rotate'];
+                const origin_ele = ele.parentElement;
+                discard_pile.append(ele);
+                const destination_box = ele.getBoundingClientRect();
+                const destination_width = destination_box.height; // account for rotation at destination
+                const destination_height = destination_box.width;
+                ele.style.setProperty('--dw', `${destination_width}px`);
+                ele.style.setProperty('--dh', `${destination_height}px`);
+                origin_ele.append(ele);
+                const args = [ele, discard_pile, 3];
                 cards_to_discard.push(this.utils.animationPromise.bind(null, ele, 'asset_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
             });
 
@@ -3788,6 +3780,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     deck_plus_one.onclick = bound_handler;
                     this.portaledge_selection_handlers.push(deck_minus_one);
                     this.portaledge_selection_handlers.push(deck_plus_one);
+                    deck_minus_one.style.display = 'none';
                 });
 
                 this.utils.updateTitlebar(_('You must take 1 card from the Portaledge'));
@@ -3816,8 +3809,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                     portaledge.style.marginTop = '-36.4061%';
                     portaledge.style.display = '';
                     this.restoreServerGameState();
+                    $('trade_button').classList.remove('disabled');
                     this.utils.clicksOn();
                 }), null, false, 'red');
+                
+                const draw_counter = document.createElement('div');
+                draw_counter.id = 'draw_counter';
+                draw_counter.innerHTML = '0/1';
+                $('generalactions').append(draw_counter);
             });
         },
 
@@ -4166,36 +4165,44 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.stopEvent(evt);
 
             const player_id = this.getActivePlayerId();
+            const show_hide_button = $('show_hide_card_button');
             const confirm_button = document.getElementById('confirm_button');
             const climbing_dimmer = document.getElementById('climbing_dimmer');
-            const personal_objectives_box = $('personal_objectives_box');
+            
+            // close reference popup if open and kill listener
+            const reference_popup = $('reference_popup');
+            if (reference_popup.style.display === 'flex') {
+                reference_popup.style.display = '';
+                $('climbing_dimmer').classList.remove('dim_bg');
+                this.utils.removeOutsideClickListener();
+            }
 
             if (this.gamedatas.players[player_id]['character'] === '10' && this.gamedatas.current_state === 'crimperClimbingCards') { // Cool-Headed Crimper
 
                 const crimper_display = document.getElementById('crimper_display');
                 const crimper_display_1 = document.getElementById('crimper_display_1');
                 const crimper_display_2 = document.getElementById('crimper_display_2');
-                if (evt.target.innerHTML === 'Hide cards') { // hide
+                if (show_hide_button.innerHTML === 'Hide cards') { // hide
                     crimper_display.style.display = '';
                     climbing_dimmer.style.display = 'none';
-                    evt.target.innerHTML = _('Show cards');
-                    evt.target.classList.remove('shown');
-                    evt.target.classList.add('hidden');
+                    show_hide_button.innerHTML = _('Show cards');
+                    show_hide_button.classList.remove('shown');
+                    show_hide_button.classList.add('hidden');
                     if (this.isCurrentPlayerActive()) { confirm_button.classList.add('disabled'); }
                     this.utils.removeOutsideClickListener();
                     
                 } else { // show                    
                     crimper_display.style.display = 'block';
                     climbing_dimmer.style.display = 'block';
-                    evt.target.innerHTML = _('Hide cards');
-                    evt.target.classList.remove('hidden');
-                    evt.target.classList.add('shown');
+                    show_hide_button.innerHTML = _('Hide cards');
+                    show_hide_button.classList.remove('hidden');
+                    show_hide_button.classList.add('shown');
                     if (document.querySelector('.selected_asset')) { confirm_button.classList.remove('disabled'); }
 
                     // set popup to close if user clicks x or outside of element
                     const closePopup = () => {
-                        $('show_hide_card_button').click();
-                        
+                        show_hide_button.click();
+
                         this.utils.removeOutsideClickListener();
                     };
 
@@ -4208,12 +4215,12 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 const climbing_slot = $('climbing_slot');
 
-                if (evt.target.innerHTML === 'Hide card') { // hide
+                if (show_hide_button.innerHTML === 'Hide card') { // hide
                     climbing_slot.style.display = '';
                     climbing_dimmer.style.display = 'none';
-                    evt.target.innerHTML = _('Show card');
-                    evt.target.classList.remove('shown');
-                    evt.target.classList.add('hidden');
+                    show_hide_button.innerHTML = _('Show card');
+                    show_hide_button.classList.remove('shown');
+                    show_hide_button.classList.add('hidden');
                     if (this.isCurrentPlayerActive()) {
                         if (confirm_button.classList.contains('disabled')) {
                             this.confirm_disabled = true;
@@ -4225,9 +4232,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                 } else { // show
                     climbing_slot.style.display = 'block';
                     climbing_dimmer.style.display = 'block';
-                    evt.target.innerHTML = _('Hide card');
-                    evt.target.classList.remove('hidden');
-                    evt.target.classList.add('shown');
+                    show_hide_button.innerHTML = _('Hide card');
+                    show_hide_button.classList.remove('hidden');
+                    show_hide_button.classList.add('shown');
 
                     const checkboxes = Array.from($('generalactions').querySelectorAll('.asset_checkbox'));
                     if (this.isCurrentPlayerActive()) {
@@ -4254,7 +4261,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     // set popup to close if user clicks x or outside of element
                     const closePopup = () => {
                         $('show_hide_card_button').click();
-                        
+
                         this.utils.removeOutsideClickListener();
                     };
 
@@ -4301,6 +4308,7 @@ function (dojo, declare, aspect, BgaAutofit) {
         onConfirmClimbingCardChoice: async function(evt) {
             dojo.stopEvent(evt);
 
+            this.utils.removeOutsideClickListener();
             this.utils.disableSummitBetaTokens();
 
             const choice = dojo.query('.selected_choice')[0].classList[1];
@@ -4430,11 +4438,17 @@ function (dojo, declare, aspect, BgaAutofit) {
                 });
             }
 
+            // update discard counter
+            const discard_counter = $('discard_counter');
+            discard_counter.innerHTML = `${selected_resources.length}/${this.discard_num}`;
+
 
             if (selected_resources.length == this.discard_num && $('confirm_button').classList.contains('disabled')) {
+                discard_counter.style.color = 'blue';
                 $('confirm_button').classList.remove('disabled');
             }
             else if (selected_resources.length < this.discard_num && !$('confirm_button').classList.contains('disabled')) {
+                discard_counter.style.color = 'red';
                 $('confirm_button').classList.add('disabled');
             }
         },
@@ -4466,6 +4480,9 @@ function (dojo, declare, aspect, BgaAutofit) {
             tucked_card_types = tucked_card_types.slice(0, -1);
             tucked_card_nums = tucked_card_nums.slice(0, -1);
 
+            const discard_counter = $('discard_counter');
+            if (discard_counter) { discard_counter.remove(); }
+
             if (this.checkAction('confirmAssetsForDiscard')) {
                 this.ajaxcall("/firstascent/firstascent/confirmAssetsForDiscard.html", { lock: true,
                     hand_card_ids : hand_card_ids,
@@ -4483,6 +4500,15 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.query('.selected_opponent').forEach(ele => { ele.classList.remove('selected_opponent'); });
             selected_button.classList.add('selected_opponent');
             if ($('confirm_button').classList.contains('disabled')) { $('confirm_button').classList.remove('disabled'); }
+        },
+
+        onConfirmOpponent: function(evt) {
+            dojo.stopEvent(evt);
+
+            let opponent_id = null;
+            if (this.jesus_piece_requirements === 'true') { opponent_id = 'jesus_piece'; }
+            else { opponent_id = dojo.query('.selected_opponent')[0].id; }
+            const jesus_party = (typeof this.jesus_piece_requirements != 'undefined' && this.jesus_piece_requirements === 'jesus_party') ? true : false;
 
             const climbing_card_type_arg = this.utils.getCurrentClimbingCard();
             if (climbing_card_type_arg != '49' && gameui.risk_it != true) {
@@ -4494,15 +4520,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     ele.firstElementChild.style.boxShadow = '';
                 });
             }
-        },
-
-        onConfirmOpponent: function(evt) {
-            dojo.stopEvent(evt);
-
-            let opponent_id = null;
-            if (this.jesus_piece_requirements === 'true') { opponent_id = 'jesus_piece'; }
-            else { opponent_id = dojo.query('.selected_opponent')[0].id; }
-            const jesus_party = (typeof this.jesus_piece_requirements != 'undefined' && this.jesus_piece_requirements === 'jesus_party') ? true : false;
 
             if (this.checkAction('confirmSelectedOpponent')) {
                 this.ajaxcall("/firstascent/firstascent/confirmSelectedOpponent.html", { lock: true,
@@ -4520,6 +4537,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const portaledge = $('portaledge');
             if ($('requirements_message')) { $('requirements_message').remove(); }
             if ($('no_more_cards_message')) { $('no_more_cards_message').remove(); }
+            const draw_counter = $('draw_counter');
 
             if (this.bomber_anchor) { this.portaledge_num = dojo.query('.selected_resource').length; }
 
@@ -4588,8 +4606,10 @@ function (dojo, declare, aspect, BgaAutofit) {
                     $('rest_psych_plus_click').style.display = '';
                     $('rest_psych_plus_symbol').style.display = '';
                 }
+                draw_counter.innerHTML = `${rest_resources}/${rest_num}`;
                 if (rest_resources === rest_num && $('confirm_button').classList.contains('disabled')) {
                     $('confirm_button').classList.remove('disabled');
+                    draw_counter.style.color = 'blue';
                 } else if (rest_resources < rest_num) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => {
                         ele.style.display = '';
@@ -4600,10 +4620,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                     $('rest_psych_plus_symbol').style.display = 'block';
                     if (!$('confirm_button').classList.contains('disabled')) {
                         $('confirm_button').classList.add('disabled');
-                    }                    
+                    }
+                    draw_counter.style.color = '';
                 }
 
             } else { // selectPortaledge state
+                const draw_counter_numerator = operation === 'plus' ? currently_selected + 1 : currently_selected - 1;
+                draw_counter.innerHTML = `${draw_counter_numerator}/${this.portaledge_num}`;
+
                 if (operation === 'plus' && currently_selected+1 === this.portaledge_num) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => {
                         ele.style.display = 'none';
@@ -4611,19 +4635,24 @@ function (dojo, declare, aspect, BgaAutofit) {
                     if ($('confirm_button').classList.contains('disabled')) {
                         $('confirm_button').classList.remove('disabled');
                     }
+                    draw_counter.style.color = 'blue';
                 }
                 else if (operation === 'minus' && currently_selected-1 < this.portaledge_num) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => {
                         ele.style.display = '';
                     });
+                    draw_counter.style.color = '';
+                    $('confirm_button').classList.add('disabled');
                 }
                 else if (operation === 'minus' && currently_selected-1 === this.portaledge_num
                          && $('confirm_button').classList.contains('disabled')
                          && this.portaledge_num > 0) {
                     $('confirm_button').classList.remove('disabled');
+                    draw_counter.style.color = 'blue';
                 }
                 else if ((currently_selected+1 != this.portaledge_num || this.portaledge_num == 0) && !$('confirm_button').classList.contains('disabled')) {
                     $('confirm_button').classList.add('disabled');
+                    draw_counter.style.color = '';
                 }
             }
 
@@ -4650,6 +4679,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 portaledge_to_draw += `${water_num},${psych_num}`;
             }
 
+            const draw_counter = $('draw_counter');
+            if (draw_counter) { draw_counter.remove(); }
             this.utils.disableSummitBetaTokens();
 
             if (this.checkAction('confirmPortaledge')) {
@@ -4670,6 +4701,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const character_num = this.gamedatas.players[this.getActivePlayerId()]['character'];
             const max_num = character_num != '8' ? 6 : 7;     // Phil
             const rest_num = !['2', '8'].includes(character_num) ? 5 : 6;
+            const draw_counter = $('draw_counter');
 
             if ($('requirements_message')) { $('requirements_message').remove(); }
 
@@ -4722,6 +4754,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
             }
 
+            draw_counter.innerHTML = `${this.rest_resources}/${rest_num}`;
+
             if (this.rest_resources === rest_num) {
                 portaledge.querySelectorAll('.porta_plus').forEach(ele => {
                     ele.style.display = 'none';
@@ -4731,6 +4765,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 $('rest_psych_plus_click').style.display = '';
                 $('rest_psych_plus_symbol').style.display = '';
                 $('confirm_button').classList.remove('disabled');
+                draw_counter.style.color = 'blue';
             }
             else if (this.rest_resources < rest_num) {
                 portaledge.querySelectorAll('.porta_plus').forEach(ele => {
@@ -4743,6 +4778,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 if (!$('confirm_button').classList.contains('disabled')) {
                     $('confirm_button').classList.add('disabled');
                 }
+                draw_counter.style.color = '';
             }
         },
 
@@ -5068,6 +5104,8 @@ function (dojo, declare, aspect, BgaAutofit) {
         onPassClimbingCard: function (evt) {
             dojo.stopEvent(evt);
 
+            this.utils.removeOutsideClickListener();
+
             if (this.checkAction('passClimbingCard')) {
                 this.ajaxcall("/firstascent/firstascent/passClimbingCard.html", { lock: true,
                     player_id : this.getActivePlayerId(),
@@ -5077,6 +5115,8 @@ function (dojo, declare, aspect, BgaAutofit) {
 
         onUndoClimbingCard: function (evt=null) {
             if (evt) { dojo.stopEvent(evt); }
+
+            this.utils.removeOutsideClickListener();
 
             if (this.checkAction('undoClimbingCard')) {
                 this.ajaxcall("/firstascent/firstascent/undoClimbingCard.html", { lock: true,
@@ -5281,7 +5321,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             });
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmRerack')) {
                 this.ajaxcall("/firstascent/firstascent/confirmRerack.html", { lock: true,
@@ -5336,7 +5376,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.stopEvent(evt);
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmEnergyDrink')) {
                 this.ajaxcall("/firstascent/firstascent/confirmEnergyDrink.html", {lock: true,}, this, function(result) {} );
@@ -5468,7 +5508,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const deck_to_draw = Number(deck_classes[deck_classes.length - 1]) || 0;
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             for (const ele of this.simul_climb_handlers) { ele.onclick = null; }
             this.simul_climb_handlers = [];
@@ -5552,6 +5592,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 this.portaledge_selection_handlers.push(deck_minus_one);
                 deck_plus_one.onclick = bound_handler;
                 this.portaledge_selection_handlers.push(deck_plus_one);
+                deck_minus_one.style.display = 'none';
             });
 
             portaledge.style.display = 'block';
@@ -5657,7 +5698,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.bomber_anchor = false;
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmBomberAnchor')) {
                 this.ajaxcall("/firstascent/firstascent/confirmBomberAnchor.html", { lock: true,
@@ -5975,6 +6016,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             }
 
             const updated_requirements = this.utils.updateRequirementsForSB();
+            
             if (updated_requirements) { this.guidebook_requirements = true; }
             else { this.guidebook_requirements = 1; }
 
@@ -6210,8 +6252,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 case 8: // guidebook
                     if (document.querySelector('.selected_skill')) { document.querySelector('.selected_skill').click(); }
                     if ($('sb_skills_wrapper')) { $('sb_skills_wrapper').remove(); }
-                    if (this.guidebook_requirements && this.gamedatas.gamestate.name === 'climbOrRest' && !document.querySelector('#my_undo_button')) {
 
+                    if (this.guidebook_requirements && this.gamedatas.gamestate.name === 'climbOrRest' && !document.querySelector('#my_undo_button')) {
                         const pitch_click = document.querySelector('.selected_pitch').nextElementSibling.nextElementSibling;
                         this.already_climbed = 0;
                         this.already_climbed_trigger = false;
@@ -6253,6 +6295,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             // redo fulfilled requirements
             const selected_assets = document.querySelectorAll('.selected_resource');
             const selected_sb_tokens = document.querySelectorAll('#assets_wrap .selected_token');
+
             if (selected_sb_tokens.length > 0) {
                 selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); });
                 selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); });
@@ -6325,15 +6368,18 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectDirtbag: function(evt) {
             dojo.stopEvent(evt);
 
+            const button_wrap = evt.currentTarget;
             const button = evt.currentTarget.firstElementChild;
             let action = null;
             if (!button.classList.contains('dirtbag_selected')) {
                 button.classList.add('dirtbag_selected');
+                button_wrap.classList.replace('bgabutton_blue', 'bgabutton_red');
                 document.querySelector('.button_text_wrap').innerHTML = _('Undo<br>Substitution');
                 action = 'select';
             }
             else {
                 button.classList.remove('dirtbag_selected');
+                button_wrap.classList.replace('bgabutton_red', 'bgabutton_blue');
                 document.querySelector('.button_text_wrap').innerHTML = _('Substitute<br>Requirement');
                 action = 'deselect';
             }
@@ -6434,15 +6480,18 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectOverstoker: function(evt) {
             dojo.stopEvent(evt);
 
+            const button_wrap = evt.currentTarget;
             const button = evt.currentTarget.firstElementChild;
             let action = null;
             if (!button.classList.contains('overstoker_selected')) {
                 button.classList.add('overstoker_selected');
+                button_wrap.classList.replace('bgabutton_blue', 'bgabutton_red');
                 document.querySelector('.button_text_wrap').innerHTML = _('Undo<br>Substitution');
                 action = 'select';
             }
             else {
                 button.classList.remove('overstoker_selected');
+                button_wrap.classList.replace('bgabutton_red', 'bgabutton_blue');
                 document.querySelector('.button_text_wrap').innerHTML = _('Substitute<br>Requirement');
                 action = 'deselect';
             }
@@ -6505,6 +6554,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     const type = has_border ? classlist[classlist.length-2].slice(4) : classlist[classlist.length-1].slice(4);
                     converted_icon.parentElement.classList = `requirement_wrap ${type}_wrap`;
                     switch (type) {
+                        case 'gear' : converted_icon.style.backgroundPosition = '-800% -0%'; break;
                         case 'face' : converted_icon.style.backgroundPosition = '-600% -0%'; break;
                         case 'crack' : converted_icon.style.backgroundPosition = '-500% -0%'; break;
                         case 'slab' : converted_icon.style.backgroundPosition = '-700% -0%'; break;
@@ -6515,6 +6565,13 @@ function (dojo, declare, aspect, BgaAutofit) {
                             break;
                     }
                     switch (type) {
+                        case 'gear':
+                            converted_icon.classList = 'skills_and_techniques';
+                            if (has_border) {
+                                border.classList.add('gear_border', 'requirement_border');
+                                converted_icon.parentElement.insertBefore(border, converted_icon);
+                            }
+                            break;
                         case 'face': case 'crack': case 'slab': case 'any_skill':
                             converted_icon.classList = 'skills_and_techniques';
                             if (has_border) {
@@ -6572,6 +6629,8 @@ function (dojo, declare, aspect, BgaAutofit) {
         onConfirmCrimperClimbingCard: function(evt) {
             dojo.stopEvent(evt);
 
+            this.utils.removeOutsideClickListener();
+
             const chosen_ele = document.querySelector('.drawn_climbing.selected_asset');
             const discard_ele = document.querySelector('.drawn_climbing:not(.selected_asset)');
             const chosen_id = chosen_ele.id.slice(-3).replace(/^\D+/g, '');
@@ -6588,15 +6647,18 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectCragMama: function(evt) {
             dojo.stopEvent(evt);
 
+            const button_wrap = evt.currentTarget;
             const button = evt.currentTarget.firstElementChild;
             let action = null;
             if (!button.classList.contains('crag_mama_selected')) {
                 button.classList.add('crag_mama_selected');
+                button_wrap.classList.replace('bgabutton_blue', 'bgabutton_red');
                 document.querySelector('.button_text_wrap').innerHTML = _('Undo<br>Ignore');
                 action = 'select';
             }
             else {
                 button.classList.remove('crag_mama_selected');
+                button_wrap.classList.replace('bgabutton_red', 'bgabutton_blue');
                 document.querySelector('.button_text_wrap').innerHTML = _('Ignore<br>Requirement');
                 action = 'deselect';
             }
@@ -6677,15 +6739,18 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectBionicWoman: function(evt) {
             dojo.stopEvent(evt);
 
+            const button_wrap = evt.currentTarget;
             const button = evt.currentTarget.firstElementChild;
             let action = null;
             if (!button.classList.contains('bionic_woman_selected')) {
                 button.classList.add('bionic_woman_selected');
+                button_wrap.classList.replace('bgabutton_blue', 'bgabutton_red');
                 document.querySelector('.button_text_wrap').innerHTML = _('Undo<br>Substitution');
                 action = 'select';
             }
             else {
                 button.classList.remove('bionic_woman_selected');
+                button_wrap.classList.replace('bgabutton_blue', 'bgabutton_red');
                 document.querySelector('.button_text_wrap').innerHTML = _('Substitute<br>Requirement');
                 action = 'deselect';
             }
@@ -6782,6 +6847,34 @@ function (dojo, declare, aspect, BgaAutofit) {
             });
             let icon_removed = false;
             let conversion_finished = true;
+            this.utils.clicksOn('hard_on');
+
+            function initRedoSB(token_ele) {
+                const id = token_ele.id.slice(-3).replace(/^\D+/g, '');
+                const type_arg = gameui.gamedatas.token_identifier[id];
+                if (type_arg === '8') {
+                    const selected = token_ele.querySelector('.selected_skill');
+                    if (selected) {
+                        const type = selected.id.slice(3);
+                        this.guidebook_temp_type = type;
+                        token_ele.firstElementChild.click();
+                    }
+                } else {
+                    token_ele.firstElementChild.click();
+                }
+            }
+
+            function finishRedoSB(token_ele) {
+                const id = token_ele.id.slice(-3).replace(/^\D+/g, '');
+                const type_arg = gameui.gamedatas.token_identifier[id];
+                if (type_arg === '8') {
+                    token_ele.firstElementChild.click();
+                    $(`sb_${this.guidebook_temp_type}`).click();
+                    delete this.guidebook_temp_type;
+                } else {
+                    token_ele.firstElementChild.click();
+                }
+            }
 
             // Pitch has already been climbed
             if (this.already_climbed > 0) {
@@ -6801,7 +6894,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // init redo fulfilled requirements
                 const selected_resources = document.querySelectorAll('.selected_resource');
                 const selected_sb_tokens = document.querySelectorAll('.selected_token.summit_beta');
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { initRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
 
                 icon.classList.remove(icon.classList[1]);
@@ -6820,7 +6913,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                         if (temp_type === type) { ele.remove(); }
                     });
                 }
-                if (this.pitch_requirements['gear'] > this.resources['skills']['gear']) {
+
+                if (this.pitch_requirements['gear'] >= this.resources['skills']['gear']) {
                     const converted_wrap = document.querySelector('.dirtbag_converted').parentElement;
                     const gear_border = document.createElement('div');
                     gear_border.classList.add('gear_border', 'requirement_border');
@@ -6828,7 +6922,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
     
                 // finish redo fulfilled requirements
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { finishRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
             }
 
@@ -6839,7 +6933,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // init redo fulfilled requirements
                 const selected_resources = document.querySelectorAll('.selected_resource');
                 const selected_sb_tokens = document.querySelectorAll('.selected_token.summit_beta');
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { initRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
 
                 icon.classList.remove(icon.classList[1], 'cursor');
@@ -6867,7 +6961,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
 
                 // finish redo fulfilled requirements
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { finishRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
             }
 
@@ -6876,7 +6970,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // init redo fulfilled requirements
                 const selected_resources = document.querySelectorAll('.selected_resource');
                 const selected_sb_tokens = document.querySelectorAll('.selected_token.summit_beta');
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { initRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
 
                 icon.classList.remove(icon.classList[1]);
@@ -6890,7 +6984,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 icon_removed = true;
 
                 // finish redo fulfilled requirements
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { finishRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
             }
 
@@ -6901,7 +6995,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // init redo fulfilled requirements
                 const selected_resources = document.querySelectorAll('.selected_resource');
                 const selected_sb_tokens = document.querySelectorAll('.selected_token.summit_beta');
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { initRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
 
                 icon.classList.remove(icon.classList[1]);
@@ -6925,7 +7019,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
 
                 // finish redo fulfilled requirements
-                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { ele.firstElementChild.click(); }); }
+                if (selected_sb_tokens.length > 0) { selected_sb_tokens.forEach(ele => { finishRedoSB(ele); }); }
                 else { selected_resources.forEach(ele => { ele.click(); }); }
             }
 
@@ -6952,7 +7046,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
             }
 
-            this.utils.clicksOn('hard_on');
             const check_requirements = this.utils.checkRequirements();
             const selected_resources = check_requirements[0];
             const pitch_requirements = check_requirements[1];
@@ -7285,6 +7378,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 mX : mx_y[0],
                 mY : mx_y[1]
             }), meeple_destination);
+            const meeple_id = `meeple_${player_id}`;
+            this.addTooltipHtml(meeple_id, _('Climber'), 500);
 
             // remove styling, move div, animate slide
             
@@ -7487,6 +7582,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }), objective_2_wrap);
                 this.utils.resizeHand();
 
+                // init tracker and attach tooltips
+                gameui.gamedatas.personal_objectives_tracker = {
+                    [objective_1_type_arg] : [],
+                    [objective_2_type_arg] : [],
+                };
+                this.utils.personalObjectiveTooltip(`personal_objective_${objective_1_type_arg}`, objective_1_type_arg);
+                this.utils.personalObjectiveTooltip(`personal_objective_${objective_2_type_arg}`, objective_2_type_arg);
+
                 this.notifqueue.setSynchronousDuration();
             }
         },
@@ -7516,8 +7619,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // move card backs to board and make invisible to set up for animating
                 objective_1_ele.style.opacity = '0';
                 objective_2_ele.style.opacity = '0';
-                $('board').insertBefore(objective_1_ele, $('board').children[2]);
-                $('board').insertBefore(objective_2_ele, $('board').children[3]);
+                $('character_selection').append(objective_1_ele);
+                $('character_selection').append(objective_2_ele);
                 this.utils.resizeHand();
                 objective_1_ele.style.setProperty('--objective_width', objective_dimensions.width + 'px');
                 objective_1_ele.style.setProperty('--objective_height', objective_dimensions.height + 'px');
@@ -7789,7 +7892,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 const destination = $('climbing_discard_90');
                                 destination.append(climbing_div);
                                 climbing_div.classList.remove('drawn_climbing');
-                                $('climbing_discard').style.zIndex = '';
                                 this.utils.cleanClimbingDiscardPile();
                             }
 
@@ -8154,7 +8256,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 const destination = $('climbing_discard_90');
                                 destination.append(climbing_div);
                                 climbing_div.classList.remove('drawn_climbing');
-                                $('climbing_discard').style.zIndex = '';
                                 this.utils.cleanClimbingDiscardPile();
                             }
 
@@ -8242,7 +8343,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     ele = $(`asset_card_${id}`);
                     const hand_slot = ele.parentElement;
                     this.risk_hand_slots[id] = hand_slot;
-                    const args = [ele, slot];
+                    const args = [ele, slot, null, false, true];
                     cards_to_anim.push(this.utils.animationPromise.bind(null, ele, 'asset_hand_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                     cards_to_place.push(args);
 
@@ -8428,7 +8529,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (this.utils.shouldAnimate()) {
 
                 $('asset_deck_draw').style.display = 'flex';
-                let i = 1;
+                let i = discard_arr.length;
                 for (const card of discard_arr) {
 
                     const id = card[0];
@@ -8448,10 +8549,10 @@ function (dojo, declare, aspect, BgaAutofit) {
                     card_ele.style.setProperty('--dw', new_width);
                     card_ele.style.setProperty('--dh', new_height);
                     let args = [card_ele, deck_draw_slot, null, false, true];
-                    i++;
+                    i--;
 
                     display_anims.push(this.utils.animationPromise.bind(null, card_ele, 'asset_counter_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
-                    args = [card_ele, $('asset_discard'), 3, 'rotate'];
+                    args = [card_ele, $('asset_discard'), 3];
                     discard_anims.push(this.utils.animationPromise.bind(null, card_ele, 'asset_display_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                 }
 
@@ -8501,6 +8602,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const drawn_id = notif.args.drawn_id;
             const drawn_type_arg = notif.args.drawn_type_arg;
             const hand_count = notif.args.hand_count;
+            this.gamedatas.hand_assets = notif.args.hand_assets;
             const last_card = notif.args.last_card;
             const refill_portaledge = notif.args.refill_portaledge;
 
@@ -8909,20 +9011,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                     $('climbing_deck').style.zIndex = '199';
                     this.utils.climbingTooltip(`climbing_card_${climbing_card_info.id}`, climbing_card_info.type_arg);
 
-                    // set popup to close if user clicks x or outside of element
-                    const climbing_slot = $('climbing_slot');
-                    const closePopup = () => {
-                        $('show_hide_card_button').click();
-                        
-                        this.utils.removeOutsideClickListener();
-                    };
-
-                    // start listener
-                    this.utils.setupOutsideClickListener(climbing_slot, closePopup);
-
                     this.notifqueue.setSynchronousDuration();
                 }
-                animateClimbingCard();
+                await animateClimbingCard();
 
             } else { // shouldn't animate
                 const climbing_card_div = dojo.place(this.format_block('jstpl_climbing_card', {
@@ -8948,17 +9039,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     choice_bottom.classList.add('cursor');
                 }
                 this.utils.climbingTooltip(`climbing_card_${climbing_card_info.id}`, climbing_card_info.type_arg);
-
-                // set popup to close if user clicks x or outside of element
-                const climbing_slot = $('climbing_slot');
-                const closePopup = () => {
-                    $('show_hide_card_button').click();
-                    
-                    this.utils.removeOutsideClickListener();
-                };
-
-                // start listener
-                this.utils.setupOutsideClickListener(climbing_slot, closePopup);
 
                 this.notifqueue.setSynchronousDuration();
             }
@@ -9053,16 +9133,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 
                 $('crimper_draw').style.display = '';
 
-                // set popup to close if user clicks x or outside of element
-                const closePopup = () => {
-                    $('show_hide_card_button').click();
-                    
-                    this.utils.removeOutsideClickListener();
-                };
-
-                // start listener
-                this.utils.setupOutsideClickListener([crimper_display_1, crimper_display_2], closePopup);
-
                 this.notifqueue.setSynchronousDuration();
             }
 
@@ -9089,16 +9159,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 $('climbing_deck').style.zIndex = '199';
                 $('climbing_dimmer').classList.add('dim_bg');
 
-                // set popup to close if user clicks x or outside of element
-                const closePopup = () => {
-                    $('show_hide_card_button').click();
-                    
-                    this.utils.removeOutsideClickListener();
-                };
-
-                // start listener
-                this.utils.setupOutsideClickListener([crimper_display_1, crimper_display_2], closePopup);
-
                 this.notifqueue.setSynchronousDuration();
             }
         },
@@ -9106,7 +9166,7 @@ function (dojo, declare, aspect, BgaAutofit) {
         notif_passedClimbingCard: async function(notif) {
 
             if ($('climbing_slot').firstElementChild) { await this.utils.retractClimbingCard(); }
-            const climbing_div = $('#climbing_discard_straightened').firstElementChild;
+            const climbing_div = $('climbing_discard_straightened').firstElementChild;
             const destination = $('climbing_discard_90');
 
             if (this.utils.shouldAnimate()) {
@@ -9116,7 +9176,6 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
             if ($('pass_message')) { $('pass_message').remove(); }
@@ -9142,7 +9201,6 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (notif.args.gain_symbol_token == false && notif.args.gain_summit_beta_token == false) {
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -9170,7 +9228,6 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (notif.args.gain_symbol_token == false && notif.args.gain_summit_beta_token == false) {
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -9260,7 +9317,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                         asset_counter_img.parentElement.append(img_clone);
                                     }
 
-                                    const args = [asset_ele, discard_pile, 3, 'rotate'];
+                                    const args = [asset_ele, discard_pile, 3];
                                     asset_anims.push(this.utils.animationPromise.bind(null, asset_ele, 'asset_tucked_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                                 }
 
@@ -9278,7 +9335,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                     asset_ele.style.setProperty('--dw', `${destination_width}px`);
                                     asset_ele.style.setProperty('--dh', `${destination_height}px`);
                                     origin_ele.append(asset_ele);
-                                    const args = [asset_ele, discard_pile, 3, 'rotate'];
+                                    const args = [asset_ele, discard_pile, 3];
                                     delete this.gamedatas.hand_assets[asset_id];
 
                                     asset_anims.push(this.utils.animationPromise.bind(null, asset_ele, 'asset_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
@@ -9296,7 +9353,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                     old_board_slot.style.zIndex = '10';
 
                                     const old_board_slot_num = asset_ele.parentElement.id.slice(-1);
-                                    let args = [asset_ele, discard_pile, 3, 'rotate'];
+                                    let args = [asset_ele, discard_pile, 3];
 
                                     if (flipped_ids.includes(asset_id)) {
 
@@ -9724,7 +9781,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                         } else {
                             destination.append(climbing_div);
                             climbing_div.classList.remove('drawn_climbing');
-                            $('climbing_discard').style.zIndex = '';
                             this.utils.cleanClimbingDiscardPile();
                         }
                     }
@@ -9891,7 +9947,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 for (let id of all_card_ids) {
                                     const card = $(`asset_card_${id}`);
 
-                                    const args = [card, discard_pile, 3, 'rotate'];
+                                    const args = [card, discard_pile, 3];
                                     asset_display_to_discard.push(this.utils.animationPromise.bind(null, card, 'asset_display_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                                 }
                                 return Promise.all(asset_display_to_discard.map((func) => { return func(); }));
@@ -10129,7 +10185,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     } else {
                         destination.append(climbing_div);
                         climbing_div.classList.remove('drawn_climbing');
-                        $('climbing_discard').style.zIndex = '';
                         this.utils.cleanClimbingDiscardPile();
                     }
                     
@@ -10169,7 +10224,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 if (climbing_div) {
                     card_destination.append(climbing_div);
                     climbing_div.classList.remove('drawn_climbing');
-                    $('climbing_discard').style.zIndex = '';
                 }
             }
             if (last_token) { $('summit_pile').style.visibility = 'hidden'; }
@@ -10374,7 +10428,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 } else { // shouldn't animate
                     destination.append(climbing_div);
                     climbing_div.classList.remove('drawn_climbing');
-                    $('climbing_discard').style.zIndex = '';
                 }
                 this.utils.cleanClimbingDiscardPile();
             }
@@ -10414,7 +10467,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 } else { // shouldn't animate
                     destination.append(climbing_div);
                     climbing_div.classList.remove('drawn_climbing');
-                    $('climbing_discard').style.zIndex = '';
                 }
                 this.utils.cleanClimbingDiscardPile();
             }
@@ -10498,7 +10550,6 @@ function (dojo, declare, aspect, BgaAutofit) {
             } else {
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
                 this.utils.cleanClimbingDiscardPile();
             }
             
@@ -10605,7 +10656,6 @@ function (dojo, declare, aspect, BgaAutofit) {
             } else {
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
                 this.utils.cleanClimbingDiscardPile();
             }
             
@@ -10651,7 +10701,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     const destination = $('climbing_discard_90');
                     destination.append(climbing_div);
                     climbing_div.classList.remove('drawn_climbing');
-                    $('climbing_discard').style.zIndex = '';
                 }
                 this.utils.cleanClimbingDiscardPile();
 
@@ -10687,7 +10736,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     const destination = $('climbing_discard_90');
                     destination.append(climbing_div);
                     climbing_div.classList.remove('drawn_climbing');
-                    $('climbing_discard').style.zIndex = '';
                 }
                 this.utils.cleanClimbingDiscardPile();
 
@@ -10753,7 +10801,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -10828,7 +10875,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -10997,7 +11043,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11146,7 +11191,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11216,7 +11260,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11352,7 +11395,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 const destination = $('climbing_discard_90');
                 destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11523,7 +11565,6 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 card_destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
             this.utils.disableSummitBetaTokens();
@@ -11602,7 +11643,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                         
                 card_destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11657,7 +11697,6 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 card_destination.append(climbing_div);
                 climbing_div.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
             }
             this.utils.cleanClimbingDiscardPile();
 
@@ -11751,7 +11790,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                                 const token_id = Object.keys(this.gamedatas.token_identifier).find(key => this.gamedatas.token_identifier[key] === '6');
                                 const token_ele = $(`summit_beta_${token_id}`);
-                                const args = [token_ele, $('summit_discard')];
+                                const args = [token_ele, $('summit_discard'), null, false, true];
                                 this.utils.updateTitlebar(_('Discarding Summit Beta Token'));
                                 await this.utils.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args);
                                 resolve();
@@ -12046,7 +12085,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                             const asset_ele = $(`asset_card_${asset_id}`);
                             const num_ele = asset_ele.parentElement.nextElementSibling;
-                            const args = [asset_ele, discard_pile, 3, 'rotate'];
+                            const args = [asset_ele, discard_pile, 3];
                             const animation_type = tucked_ids.includes(asset_id) ? 'fast_tucked_to_discard' : 'fast_board_to_discard';
 
                             if (i == 1) {
@@ -12635,7 +12674,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     token_ele.classList.remove('selected_token', 'selectable_token');
                     token_ele.parentElement.classList.remove('selected_token_wrap');
                     token_ele.firstElementChild.classList.remove('click', 'cursor');
-                    const args = [token_ele, $('summit_discard')];
+                    const args = [token_ele, $('summit_discard'), null, false, true];
                     this.utils.updateTitlebar(_('Discarding Summit Beta Token'));
                     await this.utils.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args);
 
@@ -12722,7 +12761,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                     if (show_hide_card_button && show_hide_card_button.classList.contains('shown')) { show_hide_card_button.click(); }
 
-                    const args = [token_ele, $('summit_discard')];
+                    const args = [token_ele, $('summit_discard'), null, false, true];
                     this.utils.updateTitlebar(_('Discarding Summit Beta Token'));
                     await this.utils.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args);
                 }
@@ -12801,7 +12840,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 
                 if (this.utils.shouldAnimate()) {
 
-                    const args = [token_ele, $('summit_discard')];
+                    const args = [token_ele, $('summit_discard'), null, false, true];
                     this.utils.updateTitlebar(_('Discarding Summit Beta Token'));
                     await this.utils.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args);
                 }
@@ -12975,7 +13014,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 if (this.isCurrentPlayerActive()) {
 
                     const token_ele = $(`summit_beta_${token_id}`);
-                    const args = [token_ele, summit_discard];
+                    const args = [token_ele, summit_discard, null, false, true];
                     await this.utils.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args);
 
                     while (summit_discard.childElementCount > 1) { summit_discard.firstElementChild.remove(); }
@@ -13071,11 +13110,10 @@ function (dojo, declare, aspect, BgaAutofit) {
                 discard_ele.style.setProperty('--dw', size.width + 'px');
                 discard_ele.style.setProperty('--dh', size.height + 'px');
 
-                const discard_args = [discard_ele, climbing_discard_90, 3, 'rotate'];
+                const discard_args = [discard_ele, climbing_discard_90, 3];
                 await this.utils.animationPromise(discard_ele, 'climbing_card_slot_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...discard_args);
 
                 discard_ele.classList.remove('drawn_climbing');
-                $('climbing_discard').style.zIndex = '';
                 this.utils.cleanClimbingDiscardPile();
 
                 // move chosen card to climbing_slot
@@ -13122,11 +13160,10 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 if (!['2', '6', '36', '41', '50', '54', '63'].includes(chosen_type_arg)) { this.utils.checkClimbingChoices(); }
 
-                this.utils.removeOutsideClickListener();
                 // set popup to close if user clicks x or outside of element
                 const closePopup = () => {
                     $('show_hide_card_button').click();
-                    
+
                     this.utils.removeOutsideClickListener();
                 };
 
@@ -13206,7 +13243,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 climbing_div.style.setProperty('--dw', size.width + 'px');
                 climbing_div.style.setProperty('--dh', size.height + 'px');
 
-                const discard_args = [climbing_div, climbing_discard_90, 3, 'rotate'];
+                const discard_args = [climbing_div, climbing_discard_90, 3];
                 await this.utils.animationPromise(climbing_div, 'climbing_card_slot_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...discard_args);
 
             } else if (climbing_discard_straightened.firstElementChild) {
@@ -13222,70 +13259,13 @@ function (dojo, declare, aspect, BgaAutofit) {
             const score_tracker = notif.args.score_tracker;
             const scored_personal_objectives = notif.args.scored_personal_objectives;
             const personal_objectives_tracker = notif.args.personal_objectives_tracker;
+            const titlebar_extras_wrapper = $('titlebar_extras_wrapper');
             const players = this.gamedatas.player_names_and_colors;
-            const titlebar_addon = $('titlebar_addon');
-            const toggles_wrap = $('toggles_wrap');
-            toggles_wrap.style.width = '61vmin';
-            const personal_objectives_toggle = $('personal_objectives_toggle');
-            if ($('final_round_msg')) { $('final_round_msg').remove(); }
 
-            const opponent_objectives_box = document.createElement('div');
-            opponent_objectives_box.id = 'opponent_objectives_box';
-            opponent_objectives_box.style.display = 'none';
-            titlebar_addon.append(opponent_objectives_box);
-            let pos_num = 1;
-            for (const [player_id, objectives] of Object.entries(personal_objectives_tracker)) {
-
-                if (player_id != this.player_id) {
-                    const player_objectives_wrap = document.createElement('div');
-                    player_objectives_wrap.id = `opponent_objectives_${pos_num}`;
-                    player_objectives_wrap.classList.add('opponent_objectives_wrap');
-                    opponent_objectives_box.append(player_objectives_wrap);
-                    const player = this.gamedatas.players[player_id];
-                    const name_span = dojo.place(this.format_block('jstpl_colored_name', {
-                        player_id : player_id,
-                        color : `#${player.color}`,
-                        player_name : player.name,
-                    }), player_objectives_wrap);
-                    name_span.style.display = 'block';
-                    name_span.classList.add('opponent_objectives_name');
-
-                    for (const objective_id of Object.keys(objectives)) {
-                        const objective = this.gamedatas.personal_objectives[objective_id];
-                        const coords = objective['x_y'];
-                        const obj_ele = dojo.place(this.format_block('jstpl_personal_objective', {
-                            poId : `${objective_id}_opponent`,
-                            poX : coords[0],
-                            poY : coords[1],
-                        }), player_objectives_wrap);
-                        obj_ele.classList.add('opponent_objective_card');
-                        const po_tracker = obj_ele.firstElementChild;
-                        const po_pitches = personal_objectives_tracker[player_id][objective_id];
-                        const po_num = po_pitches.length < 3 ? po_pitches.length : 3;
-                        po_tracker.innerHTML = `${po_num}/3`;
-                        if (po_num === 3) { po_tracker.style.color = 'green'; }
-                        po_tracker.style.fontSize = '0.7em';
-                        this.utils.personalObjectiveTooltip(obj_ele.id, objective_id);
-                    }
-                    pos_num++;
-                }
-            }
-
-            for (const [player_id, objective_id] of Object.entries(scored_personal_objectives)) {
-                if (objective_id) {
-                    const objective = this.gamedatas.personal_objectives[objective_id];
-                    this.scoreCtrl[player_id].incValue(objective.score);
-                    const player = this.gamedatas.players[player_id];
-
-                    if (player_id != this.player_id) {
-                        $(`personal_objective_${objective_id}_opponent`).style.border = `4px solid #${player.color}`;
-                    }
-                }
-            }
-
+            // score card
             const scorecard = document.createElement('div');
             scorecard.id = 'scorecard';
-            titlebar_addon.append(scorecard);
+            titlebar_extras_wrapper.append(scorecard);
             $('climbing_dimmer').classList.add('dim_bg');
             const table = document.createElement('table');
             table.id = 'score_table';
@@ -13334,15 +13314,79 @@ function (dojo, declare, aspect, BgaAutofit) {
             scorecard_toggle.id = 'scorecard_toggle';
             scorecard_toggle.innerHTML = _('Hide<br>Scorecard');
             scorecard_toggle.classList.add('addon_on', 'always_cursor', 'toggle');
-            toggles_wrap.insertBefore(scorecard_toggle, personal_objectives_toggle);
-            scorecard_toggle.onclick = (evt) => { this.utils.toggleScorecard(evt); }
+            titlebar_extras_wrapper.append(scorecard_toggle);
+            scorecard_toggle.onclick = () => { this.utils.toggleScorecard(); }
+
+            // const closePopup = () => {
+            //     this.utils.toggleScorecard();
+
+            //     this.utils.removeOutsideClickListener();
+            // };
+            // this.utils.setupOutsideClickListener([scorecard, scorecard_toggle], closePopup);
+
+            // opponents' personal objectives
+            const opponent_objectives_box = document.createElement('div');
+            opponent_objectives_box.id = 'opponent_objectives_box';
+            opponent_objectives_box.style.display = 'none';
+            titlebar_extras_wrapper.append(opponent_objectives_box);
+            let pos_num = 1;
 
             const opponent_objectives_toggle = document.createElement('div');
             opponent_objectives_toggle.id = 'opponent_objectives_toggle';
             opponent_objectives_toggle.innerHTML = _('Show Opponent<br>Objectives');
             opponent_objectives_toggle.classList.add('addon_off', 'always_cursor', 'toggle');
-            toggles_wrap.insertBefore(opponent_objectives_toggle, scorecard_toggle);
-            opponent_objectives_toggle.onclick = (evt) => { this.utils.toggleOpponentObjectives(evt); }
+            titlebar_extras_wrapper.append(opponent_objectives_toggle);
+            opponent_objectives_toggle.onclick = () => { this.utils.toggleOpponentObjectives(); }
+
+            opponent_objectives_toggle.click();
+            for (const [player_id, objectives] of Object.entries(personal_objectives_tracker)) {
+
+                if (player_id != this.player_id) {
+                    const player_objectives_wrap = document.createElement('div');
+                    player_objectives_wrap.id = `opponent_objectives_${pos_num}`;
+                    player_objectives_wrap.classList.add('opponent_objectives_wrap');
+                    opponent_objectives_box.append(player_objectives_wrap);
+                    const player = this.gamedatas.players[player_id];
+                    const name_span = dojo.place(this.format_block('jstpl_colored_name', {
+                        player_id : player_id,
+                        color : `#${player.color}`,
+                        player_name : player.name,
+                    }), player_objectives_wrap);
+                    name_span.style.display = 'block';
+                    name_span.classList.add('opponent_objectives_name');
+
+                    for (const objective_id of Object.keys(objectives)) {
+                        const objective = this.gamedatas.personal_objectives[objective_id];
+                        const coords = objective['x_y'];
+                        const obj_ele = dojo.place(this.format_block('jstpl_personal_objective', {
+                            poId : `${objective_id}_opponent`,
+                            poX : coords[0],
+                            poY : coords[1],
+                        }), player_objectives_wrap);
+                        obj_ele.classList.add('opponent_objective_card');
+                        const po_tracker = obj_ele.firstElementChild;
+                        const po_pitches = personal_objectives_tracker[player_id][objective_id];
+                        const po_num = po_pitches.length < 3 ? po_pitches.length : 3;
+                        po_tracker.innerHTML = `${po_num}/3`;
+                        if (po_num === 3) { po_tracker.style.color = 'green'; }
+                        this.utils.personalObjectiveTooltip(obj_ele.id, objective_id);
+                    }
+                    pos_num++;
+                }
+            }
+            opponent_objectives_toggle.click();
+
+            for (const [player_id, objective_id] of Object.entries(scored_personal_objectives)) {
+                if (objective_id) {
+                    const objective = this.gamedatas.personal_objectives[objective_id];
+                    this.scoreCtrl[player_id].incValue(objective.score);
+                    const player = this.gamedatas.players[player_id];
+
+                    if (player_id != this.player_id) {
+                        $(`personal_objective_${objective_id}_opponent`).style.border = `4px solid #${player.color}`;
+                    }
+                }
+            }
 
             this.utils.updateTitlebarAddon(_('Game End'), 'phase');
             this.utils.addTooltipsToLog();

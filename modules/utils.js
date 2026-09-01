@@ -99,23 +99,25 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 					else {
 
+						// temporarily remove rotations so bounding rects measure in pure unrotated layout space
+						origin.style.transform = 'none';
+						destination.style.transform = 'none';
+
 						origin.appendChild(ele); //put back to where it was
 						const x0 = ele.getBoundingClientRect().left;
 						const y0 = ele.getBoundingClientRect().top;
 
 						destination.appendChild(ele);
 						if (orientation === 'rotate') { ele.style.transform = 'rotate(90deg)'; }
-						x1 = ele.getBoundingClientRect().left;
-						y1 = ele.getBoundingClientRect().top;
+						const x1 = ele.getBoundingClientRect().left;
+						const y1 = ele.getBoundingClientRect().top;
 						origin.appendChild(ele);
 
 						if (orientation === 'rotate') { ele.style.transform = ''; }
 
-						if (orientation === 'straighten') { origin.style.transform = ''; }
-
 						if (adjust === 1) {
 							ele.style.setProperty('--dx', (y1 - y0) + 'px');
-							ele.style.setProperty('--dy', (x1 - x0) + 'px');
+							ele.style.setProperty('--dy', `calc(${x1 - x0}px + .27vw)`);
 						} else if (adjust === 2) {
 							ele.style.setProperty('--dx', (y1 - y0) + 'px');
 							ele.style.setProperty('--dy', (x0 - x1) + 'px');
@@ -135,6 +137,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 							ele.style.setProperty('--dx', (x1 - x0) + 'px');
 							ele.style.setProperty('--dy', (y1 - y0) + 'px');
 						}
+
+						// restore the original transforms back to the containers
+						origin.style.transform = '';
+						destination.style.transform = '';
 					}   
 
 					return {
@@ -275,163 +281,163 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			},
 
 			resizeTitlebar: function() {
-				// 1. THROTTLE: If a frame is already scheduled, let it run.
-				// Do NOT cancel it. This ensures the resize happens on the very next frame,
-				// rather than waiting for a burst of events to finish.
-				if (this._resizeTitlebarTimer) return;
+				// // 1. THROTTLE: If a frame is already scheduled, let it run.
+				// // Do NOT cancel it. This ensures the resize happens on the very next frame,
+				// // rather than waiting for a burst of events to finish.
+				// if (this._resizeTitlebarTimer) return;
 
-				// 2. SCHEDULE: Run the logic in the next animation frame.
-				this._resizeTitlebarTimer = window.requestAnimationFrame(() => {
-					this._resizeTitlebarTimer = null; // Reset timer
+				// // 2. SCHEDULE: Run the logic in the next animation frame.
+				// this._resizeTitlebarTimer = window.requestAnimationFrame(() => {
+				// 	this._resizeTitlebarTimer = null; // Reset timer
 
-					const parent = $('maintitlebar_content');
-					const main_msg = $('pagemaintitletext');
+				// 	const parent = $('maintitlebar_content');
+				// 	const main_msg = $('pagemaintitletext');
 					
-					// Safety check: ensure elements exist before running
-					if (!parent || !main_msg) return;
+				// 	// Safety check: ensure elements exist before running
+				// 	if (!parent || !main_msg) return;
 
-					const button_example = document.querySelector('#generalactions > .bgabutton');
+				// 	const button_example = document.querySelector('#generalactions > .bgabutton');
 					
-					// Safety check for next table button
-					const active_btn = document.querySelector('#go_to_next_table_active_player');
-					const inactive_btn = document.querySelector('#go_to_next_table_inactive_player');
+				// 	// Safety check for next table button
+				// 	const active_btn = document.querySelector('#go_to_next_table_active_player');
+				// 	const inactive_btn = document.querySelector('#go_to_next_table_inactive_player');
 					
-					let next_table_button = null;
-					if (inactive_btn && inactive_btn.style.display === 'none' && active_btn) {
-						next_table_button = active_btn;
-					} else if (inactive_btn) {
-						next_table_button = inactive_btn;
-					}
+				// 	let next_table_button = null;
+				// 	if (inactive_btn && inactive_btn.style.display === 'none' && active_btn) {
+				// 		next_table_button = active_btn;
+				// 	} else if (inactive_btn) {
+				// 		next_table_button = inactive_btn;
+				// 	}
 
-					// If vital elements are missing, abort to prevent errors
-					if (!next_table_button) return;
+				// 	// If vital elements are missing, abort to prevent errors
+				// 	if (!next_table_button) return;
 
-					const next_table_margin = next_table_button.style.marginLeft ? Number(next_table_button.style.marginLeft.slice(0, -2)) : 0;
+				// 	const next_table_margin = next_table_button.style.marginLeft ? Number(next_table_button.style.marginLeft.slice(0, -2)) : 0;
 
-					// --- RESET PHASE ---
-					main_msg.style.fontSize = '';
-					next_table_button.style.marginLeft = '0px';
-					parent.querySelectorAll('.bgabutton').forEach(ele => {
-						ele.style.padding = '';
-						ele.style.marginLeft = '';
-						ele.style.fontSize = '';
-					});
+				// 	// --- RESET PHASE ---
+				// 	main_msg.style.fontSize = '';
+				// 	next_table_button.style.marginLeft = '0px';
+				// 	parent.querySelectorAll('.bgabutton').forEach(ele => {
+				// 		ele.style.padding = '';
+				// 		ele.style.marginLeft = '';
+				// 		ele.style.fontSize = '';
+				// 	});
 
-					// --- MEASURE PHASE ---
-					let children_width = 0;
+				// 	// --- MEASURE PHASE ---
+				// 	let children_width = 0;
 					
-					// Helper to safely get width including margins
-					const getOuterWidth = (el) => {
-						if (!el) return 0;
-						const style = window.getComputedStyle(el);
-						// Handle hidden elements gracefully
-						if (style.display === 'none') return 0;
-						return el.getBoundingClientRect().width 
-							+ (parseFloat(style.marginLeft) || 0) 
-							+ (parseFloat(style.marginRight) || 0);
-					};
+				// 	// Helper to safely get width including margins
+				// 	const getOuterWidth = (el) => {
+				// 		if (!el) return 0;
+				// 		const style = window.getComputedStyle(el);
+				// 		// Handle hidden elements gracefully
+				// 		if (style.display === 'none') return 0;
+				// 		return el.getBoundingClientRect().width 
+				// 			+ (parseFloat(style.marginLeft) || 0) 
+				// 			+ (parseFloat(style.marginRight) || 0);
+				// 	};
 
-					const child_list = parent.firstElementChild ? parent.firstElementChild.children : [];
+				// 	const child_list = parent.firstElementChild ? parent.firstElementChild.children : [];
 
-					for (const child of child_list) {
-						if (child.id != 'not_playing_help' && child.id != 'generalactions') {
-							children_width += getOuterWidth(child);
-						}
-					}
+				// 	for (const child of child_list) {
+				// 		if (child.id != 'not_playing_help' && child.id != 'generalactions') {
+				// 			children_width += getOuterWidth(child);
+				// 		}
+				// 	}
 					
-					const general_actions = $('generalactions');
-					if (general_actions) {
-						for (const child of general_actions.children) {
-							children_width += getOuterWidth(child);
-						}
-					}
+				// 	const general_actions = $('generalactions');
+				// 	if (general_actions) {
+				// 		for (const child of general_actions.children) {
+				// 			children_width += getOuterWidth(child);
+				// 		}
+				// 	}
 
-					children_width += getOuterWidth(active_btn);
-					children_width += getOuterWidth(inactive_btn);
+				// 	children_width += getOuterWidth(active_btn);
+				// 	children_width += getOuterWidth(inactive_btn);
 					
-					const parent_width = parent.getBoundingClientRect().width;
-					if (parent_width === 0) return; // Prevent division by zero if parent is hidden
+				// 	const parent_width = parent.getBoundingClientRect().width;
+				// 	if (parent_width === 0) return; // Prevent division by zero if parent is hidden
 
-					let percentage = Math.round((children_width / parent_width) * 100);
-					const font_min = document.querySelector('.mobile_version') ? 10 : 14;
+				// 	let percentage = Math.round((children_width / parent_width) * 100);
+				// 	const font_min = document.querySelector('.mobile_version') ? 10 : 14;
 
-					if (document.querySelector('.mobile_version') && percentage > 97) {
-						const first_icon = document.querySelector('.requirement_wrap');
-						if (first_icon && !document.querySelector('#titlebar_line_break')) {
-							first_icon.insertAdjacentHTML('beforebegin', '<div id="titlebar_line_break"></div>');
-						}
-					}
+				// 	if (document.querySelector('.mobile_version') && percentage > 97) {
+				// 		const first_icon = document.querySelector('.requirement_wrap');
+				// 		if (first_icon && !document.querySelector('#titlebar_line_break')) {
+				// 			first_icon.insertAdjacentHTML('beforebegin', '<div id="titlebar_line_break"></div>');
+				// 		}
+				// 	}
 
-					let button_padding, button_margin, button_font_size, button_ninety_five;
+				// 	let button_padding, button_margin, button_font_size, button_ninety_five;
 					
-					// Safety Brake: Max 20 loops to prevent browser freeze if logic fails
-					let safety_loop_count = 0; 
+				// 	// Safety Brake: Max 20 loops to prevent browser freeze if logic fails
+				// 	let safety_loop_count = 0; 
 
-					while (percentage > 80 && safety_loop_count < 20) {
-						safety_loop_count++;
+				// 	while (percentage > 80 && safety_loop_count < 20) {
+				// 		safety_loop_count++;
 						
-						const main_msg_style = window.getComputedStyle(main_msg);
-						const msg_font_size = parseFloat(main_msg_style.fontSize);
-						const msg_ninety_five = msg_font_size * 0.95;
+				// 		const main_msg_style = window.getComputedStyle(main_msg);
+				// 		const msg_font_size = parseFloat(main_msg_style.fontSize);
+				// 		const msg_ninety_five = msg_font_size * 0.95;
 
-						if (button_example) {
-							const btn_style = window.getComputedStyle(button_example);
-							button_padding = parseFloat(btn_style.paddingLeft);
-							button_margin = parseFloat(btn_style.marginLeft);
-							button_font_size = parseFloat(btn_style.fontSize);
-							button_ninety_five = button_font_size * 0.95;
-						}
+				// 		if (button_example) {
+				// 			const btn_style = window.getComputedStyle(button_example);
+				// 			button_padding = parseFloat(btn_style.paddingLeft);
+				// 			button_margin = parseFloat(btn_style.marginLeft);
+				// 			button_font_size = parseFloat(btn_style.fontSize);
+				// 			button_ninety_five = button_font_size * 0.95;
+				// 		}
 
-						if (msg_ninety_five > font_min) {
-							const width_before = main_msg.getBoundingClientRect().width;
-							main_msg.style.fontSize = `${msg_ninety_five}px`;
-							const width_after = main_msg.getBoundingClientRect().width; 
-							children_width -= (width_before - width_after);
-							percentage = Math.round((children_width / parent_width) * 100);
-						}
-						else if (button_example && button_font_size > font_min) {
-							// Batch button updates to minimize thrashing
-							const buttons_general = document.querySelectorAll('#generalactions > .bgabutton');
-							const buttons_next = document.querySelectorAll('#gotonexttable_wrap > .bgabutton');
+				// 		if (msg_ninety_five > font_min) {
+				// 			const width_before = main_msg.getBoundingClientRect().width;
+				// 			main_msg.style.fontSize = `${msg_ninety_five}px`;
+				// 			const width_after = main_msg.getBoundingClientRect().width; 
+				// 			children_width -= (width_before - width_after);
+				// 			percentage = Math.round((children_width / parent_width) * 100);
+				// 		}
+				// 		else if (button_example && button_font_size > font_min) {
+				// 			// Batch button updates to minimize thrashing
+				// 			const buttons_general = document.querySelectorAll('#generalactions > .bgabutton');
+				// 			const buttons_next = document.querySelectorAll('#gotonexttable_wrap > .bgabutton');
 							
-							const resizeButtons = (nodeList) => {
-								nodeList.forEach(ele => {
-									const w_before = ele.getBoundingClientRect().width;
-									ele.style.fontSize = `${button_ninety_five}px`;
-									const w_after = ele.getBoundingClientRect().width;
-									children_width -= (w_before - w_after);
-								});
-							};
+				// 			const resizeButtons = (nodeList) => {
+				// 				nodeList.forEach(ele => {
+				// 					const w_before = ele.getBoundingClientRect().width;
+				// 					ele.style.fontSize = `${button_ninety_five}px`;
+				// 					const w_after = ele.getBoundingClientRect().width;
+				// 					children_width -= (w_before - w_after);
+				// 				});
+				// 			};
 
-							resizeButtons(buttons_general);
-							resizeButtons(buttons_next);
+				// 			resizeButtons(buttons_general);
+				// 			resizeButtons(buttons_next);
 							
-							percentage = Math.round((children_width / parent_width) * 100);
-						}
-						else if (button_example && button_padding > 3) {
-							parent.querySelectorAll('.bgabutton').forEach(ele => {
-								ele.style.padding = `6px ${button_padding - 3}px`;
-								children_width -= 6;
-							});
-							percentage = Math.round((children_width / parent_width) * 100);
-						}
-						else if (next_table_margin > -50) {
-							next_table_button.style.marginLeft = '-50px';
-							children_width -= 50; 
-							percentage = Math.round((children_width / parent_width) * 100);
-						}
-						else if (button_example && button_margin > 2) {
-							parent.querySelectorAll('.bgabutton').forEach(ele => {
-								ele.style.marginLeft = `${button_margin - 2.5}px`;
-								children_width -= 2.5;
-							});
-							percentage = Math.round((children_width / parent_width) * 100);
-						}
-						else { 
-							break; 
-						}
-					}
-				});
+				// 			percentage = Math.round((children_width / parent_width) * 100);
+				// 		}
+				// 		else if (button_example && button_padding > 3) {
+				// 			parent.querySelectorAll('.bgabutton').forEach(ele => {
+				// 				ele.style.padding = `6px ${button_padding - 3}px`;
+				// 				children_width -= 6;
+				// 			});
+				// 			percentage = Math.round((children_width / parent_width) * 100);
+				// 		}
+				// 		else if (next_table_margin > -50) {
+				// 			next_table_button.style.marginLeft = '-50px';
+				// 			children_width -= 50; 
+				// 			percentage = Math.round((children_width / parent_width) * 100);
+				// 		}
+				// 		else if (button_example && button_margin > 2) {
+				// 			parent.querySelectorAll('.bgabutton').forEach(ele => {
+				// 				ele.style.marginLeft = `${button_margin - 2.5}px`;
+				// 				children_width -= 2.5;
+				// 			});
+				// 			percentage = Math.round((children_width / parent_width) * 100);
+				// 		}
+				// 		else { 
+				// 			break; 
+				// 		}
+				// 	}
+				// });
 			},
 
 			delay: function(ms) {
@@ -1633,116 +1639,53 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 			},
 
-			setupOutsideClickListener: function(target_elements, closeCallback) {
+			setupOutsideClickListener: function(target_elements, closeCallback, reference=false) {
 
 				this.removeOutsideClickListener();
 				const game_instance = gameui;
 				const targets = Array.isArray(target_elements) ? target_elements : [target_elements];
+				if (!reference) {
+					const general_actions = $('generalactions');
+					targets.push(general_actions);
+				}
+				game_instance.globalCloseCallback = closeCallback;
 				game_instance.globalOutsideClickListener = (evt) => {
 					const clicked_inside = targets.some(target => target && target.contains(evt.target));
 					if (!clicked_inside) {
-						closeCallback();
+						this.triggerOutsideClickClose();
 					}
 				};
 
 				// defer binding to prevent immediate firing
 				setTimeout(() => {
-					window.addEventListener('click', game_instance.globalOutsideClickListener);
+					window.addEventListener('click', game_instance.globalOutsideClickListener, { capture: true });
 				}, 0);
+			},
+
+			triggerOutsideClickClose: function() {
+
+				const game_instance = gameui;
+				if (game_instance && typeof game_instance.globalCloseCallback === 'function') {
+					game_instance.globalCloseCallback();
+					this.removeOutsideClickListener();
+				}
 			},
 
 			removeOutsideClickListener: function() {
 
 				const game_instance = gameui;
 				if (game_instance && game_instance.globalOutsideClickListener) {
-					window.removeEventListener('click', game_instance.globalOutsideClickListener);
+					window.removeEventListener('click', game_instance.globalOutsideClickListener, { capture: true });
 					game_instance.globalOutsideClickListener = null;
+					game_instance.globalCloseCallback = null;
 				}
 			},
 
-			togglePersonalObjectives: function(evt) {
-
-				const toggle_button = $('personal_objectives_toggle');
-				const personal_objectives_box = $('personal_objectives_box');
-				const opponent_objectives_toggle = $('opponent_objectives_toggle');
-				const shared_objectives_toggle = $('shared_objectives_toggle');
-				const scorecard_toggle = $('scorecard_toggle');
-				const climbing_slot = $('climbing_slot');
-				const crimper_display = $('crimper_display');
-
-				if (toggle_button.classList.contains('addon_on')) { // turn off
-					personal_objectives_box.style.display = '';
-					toggle_button.classList.remove('addon_on');
-					toggle_button.classList.add('addon_off');
-					toggle_button.innerHTML = _('Show Personal<br>Objectives');
-					this.deleteExtraneousStats();
-				}
-				else if (toggle_button.classList.contains('addon_off')) { // turn on
-					personal_objectives_box.style.display = 'flex';
-					toggle_button.classList.remove('addon_off');
-					toggle_button.classList.add('addon_on');
-					toggle_button.innerHTML = _('Hide Personal<br>Objectives');
-
-					if (crimper_display && this.checkForOverlap(crimper_display, personal_objectives_box)) {
-						$('show_hide_card_button').click();
-					}
-					
-					if (climbing_slot && this.checkForOverlap(climbing_slot, personal_objectives_box)) {
-						$('show_hide_card_button').click();
-					}
-
-					if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
-						opponent_objectives_toggle.click();
-					}
-					// if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
-					// 	shared_objectives_toggle.click();
-					// }
-					if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
-						scorecard_toggle.click();
-					}
-				}
-			},
-
-			toggleSharedObjectives: function(evt) {
-
-				const toggle_button = $('shared_objectives_toggle');
-				const shared_objective_trackers = document.querySelectorAll('.shared_objective_tracker');
-				const personal_objectives_toggle = $('personal_objectives_toggle');
-				const opponent_objectives_toggle = $('opponent_objectives_toggle');
-				const scorecard_toggle = $('scorecard_toggle');
-
-				if (toggle_button.classList.contains('addon_on')) { // turn off
-					shared_objective_trackers.forEach(ele => { ele.style.display = ''; });
-					toggle_button.classList.remove('addon_on');
-					toggle_button.classList.add('addon_off');
-					toggle_button.innerHTML = _('Show Shared<br>Objective Trackers');
-					this.deleteExtraneousStats();	
-				}
-				else if (toggle_button.classList.contains('addon_off')) { // turn on
-					shared_objective_trackers.forEach(ele => { ele.style.display = 'flex'; });
-					toggle_button.classList.remove('addon_off');
-					toggle_button.classList.add('addon_on');
-					toggle_button.innerHTML = _('Hide Shared<br>Objective Trackers');
-					
-					// if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
-					// 	personal_objectives_toggle.click();
-					// }
-					// if (opponent_objectives_toggle && opponent_objectives_toggle.classList.contains('addon_on')) {
-					// 	opponent_objectives_toggle.click();
-					// }
-					// if (scorecard_toggle && scorecard_toggle.classList.contains('addon_on')) {
-					// 	scorecard_toggle.click();
-					// }
-				}
-			},
-
-			toggleScorecard: function(evt) {
+			toggleScorecard: function() {
 
 				const toggle_button = $('scorecard_toggle');
 				const scorecard = $('scorecard');
 				const opponent_objectives_toggle = $('opponent_objectives_toggle');
-				const shared_objectives_toggle = $('shared_objectives_toggle');
-				const personal_objectives_toggle = $('personal_objectives_toggle');
 				
 				if (toggle_button.classList.contains('addon_on')) { // turn off
 					scorecard.style.display = 'none';
@@ -1766,12 +1709,16 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					// if (shared_objectives_toggle && shared_objectives_toggle.classList.contains('addon_on')) {
 					// 	shared_objectives_toggle.click();
 					// }
-					if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
-						personal_objectives_toggle.click();
-					}
 					if (gameui.gamedatas.gamestate.name === 'gameEnd') {
 						$('climbing_dimmer').classList.add('dim_bg');
 					}
+
+					const closePopup = () => {
+						this.toggleScorecard();
+
+						this.removeOutsideClickListener();
+					};
+					this.setupOutsideClickListener([scorecard, scorecard_toggle], closePopup);
 				}
 			},
 
@@ -1779,7 +1726,6 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 				const toggle_button = $('opponent_objectives_toggle');
 				const opponent_objectives = $('opponent_objectives_box');
-				const shared_objectives_toggle = $('shared_objectives_toggle');
 				const scorecard_toggle = $('scorecard_toggle');
 				const personal_objectives_toggle = $('personal_objectives_toggle');
 
@@ -1805,6 +1751,13 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					if (personal_objectives_toggle && personal_objectives_toggle.classList.contains('addon_on')) {
 						personal_objectives_toggle.click();
 					}
+
+					const closePopup = () => {
+						this.toggleOpponentObjectives();
+
+						this.removeOutsideClickListener();
+					};
+					this.setupOutsideClickListener([scorecard, opponent_objectives_toggle], closePopup);
 				}
 			},
 
@@ -2104,9 +2057,30 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 			},
 
-			updateSharedObjectivesDisplay: function(shared_objectives_tracker) {
-				const player_names_and_colors = gameui.gamedatas.player_names_and_colors;
+			toggleSharedObjectives: function() {
+
 				const toggle = $('shared_objectives_toggle');
+				const shared_objectives = $('shared_objectives');
+				if (toggle.classList.contains('objectives_hidden')) { // show trackers
+					toggle.innerHTML = 'Hide trackers';
+					toggle.classList.replace('objectives_hidden', 'objectives_shown');
+					shared_objectives.querySelectorAll('.shared_objective_tracker').forEach(ele => {
+						ele.style.display = 'block';
+					});
+				}
+				else if (toggle.classList.contains('objectives_shown')) { // hide trackers
+					toggle.innerHTML = 'Show trackers';
+					toggle.classList.replace('objectives_shown', 'objectives_hidden');
+					shared_objectives.querySelectorAll('.shared_objective_tracker').forEach(ele => {
+						ele.style.display = '';
+					})	;
+				}
+			},
+
+			updateSharedObjectivesDisplay: function(shared_objectives_tracker) {
+
+				const player_names_and_colors = gameui.gamedatas.player_names_and_colors;
+				// const toggle = $('shared_objectives_toggle');
 				for (const [type_arg, info] of Object.entries(shared_objectives_tracker)) {
 					const objective_tracker_ele = document.querySelector(`.so_${type_arg} > .shared_objective_tracker`);
 					objective_tracker_ele.innerHTML = ''; // removes existing children
@@ -2157,13 +2131,13 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					}
 					// center tracker to objective horizontally
 					const objective_ele = objective_tracker_ele.parentElement;
-					objective_tracker_ele.style.display = 'flex';
-					// handle visibility
-					if (toggle.classList.contains('addon_off')) {
-						objective_tracker_ele.style.display = '';
-					} else {
-						objective_tracker_ele.style.display = 'flex';
-					}
+					// objective_tracker_ele.style.display = 'flex';
+					// // handle visibility
+					// if (toggle.classList.contains('addon_off')) {
+					// 	objective_tracker_ele.style.display = '';
+					// } else {
+					// 	objective_tracker_ele.style.display = 'flex';
+					// }
 
 					if (!objective_tracker_ele._scaleObserver) {
 						objective_tracker_ele._scaleObserver = new ResizeObserver(entries => {
@@ -2201,17 +2175,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					const final_round = pitch_tracker.length === 9 ? true : false;
 
 					// final round message
-					if (final_round && !$('final_round_msg')) {
-						const final_round_wrapper = document.createElement('div');
-						final_round_wrapper.id = 'final_round_wrapper';
-						const final_round_msg = document.createElement('div');
-						final_round_msg.id = 'final_round_msg';
-						final_round_msg.innerHTML = _('Final Round');
-						const titlebar_addon = $('titlebar_addon');
-						const climbing_slot = $('climbing_slot');
-						final_round_wrapper.append(final_round_msg);
-						titlebar_addon.insertBefore(final_round_wrapper, climbing_slot);
-						final_round_msg.classList.add('pulse');
+					if (final_round && !$('bga-last-turn-banner')) {
+						gameui.bga.gameArea.addLastTurnBanner(
+							_('This is the final round!')
+						);
 					}
 
 					// update shared objectives tracker
@@ -2319,7 +2286,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    	let rope_anim = (rope_num > 1 && bailed_pitch !== '0') ? 'rope_pitch_to_pitch' : 'rope_counter_to_pitch';
 		                    	const meeple_anim = (rope_num > 1 && bailed_pitch !== '0') ? 'meeple_pitch_to_pitch' : 'meeple_panel_to_pitch';
 								const mobile_version = $('ebd-body').classList.contains('mobile_version') ? true : false;
-								if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) { $('board').style.zIndex = '1053'; }
+								if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) {
+									$('board').style.zIndex = '1053';
+									$('starting_player').style.zIndex = '1054';
+								}
 
 		                    	this.updateTitlebar(_('Placing Rope and Climber'));
 
@@ -2363,23 +2333,34 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			                    	const rope_destination_left = rope_destination_rect.left;
 			                    	overflow_wrapper.append(rope_wrapper);
 
-			                    	const rope_origin_top_diff = rope_origin_top - overflow_top;
-			                    	const rope_origin_left_diff = rope_origin_left - overflow_left;
-			                    	const rope_destination_top_diff = rope_destination_top - overflow_top;
-			                    	const rope_destination_left_diff = rope_destination_left - overflow_left;
+			                    	const rope_origin_top_diff = (rope_origin_top - overflow_top);
+									const rope_origin_left_diff = (rope_origin_left - overflow_left);
+									const rope_destination_top_diff = (rope_destination_top - overflow_top);
+									const rope_destination_left_diff = (rope_destination_left - overflow_left);
 
 			                    	if (rope_num == 1 || bailed_pitch === '0') {
+										// derive dynamic offsets relative to the origin element's size
+										const originRect = rope_origin.getBoundingClientRect();
+										const dynamicOffsetY = originRect.height * 1.7;
+										const dynamicOffsetX = originRect.width * -.9;
 
-			                    		rope_wrapper.style.top = `${rope_origin_top_diff}px`;
-			                    		rope_wrapper.style.left = `${rope_origin_left_diff}px`;
-			                    		rope_wrapper.style.setProperty('--dtcounter', `${rope_origin_top_diff + 85}px`);
-			                    		rope_wrapper.style.setProperty('--dlcounter', `${rope_origin_left_diff - 50}px`);
-			                    	}
+										rope_wrapper.style.top = `${rope_origin_top_diff}px`;
+										rope_wrapper.style.left = `${rope_origin_left_diff}px`;
+										
+										// explicitly declare the start position for the 0% keyframe
+										rope_wrapper.style.setProperty('--dtop-start', `${rope_origin_top_diff}px`);
+										rope_wrapper.style.setProperty('--dleft-start', `${rope_origin_left_diff}px`);
+										
+										// set proportional waypoint coordinates
+										rope_wrapper.style.setProperty('--dtcounter', `${rope_origin_top_diff + dynamicOffsetY}px`);
+										rope_wrapper.style.setProperty('--dlcounter', `${rope_origin_left_diff + dynamicOffsetX}px`);
+									}
 
-			                    	const differential = this.getRopeDifferentials(destination_pitch_id, rotation, overlap);
+			                    	const differential = this.getRopeDifferentials(destination_pitch_id, rotation, overlap, rope_wrapper.getBoundingClientRect().width);
 
-			                    	rope_wrapper.style.setProperty('--dt', `${rope_destination_top_diff + differential[0]}px`);
-			                    	rope_wrapper.style.setProperty('--dl', `${rope_destination_left_diff + differential[1]}px`);
+			                    	// ensure the differential logic returns unscaled pixels; otherwise, scale it as well
+									rope_wrapper.style.setProperty('--dt', `${rope_destination_top_diff + differential[0]}px`);
+									rope_wrapper.style.setProperty('--dl', `${rope_destination_left_diff + differential[1]}px`);
 		                    	}
 								rope_wrapper.classList.add(`climber_${current_climber_order}`);
 
@@ -2397,7 +2378,14 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								const meeple_origin_doc_width = meeple_origin_doc.width;
 								const meeple_origin_doc_height = meeple_origin_doc.height;
 
+								if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) {
+									const meeple_placeholder = meeple.cloneNode();
+									meeple_placeholder.id = 'meeple_placeholder';
+									meeple.after(meeple_placeholder);
+									meeple_placeholder.style.visibility = 'hidden';
+								}
 		                    	destination_pitch_ele.append(meeple);
+
 		                    	if (meeple_overlap) { meeple.classList.add(`over_meeple_${meeple_overlap}`); }
 		                    	const meeple_destination_style = window.getComputedStyle(meeple);
 		                    	const meeple_destination_top = Number(meeple_destination_style.getPropertyValue('top').slice(0, -2));
@@ -2436,7 +2424,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 			                        // rope_destination.append(overflow_clone);
 			                        // overflow_clone.firstElementChild.classList.add('upper_ledge_refresh');
 
+									// temporarily elevate z-index during animation to prevent clipping
+									rope_wrapper.style.zIndex = '1050';
 		                    		await this.animationPromise(rope_wrapper, ledge_rope_anim, 'anim', null, false, false);
+									rope_wrapper.style.zIndex = '';
 		                    		resolve();
 		                    	}
 		                    	else {
@@ -2453,7 +2444,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			                        Promise.all(rope_and_meeple_anim.map(func => { return func(); }))
 			                        .then(() => {
-										if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) { $('board').style.zIndex = ''; }
+										if (meeple_anim === 'meeple_panel_to_pitch' && mobile_version) {
+											$('board').style.zIndex = '';
+											$('starting_player').style.zIndex = '';
+											$('meeple_placeholder').remove();
+										}
 										rope_wrapper.parentElement.zIndex = '';
 			                        	meeple.style.zIndex = '';
 			                        	meeple.style.top = '';
@@ -2462,6 +2457,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 										meeple.style.height = '';
 			                        	rope_wrapper.style.top = '';
 			                        	rope_wrapper.style.left = '';
+
 			                        	overflow_wrapper.remove();
 
 			                        	if (rope_num == 1) {
@@ -2524,7 +2520,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                        resolve();
 		                    }
 		                })
-		            }
+		            };
 		            await animateRopeAndMeepleAndCubes();
 
 					const current_pitch = dojo.attr(`pitch_${destination_pitch_id}`, 'class').slice(-2).replace(/^\D+/g, '');
@@ -2590,39 +2586,42 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
             	else { return false; }
 	        },
 
-	        getRopeDifferentials: function(destination_pitch_id, rotation, overlap) { // returns [top, left] differentials
+	        getRopeDifferentials: function(destination_pitch_id, rotation, overlap, current_width) { // returns [top, left] differentials
+
+				const reference_width = 30.057; // desktop size
+				const scale = current_width / reference_width;
+
+				const scaleDiff = ([t, l]) => [t * scale, l * scale];
 
 	        	if (gameui.gamedatas.board === 'desert') {
 
 	        		if (   ['1', '2', '3', '4', '5', '6', '7', '8'].includes(destination_pitch_id)
 	        			&& rotation === '210') {
 
-	        				return [2, 0.4];
+	        				return scaleDiff([2, 0.4]);
 	        		}
 
 	        		switch (rotation) {
 
 		        		case ('150'): {
-		        			if (destination_pitch_id === '15') { return [0, 0.2]; }
-		        			else if (destination_pitch_id === '19') { return [0, 0.25]; }
-		        			else if (destination_pitch_id === '21') { return [0, 0.1]; }
-		        			else if (destination_pitch_id === '29') { return [-0.5, 0]; }
-		        			else { return [0, -0.25]; }
+		        			if (destination_pitch_id === '15') { return scaleDiff([0, 0.2]); }
+		        			else if (destination_pitch_id === '19') { return scaleDiff([0, 0.25]); }
+		        			else if (destination_pitch_id === '21') { return scaleDiff([0, 0.1]); }
+		        			else if (destination_pitch_id === '29') { return scaleDiff([-0.5, 0]); }
+		        			else { return scaleDiff([0, -0.25]); }
 		        		}
 		        		case ('210'): {
 		        			if (overlap) { return [0, 0]; }
-		        			else if (destination_pitch_id === '15') { return [0, -0.2]; }
-		        			else if (destination_pitch_id === '29') { return [0, -0.25]; }
-		        			else if (destination_pitch_id === '32') { return [0, -0.25]; }
-		        			else { return [0, 0.15]; }
+		        			else if (destination_pitch_id === '15') { return scaleDiff([0, -0.2]); }
+		        			else if (destination_pitch_id === '29') { return scaleDiff([0, -0.25]); }
+		        			else if (destination_pitch_id === '32') { return scaleDiff([0, -0.25]); }
+		        			else { return scaleDiff([0, 0.15]); }
 		        		}
 		        		case ('270'): {
 		        			if (destination_pitch_id === '8') { return [0, 0]; }
-		        			else { return [0, 0.25]; }
+		        			else { return scaleDiff([0, 0.25]); }
 		        		}
 		        	}
-
-
 	        	}
 	        	else if (gameui.gamedatas.board === 'forest') {
 
@@ -2760,12 +2759,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					const climbing_card_id = climbing_card_ele.id.slice(-3).replace(/^\D+/g, '');
 					const climbing_card_type_arg = gameui.gamedatas.climbing_card_identifier[climbing_card_id];
 	        		const destination = $('climbing_discard_straightened');
-					const climbing_discard = document.getElementById('climbing_discard');
 		        	const args = [climbing_card_ele, destination, null, false, true];
 		        	$('climbing_slot').style.display = 'block';
 		        	$('climbing_dimmer').classList.remove('dim_bg');
 		        	dojo.query('.selected_choice').forEach((ele) => { ele.classList.remove('selected_choice'); });
-					climbing_discard.style.zIndex = '202';
 
 		        	if (this.shouldAnimate()) {
 
@@ -2789,7 +2786,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 					const card_ele = $('climbing_discard_straightened').firstElementChild;
 					const destination = $('climbing_discard_90');
-					const args = [card_ele, destination, 3, 'rotate'];
+					const args = [card_ele, destination, 3];
 					await this.animationPromise(card_ele, 'climbing_card_discard', 'anim', this.moveToNewParent(), false, true, ...args);
 					card_ele.classList.remove('drawn_climbing');
 					this.cleanClimbingDiscardPile();
@@ -3310,6 +3307,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 											asset_back.style.zIndex = `${zIndex}`;
 											zIndex--;
 
+											hand_counter.style.zIndex = '1';
 						                    const args = [asset_back, hand_counter, null, false, true];
 						                    this.animationPromise(asset_back, 'asset_portaledge_to_counter', 'anim', this.moveToNewParent(), true, false, ...args);
 
@@ -3329,6 +3327,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						                    if (current_draw === total_draw) {
 						                    	await (async function() { return new Promise(resolve => setTimeout(resolve, 800)) })();
 						                    	this.handCount(player_id, hand_count);
+												hand_counter.style.zIndex = '';
 						                    	resolve();
 						                    }
 						                    current_draw += 1;
@@ -3346,11 +3345,11 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    		portaledge.style.marginTop = '-36.4061%';
 				                	portaledge.style.display = '';
 
-		                    	} else if (!climbing_card_info || !climbing_card_info.portaledge_all) {
-		                    		await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-		                    		portaledge.style.marginTop = '-36.4061%';
-				                	portaledge.style.display = '';
-		                    	}
+							} else if (!climbing_card_info || !climbing_card_info.portaledge_all) {
+								await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
+								portaledge.style.marginTop = '-36.4061%';
+								portaledge.style.display = '';
+							}
 
 		                    resolve();
 
@@ -3564,7 +3563,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 											const in_hand = expected_card.parentElement.parentElement.id === 'assets_wrap';
 											const in_display = expected_card.parentElement.classList.contains('draw_wrap') ||
 															   expected_card.parentElement.classList.contains('spread_wrap');
-											const args = [expected_card, slot];
+											const args = in_hand ? [expected_card, slot, null, false, true] : [expected_card, slot];
 											const card_origin = expected_card.parentElement;
 											slot.append(expected_card);
 											const dest_width = expected_card.getBoundingClientRect().width;
@@ -3915,13 +3914,13 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								}
 						}
 
-						if (enabled > pre_enabled) { ele.parentElement.style.marginRight = '2vmin'; }
+						// if (enabled > pre_enabled) { ele.parentElement.style.marginRight = '2vmin'; }
 					});
 
 					gameui.enabled_summit_beta_tokens = enabled;
-					if (enabled && gameui.isCurrentPlayerActive() && dojo.query('#available_sb_message').length === 0) {
-						$('phase_tracker').insertAdjacentHTML('afterend', `<span id="available_sb_message">${_('You have available<br>Summit Beta Tokens')}</span`);
-					}
+					// if (enabled && gameui.isCurrentPlayerActive() && dojo.query('#available_sb_message').length === 0) {
+					// 	$('phase_tracker').insertAdjacentHTML('afterend', `<span id="available_sb_message">${_('You have available<br>Summit Beta Tokens')}</span`);
+					// }
 				}
 			},
 
@@ -4044,7 +4043,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 									token_ele.classList.remove('selected_token', 'selectable_token');
 									token_ele.firstElementChild.classList.remove('click', 'cursor');
-									const args = [token_ele, $('summit_discard')];
+									const args = [token_ele, $('summit_discard'), null, false, true];
 
 									this.updateTitlebar(_('Discarding Summit Beta Token/s'));
 									await this.animationPromise(token_ele, 'token_hand_to_discard', 'anim', this.moveToNewParent(), false, true, ...args);
@@ -4064,9 +4063,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								}
 
 								gameui.enabled_summit_beta_tokens--;
-            					if (gameui.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) {
-									document.getElementById('available_sb_message').remove();
-								}
+            					// if (gameui.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) {
+								// 	document.getElementById('available_sb_message').remove();
+								// }
 							}
 						}
 						resolve();
@@ -4155,63 +4154,54 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 			updateRequirementsForSB: function() {
 
-				if ($('confirm_requirements_button') && dojo.query('.requirement_border').length === 1) {
-
-					$('confirm_requirements_button').remove();
-					gameui.addActionButton('risk_it_button', _('Risk it'), 'onConfirmRequirements', null, false, 'white');
-					const button = $('risk_it_button');
-					button.classList.add('disabled');
-					$('generalactions').insertBefore(button, $('generalactions').firstChild);
-				}
-
-				else if ($('risk_it_button') && dojo.query('.requirement_border').length === 0 && gameui.character_id != '8') {
-
-					$('risk_it_button').remove();
-					gameui.addActionButton('confirm_requirements_button', _('Climb'), 'onConfirmRequirements', null, false, 'white');
-					const button = $('confirm_requirements_button');
-					button.classList.add('disabled');
-					$('generalactions').insertBefore(button, $('generalactions').firstChild);
-				}
-
-				let missing_requirements = 0;
-				if ($('confirm_button')) { missing_requirements = dojo.query('.requirement_border').length; }
-				else if ($('confirm_requirements_button') || $('risk_it_button')) {
-
-					dojo.query('.requirement_wrap > .skills_and_techniques').forEach(ele => {
-
-						if (!ele.parentElement.classList.contains('fulfilled')) { missing_requirements++; }
-					});
-
-					missing_requirements += dojo.query('.psych_wrap > .requirement_border').length + dojo.query('.water_wrap > .requirement_border').length;
-				}
+				const check_requirements = this.checkRequirements();
+				const pitch_requirements = check_requirements[1];
+				gameui.pitch_requirements = pitch_requirements;
+				const requirements_met = this.checkPotential();
 
 				let button = null;
 				if ($('confirm_button')) { button = $('confirm_button'); }
 				else if ($('confirm_requirements_button')) { button = $('confirm_requirements_button'); }
 				else if ($('risk_it_button')) { button = $('risk_it_button'); }
 
-				if (gameui.character_id === '8' && missing_requirements === 0) { missing_requirements = 1; }
-				
-				if (missing_requirements === 0) {
+				if (button.id === 'confirm_requirements_button' && requirements_met === 1) {
 
-					button.classList.remove('disabled');
-					dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
-                    dojo.query('#risk_it_message').forEach(ele => { ele.remove(); });
-					return true;
+					$('confirm_requirements_button').remove();
+					gameui.addActionButton('risk_it_button', _('Risk it'), 'onConfirmRequirements', null, false, 'white');
+					button = $('risk_it_button');
+					button.classList.add('disabled');
+					$('generalactions').insertBefore(button, $('generalactions').firstChild);
+					if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
+						`<span id="risk_it_message">${_('You may<br>risk it')}</span>`
+					); }
 				}
 
-				else if (missing_requirements === 1) {
+				else if (button.id === 'risk_it_button' && requirements_met === true && gameui.character_id != '8') {
 
-					if ($('confirm_button')) {
-                        button.classList.remove('disabled');
-                        dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
-                        if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
+					$('risk_it_button').remove();
+					if ($('risk_it_message')) { $('risk_it_message').remove(); }
+					gameui.addActionButton('confirm_requirements_button', _('Climb'), 'onConfirmRequirements', null, false, 'white');
+					const button = $('confirm_requirements_button');
+					button.classList.add('disabled');
+					$('generalactions').insertBefore(button, $('generalactions').firstChild);
+				}
+
+				else if (button.id === 'confirm_button') {
+					if (requirements_met === true) {
+						button.classList.remove('disabled');
+						dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
+                   		dojo.query('#risk_it_message').forEach(ele => { ele.remove(); });
+						return true;
+					}
+					else if (requirements_met === 1) {
+						button.classList.remove('disabled');
+						dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
+						if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
 							`<span id="risk_it_message">${_('You may<br>risk it')}</span>`
 						); }
 						return false;
-                    }
+					}					
 				}
-
 				else if (gameui.extra_water_requirements && $('confirm_requirements_button') && missing_requirements > 1) { return true; }
 			},
 
@@ -4342,6 +4332,119 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				}
 
 				return [selected_resources, pitch_requirements];
+			},
+
+			checkPotential: function() {
+
+				const pitch = $('pitches').querySelector('.selected_pitch').nextElementSibling;
+				const pitch_num = pitch.classList[pitch.classList.length-1].slice(-2).replace(/^\D+/g, '');
+				const pitch_requirements = gameui.pitch_requirements;
+
+				const available_face = gameui.resources['skills']['face'] + gameui.resources['permanent_skills']['face'];
+				const available_crack = gameui.resources['skills']['crack'] + gameui.resources['permanent_skills']['crack'];
+				const available_slab = gameui.resources['skills']['slab'] + gameui.resources['permanent_skills']['slab'];
+
+				let requirements_met = 0;
+				const all_skills = available_face + available_crack + available_slab;
+				const skill_requirements = pitch_requirements['face'] + pitch_requirements['crack'] + pitch_requirements['slab'] + pitch_requirements['any_skill'];
+				for (const [type, value] of Object.entries(pitch_requirements)) {
+
+					if (type == 'any_skill' && value > 0) {
+
+						let extra_skills = 0;
+						const extra_face = available_face - pitch_requirements['face'];
+						const extra_crack = available_crack - pitch_requirements['crack'];
+						const extra_slab = available_slab - pitch_requirements['slab'];
+						for (const extra of [extra_face, extra_crack, extra_slab]) {
+							if (extra > 0) { extra_skills += extra; }
+						}
+						const missing_requirements = extra_skills - value;
+						if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
+					}
+
+					else if (['gear', 'face', 'crack', 'slab'].includes(type) && value > 0) {
+
+						const missing_requirements = (gameui.resources['skills'][type] + gameui.resources['permanent_skills'][type]) - value;
+						if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
+					}
+
+					else if (type === 'water' && value > 0) {
+						const missing_requirements = gameui.resources['water'] - pitch_requirements.water; 
+						if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
+					}
+					else if (type === 'psych' && value > 0) {
+						const missing_requirements = gameui.resources['psych'] - pitch_requirements.psych; 
+						if (missing_requirements < 0) { requirements_met += Math.abs(missing_requirements); }
+					}
+				}
+
+				// Dirtbag
+				if (gameui.character_id === '3' && requirements_met > 0 && gameui.resources['skills']['gear'] + gameui.resources['permanent_skills']['gear'] > pitch_requirements['gear']) {
+					requirements_met--;
+				}
+
+				// Overstoker
+				if (gameui.character_id === '5' && gameui.resources['psych'] > pitch_requirements['psych']) {
+					requirements_met--;
+				}
+
+				// Phil
+				if (gameui.character_id === '8' && requirements_met === 0) {
+					requirements_met = 1;
+					gameui.phil = true;
+				}
+
+				// Crag Mama
+				if (gameui.character_id === '9') {
+					const cutoff = gameui.board === 'desert' ? 21 : 27;
+					if (hex_num <= cutoff) {
+						const face = gameui.resources['skills']['face'] + gameui.resources['permanent_skills']['face'] - pitch_requirements['face'];
+						const crack = gameui.resources['skills']['crack'] + gameui.resources['permanent_skills']['crack'] - pitch_requirements['crack'];
+						const slab = gameui.resources['skills']['slab'] + gameui.resources['permanent_skills']['crack'] - pitch_requirements['slab'];
+
+						if ([face, crack, slab].some(num => num < 0)) {
+							requirements_met--;
+						}
+					}
+				}
+
+				// Bionic Woman
+				if (gameui.character_id === '11') {
+
+					const face = gameui.resources['skills']['face'] + gameui.resources['permanent_skills']['face'] - pitch_requirements['face'];
+					const crack = gameui.resources['skills']['crack'] + gameui.resources['permanent_skills']['crack'] - pitch_requirements['crack'];
+					const slab = gameui.resources['skills']['slab'] + gameui.resources['permanent_skills']['crack'] - pitch_requirements['slab'];
+					const total = face + crack + slab - pitch_requirements['any_skill'];
+
+					if (total >= 0 && [face, crack, slab].some(num => num < 0)) {
+						requirements_met--;
+					}
+				}
+
+				// Buff Boulderer
+				if (gameui.character_id === '12') {
+
+					const value = gameui.gamedatas.pitches[pitch_num]['value'];
+					if (value === 4) { requirements_met--; }
+					else if (value === 5) { requirements_met -= 2; }
+				}
+
+				// If the pitch has been previously climbed by other players
+				let already_climbed = 0;
+				let selected_pitch = dojo.query('.selected_pitch')[0].nextElementSibling;
+				let selected_hex = selected_pitch.id.slice(-2).replace(/^\D+/g, '');
+				for (const [player, pitch_list] of Object.entries(gameui.gamedatas.pitch_tracker)) {
+					if (player != gameui.player_id && pitch_list.includes(`${selected_hex}`)) {
+						already_climbed++;
+					}
+				}
+				requirements_met -= already_climbed;
+
+				if (requirements_met <= 0) { requirements_met = true; }
+				else if (requirements_met > 1) { requirements_met = false; }
+				if (gameui.character_id === '8' && requirements_met === true) { requirements_met = 1; } // Phil
+
+				return requirements_met;
 			},
 
 			checkConfirmButton: function(selected_resources, pitch_requirements) {
