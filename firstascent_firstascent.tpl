@@ -69,6 +69,7 @@
                         <div id="shared_objective{soId}_tracker" class="shared_objective_tracker"></div>
                     </div>
                 <!-- END shared_objective -->
+                <div id="shared_objectives_toggle" class="objectives_hidden">Show trackers</div>
             </div>
 
             <div id="asset_deck_draw">

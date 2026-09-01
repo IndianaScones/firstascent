@@ -304,8 +304,8 @@ class FirstAscent extends Bga\GameFramework\Table
         }
         $this->cards_and_tokens->createCards($climbing_cards, 'climbing_deck');
         $this->cards_and_tokens->shuffle('climbing_deck');
-        // $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 13");
-        // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 4");
+        $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 60");
+        // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 14");
         // $testing3 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 19");
         // $testing4 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 30");
         // $testing5 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 9");
@@ -319,7 +319,7 @@ class FirstAscent extends Bga\GameFramework\Table
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing4, 'climbing_deck', true);
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing3, 'climbing_deck', true);
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing2, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing1, 'climbing_deck', true);
+        $this->cards_and_tokens->insertCardOnExtremePosition($testing1, 'climbing_deck', true);
 
         // add summit beta tokens
         $summit_beta_tokens = array();
@@ -333,10 +333,10 @@ class FirstAscent extends Bga\GameFramework\Table
         $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
         // $this->cards_and_tokens->pickCardsForLocation(1, 'summit_beta_supply', 'summit_beta_discard');
         $this->cards_and_tokens->shuffle('summit_beta_supply');
-        // $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=2");
+        $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=3");
         // $testingSB2 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=8");
         // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB2, 'summit_beta_supply', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
+        $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
 
         // add asset cards
         $asset_cards = array();
@@ -723,10 +723,10 @@ class FirstAscent extends Bga\GameFramework\Table
         }
 
         // TESTING
-        if (!in_array('10', $available_characters)) {
-            array_shift($available_characters);
-            $available_characters[] = '10';
-        }
+        // if (!in_array('5', $available_characters)) {
+        //     array_shift($available_characters);
+        //     $available_characters[] = '5';
+        // }
         // if (!in_array('12', $available_characters)) {
         //     array_shift($available_characters);
         //     $available_characters[] = '12';
@@ -1007,8 +1007,6 @@ class FirstAscent extends Bga\GameFramework\Table
         $player_id = self::getActivePlayerId();
         $player_name = self::getActivePlayerName();
         $deck_assets = intval($deck_assets);
-        $this->setGlobalVariable('confirm_assets', $this->getGlobalVariable('resource_tracker', true));
-
         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
         if (in_array($player_id, $rerack_1) && !$this->getGlobalVariable('climbing_card_info', true)) {
             $key = array_search($player_id, $rerack_1); 
@@ -2093,6 +2091,7 @@ class FirstAscent extends Bga\GameFramework\Table
             'drawn_id' => $drawn_id,
             'drawn_type_arg' => $drawn_type_arg,
             'hand_count' => $hand_count,
+            'hand_assets' => $this->getHandAssets($player_id),
             'last_card' => $last_card,
             'refill_portaledge' => $refill_portaledge,
             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
