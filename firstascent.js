@@ -262,7 +262,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // initialize hand counter
                 const hand_size = gamedatas['hand_count'][player_id];
                 dojo.place(`<div id="hand_counter_${player_id}" class="hand_counter">
-                    </div><span id="hand_num_${player_id}" class="panel_num">${hand_size}</span>`, 
+                    </div><span id="hand_num_${player_id}" class="panel_num hand_num">${hand_size}</span>`, 
                     `${player_id}_water_and_psych`, 8);
 
                 // meeple and ropes in panel and/or on board
@@ -1188,9 +1188,13 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             // shared objective completion marks
             const shared_objectives_toggle = $('shared_objectives_toggle');
-            shared_objectives_toggle.onclick = () => { this.utils.toggleSharedObjectives(); }
+            shared_objectives_toggle.onclick = () => { this.utils.toggleSharedObjectives(); };
             const shared_objectives_tracker = gamedatas.shared_objectives_tracker;
             this.utils.updateSharedObjectivesDisplay(shared_objectives_tracker);
+
+            // portaledge
+            const hide_portaledge = $('hide_portaledge');
+            hide_portaledge.onclick = () => { this.onShowHidePortaledge(); };
 
             // state specific refresh
 
@@ -1206,10 +1210,20 @@ function (dojo, declare, aspect, BgaAutofit) {
                 // portaledge
             if (gamedatas.current_state === 'selectPortaledge' || gamedatas.current_state === 'resting') {
                 portaledge.style.display = 'block';
-                portaledge.style.marginTop = 0;
-            }
+                portaledge.style.marginRight = 0;
 
-            for (let type of gamedatas.empty_portaledge) { $(`porta${type}`).style.visibility = 'hidden'; }
+                for (let type of gamedatas.empty_portaledge) { $(`porta${type}`).style.visibility = 'hidden'; }
+
+                // set popup to close if user clicks x or outside of element
+                const closePopup = () => {
+                    this.onShowHidePortaledge();
+
+                    this.utils.removeOutsideClickListener();
+                };
+
+                // start listener
+                this.utils.setupOutsideClickListener(portaledge, closePopup);
+            }
 
                 // climbing
             let climbing_card_info = gamedatas.climbing_card_info;
@@ -1519,7 +1533,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 titlebar_extras_wrapper.append(opponent_objectives_toggle);
                 opponent_objectives_toggle.onclick = () => { this.utils.toggleOpponentObjectives(); }
 
-                opponent_objectives_toggle.click();
                 for (const [player_id, objectives] of Object.entries(opponents_objectives_tracker)) {
 
                     if (player_id != this.player_id) {
@@ -1555,7 +1568,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                         pos_num++;
                     }
                 }
-                opponent_objectives_toggle.click();
 
                 for (const [player_id, objective_id] of Object.entries(scored_personal_objectives)) {
                     if (objective_id) {
@@ -1576,13 +1588,16 @@ function (dojo, declare, aspect, BgaAutofit) {
             const die_wrapper = $('die_wrapper');
             const scroll_threshold = 150;
 
-            window.addEventListener('scroll', () => {
+            const updateDiePosition = () => {
                 if (window.scrollY < scroll_threshold) {
                     die_wrapper.classList.add('die_pushed_down');
                 } else {
                     die_wrapper.classList.remove('die_pushed_down');
                 }
-            }, { passive : true });
+            };
+
+            updateDiePosition();
+            window.addEventListener('scroll', updateDiePosition, { passive: true });
 
             // calls resizeHand() when screen is changed from portrait to landscape or vice-versa
             window.matchMedia("(orientation: portrait)").addEventListener("change", () => {
@@ -1731,6 +1746,36 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
             });
             progression_observer.observe(wrapper);
+
+            // ensure messages always exist at end of titlebar
+            const container = document.querySelector('#generalactions');
+
+            if (container) {
+                let rafId = null;
+
+                const observer = new MutationObserver((mutations) => {
+                    const hasAddedNodes = mutations.some(mutation => 
+                        mutation.type === 'childList' && mutation.addedNodes.length > 0
+                    );
+
+                    // Schedule execution for the next render cycle if not already pending
+                    if (hasAddedNodes && !rafId) {
+                        rafId = requestAnimationFrame(() => {
+                            rafId = null;
+
+                            observer.disconnect();
+
+                            container.querySelectorAll('.msg').forEach(element => {
+                                container.appendChild(element);
+                            });
+
+                            observer.observe(container, { childList: true });
+                        });
+                    }
+                });
+
+                observer.observe(container, { childList: true });
+            }
 
 
             /*******PHP DEBUGGING*******/
@@ -1898,7 +1943,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 border_ele.classList.add('bailing_pitch');
                             }
                             $('generalactions').lastElementChild.insertAdjacentHTML('afterend', 
-                                `<span id="bailing_message">${_('No available<br>Pitches')}</span>`
+                                `<span id="bailing_message" class="msg">${_('No available<br>Pitches')}</span>`
                             )
                         } else {
                             for (let pitch_num of available_pitches) {
@@ -2011,13 +2056,22 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                         if (this.utils.shouldAnimate() && portaledge.style.display != 'block') {
                             portaledge.style.display = 'block';
-                            await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-                            portaledge.style.marginTop = 0;
+                            await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
                         }
                         else { // shouldn't animate
                             portaledge.style.display = 'block';
-                            portaledge.style.marginTop = 0;
+                            portaledge.style.marginRight = 0;
                         }
+
+                        // set popup to close if user clicks x or outside of element
+                        const closePopup = () => {
+                            this.onShowHidePortaledge();
+
+                            this.utils.removeOutsideClickListener();
+                        };
+
+                        // start listener
+                        this.utils.setupOutsideClickListener(portaledge, closePopup);
                     })();
                     break;
 
@@ -2179,13 +2233,22 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                             if (this.utils.shouldAnimate() && portaledge.style.display != 'block') {
                                 portaledge.style.display = 'block';
-                                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-                                portaledge.style.marginTop = 0;
+                                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
                             }
                             else { // shouldn't animate
                                 portaledge.style.display = 'block';
-                                portaledge.style.marginTop = 0;
+                                portaledge.style.marginRight = 0;
                             }
+
+                            // set popup to close if user clicks x or outside of element
+                            const closePopup = () => {
+                                this.onShowHidePortaledge();
+
+                                this.utils.removeOutsideClickListener();
+                            };
+
+                            // start listener
+                            this.utils.setupOutsideClickListener(portaledge, closePopup);
                         }
                     })();
                     break;
@@ -3276,10 +3339,10 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                         if (requirements_met) { $('confirm_button').classList.remove('disabled'); }
                         if (requirements_met === 1 && !$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                                `<span id="risk_it_message">${_('You may<br>risk it')}</span>`
+                                `<span id="risk_it_message" class="msg">${_('You may<br>risk it')}</span>`
                         ); }
                         if (!requirements_met && !$('requirements_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                                `<span id="requirements_message">${_('Can\'t fulfill<br>requirements')}</span>`
+                                `<span id="requirements_message" class="msg">${_('Can\'t fulfill<br>requirements')}</span>`
                         ); }
 
                         if (pitch_num === '36' && requirements_met) { // The Trifecta
@@ -3785,8 +3848,17 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 this.utils.updateTitlebar(_('You must take 1 card from the Portaledge'));
                 portaledge.style.display = 'block';
-                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-                portaledge.style.marginTop = 0;
+                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
+
+                // set popup to close if user clicks x or outside of element
+                const closePopup = () => {
+                    this.onShowHidePortaledge();
+
+                    this.utils.removeOutsideClickListener();
+                };
+
+                // start listener
+                this.utils.setupOutsideClickListener(portaledge, closePopup);
 
                 this.addActionButton('confirm_button', _('Confirm'), 'onConfirmTrade', null, false, 'blue');
                 $('confirm_button').classList.add('disabled');
@@ -3806,7 +3878,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
                     dojo.query('.portaledge > .cursor').forEach(ele => { ele.remove(); });
                     dojo.query('.portaledge > .draw_num').forEach(ele => { ele.remove(); });
-                    portaledge.style.marginTop = '-36.4061%';
+                    portaledge.style.marginRight = '';
                     portaledge.style.display = '';
                     this.restoreServerGameState();
                     $('trade_button').classList.remove('disabled');
@@ -4030,7 +4102,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (this.unnecessary_requirements < 0) { this.unnecessary_requirements = 0; }
             if (this.unnecessary_requirements > 0) {
                 $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                    `<span id="bad_selection_message">${_('Unnecessary<br>Asset/s selected')}</span>`
+                    `<span id="bad_selection_message" class="msg">${_('Unnecessary<br>Asset/s selected')}</span>`
                 );
             }
             else if (this.unnecessary_requirements === 0) {
@@ -4271,6 +4343,44 @@ function (dojo, declare, aspect, BgaAutofit) {
             }            
         },
 
+        onShowHidePortaledge: function() {
+
+            const portaledge = $('portaledge');
+            const show_button = $('show_portaledge');
+
+            // close reference popup if open and kill listener
+            const reference_popup = $('reference_popup');
+            if (reference_popup.style.display === 'flex') {
+                reference_popup.style.display = '';
+                $('climbing_dimmer').classList.remove('dim_bg');
+                this.utils.removeOutsideClickListener();
+            }
+
+            if (portaledge.style.display === 'none' || portaledge.style.display === '') { // show portaledge
+
+                portaledge.style.display = 'block';
+                if ($('show_portaledge')) { $('show_portaledge').remove(); }
+
+                // set popup to close if user clicks x or outside of element
+                const closePopup = () => {
+                    this.onShowHidePortaledge();
+
+                    this.utils.removeOutsideClickListener();
+                };
+
+                // start listener
+                this.utils.setupOutsideClickListener(portaledge, closePopup);
+
+            } else { // hide portaledge
+
+                portaledge.style.display = '';
+                portaledge.classList.remove('portaledge_open');
+                portaledge.style.marginRight = '0';
+                this.addActionButton('show_portaledge', _('Show<br>Portaledge'), () => { this.onShowHidePortaledge(); }, undefined, undefined, 'red');
+                this.utils.removeOutsideClickListener();
+            }
+        },
+
         onSelectClimbingCardChoice: function(evt) {
             dojo.stopEvent(evt);
 
@@ -4290,13 +4400,13 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             if (this.choices_info[choice]['no_target_message']) {
                 $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                    `<span id="requirements_message">${_('No legal<br>targets')}</span>`
+                    `<span id="requirements_message" class="msg">${_('No legal<br>targets')}</span>`
                 );
             }
 
             else if (!this.choices_info[choice]['requirements_met']) {
                 $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                    `<span id="requirements_message">${_('Can\'t fulfill<br>requirements')}</span>`
+                    `<span id="requirements_message" class="msg">${_('Can\'t fulfill<br>requirements')}</span>`
                 );
             }
 
@@ -4725,7 +4835,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
                 else if (button.classList.contains('water_plus') && this.rest_resources < rest_num && (water + water_draw_num + 1) > max_num) {
                     $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                        `<span id="requirements_message">${_('Can\'t gain any<br>more Water')}</span>`
+                        `<span id="requirements_message" class="msg">${_('Can\'t gain any<br>more Water')}</span>`
                     );
                 }
             
@@ -4749,7 +4859,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
                 else if (button.classList.contains('psych_plus') && this.rest_resources < rest_num && (psych + psych_draw_num + 1) > max_num) {
                     $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                        `<span id="requirements_message">${_('Can\'t gain any<br>more Psych')}</span>`
+                        `<span id="requirements_message" class="msg">${_('Can\'t gain any<br>more Psych')}</span>`
                     );
                 }
             }
@@ -5154,7 +5264,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             } else if (current_tokens + currently_selected == max_tokens) {
                 if (!$('requirements_message')) {
                     $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                        `<span id="requirements_message" class="no_slots">${_('No more<br>available slots')}</span>`
+                        `<span id="requirements_message" class="no_slots msg">${_('No more<br>available slots')}</span>`
                     );
                 }
             }
@@ -5321,7 +5431,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             });
 
             this.enabled_summit_beta_tokens--;
-            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmRerack')) {
                 this.ajaxcall("/firstascent/firstascent/confirmRerack.html", { lock: true,
@@ -5362,7 +5472,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 if (water_current === max_num && psych_current === max_num) {
                     $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                        `<span id="maxed_out_message">${_('Your Water and<br>Psych are full')}</span>`
+                        `<span id="maxed_out_message" class="msg">${_('Your Water and<br>Psych are full')}</span>`
                     );
                     $('confirm_button').classList.add('disabled');
                 }
@@ -5376,7 +5486,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.stopEvent(evt);
 
             this.enabled_summit_beta_tokens--;
-            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmEnergyDrink')) {
                 this.ajaxcall("/firstascent/firstascent/confirmEnergyDrink.html", {lock: true,}, this, function(result) {} );
@@ -5508,7 +5618,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const deck_to_draw = Number(deck_classes[deck_classes.length - 1]) || 0;
 
             this.enabled_summit_beta_tokens--;
-            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             for (const ele of this.simul_climb_handlers) { ele.onclick = null; }
             this.simul_climb_handlers = [];
@@ -5596,8 +5706,17 @@ function (dojo, declare, aspect, BgaAutofit) {
             });
 
             portaledge.style.display = 'block';
-            await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-            portaledge.style.marginTop = 0;
+            await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
+
+            // set popup to close if user clicks x or outside of element
+            const closePopup = () => {
+                this.onShowHidePortaledge();
+
+                this.utils.removeOutsideClickListener();
+            };
+
+            // start listener
+            this.utils.setupOutsideClickListener(portaledge, closePopup);
             
             dojo.query('.hand_asset_wrap > .asset').forEach(ele => {
 
@@ -5698,7 +5817,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.bomber_anchor = false;
 
             this.enabled_summit_beta_tokens--;
-            // if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmBomberAnchor')) {
                 this.ajaxcall("/firstascent/firstascent/confirmBomberAnchor.html", { lock: true,
@@ -6071,7 +6190,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 if ($('requirements_message')) { $('requirements_message').remove(); }
                 $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-                    `<span id="jesus_piece_message">${_('Using<br>Jesus Piece')}</span>`
+                    `<span id="jesus_piece_message" class="msg">${_('Using<br>Jesus Piece')}</span>`
                 );
                 dojo.query('.requirement_wrap').forEach(ele => { ele.remove(); });
                 let i = 1;
@@ -6171,7 +6290,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     $('bomber_anchor_counter').remove();
                     const portaledge = $('portaledge');
                     if (this.utils.shouldAnimate()) { await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true); }
-                    portaledge.style.marginTop = '-36.4061%';
+                    portaledge.style.marginRight = '';
                     portaledge.style.display = '';
                     document.querySelectorAll('.draw').forEach(ele => {
                         ele.classList.remove(ele.classList[ele.classList.length-1], 'draw');
@@ -7640,11 +7759,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 objective_1_ele.style.opacity = 1;
                 objective_2_ele.style.opacity = 1;
                 objective_1_ele.style.marginRight = '0';
-                objective_2_ele.style.marginRight = '0';
-                objective_1_ele.style.setProperty('--ow', objective_dimensions.width + 'px');
-                objective_1_ele.style.setProperty('--oh', objective_dimensions.height + 'px');
-                objective_2_ele.style.setProperty('--ow', objective_dimensions.width + 'px');
-                objective_2_ele.style.setProperty('--oh', objective_dimensions.height + 'px');
+                objective_2_ele.style.marginRight = '0';;
 
                 // animate card backs to player hand_counter and disappear
                 let args = [objective_1_ele, hand_counter, null, false, true];
@@ -7681,6 +7796,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                         const counter_div = $(`hand_counter_${player_id}`);
                         $('asset_deck_draw').style.display = 'flex';
                         $('spread_draw').style.display = 'flex';
+
+                        if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = '1053'; }
 
                         for (let i=1; i<=new_deck_assets; i++) {
 
@@ -7728,13 +7845,14 @@ function (dojo, declare, aspect, BgaAutofit) {
                         .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
                         .then(() => Promise.all(asset_display_to_counter.map(func => { return func(); })))
                         .then(() => {
+                            if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                             this.utils.handCount(player_id, notif.args.hand_count);
                             $('asset_deck_draw').style.display = '';
                             if (!this.risk_it) { $('spread_draw').style.display = ''; }
                             resolve();
                         });
                             
-                    } else {
+                    } else { // shouldn't animate
                         spread_ids.map((id) => {
                             const spread_div = $(`asset_card_${id}`);
                             spread_div.remove();
@@ -8370,6 +8488,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     const args = [ele, slot, null, false, true];
 
                     cards_to_anim.push(this.utils.animationPromise.bind(null, ele, 'asset_counter_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
+                    if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
                     cards_to_place.push(args);
                 }
 
@@ -8390,6 +8509,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 Promise.all(cards_to_anim.map(func => { return func(); }))
                 .then(() => {
                     this.utils.clicksOn();
+                    if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                     this.notifqueue.setSynchronousDuration();
                 });
             }
@@ -8452,6 +8572,8 @@ function (dojo, declare, aspect, BgaAutofit) {
             }
             else {
 
+                if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
+
                 for (let ele of risked_cards) {
 
                     const ele_origin = ele.parentElement;
@@ -8475,6 +8597,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 Promise.all(cards_to_anim.map(func => { return func(); }))
                 .then(() => {
+                    if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                     dojo.query('#assets_wrap .asset').forEach(ele => { ele.style.width = ''; });
                     $('spread_draw').style.display = '';
                     this.risk_it = false;
@@ -8552,6 +8675,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     i--;
 
                     display_anims.push(this.utils.animationPromise.bind(null, card_ele, 'asset_counter_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args));
+                    if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
                     args = [card_ele, $('asset_discard'), 3];
                     discard_anims.push(this.utils.animationPromise.bind(null, card_ele, 'asset_display_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...args));
                 }
@@ -8572,6 +8696,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                     this.utils.handCount(player_id, hand_count);
                     this.restoreServerGameState();
+                    if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                     this.notifqueue.setSynchronousDuration();
                 })
             }
@@ -8687,6 +8812,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                                 const card = cards_for_playing[i-1];
                                 const card_ele = dojo.place(card[0], `hand_counter_${player_id}`);
                             }
+
+                            if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
                     
                             let i = 1;
                             for (const card of $(`hand_counter_${player_id}`).children) {
@@ -8719,6 +8846,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                             if (this.risky_climb) { this.risky_climb = false; }
                             $('asset_deck_draw').style.display = '';
                             $('spread_draw').style.display = '';
+                            if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                             resolve();
 
                         });
@@ -9581,6 +9709,8 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                             this.utils.updateTitlebar(_('Discarding Asset/s'));
 
+                            if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
+
                             $('asset_deck_draw').style.display = 'flex';
                             let i = 1;
                             for (const asset_id of hand_card_ids) {
@@ -9708,6 +9838,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                             Promise.all(asset_anims.map((func) => { return func(); }))
                             .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
                             .then(() => {
+                                if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                                 let asset_display_to_hand = [];
                                 for (let id of all_card_ids) {
                                     const card = $(`asset_card_${id}`);
@@ -9838,6 +9969,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                             $('asset_deck_draw').style.display = 'flex';
                             let i = all_card_ids.length;
 
+                            if ($('ebd-body').classList.contains('mobile_version') && this.utils.shouldAnimate()) { $('asset_deck_draw').style.zIndex = '1053'; }
+
                             for (const asset_id of tucked_card_ids) {
                                 const type_arg = this.gamedatas.asset_identifier[asset_id];
                                 const type = this.utils.getAssetType(type_arg);
@@ -9943,6 +10076,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                             Promise.all(asset_anims.map(func => { return func(); }))
                             .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
                             .then(() => {
+                                if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                                 let asset_display_to_discard = [];
                                 for (let id of all_card_ids) {
                                     const card = $(`asset_card_${id}`);
@@ -10104,6 +10238,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                     .then(() => { return new Promise(resolve => setTimeout(resolve, 1000)) })
                                     .then(() => {
                                         let asset_display_to_counter = [];
+                                        if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = '1053'; }
                                         const hand_counter = $(`hand_counter_${opponent}`);
                                         for (let id of board_card_ids.concat(tucked_card_ids)) {
                                             const card = $(`asset_card_${id}`);
@@ -10121,6 +10256,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                                         return Promise.all(asset_display_to_counter.map(func => { return func(); }));
                                     })
                                     .then(async () => {
+                                        if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                                         $('asset_deck_draw').style.display = '';
                                         if ($('asset_counter_img_temp')) { $('asset_counter_img_temp').remove(); }
                                         this.utils.handCount(player_id, notif.args.player_hand_count);
@@ -10565,13 +10701,12 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.risky_climb = notif.args.risky_climb;
             if (notif.args.risky_climb) { this.risk_it = true; }
             const risk_summit_beta = notif.args.risk_summit_beta;
+            const risk_die = $('risk_die');
+            const die_wrapper = $('die_wrapper');
 
             if (this.utils.shouldAnimate()) {
                 if (Object.keys(notif.args.climbing_card_info).length > 0) { await this.utils.retractClimbingCard(); }
                 this.utils.updateTitlebar(_('Rolling Risk Die'));
-
-                const risk_die = $('risk_die');
-                const die_wrapper = $('die_wrapper');
 
                 die_wrapper.style.display = 'block';
                 this.utils.animationPromise(die_wrapper, 'roll_die_wrapper', 'anim', null, false, false);
@@ -10587,11 +10722,13 @@ function (dojo, declare, aspect, BgaAutofit) {
                         die_face_class = 'risk_card_and_psych';
                         break;
                 }
-                await this.utils.animationPromise(risk_die, 'roll_die', 'anim', null, false, true);
 
-                risk_die.style.display = 'none';
-                const die_face = dojo.place(`<div id="die_face_${face_rolled}" class="risk_face ${die_face_class}"></div>`, 'die_wrapper');
+                const die_face = dojo.place(`<div id="die_face_${face_rolled}" class="risk_face ${die_face_class} risk_face_reveal"></div>`, 'die_wrapper');
                 die_face.style.transform = 'none';
+
+                await this.utils.animationPromise(risk_die, 'roll_die', 'anim', {
+                    after: () => { risk_die.style.display = 'none'; }
+                }, false, true);
 
                 if (!(risk_summit_beta && [2, 3].includes(face_rolled))) { 
                     await (async function() { return new Promise(resolve => setTimeout(resolve, 1500)) })();
@@ -10843,7 +10980,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                         asset_ele.style.setProperty('--dw', new_width);
                         asset_ele.style.setProperty('--dh', new_height);
                         const args = [asset_ele, deck_draw_slot, null, false, true];
+                        if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = '1053'; }
                         await this.utils.animationPromise(asset_ele, 'asset_counter_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...args);
+                        if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                         await new Promise(resolve => setTimeout(resolve, 1000));
 
                         await this.utils.matchBoardAssets();
@@ -10990,12 +11129,14 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                             args = [asset_ele, hand_counter, null, false, true];
                             asset_board_anims.push(this.utils.animationPromise.bind(null, asset_ele, 'asset_display_to_counter', 'anim', this.utils.moveToNewParent(), true, false, ...args));
+                            if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = '1053'; }
                         }
                         document.querySelectorAll('.asset_board_slot').forEach(ele => { ele.style.zIndex = ''; });
                         await this.utils.matchBoardAssets();
 
                         Promise.all(asset_board_anims.map(func => { return func(); }))
                         .then(() => {
+                            if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                             this.utils.sanitizeAssetBoards();
                             $('asset_deck_draw').style.zIndex = '';
                             $('asset_deck_draw').style.display = '';
@@ -11208,8 +11349,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 this.utils.updateTitlebar(_('Dealing Gear cards from the Portaledge'));
                 const portaledge = $('portaledge');
                 portaledge.style.display = 'block';
-                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-                portaledge.style.marginTop = 0;
+                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
                 await (async function() { return new Promise(resolve => setTimeout(resolve, 300)) })();
 
                 await (async () => {
@@ -11240,7 +11380,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 await (async function() { return new Promise(resolve => setTimeout(resolve, 100)) })(); // I don't know why but without this line, the line below doesn't work
                 await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-                portaledge.style.marginTop = '-36.4061%';
+                portaledge.style.marginRight = '';
                 portaledge.style.display = '';
             
             } else { // shouldn't animate
@@ -11302,8 +11442,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 this.utils.updateTitlebar(_('Dealing Gear cards from the Portaledge'));
                 const portaledge = $('portaledge');
                 portaledge.style.display = 'block';
-                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-                portaledge.style.marginTop = 0;
+                await this.utils.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
                 await (async function() { return new Promise(resolve => setTimeout(resolve, 300)) })();
 
                 await (async () => { // deliver assets to other opponents
@@ -11362,7 +11501,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
                 await (async function() { return new Promise(resolve => setTimeout(resolve, 100)) })(); // I don't know why but without this line, the line below doesn't work
                 await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-                portaledge.style.marginTop = '-36.4061%';
+                portaledge.style.marginRight = '';
                 portaledge.style.display = '';
                 await (async function() { return new Promise(resolve => setTimeout(resolve, 1000)) })();
                 args = [asset_ele, hand_slot];
@@ -12329,7 +12468,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const starting_player_token = $('starting_player');
             const new_starting_player = notif.args.new_starting_player;
             const destination = $(`${new_starting_player}_water_and_psych`);
-            const args = [starting_player_token, destination];
+            const args = [starting_player_token, destination, null, false, true];
 
             if (this.utils.shouldAnimate()) { await this.utils.animationPromise(starting_player_token, 'pass_starting_player', 'anim', this.utils.moveToNewParent(), false, true, ...args); }
             else { destination.append(starting_player_token); }
@@ -12509,6 +12648,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     ele.style.setProperty('--dh', new_height);
                     args = [ele, hand_counter, null, false, true];
                     display_to_counter.push(this.utils.animationPromise.bind(null, ele, 'asset_display_to_counter', 'anim', this.utils.moveToNewParent(), false, true, ...args));
+                    if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = '1053'; }
                 }
 
                 $('asset_deck_draw').style.display = 'flex';
@@ -12517,6 +12657,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 .then(() => Promise.all(display_to_counter.map(func => { return func();})))
                 .then(async () => {
 
+                    if ($('ebd-body').classList.contains('mobile_version')) { $('asset_deck_draw').style.zIndex = ''; }
                     elements.forEach(ele => { ele.remove(); });
                     this.utils.handCount(player_id, notif.args.hand_count);
 
@@ -13228,7 +13369,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             if ($('portaledge').style.display === 'block') {
                 const portaledge = $('portaledge');
                 await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-                portaledge.style.marginTop = '-36.4061%';
+                portaledge.style.marginRight = '';
                 portaledge.style.display = '';
             }
             // discard climbing card
@@ -13244,7 +13385,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 climbing_div.style.setProperty('--dh', size.height + 'px');
 
                 const discard_args = [climbing_div, climbing_discard_90, 3];
-                await this.utils.animationPromise(climbing_div, 'climbing_card_slot_to_display', 'anim', this.utils.moveToNewParent(), false, true, ...discard_args);
+                await this.utils.animationPromise(climbing_div, 'climbing_card_slot_to_discard', 'anim', this.utils.moveToNewParent(), false, true, ...discard_args);
 
             } else if (climbing_discard_straightened.firstElementChild) {
                 await this.utils.discardClimbingCard();
@@ -13338,7 +13479,6 @@ function (dojo, declare, aspect, BgaAutofit) {
             titlebar_extras_wrapper.append(opponent_objectives_toggle);
             opponent_objectives_toggle.onclick = () => { this.utils.toggleOpponentObjectives(); }
 
-            opponent_objectives_toggle.click();
             for (const [player_id, objectives] of Object.entries(personal_objectives_tracker)) {
 
                 if (player_id != this.player_id) {
@@ -13374,7 +13514,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                     pos_num++;
                 }
             }
-            opponent_objectives_toggle.click();
 
             for (const [player_id, objective_id] of Object.entries(scored_personal_objectives)) {
                 if (objective_id) {

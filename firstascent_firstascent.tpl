@@ -11,142 +11,147 @@
 
     firstascent_firstascent.tpl
 -->
+<div id="FirstAscent_table_display">
 
-<div id="character_selection_ratio" class="character_selection_ratio">
-    <div class="character_selection_ratio_child">
-        <div id="character_selection"></div>
-        <div id="selection_dimmer"></div>
-        <div id="selected_character"></div>
-    </div>
-</div>
-
-<div id="climbing_slot"></div>
-<div id="climbing_dimmer"></div>
-
-<div id="portaledge">
-    <div id="portagear" class="portaledge portagear" style="transform: none;"></div>
-    <div id="portaface" class="portaledge portaface" style="transform: none;"></div>
-    <div id="portacrack" class="portaledge portacrack" style="transform: none;"></div>
-    <div id="portaslab" class="portaledge portaslab" style="transform: none;"></div>
-    <div id="rest_water_psych">
-        <div id="rest_water">
-            <div id="rest_water_minus_click" class="rest_click water_minus"></div>
-            <div id="rest_water_minus_symbol" class="rest_minus">-</div>
-            <div id="rest_water_plus_click" class="rest_click water_plus"></div>
-            <div id="rest_water_plus_symbol" class="rest_plus">+</div>
-            <div id="rest_water_draw_num" class="rest_draw_num">0</div>
-            <div id="rest_water_symbol" class="rest_icon"></div>
-        </div>
-        <div id="rest_psych">
-            <div id="rest_psych_minus_click" class="rest_click psych_minus"></div>
-            <div id="rest_psych_minus_symbol" class="rest_minus">-</div>
-            <div id="rest_psych_plus_click" class="rest_click psych_plus"></div>
-            <div id="rest_psych_plus_symbol" class="rest_plus">+</div>
-            <div id="rest_psych_draw_num" class="rest_draw_num">0</div>
-            <div id="rest_psych_symbol" class="rest_icon"></div>
+    <div id="character_selection_ratio" class="character_selection_ratio">
+        <div class="character_selection_ratio_child">
+            <div id="character_selection"></div>
+            <div id="selection_dimmer"></div>
+            <div id="selected_character"></div>
         </div>
     </div>
-</div>
 
-<div class="board_ratio">
-    <div class="board_ratio_child">
-        <div id="board">
+    <div id="climbing_slot"></div>
+    <div id="climbing_dimmer"></div>
 
-            <div id="die_wrapper">
-                <div id="risk_die" class="risk_die">
-                    <div id="risk_die_1" class="risk_checkmark risk_face"></div>
-                    <div id="risk_die_2" class="risk_checkmark risk_face"></div>
-                    <div id="risk_die_3" class="risk_cards risk_face"></div>
-                    <div id="risk_die_4" class="risk_cards risk_face"></div>
-                    <div id="risk_die_5" class="risk_card_and_psych risk_face"></div>
-                    <div id="risk_die_6" class="risk_card_and_psych risk_face"></div>
+    <div class="board_ratio">
+        <div class="board_ratio_child">
+
+            <div id="portaledge">
+            
+                <div id="portagear" class="portaledge portagear" style="transform: none;"></div>
+                <div id="portaface" class="portaledge portaface" style="transform: none;"></div>
+                <div id="portacrack" class="portaledge portacrack" style="transform: none;"></div>
+                <div id="portaslab" class="portaledge portaslab" style="transform: none;"></div>
+                <div id="rest_water_psych">
+                    <div id="rest_water">
+                        <div id="rest_water_minus_click" class="rest_click water_minus"></div>
+                        <div id="rest_water_minus_symbol" class="rest_minus">-</div>
+                        <div id="rest_water_plus_click" class="rest_click water_plus"></div>
+                        <div id="rest_water_plus_symbol" class="rest_plus">+</div>
+                        <div id="rest_water_draw_num" class="rest_draw_num">0</div>
+                        <div id="rest_water_symbol" class="rest_icon"></div>
+                    </div>
+                    <div id="rest_psych">
+                        <div id="rest_psych_minus_click" class="rest_click psych_minus"></div>
+                        <div id="rest_psych_minus_symbol" class="rest_minus">-</div>
+                        <div id="rest_psych_plus_click" class="rest_click psych_plus"></div>
+                        <div id="rest_psych_plus_symbol" class="rest_plus">+</div>
+                        <div id="rest_psych_draw_num" class="rest_draw_num">0</div>
+                        <div id="rest_psych_symbol" class="rest_icon"></div>
+                    </div>
+                </div>
+                <div id="hide_portaledge" class="hide_portaledge_button always_cursor">x</div>
+            </div>
+
+            <div id="board">
+
+                <div id="die_wrapper">
+                    <div id="risk_die" class="risk_die">
+                        <div id="risk_die_1" class="risk_checkmark risk_face"></div>
+                        <div id="risk_die_2" class="risk_checkmark risk_face"></div>
+                        <div id="risk_die_3" class="risk_cards risk_face"></div>
+                        <div id="risk_die_4" class="risk_cards risk_face"></div>
+                        <div id="risk_die_5" class="risk_card_and_psych risk_face"></div>
+                        <div id="risk_die_6" class="risk_card_and_psych risk_face"></div>
+                    </div>
+                </div>
+
+                <div id="shared_objectives">
+                    <!-- BEGIN shared_objective -->
+                        <div id="shared_objective{soId}" class="shared_objective so_{soTA}" style="background-position: -{soX}% -{soY}%; top: {TOP}%; left: {LEFT}%;">
+                            <div id="shared_objective{soId}_tracker" class="shared_objective_tracker"></div>
+                        </div>
+                    <!-- END shared_objective -->
+                    <div id="shared_objectives_toggle" class="objectives_hidden">Show trackers</div>
+                </div>
+
+                <div id="asset_deck_draw">
+                    <div id="deck_draw_9" class="draw_wrap"></div>
+                    <div id="deck_draw_8" class="draw_wrap"></div>
+                    <div id="deck_draw_7" class="draw_wrap"></div>
+                    <div id="deck_draw_6" class="draw_wrap"></div>
+                    <div id="deck_draw_5" class="draw_wrap"></div>
+                    <div id="deck_draw_4" class="draw_wrap"></div>
+                    <div id="deck_draw_3" class="draw_wrap"></div>
+                    <div id="deck_draw_2" class="draw_wrap"></div>
+                    <div id="deck_draw_1" class="draw_wrap"></div>
+                </div>
+
+                <div id="spread_draw">
+                    <div id="spread_draw_9" class="spread_wrap"></div>
+                    <div id="spread_draw_8" class="spread_wrap"></div>
+                    <div id="spread_draw_7" class="spread_wrap"></div>
+                    <div id="spread_draw_6" class="spread_wrap"></div>
+                    <div id="spread_draw_5" class="spread_wrap"></div>
+                    <div id="spread_draw_4" class="spread_wrap"></div>
+                    <div id="spread_draw_3" class="spread_wrap"></div>
+                    <div id="spread_draw_2" class="spread_wrap"></div>
+                    <div id="spread_draw_1" class="spread_wrap"></div>
+                </div>
+
+                <div id="token_display">
+                    <div id="token_display_4" class="display_token_wrap"></div>
+                    <div id="token_display_3" class="display_token_wrap"></div>
+                    <div id="token_display_2" class="display_token_wrap"></div>
+                    <div id="token_display_1" class="display_token_wrap"></div>
+                </div>
+
+                <div id="the_spread"></div>
+                
+                <div id="pitches">
+                    <!-- BEGIN pitch -->
+                        <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%;">
+                        <div id="pitch_{X}_border" class="pitch_border"></div>
+                        <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;">
+                            <div id="pitch_{X}_rope" class="rope_hub"></div>
+                        </div>
+                        <div id="pitch_{X}_click" class="pitch_click"></div>
+                        <!-- <div class="pitch_center"></div> -->
+                        </div>
+                    <!-- END pitch -->
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <h3 id ="hand_title">{MY_HAND}</h3>
+    <div id="hand_ratio">
+        <div id="hand_ratio_child">
+            <div id="myhand_wrap">
+                <div id="assets_wrap"></div>
+                <div id="objectives_wrap">
+                    <div id="personal_objective_1_wrap" class="personal_objective_wrap"></div>
+                    <div id="personal_objective_2_wrap" class="personal_objective_wrap"></div>
                 </div>
             </div>
-
-            <div id="shared_objectives">
-                <!-- BEGIN shared_objective -->
-                    <div id="shared_objective{soId}" class="shared_objective so_{soTA}" style="background-position: -{soX}% -{soY}%; top: {TOP}%; left: {LEFT}%;">
-                        <div id="shared_objective{soId}_tracker" class="shared_objective_tracker"></div>
-                    </div>
-                <!-- END shared_objective -->
-                <div id="shared_objectives_toggle" class="objectives_hidden">Show trackers</div>
-            </div>
-
-            <div id="asset_deck_draw">
-                <div id="deck_draw_9" class="draw_wrap"></div>
-                <div id="deck_draw_8" class="draw_wrap"></div>
-                <div id="deck_draw_7" class="draw_wrap"></div>
-                <div id="deck_draw_6" class="draw_wrap"></div>
-                <div id="deck_draw_5" class="draw_wrap"></div>
-                <div id="deck_draw_4" class="draw_wrap"></div>
-                <div id="deck_draw_3" class="draw_wrap"></div>
-                <div id="deck_draw_2" class="draw_wrap"></div>
-                <div id="deck_draw_1" class="draw_wrap"></div>
-            </div>
-
-            <div id="spread_draw">
-                <div id="spread_draw_9" class="spread_wrap"></div>
-                <div id="spread_draw_8" class="spread_wrap"></div>
-                <div id="spread_draw_7" class="spread_wrap"></div>
-                <div id="spread_draw_6" class="spread_wrap"></div>
-                <div id="spread_draw_5" class="spread_wrap"></div>
-                <div id="spread_draw_4" class="spread_wrap"></div>
-                <div id="spread_draw_3" class="spread_wrap"></div>
-                <div id="spread_draw_2" class="spread_wrap"></div>
-                <div id="spread_draw_1" class="spread_wrap"></div>
-            </div>
-
-            <div id="token_display">
-                <div id="token_display_4" class="display_token_wrap"></div>
-                <div id="token_display_3" class="display_token_wrap"></div>
-                <div id="token_display_2" class="display_token_wrap"></div>
-                <div id="token_display_1" class="display_token_wrap"></div>
-            </div>
-
-            <div id="the_spread"></div>
-            
-            <div id="pitches">
-                <!-- BEGIN pitch -->
-                    <div id="pitch_{X}_wrap" class="pitch_wrap" style="bottom: {BOTTOM}%; left: {LEFT}%;">
-                    <div id="pitch_{X}_border" class="pitch_border"></div>
-                    <div id="pitch_{X}" class="pitch p{PITCH}" style="background-position: -{PX}% -{PY}%;">
-                        <div id="pitch_{X}_rope" class="rope_hub"></div>
-                    </div>
-                    <div id="pitch_{X}_click" class="pitch_click"></div>
-                    <!-- <div class="pitch_center"></div> -->
-                    </div>
-                <!-- END pitch -->
-            </div>
-
         </div>
     </div>
-</div>
 
-<h3 id ="hand_title">{MY_HAND}</h3>
-<div id="hand_ratio">
-    <div id="hand_ratio_child">
-        <div id="myhand_wrap">
-            <div id="assets_wrap"></div>
-            <div id="objectives_wrap">
-                <div id="personal_objective_1_wrap" class="personal_objective_wrap"></div>
-                <div id="personal_objective_2_wrap" class="personal_objective_wrap"></div>
-            </div>
-        </div>
+
+    <div id="character_zone" style="position: relative;">
     </div>
+
+    <button id="reference_cards">?</button>
+    <div id="reference_popup">
+        <div id="ref_popup_close">X</div>
+        <div id="ref_1" class="reference"></div>
+        <div id="ref_2" class="reference"></div>
+    </div>
+
+    <div id="sprite_preloader"></div>
 </div>
-
-
-<div id="character_zone" style="position: relative;">
-</div>
-
-<button id="reference_cards">?</button>
-<div id="reference_popup">
-    <div id="ref_popup_close">X</div>
-    <div id="ref_1" class="reference"></div>
-    <div id="ref_2" class="reference"></div>
-</div>
-
-<div id="sprite_preloader"></div>
 
 <script type="text/javascript">
 

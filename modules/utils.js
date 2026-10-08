@@ -27,10 +27,8 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					const ele_original_zIndex_computed = window.getComputedStyle(ele).zIndex === 'auto' ? 0 : Number(window.getComputedStyle(ele).zIndex);
 					const animate_in_front =
 						$('ebd-body').classList.contains('mobile_version') &&
-						!$('page-title').classList.contains('fixed-page-title')
-							? true
-							: false;
-					const temp_zIndex = animate_in_front? 1053 : 700;
+						!$('page-title').classList.contains('fixed-page-title');
+					const temp_zIndex = animate_in_front ? 1053 : 700;
 					ele.style.zIndex = String(temp_zIndex + ele_original_zIndex_computed);
 
 					// guard against race condition from recording root_original_zIndex when several calls are firing concurrently
@@ -84,17 +82,28 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 						destination.appendChild(ele);
 						const end_pos = ele.getBoundingClientRect();
-						const x_diff = start_pos.left - end_pos.left;
-						const y_diff = start_pos.top - end_pos.top;
 
-						dojo.setStyle(ele, {
-							'top' : `${y_diff}px`,
-							'left' : `${x_diff}px`,
-							'width' : `${start_pos.width}px`,
-							'height' : `${start_pos.height}px`
-						});
-						ele.style.setProperty('--dw', `${end_pos.width}px`);
-                    	ele.style.setProperty('--dh', `${end_pos.height}px`);
+						// measure destination parent's rendered scale ratio (Screen px vs Layout px)
+						const dest_rect = destination.getBoundingClientRect();
+						const parent_scale_x = (destination.offsetWidth && dest_rect.width) ? (dest_rect.width / destination.offsetWidth) : 1;
+						const parent_scale_y = (destination.offsetHeight && dest_rect.height) ? (dest_rect.height / destination.offsetHeight) : 1;
+
+						// convert viewport pixel delta into destination's local coordinate space
+						const x_diff = (start_pos.left - end_pos.left) / parent_scale_x;
+						const y_diff = (start_pos.top - end_pos.top) / parent_scale_y;
+
+						// size ratio between start and end layout positions
+						const scale_x = end_pos.width ? start_pos.width / end_pos.width : 1;
+						const scale_y = end_pos.height ? start_pos.height / end_pos.height : 1;
+
+						// custom properties passed to keyframe animation
+						ele.style.setProperty('--dx', `${x_diff}px`);
+						ele.style.setProperty('--dy', `${y_diff}px`);
+						ele.style.setProperty('--sx', `${scale_x}`);
+						ele.style.setProperty('--sy', `${scale_y}`);
+
+						// initial transform prevents single-frame visual jumps before keyframe evaluation
+            			ele.style.transform = `translate(${x_diff}px, ${y_diff}px) scale(${scale_x}, ${scale_y})`;
 					}
 
 					else {
@@ -103,7 +112,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						origin.style.transform = 'none';
 						destination.style.transform = 'none';
 
-						origin.appendChild(ele); //put back to where it was
+						origin.appendChild(ele);
 						const x0 = ele.getBoundingClientRect().left;
 						const y0 = ele.getBoundingClientRect().top;
 
@@ -161,6 +170,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                destination.appendChild(ele);
 
 					ele.style.zIndex = ele_original_zIndex_inline;
+
 					// guard against race condition from recording root_original_zIndex when several calls are firing concurrently
 					const root_tracker = this.active_zIndex_map.get(stacking_context_root);
 					if (root_tracker) {
@@ -185,14 +195,24 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					}
 
 					if (offset_method) {
+						// Restore native layout styles and clean up animation custom properties
+						ele.style.transform = '';
+						ele.style.removeProperty('--dx');
+						ele.style.removeProperty('--dy');
+						ele.style.removeProperty('--sx');
+						ele.style.removeProperty('--sy');
+						ele.style.removeProperty('--rot');
+						ele.style.removeProperty('--start-rot');
+						ele.style.removeProperty('--end-rot');
+
 						dojo.setStyle(ele, {
-							'top' : '',
-							'left' : '',
-							'width' : '',
-							'height' : ''
+							'top': '',
+							'left': '',
+							'width': '',
+							'height': ''
 						});
 					}
-	            }
+	            };
 
 	            const func = {
 	                before: beforeAnimation,
@@ -220,7 +240,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                        ele.removeEventListener('animationend', afterAnimationCb);
 	                        if (destroy) { ele.remove(); }
 	                        resolve();
-	                    }
+	                    };
 
 	                    ele.addEventListener('animationend', afterAnimationCb);
 	                    ele.classList.add(class_name);
@@ -232,7 +252,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                        ele.removeEventListener('transitionend', afterTransitionCb);
 	                        if (destroy) { ele.remove(); }
 	                        resolve();
-	                    }
+	                    };
 
 	                    ele.addEventListener('transitionend', afterTransitionCb);
 	                    ele.classList.add(class_name);
@@ -2948,7 +2968,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					
 					gameui.addActionButton('pass_button', _('Pass'), 'onPassClimbingCard', null, false, 'white');
 					$('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-						`<span id="pass_message">${_('You cannot choose<br>either option')}</span>`
+						`<span id="pass_message" class="msg">${_('You cannot choose<br>either option')}</span>`
 					);
 				}
 			},
@@ -3132,8 +3152,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	        				this.updateTitlebar(_('Drawing Asset/s from the Portaledge'));
 		        			if (auto) {
 		        				portaledge.style.display = 'block';
-			                    await this.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-			                    portaledge.style.marginTop = 0;
+			                    await this.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
 			                    await (async function() { return new Promise(resolve => setTimeout(resolve, 300)) })();
 		        			}
 
@@ -3203,7 +3222,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 		                    if (share) { await (async function() { return new Promise(resolve => setTimeout(resolve, 500)) })(); }
 		                    await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 		                	portaledge.style.display = '';
 
 		                	await (async function() { return new Promise(resolve => setTimeout(resolve, 1000)) })();
@@ -3225,7 +3244,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    portaledge.querySelectorAll('.porta_minus').forEach(ele => { ele.remove(); });
 							portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
 							portaledge.querySelectorAll('.draw_num').forEach(ele => { ele.remove(); });
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 		                	portaledge.style.display = '';
 							this.clicksOn();
 	        				resolve();
@@ -3242,10 +3261,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	                	if (climbing_card_info && climbing_card_info.portaledge_all
 	                	&& climbing_card_info.finished_portaledge.length+1 == Object.keys(gameui.gamedatas.players).length) {
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 			                portaledge.style.display = '';
 	                	} else if (!climbing_card_info || !climbing_card_info.portaledge_all) {
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 			                portaledge.style.display = '';
 	                	}
 	                	const player_resources = this.getCurrentPlayerResources();
@@ -3283,8 +3302,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 		        			if (auto || bomber_anchor) {
 		        				portaledge.style.display = 'block';
-			                    await this.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, true);
-			                    portaledge.style.marginTop = 0;
+			                    await this.animationPromise(portaledge, 'portaledge_open', 'anim', null, false, false);
 			                    await (async function() { return new Promise(resolve => setTimeout(resolve, 300)) })();
 		        			}
 
@@ -3342,12 +3360,12 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 		                    if (climbing_card_info && climbing_card_info.portaledge_all
 		                    	&& climbing_card_info.finished_portaledge.length+1 == Object.keys(gameui.gamedatas.players).length) {
 		                    		await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-		                    		portaledge.style.marginTop = '-36.4061%';
+		                    		portaledge.style.marginRight = '';
 				                	portaledge.style.display = '';
 
 							} else if (!climbing_card_info || !climbing_card_info.portaledge_all) {
 								await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-								portaledge.style.marginTop = '-36.4061%';
+								portaledge.style.marginRight = '';
 								portaledge.style.display = '';
 							}
 
@@ -3356,7 +3374,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	                	} else {
 
 		                    await this.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true);
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 		                	portaledge.style.display = '';
 	                		resolve();
 	                	}
@@ -3366,10 +3384,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						this.updateDiscardTopCard();
 	                	if (climbing_card_info && climbing_card_info.portaledge_all
 	                	&& climbing_card_info.finished_portaledge.length+1 == Object.keys(gameui.gamedatas.players).length) {
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 			                portaledge.style.display = '';
 	                	} else if (!climbing_card_info || !climbing_card_info.portaledge_all) {
-	                		portaledge.style.marginTop = '-36.4061%';
+	                		portaledge.style.marginRight = '';
 			                portaledge.style.display = '';
 	                	}
 	                	this.handCount(player_id, hand_count);
@@ -3918,9 +3936,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					});
 
 					gameui.enabled_summit_beta_tokens = enabled;
-					// if (enabled && gameui.isCurrentPlayerActive() && dojo.query('#available_sb_message').length === 0) {
-					// 	$('phase_tracker').insertAdjacentHTML('afterend', `<span id="available_sb_message">${_('You have available<br>Summit Beta Tokens')}</span`);
-					// }
+					if (enabled && gameui.isCurrentPlayerActive() && dojo.query('#available_sb_message').length === 0) {
+						$('generalactions').lastElementChild.insertAdjacentHTML('afterend', `<span id="available_sb_message" class="msg">${_('You have available<br>Summit Beta Tokens')}</span`);
+					}
 				}
 			},
 
@@ -4063,9 +4081,9 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 								}
 
 								gameui.enabled_summit_beta_tokens--;
-            					// if (gameui.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) {
-								// 	document.getElementById('available_sb_message').remove();
-								// }
+            					if (gameui.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) {
+									document.getElementById('available_sb_message').remove();
+								}
 							}
 						}
 						resolve();
@@ -4172,7 +4190,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					button.classList.add('disabled');
 					$('generalactions').insertBefore(button, $('generalactions').firstChild);
 					if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-						`<span id="risk_it_message">${_('You may<br>risk it')}</span>`
+						`<span id="risk_it_message" class="msg">${_('You may<br>risk it')}</span>`
 					); }
 				}
 
@@ -4197,7 +4215,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 						button.classList.remove('disabled');
 						dojo.query('#requirements_message').forEach(ele => { ele.remove(); });
 						if (!$('risk_it_message')) { $('generalactions').lastElementChild.insertAdjacentHTML('afterend',
-							`<span id="risk_it_message">${_('You may<br>risk it')}</span>`
+							`<span id="risk_it_message" class="msg">${_('You may<br>risk it')}</span>`
 						); }
 						return false;
 					}					

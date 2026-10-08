@@ -304,7 +304,7 @@ class FirstAscent extends Bga\GameFramework\Table
         }
         $this->cards_and_tokens->createCards($climbing_cards, 'climbing_deck');
         $this->cards_and_tokens->shuffle('climbing_deck');
-        $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 60");
+        // $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 3");
         // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 14");
         // $testing3 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 19");
         // $testing4 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 30");
@@ -319,7 +319,7 @@ class FirstAscent extends Bga\GameFramework\Table
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing4, 'climbing_deck', true);
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing3, 'climbing_deck', true);
         // $this->cards_and_tokens->insertCardOnExtremePosition($testing2, 'climbing_deck', true);
-        $this->cards_and_tokens->insertCardOnExtremePosition($testing1, 'climbing_deck', true);
+        // $this->cards_and_tokens->insertCardOnExtremePosition($testing1, 'climbing_deck', true);
 
         // add summit beta tokens
         $summit_beta_tokens = array();
@@ -333,10 +333,10 @@ class FirstAscent extends Bga\GameFramework\Table
         $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
         // $this->cards_and_tokens->pickCardsForLocation(1, 'summit_beta_supply', 'summit_beta_discard');
         $this->cards_and_tokens->shuffle('summit_beta_supply');
-        $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=3");
+        // $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=7");
         // $testingSB2 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=8");
         // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB2, 'summit_beta_supply', true);
-        $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
+        // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
 
         // add asset cards
         $asset_cards = array();
