@@ -38,6 +38,12 @@ Principles for the migration: the client renders from authoritative server state
 
 
 
+## Guide Mode is not implemented
+
+Guide Mode (the simplified rules in RULES.md p. 18 onward) will not be implemented; there are no plans for it. Reason: publisher decision. The implementation follows the standard rules only, so a difference from Guide Mode is never a bug.
+
+
+
 ## Workflow
 
 A Claude.ai design project handles architecture, strategy, bug priorities, evaluation of Claude Code's output, and writing prompts for Claude Code. It has read-only access to the repo via GitHub sync. Claude Code works in the repo. The repo is the single source of truth: decisions made in design discussions are written into repo docs through Claude Code. Model guidance: Opus for investigation, architecture, and migration planning; Sonnet for carrying out well-specified steps.

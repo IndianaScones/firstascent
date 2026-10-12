@@ -73,7 +73,7 @@ Consistency: do similar actions behave and look similar throughout the game?
 
 Recovery and continuity: can players always understand what state the game is in after an action or refresh?
 
-The latest review also still identified concrete issues with wide-screen containment, tooltip positioning, persistent round information in the Action Bar, refresh/continuity, and interaction discoverability. Those points still need to be addressed as part of this broader pass. Texte collé
+The latest review also still identified concrete issues with wide-screen containment, tooltip positioning, persistent round information in the Action Bar, refresh/continuity, and interaction discoverability. Those points still need to be addressed as part of this broader pass.
 
 I appreciate that a significant amount of work has already gone into the adaptation. However, after several review cycles, I think the most useful thing now is to step away from individual fixes and validate the complete experience with fresh players.
 
@@ -164,6 +164,7 @@ Ian"
 
 * [?] benighted - shared technique token climbing card discarded after current player choose a token but before next player chooses one
 * Fix this SQL game creation strict mode issue: https://boardgamearena.com/forum/viewtopic.php?t=48813
+* `firstascent.game.php` requires `modules/utils.php`, but git tracks the file as `modules/Utils.php`. A deploy from a fresh clone to Studio (case-sensitive filesystem) would break the require. Expected to be resolved by the migration's file restructure.
 
 ## Test scenarios
 

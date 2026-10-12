@@ -1,0 +1,41 @@
+# Procedures
+
+Working rules for Claude Code sessions in this repo. Read this file at the start of every session, together with the latest entry in `progress.md` and `misc/docs/DECISIONS.md`.
+
+## Current phase: review
+Until Jonathan says otherwise, **do not modify code files.** Only create or edit files in `misc/docs/` and `CLAUDE.md`. Jonathan will say when this phase ends; update this section then.
+
+One-time exceptions to this rule are granted per task. When one is granted, note it in that session's `progress.md` entry. Exceptions never carry over to later tasks or change the phase.
+
+## Scope before migration
+Until the migration starts, only two code tasks are in scope:
+1. The SQL strict-mode game creation fix.
+2. The freeze investigation (review first, then diagnostic tooling).
+
+Don't fix other `TODO.md` bugs in legacy code; their reproduction steps serve as regression tests for the migrated code. Freeze diagnostic tooling lives on a throwaway branch and is never merged into `main`.
+
+Being in scope does not lift the phase rule above: code changes still need Jonathan to end the review phase or grant an exception.
+
+## UX and usability
+UX and usability decisions belong to Jonathan and Garrett (the game's publisher). When migrating or fixing code, preserve the current UI behavior and appearance unless Jonathan specifies a change. Suggest UX improvements; don't implement them on your own initiative.
+
+## Testing
+- The game is tested on BGA Studio, not locally.
+- After any code change, list specifically what Jonathan should playtest to verify it: the scenario to set up (phase, character, player count), the steps, and the expected result.
+
+## Commits
+- Keep bug fixes and structural changes in separate commits. Never combine them.
+- Work in small, reviewable steps. Commit after each verified step.
+- Playtest verification applies to code changes (verified = playtested on Studio by Jonathan). Docs-only changes are committed once Jonathan approves them.
+
+## When unsure
+- If the rules are ambiguous, or the code contradicts `RULES.md` (excluding Guide Mode), ask Jonathan rather than guessing. Quote the `RULES.md` passage (with page number) and the code location.
+
+## Code conventions
+- Never assume a fixed length for player IDs (for example, expecting 7 digits). Treat them as opaque identifiers.
+
+## Decisions
+- When Jonathan relays a decision from the design discussions, record it (with its reasoning) in `misc/docs/DECISIONS.md` in the same session.
+
+## Progress log
+- Keep a running log in `misc/docs/progress.md`. Add an entry at the end of each session (newest first) with the date, what was done, and what's next.
