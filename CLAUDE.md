@@ -25,7 +25,7 @@ This repo is the Board Game Arena (BGA) Studio implementation (game name `firsta
 | `dbmodel.sql`, `stats.json`, `gameoptions.json`, `gameinfos.inc.php` | DB schema, stats, options, game metadata. |
 | `img/` | Board, card, token and sprite images. |
 | `_ide_helper.php`, `bga-framework.d.ts` | IDE stubs for the framework. Not game code; ignore. |
-| `.vscode/sftp.json` | Studio deploy config. Untracked (listed in `.gitignore`). Contains credentials: never print, copy, edit, or commit it. |
+| `.vscode/sftp.json` | Studio deploy config for the VS Code SFTP extension (Natizyskunk). Authenticates with an SSH key via the Windows OpenSSH agent (`agent` option); contains no secret. Untracked (listed in `.gitignore`): don't commit it, and don't edit it without Jonathan's go-ahead. |
 | `version.php`, `LICENCE_BGA`, `misc/README`, `modules/README` | BGA boilerplate. Don't edit. |
 
 ## Doc map: `misc/docs/`

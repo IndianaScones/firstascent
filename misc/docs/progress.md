@@ -2,6 +2,19 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-12 (Studio SSH key auth)
+
+**Phase-rule exception:** one-time exception granted for this task only. It allowed reading and editing `.vscode/sftp.json`, reading the installed SFTP extension's files, running the Windows OpenSSH `ssh-add -l`, and editing, committing and pushing `CLAUDE.md` and `progress.md` (normal push). The "Current phase" section is unchanged.
+
+**Done**
+- Studio SFTP switched from password to SSH key auth. `.vscode/sftp.json` now uses the extension's `agent` option pointing at the Windows OpenSSH agent pipe, which holds the `bga_studio` ed25519 key. The extension (Natizyskunk SFTP 1.16.3, ssh2 1.13.0) supports that pipe. VS Code deploy verified ("SFTP: Diff Active File with Remote" worked).
+- The old password is confirmed dead: Studio rejected it after the key upload, so no admin reset is needed.
+- The backups from the git cleanup were deleted by Jonathan.
+- `CLAUDE.md` file-map row for `.vscode/sftp.json` updated.
+
+**Next**
+1. Freeze investigation (review first, writing `FREEZE_INVESTIGATION.md`).
+
 ## 2026-10-12 (SFTP config removal)
 
 **Phase-rule exception:** one-time exception granted for this task only. It allowed editing `.gitignore`, rewriting git history, making the two copies of `.vscode/sftp.json` (a file backup and the mirror clone), reading the password once for the history check, editing `CLAUDE.md` and `progress.md`, and force-pushing after Jonathan's confirmation. The "Current phase" section is unchanged.
