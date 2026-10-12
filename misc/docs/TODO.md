@@ -83,31 +83,31 @@ Relevant Studio Guidelines:
 
 A.1 — Layout arrangement
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#A.1\_Layout\_arrangement
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#A.1_Layout_arrangement
 
 A.2 — Action Bar
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#A.2\_Action\_Bar
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#A.2_Action_Bar
 
 B.1 — Tooltips
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#B.1\_Tooltips
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#B.1_Tooltips
 
-C.2 — Highlights \& Glowing auras
+C.2 — Highlights & Glowing auras
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#C.2\_Highlights\_\&\_Glowing\_auras
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#C.2_Highlights_&_Glowing_auras
 
-C.4 — Sizing \& responsiveness
+C.4 — Sizing & responsiveness
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#C.4\_Sizing\_\&\_responsiveness
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#C.4_Sizing_&_responsiveness
 
 E.1 — Design for all
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#E.1\_Design\_for\_all
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#E.1_Design_for_all
 
-F.2 — Refresh \& Continuity
+F.2 — Refresh & Continuity
 
-https://en.doc.boardgamearena.com/BGA\_Studio\_Guidelines#F.2\_Refresh\_\&\_Continuity
+https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#F.2_Refresh_&_Continuity
 
 Not ready for Alpha. A broader usability pass with new players is required before the next submission.
 
@@ -122,7 +122,7 @@ Ian"
 * on mobile (or resized shrunken desktop window), permanent assets tokens are jumping up slightly before sliding down to asset board - only sometimes
 * bomber anchor - make it so clicking on cards in hand doesn’t hide the portaledge - check bomber anchor a bunch with new portaledge - if it gets hidden and then cards are deselected for example, it creates problems - play with undo also
 * recheck responsiveness of scorecard - opponent objectives button can go to weird places if screen scrunched horizontally and if scorecard is too small, names go outside of the lines
-* [state] asset\_hand\_to\_board z-indices are wrong, cards slide under cards remaining in hand
+* [state] asset_hand_to_board z-indices are wrong, cards slide under cards remaining in hand
 
   * not reproducible from load/refresh. Must be something about cards getting z-indices when they’re drawn and not freeing them up afterwards or something. In any event, happens only to cards drawn since the last page load
 * dark mode issues:
@@ -152,13 +152,13 @@ Ian"
 * [state] Guidebook has to deselect itself if player fails to climb pitch (due to risking it and not being able to resolve die result)
 * double check cards discarded from asset board for permanent tokens - saw another instance of the wrong card being in front during anim, then the correct one snapping in front at end of anim
 * issue with red border pop-in still exists for water/psych red border - update solution to include that
-* [state] check trifecta\_drawer - when I climbed trifecta, garrett saw- IndianaScones: undefined
+* [state] check trifecta_drawer - when I climbed trifecta, garrett saw- IndianaScones: undefined
 
   * fixed by refresh
 * [state] Crag dog - option a changed player from 0 psych to -1
 
   * fine on back end, only problem on front end
-* spectator - asset\_display\_to\_board doesn’t happen - assets snap onto board instead
+* spectator - asset_display_to_board doesn’t happen - assets snap onto board instead
 
 ## Server bugs
 
