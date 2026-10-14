@@ -10,9 +10,15 @@ One-time exceptions to this rule are granted per task. When one is granted, note
 ## Scope before migration
 Until the migration starts, only two code tasks are in scope:
 1. The SQL strict-mode game creation fix.
-2. The freeze investigation (review first, then diagnostic tooling).
+2. The two targeted freeze fixes:
+   - the fallback in `animationPromise` (`modules/utils.js`);
+   - the null guards at the three confirmed `trade_button` sites in `firstascent.js`.
 
-Don't fix other `TODO.md` bugs in legacy code; their reproduction steps serve as regression tests for the migrated code. Freeze diagnostic tooling lives on a throwaway branch and is never merged into `main`.
+   The freeze investigation itself is closed (`DECISIONS.md`, "The freezes are the top priority").
+
+Don't fix other `TODO.md` bugs in legacy code, including the other bugs the freeze investigation found. Their reproduction steps serve as regression tests for the migrated code.
+
+The step-2 freeze diagnostic tooling (planned for a throwaway branch) was dropped for the legacy code. Its useful ideas move into the migrated code; see `DECISIONS.md`.
 
 Being in scope does not lift the phase rule above: code changes still need Jonathan to end the review phase or grant an exception.
 

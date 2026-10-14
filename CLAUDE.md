@@ -8,7 +8,7 @@ This repo is the Board Game Arena (BGA) Studio implementation (game name `firsta
 ## Current state and goal
 - **Now:** legacy BGA framework with no class structure. The code is two giant files (client `firstascent.js`, server `firstascent.game.php`), with states in `states.inc.php`, actions in `firstascent.action.php`, and layout in `.tpl`/`.view.php`.
 - **Goal:** migrate to the current BGA framework (`modules/php/Game.php`, `modules/php/States/` state classes, `modules/js/Game.js`, autowired actions). Restructure into classes along the way. Most known bugs are fixed in the migrated code, not the legacy code; see `misc/docs/PROCEDURES.md` for what is in scope before the migration. Resubmission to BGA waits until the migration is done.
-- **Top priority:** eliminate the intermittent freezes. The client gets stuck while the server state is fine, and a refresh always fixes it. The suspected cause is client state drifting out of sync with game state. Approach and reasoning: `misc/docs/DECISIONS.md`.
+- **Top priority:** the intermittent freezes. Cause found and investigation closed: a notification handler either waits on an animation that can never finish (for example, inside a container the player hid) or throws before its release call, stranding that client's queue until a refresh. Two targeted legacy fixes cover this; the rest goes into the migration principles. Conclusions, decisions and principles: `misc/docs/DECISIONS.md`.
 
 ## File map (existing code, repo root)
 | File | Role |
@@ -34,6 +34,7 @@ This repo is the Board Game Arena (BGA) Studio implementation (game name `firsta
 - `RULES.md`: complete rulebook transcription (page markers `<!-- p. N -->`). It also transcribes Guide Mode (simplified rules, p. 18 onward). Guide Mode is not implemented and not planned; ignore it, and never treat a difference from Guide Mode as a bug.
 - `TODO.md`: BGA review feedback, known bugs (`[state]` = client out of sync with game state), test scenarios, planned improvements.
 - `DECISIONS.md`: reasoning behind project decisions.
+- `FREEZE_INVESTIGATION.md`: the closed freeze investigation: review, playtest results, suspects and code locations. Conclusions are in `DECISIONS.md`.
 - `bga/current/`: current BGA framework docs: `game-files/` (Game.php, Game.js, State classes, dbmodel, …), `components/` (BgaCards, ItemManager, BgaAnimations, …), `components-community/`, `guides/`, `studio/` (debugging, logs, troubleshooting), `bga_ux_guidelines.md`.
 - `bga/legacy/`: deprecated framework pages (action.php, states.inc.php, view/tpl, Deck, Stock).
 

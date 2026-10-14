@@ -1,5 +1,15 @@
 # Freeze investigation, step 1 (review only)
 
+**Status (2026-10-13): investigation closed.**
+- **Conclusions and decisions:** `DECISIONS.md`, "The freezes are the top priority".
+- **Step-2 tooling (§8): superseded.** It was not built for the legacy code. Its snapshot and animation-wait registry ideas move into the migrated code.
+- **Open questions (§9): skipped.**
+- **Fixes applied in the closing task** (playtested on Studio by Jonathan on 2026-10-14; results and commits in `progress.md`):
+  - **Silent class (S1, S4 and any instances not found):** `animationPromise` (`modules/utils.js`) now settles an animation wait that can't complete. That covers an element not in the document or not rendered, no animation running one frame after the class is applied (this includes "class already present"), the animation cancelled, and a timeout backstop. Each fallback goes through the normal completion path and logs one `[FA animation fallback]` warning. An element that is already out of the document stays out: `after()` still runs its cleanup, but the element isn't re-inserted at its destination.
+  - **S2:** null guards at the three `trade_button` sites: js:8222 (Simul Climb), js:12831 and 12876 (Rerack) and js:12996 (Bomber Anchor). Line numbers are from before the change. With the button missing, the check is skipped; `onUndoSummitBeta` → `restoreServerGameState()` then recreates the button with its state recomputed (js:2615–2616).
+
+The rest of this document is the investigation record and is unchanged.
+
 Date: 2026-10-12. Playtest results were added the same day: see "Playtest results" just before §1. Each suspect in §1 now opens with its verdict. No code was changed. Scope: `firstascent.js`, `modules/utils.js`, `firstascent.game.php`, `states.inc.php`, `firstascent.action.php`, plus `firstascent.css` and `firstascent_firstascent.tpl` where they decide whether an animation can run at all.
 
 ## How to read this document

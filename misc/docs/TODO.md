@@ -160,13 +160,20 @@ Ian"
   * fine on back end, only problem on front end
 * spectator - asset_display_to_board doesn’t happen - assets snap onto board instead
 * bomber anchor - the Portaledge "+" buttons can be clicked with no hand cards selected for discard. Before the Portaledge refactor, draws were limited to the number of selected discards. Now every "+" is shown when Bomber Anchor is confirmed (js:5683), and nothing caps the draws at the selected discards (js:4652)
+
+  * and there's no upper limit on draws either
 * bomber anchor - every Portaledge +/- click throws `Cannot set properties of null (setting 'innerHTML')` at js:4739 in states that have no `#draw_counter` (for example `climbOrRest`). `onSelectPortaledge`'s non-resting branch assumes the `selectPortaledge` counter. The draw number updates first, but the code that hides "+" and enables/disables Confirm (js:4741–4766) never runs
+
+  * observed: with a hand card selected first, clicking "+" gives Discard 1 Draw 1 but Confirm stays disabled; choosing the draw first works (Confirm is then enabled by the hand click, js:5770)
 * confirming Bomber Anchor when it's the last enabled any-time Summit Beta token throws `Cannot read properties of null (reading 'remove')` at js:5820, because `#available_sb_message` is already gone. The action is never sent
 
   * the token count and the Bomber Anchor state are already cleared at that point (js:5814–5819), so clicking Confirm again throws again
   * Energy Drink (js:5489) and Simul Climb (js:5621) have the same unguarded line; Rerack guards it (js:5434)
 * [state] bomber anchor - Undo Token (`onUndoSummitBeta`) doesn't reset `this.bomber_anchor`, so the next Portaledge +/- click (for example while resting) throws on the missing `#ba_draw_num` (js:4674, 4680, 4694, 4701)
 * "Hide card(s)" button - `onShowHideCard` compares the button's text with the untranslated English 'Hide card' / 'Hide cards' (js:4257, 4290). In any other language the button never hides the card(s)
+* refillPortaledge - the first refill step uses card backs that are too large and slightly off target, in every refill since the Portaledge refactor. The shuffle step is correct
+* climbing card 49 (shared Gear draw) - race: both Portaledge draws run at once (the opponent's isn't awaited, js:10827/10830, 10866), so with a refill both refill the same deck at once. About 7 `[FA animation fallback]` warnings per refill; no flight to the opponent's hand counter
+* a hidden portaledge or crimper display should reappear before cards animate (desired behavior per Jonathan). Today cards fly in from the upper left, or from off-screen above the page
 
 ## Server bugs
 
