@@ -8219,7 +8219,8 @@ function (dojo, declare, aspect, BgaAutofit) {
             await drawCards();
 
             // check if the trade button should be enabled
-            if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button').classList.contains('disabled')) {
+            // (after a Summit Beta token it's gone until onUndoSummitBeta restores the action bar, which recreates it)
+            if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button') && $('trade_button').classList.contains('disabled')) {
                 if (this.utils.tradeEnabled()) { $('trade_button').classList.remove('disabled'); }
             }
 
@@ -12828,7 +12829,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                     if (this.gamedatas.gamestate.name === 'climbingCard') { this.utils.checkClimbingChoices(); }
 
                     // check if the trade button should be enabled
-                    if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button').classList.contains('disabled')) {
+                    // (after a Summit Beta token it's gone until onUndoSummitBeta restores the action bar, which recreates it)
+                    if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button') && $('trade_button').classList.contains('disabled')) {
                         if (this.utils.tradeEnabled()) { $('trade_button').classList.remove('disabled'); }
                     }
 
@@ -12873,7 +12875,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 if (this.gamedatas.gamestate.name === 'climbingCard') { this.utils.checkClimbingChoices(); }
 
                 // check if the trade button should be enabled
-                if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button').classList.contains('disabled')) {
+                // (after a Summit Beta token it's gone until onUndoSummitBeta restores the action bar, which recreates it)
+                if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button') && $('trade_button').classList.contains('disabled')) {
                     if (this.utils.tradeEnabled()) { $('trade_button').classList.remove('disabled'); }
                 }
 
@@ -12992,7 +12995,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
 
                 // check if the trade button should be enabled
-                if (this.gamedatas.gamestate.name === 'climbOrRest') {
+                // (after a Summit Beta token it's gone until onUndoSummitBeta restores the action bar, which recreates it)
+                if (this.gamedatas.gamestate.name === 'climbOrRest' && $('trade_button')) {
                     const trade_button = $('trade_button');
                     const trade_enabled = this.utils.tradeEnabled();
                     if (trade_button.classList.contains('disabled') && trade_enabled) {
