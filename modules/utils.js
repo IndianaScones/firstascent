@@ -231,19 +231,116 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 					}
 
 	                if (type === 'anim') {
-	                    const afterAnimationCb = () => {
+	                    // fallback: if the animation can't run or its end never arrives, settle anyway (with a warning)
+	                    // through the normal completion path, instead of leaving the caller waiting forever
+	                    let settled = false;
+	                    let check_frame = null;
+	                    let cancel_frame = null;
+	                    let backstop = null;
+	                    const had_class = ele.classList.contains(class_name);
+
+	                    const complete = (keep_detached) => {
+	                        if (settled) { return; }
+	                        settled = true;
+	                        cancelAnimationFrame(check_frame);
+	                        cancelAnimationFrame(cancel_frame);
+	                        clearTimeout(backstop);
+	                        ele.removeEventListener('animationcancel', onAnimationCancel);
+	                        document.removeEventListener('visibilitychange', onVisible);
+	                        const old_parent = ele.parentNode;
+	                        const old_next = ele.nextSibling;
+
 	                        if (func && 'after' in func) {
 								const after_args = [...params, before_result];
 								func.after(...after_args);
 							}
+	                        // an element that was removed from the document stays removed: after() still runs its cleanup
+	                        // (z-index map, styles), but the element is put back where it was instead of at its destination
+	                        if (keep_detached && ele.parentNode !== old_parent) {
+	                            if (old_parent) { old_parent.insertBefore(ele, old_next && old_next.parentNode === old_parent ? old_next : null); }
+	                            else { ele.remove(); }
+	                        }
 	                        if (remove_class) { ele.classList.remove(class_name); }
 	                        ele.removeEventListener('animationend', afterAnimationCb);
 	                        if (destroy) { ele.remove(); }
 	                        resolve();
 	                    };
+	                    const afterAnimationCb = () => complete(false);
+
+	                    // CSS animations still to come on the element or its descendants (animationend bubbles up from them)
+	                    const liveAnimations = () => ele.getAnimations({ subtree: true }).filter(anim =>
+	                        (typeof CSSAnimation === 'undefined' || anim instanceof CSSAnimation)
+	                        && (anim.pending || anim.playState === 'running'));
+
+	                    const isRendered = () => ele.checkVisibility ? ele.checkVisibility() : ele.getClientRects().length > 0;
+
+	                    const fallback = (reason) => {
+	                        if (settled) { return; }
+	                        const path = [];
+	                        for (let node = ele; node && path.length < 4; node = node.parentElement) {
+	                            if (node.id) { path.unshift(`#${node.id}`); break; }
+	                            const classes = Array.from(node.classList).filter(c => c !== class_name).slice(0, 2);
+	                            path.unshift(node.tagName.toLowerCase() + classes.map(c => `.${c}`).join(''));
+	                        }
+	                        const gamestate = gameui.gamedatas && gameui.gamedatas.gamestate;
+	                        const title = document.getElementById('pagemaintitletext');
+	                        console.warn(`[FA animation fallback] ${reason} | element: ${path.join(' > ')} | class: ${class_name}`
+	                            + ` | state: ${gamestate ? gamestate.name : '?'} | title: "${title ? title.textContent.trim() : ''}"`);
+	                        complete(!ele.isConnected);
+	                    };
+
+	                    // timeout backstop: what's left of the running animations (delay included) plus 1s
+	                    const armBackstop = () => {
+	                        let remaining = 0;
+	                        for (const anim of liveAnimations()) {
+	                            remaining = Math.max(remaining, anim.effect.getComputedTiming().endTime - (anim.currentTime || 0));
+	                        }
+	                        if (!isFinite(remaining)) { return; } // an infinite animation never ends; no backstop
+	                        const delay = Math.round(remaining) + 1000;
+	                        backstop = setTimeout(() => {
+	                            if (document.hidden) { document.addEventListener('visibilitychange', onVisible); }
+	                            else {
+	                                const detail = !ele.isConnected ? ' (element removed)' : (!isRendered() ? ' (element hidden)' : '');
+	                                fallback(`no animationend within ${delay} ms${detail}`);
+	                            }
+	                        }, delay);
+	                    };
+
+	                    // a hidden tab holds animation events back: re-arm once it's visible again instead of cutting the animation short
+	                    const onVisible = () => {
+	                        if (document.hidden || settled) { return; }
+	                        document.removeEventListener('visibilitychange', onVisible);
+	                        armBackstop();
+	                    };
+
+	                    const checkAnimation = () => {
+	                        if (settled) { return; }
+	                        if (!ele.isConnected) { fallback('element is not in the document'); }
+	                        else if (!isRendered()) { fallback('element or an ancestor is not rendered (display:none)'); }
+	                        else if (liveAnimations().length === 0) {
+	                            fallback(had_class ? 'class was already present and no animation is running' : 'no animation started');
+	                        }
+	                        else { armBackstop(); }
+	                    };
+
+	                    // a cancel (also one bubbling up from a descendant) only settles once nothing is left running
+	                    const onAnimationCancel = () => {
+	                        cancelAnimationFrame(cancel_frame);
+	                        cancel_frame = requestAnimationFrame(() => {
+	                            if (!settled && (!ele.isConnected || !isRendered() || liveAnimations().length === 0)) {
+	                                fallback(ele.isConnected ? 'animation cancelled' : 'animation cancelled (element removed)');
+	                            }
+	                        });
+	                    };
 
 	                    ele.addEventListener('animationend', afterAnimationCb);
 	                    ele.classList.add(class_name);
+
+	                    // checked one frame later, after the caller has finished placing and showing things
+	                    if (typeof ele.getAnimations === 'function') {
+	                        ele.addEventListener('animationcancel', onAnimationCancel);
+	                        check_frame = requestAnimationFrame(checkAnimation);
+	                    }
 
 	                } else if (type ==='trans') {
 	                    const afterTransitionCb = () => {
