@@ -2,6 +2,66 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-14 (Freeze work closed: conclusions and two targeted fixes)
+
+Work began 2026-10-13 and was playtested on Studio by Jonathan on 2026-10-14.
+
+**Phase-rule exception:** one-time exception granted for this task only. It allowed:
+- editing the `animationPromise` function in `modules/utils.js`, and only that function;
+- editing the three `$('trade_button')` sites in `firstascent.js` (Rerack, Bomber Anchor, Simul Climb);
+- committing and pushing (normal push).
+
+The "Current phase" section of `PROCEDURES.md` is unchanged; the review phase continues. The uncommitted testing overrides in `firstascent.game.php` were not touched, staged or committed.
+
+**Done**
+- **A1:** nothing to commit. The investigation docs were already committed as `fbcd7f9` and `db8fd36`.
+- **`fb8a1f7`, docs.**
+  - `DECISIONS.md`: freeze conclusions (a silent class and a loud class), the three decisions with their reasons, and migration principles a–d. It also has two small consistency edits Jonathan approved.
+  - `PROCEDURES.md`: "Scope before migration" now lists the two fixes and notes the tooling as dropped.
+  - `CLAUDE.md`: the priority bullet and the doc map.
+  - `FREEZE_INVESTIGATION.md`: a status note at the top.
+  - `TODO.md`: the bugs found while playtesting the fixes.
+- **`948f472`, `animationPromise` fallback.**
+  - What it does: settles a wait that can't finish, through the normal completion path, with one `[FA animation fallback]` warning. One frame after the class is applied, it checks whether the element is out of the document, not rendered, or has no running animation. It also settles on a cancel that leaves nothing running, and on a timeout backstop (remaining duration plus 1 s, re-armed while the tab is hidden). An element already removed from the document isn't re-inserted.
+  - Before deploying, it was tested in a Chromium harness that loads the real function (22 cases).
+  - An audit of every removal site found one deliberate removal of in-flight elements. In the card-49 race, `updateDiscardTopCard` clears the discard pile while refill card backs are flying out of it. That led to the "not re-inserted" rule.
+- **`88209ef`, `trade_button` guards** at js:8222, 12831, 12876 and 12996 (line numbers from before the change). When the button is missing, the check is skipped; `onUndoSummitBeta` then restores the bar and recreates the button.
+- All three commits were pushed to origin `main` (normal push).
+
+**Playtest results (Studio, Jonathan)**
+- **Freeze scenarios now continue instead of freezing:**
+  - watcher, rest with a card draw and Water/Psych-only rest (1a, 1b);
+  - active player, rest and trade (2a, 2b);
+  - Rerack in `climbOrRest` before choosing a pitch (4);
+  - Cool-Headed Crimper watcher (6).
+- **The next portaledge window after 1a and 2a** opens normally, with no close animation and no warning.
+- **Nothing-hidden checks: no fallback warnings.** These were rest, trade, a full round, Rerack in another state, Simul Climb, and Bomber Anchor in `climbOrRest`. Bomber Anchor resolved there with no errors after Confirm, which verifies the js:12996 guard.
+- **Bomber Anchor selection is broken by the recent Portaledge refactor:**
+  - js:4739 throws on each "+" click;
+  - draws are uncapped;
+  - with a hand card chosen first, Confirm stays disabled.
+
+  None of this is caused by the fixes. It's recorded in `TODO.md`.
+
+**Fallback warnings seen in playtesting**
+- **Expected, in the hidden-container tests:**
+  - 1a/1b: one `portaledge_close` on `#portaledge` (not rendered);
+  - 2a: two per drawn card (`flip_transform`, `asset_portaledge_to_display`) plus one `portaledge_close`;
+  - 2b: three;
+  - 6: one `climbing_card_slot_to_discard`;
+  - Bomber Anchor confirmed with the portaledge hidden: as 2b.
+- **Normal play:** none.
+- **Climbing card 49 with a refill (forced with the testing overrides):** about 7 `element is not in the document | … class: portaledge_reshuffle_R` warnings per refill, from utils:3587.
+  - Cause: a race that was already there. Both Portaledge draws refill the same deck at once, and each shuffle loop covers both refills' 14 card backs. At `i === 6` it removes them all, then keeps shuffling the removed ones.
+  - No stray card backs were left. It's recorded in `TODO.md`.
+
+**Outstanding**
+- **Replay check** (deferred by Jonathan): step through a Studio replay, including a rest, and confirm there are no fallback warnings. Run it before outside playtesters use the build.
+- **The Bomber Anchor errors at js:4739 and js:5820** are regressions from the recent Portaledge refactor, not long-standing legacy bugs. They are candidates for a separate small fix task before outside playtesting; that isn't decided yet.
+
+**Next**
+1. A review-only migration planning session, in a new session.
+
 ## 2026-10-12 (Freeze investigation, playtest results)
 
 **Phase-rule exceptions:** none granted, and none needed. The task was review-only. Files written: `misc/docs/FREEZE_INVESTIGATION.md`, `misc/docs/TODO.md` and this entry. No code was changed. Nothing is committed: docs-only changes wait for Jonathan's approval. The uncommitted `firstascent.game.php` change and `misc/docs/temp.txt` in the working tree predate this task and weren't touched.
