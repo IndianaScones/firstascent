@@ -4368,8 +4368,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                     this.utils.removeOutsideClickListener();
                 };
 
-                // start listener
-                this.utils.setupOutsideClickListener(portaledge, closePopup);
+                // start listener (during Bomber Anchor the hand counts as inside, as in onConfirmSummitBetaBomberAnchor)
+                this.utils.setupOutsideClickListener(this.bomber_anchor ? [portaledge, $('assets_wrap')] : portaledge, closePopup);
 
             } else { // hide portaledge
 
@@ -4642,7 +4642,7 @@ function (dojo, declare, aspect, BgaAutofit) {
         onSelectPortaledge: function(evt) {
             dojo.stopEvent(evt);
 
-            const rest = this.gamedatas.gamestate.name === 'resting';
+            const rest = this.gamedatas.gamestate.name === 'resting' && !this.bomber_anchor; // Bomber Anchor in resting uses the selectPortaledge logic
             let rest_resources = rest ? this.rest_resources : 0;
             const portaledge = $('portaledge');
             if ($('requirements_message')) { $('requirements_message').remove(); }
@@ -4666,6 +4666,9 @@ function (dojo, declare, aspect, BgaAutofit) {
             }
 
             const rest_num = ['2', '8'].includes(this.character_id) ? 6 : 5;
+
+            // Bomber Anchor: draw no more cards than are being discarded
+            if (this.bomber_anchor && evt.currentTarget.id == `${selected_deck.id}_plus_one` && currently_selected >= this.portaledge_num) { return; }
 
             if (evt.currentTarget.id == `${selected_deck.id}_plus_one`) {
                 if (!selected_classes.contains('draw')) {
@@ -5678,6 +5681,10 @@ function (dojo, declare, aspect, BgaAutofit) {
             $('pagemaintitletext').insertAdjacentElement('afterend', bomber_anchor_counter);
 
             const portaledge = $('portaledge');
+
+            // draws chosen before the token was used (resting, selectPortaledge) don't carry over: they'd count against the cap invisibly
+            dojo.query('.portaledge.draw').forEach(deck => { deck.classList.remove(deck.classList[deck.classList.length-1], 'draw'); });
+
             dojo.query('.portaledge').forEach(deck => {
 
                 dojo.place(`<div id="${deck.id}_minus_one" class="porta_minus">-</div><div id="${deck.id}_plus_one" class="porta_plus">+</div>`, deck);
@@ -5703,6 +5710,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 deck_plus_one.onclick = bound_handler;
                 this.portaledge_selection_handlers.push(deck_plus_one);
                 deck_minus_one.style.display = 'none';
+                deck_plus_one.style.display = 'none'; // "+" appears once a card is selected for discard
             });
 
             portaledge.style.display = 'block';
@@ -5715,9 +5723,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                 this.utils.removeOutsideClickListener();
             };
 
-            // start listener
-            this.utils.setupOutsideClickListener(portaledge, closePopup);
-            
+            // start listener (the hand counts as inside: its cards and tokens are clicked to resolve Bomber Anchor)
+            this.utils.setupOutsideClickListener([portaledge, $('assets_wrap')], closePopup);
+
             dojo.query('.hand_asset_wrap > .asset').forEach(ele => {
 
                 const bound_handler = this.onSelectBomberAnchorDiscard.bind(gameui);
@@ -5765,6 +5773,10 @@ function (dojo, declare, aspect, BgaAutofit) {
                     asset_ele.classList.add('selected_resource');
                     asset_ele.parentElement.classList.add('selected_resource_wrap');
                     discard_num.innerHTML = discard_count;
+
+                    // one more discard allows one more draw, so any earlier draws no longer match
+                    $('portaledge').querySelectorAll('.porta_plus').forEach(ele => { ele.style.display = ''; });
+                    $('confirm_button').classList.add('disabled');
                 }
 
                 if (discard_count == draw_num.innerHTML 
@@ -5782,6 +5794,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                 document.querySelectorAll('.portaledge').forEach(ele => {
                     if (ele.classList.length === 4) { ele.classList.remove(ele.classList[ele.classList.length-1], 'draw'); }
                 });
+                // the draws were cleared: bring back "+" (hidden at the cap) while a card is still selected, and hide the now-pointless "-"
+                $('portaledge').querySelectorAll('.porta_plus').forEach(ele => { ele.style.display = discard_count > 0 ? '' : 'none'; });
+                $('portaledge').querySelectorAll('.porta_minus').forEach(ele => { ele.style.display = 'none'; });
 
                 if ((discard_num != $('ba_draw_num').innerHTML || discard_num == 0) && !$('confirm_button').classList.contains('disabled')) {
                     $('confirm_button').classList.add('disabled');
@@ -6299,8 +6314,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
                     portaledge.querySelectorAll('.porta_minus').forEach(ele => { ele.remove(); });
                     portaledge.querySelectorAll('.draw_num').forEach(ele => { ele.remove(); });
-                    document.querySelectorAll('.hand_asset_wrap > .selected_resource').forEach(ele => {
-                        ele.classList.remove('selectable', 'selected_resource');
+                    document.querySelectorAll('.hand_asset_wrap > .asset').forEach(ele => { // every hand card, not only the selected ones
+                        ele.classList.remove('cursor', 'selectable', 'selected_resource');
                         ele.parentElement.classList.remove('selectable_wrap');
                     });
                     for (const ele of this.bomber_anchor_selection_handlers) { ele.onclick = null; }
