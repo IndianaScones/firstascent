@@ -34,6 +34,7 @@ This repo is the Board Game Arena (BGA) Studio implementation (game name `firsta
 - `RULES.md`: complete rulebook transcription (page markers `<!-- p. N -->`). It also transcribes Guide Mode (simplified rules, p. 18 onward). Guide Mode is not implemented and not planned; ignore it, and never treat a difference from Guide Mode as a bug.
 - `TODO.md`: BGA review feedback, known bugs (`[state]` = client out of sync with game state), test scenarios, planned improvements.
 - `DECISIONS.md`: reasoning behind project decisions.
+- `MIGRATION_PLAN.md`: the migration plan. It covers which legacy and current-framework pieces can coexist, the phases and steps (scope, files, done criteria, playtests), the class structure, the design for the migration principles, the debug functions and the regression strategy. Its proposals aren't decisions until they're recorded in `DECISIONS.md`.
 - `FREEZE_INVESTIGATION.md`: the closed freeze investigation: review, playtest results, suspects and code locations. Conclusions are in `DECISIONS.md`.
 - `bga/current/`: current BGA framework docs: `game-files/` (Game.php, Game.js, State classes, dbmodel, …), `components/` (BgaCards, ItemManager, BgaAnimations, …), `components-community/`, `guides/`, `studio/` (debugging, logs, troubleshooting), `bga_ux_guidelines.md`.
 - `bga/legacy/`: deprecated framework pages (action.php, states.inc.php, view/tpl, Deck, Stock).

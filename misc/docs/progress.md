@@ -2,6 +2,87 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-15 (Migration plan drafted and revised)
+
+A review-only planning session. Jonathan reviewed the first draft, asked for revisions, and approved the revised plan.
+
+**Phase-rule exception:** none granted. The session stayed within the review phase:
+- the only files written were `misc/docs/MIGRATION_PLAN.md` (new), this entry and `CLAUDE.md`;
+- no code file was changed, nothing was deployed, and Studio wasn't touched;
+- nothing was recorded in `DECISIONS.md`. The plan's proposals aren't decisions until Jonathan records them there (P0.1).
+
+The uncommitted testing overrides in `firstascent.game.php` were read for §6 of the plan but not touched, staged or committed. Jonathan edited them during the session; §6.1 describes them as first read, and its design doesn't depend on their values.
+
+**Done** (one commit with the plan, `CLAUDE.md` and this entry: "Add the migration plan draft and log the planning session"; pushed to origin `main`, normal push)
+- **`MIGRATION_PLAN.md`.** A one-page summary (approach, phases with session counts, coexistence in brief, decisions D1–D14), then 13 sections:
+  1. which legacy and current-framework pieces can coexist, with doc citations and a list of cheap Studio checks (U1–U18);
+  2. the step catalog P0.1–P7.4, each step with scope, files, done criteria, playtest, `TODO.md` repros and Studio state;
+  3. the class structure, server and client;
+  4. the freeze principles from `DECISIONS.md` as concrete design;
+  5. the server port and rules checking;
+  6. debug functions to replace the testing overrides;
+  7. BGA components;
+  8. the regression strategy (`TODO.md` items T1–T32, freeze scenarios F1–F13);
+  9. the claude-code-bga evaluation, with a scoped trial proposal;
+  10. branching and commits;
+  11. the end of the review phase;
+  12. UX changes during the migration;
+  13. open decisions and questions.
+- **Revisions after Jonathan's review:**
+  - **P4.4–P4.6** are now a mechanical, timing-neutral move. Every notification handler goes behind the error-policy wrapper, and a `release` callback replaces `setSynchronousDuration()`. The async hygiene (`.then` chains, `new Promise(async …)` executors, fire-and-forget work) is deferred to the slice that owns each handler, as separate commits. The recommendation and its reasons are in P4.4–P4.6. §4.3.1 lists, by slice, all 35 executors and the five releases inside `.then` chains.
+  - **§4.1.1, the re-entry inventory for D5.** The no-transition flows can end in 14 states. Re-entering them is safe on the server in 13; `drawAssets` needs B8 fixed first. The legacy client isn't re-entry-safe, so D5 applies only through the new JS state classes. A Studio check in P5.1 comes before P5.9 relies on re-entry. For any state ruled out, the fallback is a private `refreshStateArgs` notification.
+  - **D14, the resubmission milestone:** four options with their trade-offs, no recommendation.
+  - **Session counts per phase:** about 80–100 sessions in all, 44–52 of them in P5.
+  - **P0.1** now includes revising the "roughly a couple of weeks" estimate in `DECISIONS.md`.
+- **claude-code-bga** (§9): cloned read-only into a scratch directory outside the repo and read. Nothing was installed, added as a skill or run.
+- **`CLAUDE.md`:** `MIGRATION_PLAN.md` added to the doc map.
+
+**Findings from reading the code** (§5.4 of the plan; none verified on Studio)
+- **Q-R2, suspected bug:** a bailed player is appended to `finished_drawing` twice. So when any player except the last bails, the last player in Rerack order never draws.
+- **B7, suspected bug:** Simul Climb is probably refused in `crimperClimbingCards` (state 60). It's the same gap as the Bomber Anchor one fixed in `1aaad2b`.
+- **B8, latent bug:** Simul Climb runs the Rerack draw bookkeeping in `confirmAssets`.
+- **B5:** `debug_goToState` is public and unguarded in the production build.
+- **Q-R1:** "bail out" doesn't appear in `RULES.md`.
+- Also Q-R3–Q-R8, B1–B4 and B6.
+
+They're recorded only in the plan; `TODO.md` doesn't have them.
+
+**Open decisions** (§13)
+- D1: the approach and phase order.
+- D2: branching (`main` plus tags and a hotfix branch, or a long-lived migration branch).
+- D3: claude-code-bga (don't install it; run the scoped trial or not).
+- D4: stashing the testing overrides before P1.1.
+- D5: ending the no-transition flows with a server self-transition.
+- D6: what a player sees when a notification handler fails.
+- D7: scope and timing of server-side input validation (B3).
+- D8: BGA components.
+- D9: when to do the SQL strict-mode fix (T23) and the replay check (F13).
+- D10: the UX change register.
+- D11: the rules-check record and the answers to Q-R1–Q-R8.
+- D12: release cut-over for private-alpha tables.
+- D13: local test tooling.
+- D14: the resubmission milestone.
+
+**Open questions** (§13)
+- **Rules, Q-R1–Q-R8:** listed in §5.4.
+- **Technical, Q-T1–Q-T7:**
+  - which commit the Production private-alpha build was made from;
+  - whether private-alpha tables are running now, and how long they last;
+  - whether Studio test accounts can have names containing `'`, `-` or accents;
+  - tracking harness files under `misc/tests/`;
+  - whether the SFTP setup uploads `misc/` on save;
+  - two optional debug functions.
+- **Process, Q-P1–Q-P2:** moving the BGA review feedback into the UX register now, and the review format for code steps.
+
+**Outstanding**
+- **Replay check** (from 2026-10-14): still deferred. When to do it is part of D9.
+- **The `chooseSummitBetaToken` z-index issue** in `TODO.md`.
+- **Uncommitted testing overrides** in `firstascent.game.php` remain in the working tree.
+
+**Next**
+1. Jonathan answers D1–D14 and the open questions.
+2. A P0.1 docs session records the answers: the decisions in `DECISIONS.md`, `PROCEDURES.md` "Current phase", and the revised estimate.
+
 ## 2026-10-15 (Bomber Anchor regressions from the Portaledge refactor fixed)
 
 Work began 2026-10-14 and was playtested on Studio by Jonathan in two rounds on 2026-10-14 and 2026-10-15.
