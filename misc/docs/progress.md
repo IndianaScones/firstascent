@@ -2,6 +2,87 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-15 (Bomber Anchor regressions from the Portaledge refactor fixed)
+
+Work began 2026-10-14 and was playtested on Studio by Jonathan in two rounds on 2026-10-14 and 2026-10-15.
+
+**Phase-rule exception:** one-time exception granted for this task only. As granted, it allowed:
+- editing `firstascent.js` at the Bomber Anchor sites (Part B of the task);
+- editing `DECISIONS.md`, `PROCEDURES.md` ("Scope before migration" only), `TODO.md` and `progress.md`;
+- committing and pushing (normal push).
+
+Jonathan extended it during the task, after playtesting:
+- UX changes inside the Bomber Anchor flow, which he specified: the hand no longer counts as "outside" for the click-outside popup behavior, and "+" stays hidden until a card is selected for discard. They touched `onConfirmSummitBetaBomberAnchor`, `onShowHidePortaledge`, `onSelectBomberAnchorDiscard` and `onUndoSummitBeta`;
+- a one-line edit to `states.inc.php` (the crimper fix);
+- committing his own one-line `hex_num` fix in `modules/utils.js`.
+
+The "Current phase" section of `PROCEDURES.md` is unchanged; the review phase continues. The uncommitted testing overrides in `firstascent.game.php` were not touched, staged or committed.
+
+**Done** (all pushed to origin `main`, normal push, `f287bb2..fd78ef9`)
+- **`fec912e`, docs.**
+  - `DECISIONS.md`: regressions from the Portaledge refactor are fixed in the legacy code when the fix is simple. Outside playtesters use the legacy build before the migration ships; other legacy bugs stay deferred.
+  - `PROCEDURES.md`: that is the third in-scope code task.
+  - `TODO.md`: resolved Bomber Anchor items deleted (the convention is to delete them; the fix is recorded here). Added the `chooseSummitBetaToken` z-index issue and a test scenario for `selectPortaledge`/`riskSummitBeta`.
+- **`5df6cd3`, the click-time errors.**
+  - **Cause:** any Summit Beta token click runs `removeActionButtons()`, which empties `#generalactions`. That holds `#draw_counter` and, since the refactor, `#available_sb_message`. In the June baseline (309ffba) the message sat after `#phase_tracker`, outside it.
+  - **`onSelectPortaledge`:** five `#draw_counter` writes needed guards, not one. The four `draw_counter.style.color` writes after js:4739 would have thrown next.
+  - **Energy Drink, Simul Climb and Bomber Anchor confirm:** guarded the `#available_sb_message` removal, as Rerack already does.
+  - **`onUndoSummitBeta`:** resets `bomber_anchor`, before the `await`.
+- **`0114572`, the intended behavior.**
+  - You may draw only as many Portaledge cards as you discard, up to 3. Confirm is enabled only when the two are equal and at least one. Draw-first (no card selected) is inert.
+  - Resync in the hand-card handler: a new discard re-shows "+" and disables Confirm; a deselect clears the draws and re-shows "+".
+  - In `resting`, Bomber Anchor uses the `selectPortaledge` logic instead of the rest counter.
+  - Portaledge draws chosen before the token was used are cleared at Bomber Anchor confirm. They were invisible but counted against the cap and would have been sent on Confirm.
+  - Hand clicks no longer close the portaledge, also after reopening it.
+  - Undo Token clears the selectable classes on every hand card.
+- **`1aaad2b`, crimper.** `confirmBomberAnchor` calls `confirmAssetsForDiscard` and `confirmPortaledge`, which each run `checkAction`. State 60 (`crimperClimbingCards`) listed neither, so Confirm failed with "This game action is impossible right now". Added both.
+- **`fd78ef9`, `hex_num`.** Jonathan's fix: `checkPotential` read `hex_num` without declaring it in the Crag Mama branch.
+
+**What was and wasn't a refactor regression** (checked against 309ffba)
+- Regressions: the `#draw_counter` write and the `#available_sb_message` removals.
+- Not regressions:
+  - the missing cap with zero discards (the logic is identical to June);
+  - the crimper `possibleactions`;
+  - the hand-card resync gaps.
+
+Fixed anyway, at Jonathan's request or as part of the intended behavior.
+
+**Other Bomber Anchor state that survives Undo Token** (not changed)
+- `portaledge_num` and the stale `portaledge_selection_handlers` entries: harmless, because every reader reassigns them first.
+- The outside-click listener set at Bomber Anchor confirm isn't removed on Undo. It is one shared global listener, so removing it could kill an unrelated popup's. It wasn't observed in playtesting.
+
+**Verification before Studio**
+- A Chromium DOM harness ran the real function bodies against a stubbed DOM and framework: 47 assertions, scratch only and not committed.
+- The same assertions failed 21 of the first 39 on the committed code, including the exact errors Jonathan saw.
+- With only the stale-draws line removed it failed the new stale-picks cases, so it does detect that symptom.
+
+**Playtest results (Studio, Jonathan)**
+- **Round 1, hand-first and draw-first, the cap and Confirm,** with Bomber Anchor as the only any-time token and with several (no difference):
+  - **Worked:** `drawAssets`, `climbOrRest`, `climbingCard`, `discardAssets`, `stealFromAssetBoard`, `addTokenToPitch`, `addAssetToAssetBoard`, `chooseTechniqueToken`, `selectOpponent`.
+  - **Energy Drink and Simul Climb,** each as the only any-time token: no errors or warnings.
+  - **Ordinary Portaledge draws:** incidentally tested, fine.
+  - **Problems, since fixed:**
+    - crimper Confirm failed;
+    - Undo Token left unselected hand cards looking selectable;
+    - selecting a hand card closed the portaledge, which was not wanted;
+    - "+" showed before any card was selected.
+  - **Problem, undiagnosed:** in `chooseSummitBetaToken`, a left-edge pitch overlapping the revealed tokens drew in front of the token after Bomber Anchor was discarded. In `TODO.md`.
+- **Round 2:**
+  - Click-outside, "+" visibility, the cap, Confirm and Undo all work correctly.
+  - `resting` with no prior picks works for both Undo and Confirm, and the rest continues normally. Selecting the token hides the portaledge, and Confirm fades it back in. That is the resting state's own click-outside listener treating the hand-token click as "outside". It wasn't intended, but Jonathan says it isn't undesirable.
+  - `resting` with prior picks: "+" was silently inert, now fixed.
+  - Crimper and `resting` with prior picks are confirmed resolved.
+- **Not tested:** Bomber Anchor in `selectPortaledge` and `riskSummitBeta`. Jonathan isn't concerned before the migration. Logged as a test scenario in `TODO.md`.
+
+**Outstanding**
+- **Replay check** (from 2026-10-14, still deferred): step through a Studio replay, including a rest, and confirm there are no fallback warnings. Run it before outside playtesters use the build.
+- **The `chooseSummitBetaToken` z-index issue** in `TODO.md`. A console check of `#summit_pile`'s inline z-index before and after the token is discarded would pin it down.
+- **Uncommitted testing overrides** in `firstascent.game.php` remain in the working tree.
+
+**Next**
+1. The replay check.
+2. A review-only migration planning session, in a new session.
+
 ## 2026-10-14 (Freeze work closed: conclusions and two targeted fixes)
 
 Work began 2026-10-13 and was playtested on Studio by Jonathan on 2026-10-14.
