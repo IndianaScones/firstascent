@@ -4734,9 +4734,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                     draw_counter.style.color = '';
                 }
 
-            } else { // selectPortaledge state
+            } else { // selectPortaledge state, trade, and Bomber Anchor (which has no #draw_counter)
                 const draw_counter_numerator = operation === 'plus' ? currently_selected + 1 : currently_selected - 1;
-                draw_counter.innerHTML = `${draw_counter_numerator}/${this.portaledge_num}`;
+                if (draw_counter) { draw_counter.innerHTML = `${draw_counter_numerator}/${this.portaledge_num}`; }
 
                 if (operation === 'plus' && currently_selected+1 === this.portaledge_num) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => {
@@ -4745,24 +4745,24 @@ function (dojo, declare, aspect, BgaAutofit) {
                     if ($('confirm_button').classList.contains('disabled')) {
                         $('confirm_button').classList.remove('disabled');
                     }
-                    draw_counter.style.color = 'blue';
+                    if (draw_counter) { draw_counter.style.color = 'blue'; }
                 }
                 else if (operation === 'minus' && currently_selected-1 < this.portaledge_num) {
                     portaledge.querySelectorAll('.porta_plus').forEach(ele => {
                         ele.style.display = '';
                     });
-                    draw_counter.style.color = '';
+                    if (draw_counter) { draw_counter.style.color = ''; }
                     $('confirm_button').classList.add('disabled');
                 }
                 else if (operation === 'minus' && currently_selected-1 === this.portaledge_num
                          && $('confirm_button').classList.contains('disabled')
                          && this.portaledge_num > 0) {
                     $('confirm_button').classList.remove('disabled');
-                    draw_counter.style.color = 'blue';
+                    if (draw_counter) { draw_counter.style.color = 'blue'; }
                 }
                 else if ((currently_selected+1 != this.portaledge_num || this.portaledge_num == 0) && !$('confirm_button').classList.contains('disabled')) {
                     $('confirm_button').classList.add('disabled');
-                    draw_counter.style.color = '';
+                    if (draw_counter) { draw_counter.style.color = ''; }
                 }
             }
 
@@ -5486,7 +5486,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.stopEvent(evt);
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmEnergyDrink')) {
                 this.ajaxcall("/firstascent/firstascent/confirmEnergyDrink.html", {lock: true,}, this, function(result) {} );
@@ -5618,7 +5618,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             const deck_to_draw = Number(deck_classes[deck_classes.length - 1]) || 0;
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) { document.getElementById('available_sb_message').remove(); }
 
             for (const ele of this.simul_climb_handlers) { ele.onclick = null; }
             this.simul_climb_handlers = [];
@@ -5817,7 +5817,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.bomber_anchor = false;
 
             this.enabled_summit_beta_tokens--;
-            if (this.enabled_summit_beta_tokens < 1) { document.getElementById('available_sb_message').remove(); }
+            if (this.enabled_summit_beta_tokens < 1 && document.getElementById('available_sb_message')) { document.getElementById('available_sb_message').remove(); }
 
             if (this.checkAction('confirmBomberAnchor')) {
                 this.ajaxcall("/firstascent/firstascent/confirmBomberAnchor.html", { lock: true,
@@ -6288,6 +6288,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 dojo.query('.selected_resource_wrap').forEach(ele => { ele.classList.remove('selected_resource_wrap'); });
                 if ($('bomber_anchor_counter')) {
                     $('bomber_anchor_counter').remove();
+                    this.bomber_anchor = false; // before the await: onSelectPortaledge reads #ba_draw_num while this flag is set
                     const portaledge = $('portaledge');
                     if (this.utils.shouldAnimate()) { await this.utils.animationPromise(portaledge, 'portaledge_close', 'anim', null, false, true); }
                     portaledge.style.marginRight = '';
