@@ -4512,6 +4512,7 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				// Crag Mama
 				if (gameui.character_id === '9') {
 					const cutoff = gameui.board === 'desert' ? 21 : 27;
+            		const hex_num = pitch.id.slice(-2).replace(/^\D+/g, '');
 					if (hex_num <= cutoff) {
 						const face = gameui.resources['skills']['face'] + gameui.resources['permanent_skills']['face'] - pitch_requirements['face'];
 						const crack = gameui.resources['skills']['crack'] + gameui.resources['permanent_skills']['crack'] - pitch_requirements['crack'];
