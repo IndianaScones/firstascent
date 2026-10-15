@@ -20,7 +20,7 @@ The codebase uses the legacy framework (partly deprecated) and has no class stru
 
 ## Most bugs are deferred to the migration
 
-Client-side visual and interaction bugs live in code being rebuilt, so fixing them in legacy code is wasted effort. Detailed reproduction steps in TODO.md serve as regression tests for the migrated code. Before migrating, only two things are done: fixing the SQL strict-mode game creation issue, and the freeze investigation with its two targeted fixes (see below).
+Client-side visual and interaction bugs live in code being rebuilt, so fixing them in legacy code is wasted effort. Detailed reproduction steps in TODO.md serve as regression tests for the migrated code. Before migrating, only three things are done: fixing the SQL strict-mode game creation issue, the freeze investigation with its two targeted fixes, and simple fixes for regressions from the recent Portaledge refactor (see below).
 
 
 
@@ -44,7 +44,7 @@ Decisions:
 - **Two targeted fixes go into the legacy code anyway,** because other people will playtest the legacy build before the migration ships. Both are relatively simple:
   - a fallback in `animationPromise` that settles any animation wait that can't complete and logs a warning each time. It closes the whole silent class, including instances not yet found;
   - null guards at the three confirmed `trade_button` sites.
-- **Every other bug found stays deferred to the migration.** That includes the Bomber Anchor click-time errors, the uncapped Portaledge draws and the rest of TODO.md.
+- **Every other bug found stays deferred to the migration,** except the regressions from the recent Portaledge refactor that have a simple fix (next section). That includes the rest of TODO.md.
 
 
 
@@ -54,6 +54,14 @@ Principles for the migration:
 - Every awaited animation must settle. Animation helpers resolve, with a warning visible to developers, when the element isn't rendered, the animation never starts, or it is cancelled. They also have a timeout backstop.
 - A notification handler error must never strand the notification queue silently. In the current framework, `setupPromiseNotifications` removes the manual release call. But the notification still ends only "when the promise AND the minimum durations are over" (Game.js doc, `setupPromiseNotifications`, `bga/current/game-files/Game interface logic_ Game.js - Board Game Arena.md`:1000). So a handler promise that never settles still blocks the queue, and whether a rejected one ends it isn't documented. Handlers must be written so they always settle.
 - Awaited animations must never depend on whether a container is currently visible. Whether the player can hide containers such as the portaledge is a UX decision (Jonathan's and Garrett's); the code must work either way.
+
+
+
+## Regressions from the Portaledge refactor are fixed in the legacy code
+
+Jonathan's recent Portaledge refactor introduced click-time errors that weren't there before. Outside playtesters will use the legacy build before the migration ships, so a regression from that refactor is fixed in the legacy code when the fix is simple. A fix that isn't simple waits for the migration, like every other legacy bug.
+
+First case: the Bomber Anchor click-time errors, fixed in one task (`#draw_counter` and `#available_sb_message` are cleared when a Summit Beta token is used; `bomber_anchor` survived Undo Token).
 
 
 

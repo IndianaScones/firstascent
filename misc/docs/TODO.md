@@ -120,7 +120,6 @@ Ian"
 * [state] at some point, my summit beta token still appeared selectable during opponent's turn (it was not actually selectable, just a visual issue)
 * rerack box proportions are off on mobile
 * on mobile (or resized shrunken desktop window), permanent assets tokens are jumping up slightly before sliding down to asset board - only sometimes
-* bomber anchor - make it so clicking on cards in hand doesn’t hide the portaledge - check bomber anchor a bunch with new portaledge - if it gets hidden and then cards are deselected for example, it creates problems - play with undo also
 * recheck responsiveness of scorecard - opponent objectives button can go to weird places if screen scrunched horizontally and if scorecard is too small, names go outside of the lines
 * [state] asset_hand_to_board z-indices are wrong, cards slide under cards remaining in hand
 
@@ -130,7 +129,6 @@ Ian"
   * color of numbers for choosing water/psych while resting
   * dark gray color’s name in titlebar (eg, “You must give 2 Asset card/s to PlayerName”)
   * blue/red draw/discard nums (0/3, etc) in titlebar
-* bomber anchor - click outside to close portaledge interfering with choosing cards in hand to discard
 * when selecting a crimper card, hitting the confirm button hides the popup - make an exception to “click outside” function for the titlebar
 * [?] Phil - some summit beta tokens can be used after confirming a pitch to remove red border icons and change risking it to a safe climb. These need to be handled for Phil, who needs to have a requirement risked if there are any requirements
 
@@ -159,17 +157,7 @@ Ian"
 
   * fine on back end, only problem on front end
 * spectator - asset_display_to_board doesn’t happen - assets snap onto board instead
-* bomber anchor - the Portaledge "+" buttons can be clicked with no hand cards selected for discard. Before the Portaledge refactor, draws were limited to the number of selected discards. Now every "+" is shown when Bomber Anchor is confirmed (js:5683), and nothing caps the draws at the selected discards (js:4652)
-
-  * and there's no upper limit on draws either
-* bomber anchor - every Portaledge +/- click throws `Cannot set properties of null (setting 'innerHTML')` at js:4739 in states that have no `#draw_counter` (for example `climbOrRest`). `onSelectPortaledge`'s non-resting branch assumes the `selectPortaledge` counter. The draw number updates first, but the code that hides "+" and enables/disables Confirm (js:4741–4766) never runs
-
-  * observed: with a hand card selected first, clicking "+" gives Discard 1 Draw 1 but Confirm stays disabled; choosing the draw first works (Confirm is then enabled by the hand click, js:5770)
-* confirming Bomber Anchor when it's the last enabled any-time Summit Beta token throws `Cannot read properties of null (reading 'remove')` at js:5820, because `#available_sb_message` is already gone. The action is never sent
-
-  * the token count and the Bomber Anchor state are already cleared at that point (js:5814–5819), so clicking Confirm again throws again
-  * Energy Drink (js:5489) and Simul Climb (js:5621) have the same unguarded line; Rerack guards it (js:5434)
-* [state] bomber anchor - Undo Token (`onUndoSummitBeta`) doesn't reset `this.bomber_anchor`, so the next Portaledge +/- click (for example while resting) throws on the missing `#ba_draw_num` (js:4674, 4680, 4694, 4701)
+* [state] bomber anchor in `chooseSummitBetaToken` - after Bomber Anchor is discarded, a pitch at the left edge that slightly overlaps the two revealed Summit Beta tokens is drawn in front of the token, where before the token was in front. The `summit_pile` z-index handling (js:1347 sets 201, js:2560 clears it, `onUndoSummitBeta` sets it again before `restoreServerGameState`) is unchanged since the June 2026 baseline (309ffba), but the Portaledge refactor rewrote much of the CSS and the animation z-index tracker (`utils.js` `moveToNewParent`). Not diagnosed; to check: `#summit_pile`'s inline `z-index` before and after the token is discarded
 * "Hide card(s)" button - `onShowHideCard` compares the button's text with the untranslated English 'Hide card' / 'Hide cards' (js:4257, 4290). In any other language the button never hides the card(s)
 * refillPortaledge - the first refill step uses card backs that are too large and slightly off target, in every refill since the Portaledge refactor. The shuffle step is correct
 * climbing card 49 (shared Gear draw) - race: both Portaledge draws run at once (the opponent's isn't awaited, js:10827/10830, 10866), so with a refill both refill the same deck at once. About 7 `[FA animation fallback]` warnings per refill; no flight to the opponent's hand counter
@@ -184,6 +172,7 @@ Ian"
 ## Test scenarios
 
 * test summit meeple overlap on forest board
+* bomber anchor in `selectPortaledge` and `riskSummitBeta`: not yet tested on Studio after the legacy Bomber Anchor fixes (October 2026). Test them with the migrated code
 * Can you trade cards after confirming a pitch but before confirming assets? If so, test. This would likely create problems where new requirements are missing/not missing.
 * recreate this situation -
 

@@ -8,13 +8,14 @@ Until Jonathan says otherwise, **do not modify code files.** Only create or edit
 One-time exceptions to this rule are granted per task. When one is granted, note it in that session's `progress.md` entry. Exceptions never carry over to later tasks or change the phase.
 
 ## Scope before migration
-Until the migration starts, only two code tasks are in scope:
+Until the migration starts, only three code tasks are in scope:
 1. The SQL strict-mode game creation fix.
 2. The two targeted freeze fixes:
    - the fallback in `animationPromise` (`modules/utils.js`);
    - the null guards at the three confirmed `trade_button` sites in `firstascent.js`.
 
    The freeze investigation itself is closed (`DECISIONS.md`, "The freezes are the top priority").
+3. Simple fixes for regressions from the recent Portaledge refactor (`DECISIONS.md`, "Regressions from the Portaledge refactor are fixed in the legacy code"). The first is the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
 
 Don't fix other `TODO.md` bugs in legacy code, including the other bugs the freeze investigation found. Their reproduction steps serve as regression tests for the migrated code.
 
