@@ -44,7 +44,7 @@
 - **Markers:**
   - **[inferred]**: my reasoning, not read in the docs or the code.
   - **[unverified]**: framework behavior the docs don't settle. Each one has a **Check:**, a cheap Studio test attached to the first step that depends on it. §1.7 lists them all.
-- **IDs:** steps P0.1–P7.4 (§2). TODO items T1–T32 and freeze scenarios F1–F13 (§8.1). Decisions D1–D14 and questions Q-… (§13).
+- **IDs:** steps P0.1–P8 (§2). TODO items T1–T32 and freeze scenarios F1–F13 (§8.1). Server findings B1–B8 and rules items Q-R1–Q-R8 (§5.4; the rules items are `R-1`–`R-8` in `RULES_CHECK.md`). UX items UX-n (`UX_CHANGES.md`). Decisions D1–D14 and questions Q-… (§13).
 
 ---
 
@@ -70,7 +70,7 @@
 
 | Phase | Goal | Steps | Sessions (approx.) | Studio after each step |
 |---|---|---|---|---|
-| P0 | Decisions, tags, prerequisites (no game code) | 4 | 1–2 (+1 if the trial runs) | Unchanged legacy |
+| P0 | Decisions, the final legacy fix batch, tags and phase switch | 3 | 2–4 | Legacy; P0.2 adds the final fixes and a Production release |
 | P1 | Server on the current framework: debug functions, `Game.php`, globals, current APIs, autowired actions | 10 | 10–12 | Playable |
 | P2 | Server State classes (thin); `states.inc.php` removed | 7 | 7–9 | Playable |
 | P3 | Client: prepare the legacy files, then switch to an ES-module `Game.js` | 5 | 5–7 | Playable |
@@ -78,9 +78,10 @@
 | P5 | 13 domain slices: server service, payloads, client component, JS states, TODO fixes | 13 slices | 44–52 (per slice in §2.3) | Playable |
 | P6 | Layout built in JS; `.tpl` and `.view.php` removed | 2 | 2–3 | Playable |
 | P7 | Cleanup, full regression, release preparation | 4 | 4–6 | Release candidate |
-| **Total** | | | **about 80–100** | |
+| P8 | Post-migration UX and components (D8, D10): the decided `UX_CHANGES.md` items, ItemManager, BgaAnimations, BgaCards, BgaDice, BgaScoreSheet, the last-turn banner | planned in its own session after P7 | not yet sized | Playable |
+| **Total, P0–P7** | | | **about 80–100** | |
 
-A session is one Claude Code session. Jonathan's playtests and reviews come on top of it and set the real pace, so the plan gives no dates.
+A session is one Claude Code session. Jonathan's playtests and reviews come on top of it and set the real pace, so the plan gives no dates. The total doesn't include P8. Resubmission to BGA comes after P8 (D14).
 
 ### Coexistence in brief
 - **Can coexist, documented:**
@@ -95,22 +96,22 @@ A session is one Claude Code session. Jonathan's playtests and reviews come on t
   - State classes and autoloaded server classes need the new `Game.php` first [Game.php doc:2109; States doc:24–29], so P1.2 gates P2 and everything after it.
   - The legacy client can already use the current API through `this.bga`, which is what makes P3 mechanical.
 
-### Decisions needed from Jonathan
-Details and options are in §13.
+### Decisions (decided 2026-10-21)
+Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Migration plan decisions (D1–D14)"); §13 lists them with pointers. The rules questions Q-R1 to Q-R8 are answered in `RULES_CHECK.md`.
 - **D1** The approach and phase order above.
-- **D2** Branching: `main` only, plus tags and a hotfix branch made from a tag (§10).
-- **D3** claude-code-bga: don't install it, keep its applicable pitfalls, and decide whether to run the guarded deploy-and-test trial (§9).
-- **D4** Testing overrides: you stash them before P1.1; debug functions replace them from P1.1 on (§6).
-- **D5** No-transition flows (Simul Climb, trade, Rerack, Energy Drink, Bomber Anchor) end with a server self-transition, so clients re-render from fresh state. The re-entry inventory in §4.1.1 limits where that is safe.
-- **D6** What a player sees when a notification handler fails (§4.3).
-- **D7** Scope and timing of server-side validation of action inputs (§5.4, B3).
-- **D8** Which framework APIs are adopted by default, and which visual components stay candidates (§7).
-- **D9** When to do the pre-migration leftovers: the SQL strict-mode fix (T23) and the replay check (F13).
-- **D10** The UX change register and its scheduling rule (§12).
-- **D11** The rules-check record, and answers to Q-R1 to Q-R8 (§5).
-- **D12** Release cut-over for in-progress private-alpha tables (§2.4).
-- **D13** Local tooling for tests: Python's built-in server for harnesses (already installed); PHP for linting (optional, not installed).
-- **D14** The resubmission milestone: what must be complete before resubmitting to BGA, and what can continue afterward (§13).
+- **D2** Branching: `main` plus tags. A hotfix branch is made from `legacy-final` only if a legacy hotfix is ever needed (§10).
+- **D3** claude-code-bga is not installed; its applicable pitfalls are in `BGA_PITFALLS.md`; the deploy-and-test trial isn't run for now (§9).
+- **D4** Testing overrides: the Studio-only debug functions replace them (§6), including `debug_endGameSoon` and `debug_giveSummitBeta`. The setup-overrides file is dropped unless P1.1 finds a gap. The overrides are set aside at the start of P0.2.
+- **D5** No-transition flows (Simul Climb, trade, Rerack, Energy Drink, Bomber Anchor) end with a server self-transition where the re-entry inventory in §4.1.1 says it is safe, and with an args-refresh notification elsewhere.
+- **D6** When a notification handler fails, the player sees a short non-blocking message, besides the console log and the re-render (§4.3).
+- **D7** Client-sent player ids are fixed in P1.6–P1.9; every other `act*` input is validated in the slice that owns it (§5.4, B3).
+- **D8** All of §7's components are adopted: PlayerCounter/TableCounter and Zone during the migration; ItemManager, BgaAnimations, BgaCards, BgaDice, BgaScoreSheet and the last-turn banner in P8.
+- **D9** The SQL strict-mode fix (T23) and the replay check (F13) are folded into P1.
+- **D10** The UX change register `UX_CHANGES.md`. The migration is parity only; decided UX items are implemented in P8 (§12).
+- **D11** The rules-check record `RULES_CHECK.md` (§5).
+- **D12** No formal cut-over for private-alpha tables; releases only when no table is running (§2.4).
+- **D13** Local tooling: Python's built-in server for harnesses; a PHP CLI for linting, installed in P0.2.
+- **D14** Resubmit to BGA after the full plan, including P8 (§13).
 
 ---
 
@@ -237,7 +238,7 @@ Details and options are in §13.
 | U5 | `zombieTurn` vs `zombie()` during the mix | P2.1 |
 | U6 | `#[PossibleAction]` methods provided through a PHP trait; a `Game.php` `act*` method called in a class state that doesn't declare it | P2.2, P2.7 |
 | U7 | `bga->globals->get` returns arrays or `stdClass` for JSON objects ([Game.php doc:286] shows `stdClass` for a stored class) | P1.3 |
-| U8 | Whether PHP can read a file under `misc/` at runtime on Studio (for the setup-overrides file, §6.3) | P1.1 |
+| U8 | Whether PHP can read a file under `misc/` at runtime on Studio (for the setup-overrides file, §6.3). Checked only if P1.1 finds that §6.3 is needed (D4) | P1.1, conditional |
 | U9 | A rejected promise under `setupPromiseNotifications` | P4.2 |
 | U10 | Which client entry wins when both exist (avoided by deleting) | P3.5 |
 | U11 | `.tpl` + `jstpl_` with `Game.js`; `this.gamedatas` set on the new class [Game.js doc:254] | P3.5 |
@@ -285,56 +286,73 @@ Details and options are in §13.
 
 ### 2.3 Step catalog
 
-#### Phase P0: decisions and prerequisites (no game code)
+#### Phase P0: decisions, the final legacy fix batch, tags and phase switch
 
-**P0.1 Decisions** (docs only)
+**P0.1 Decisions** (docs only; plus one git tag)
 - **Scope:**
-  - Jonathan reviews this plan and decides D1–D14. A docs session then records the decisions in `DECISIONS.md` and updates `PROCEDURES.md` "Current phase" (§11).
-  - The same session revises the estimate in `DECISIONS.md` ("Migrate to the current BGA framework"): "expected: roughly a couple of weeks, depending on availability". The plan sizes the migration at about 80–100 sessions (phase table), so that wording is replaced by the sizing, or dropped, when the decisions are recorded. D14 may also change the same paragraph's "Resubmission to BGA waits until after the migration".
-- **Files:** `DECISIONS.md`, `PROCEDURES.md`, `progress.md`.
-- **Done when:** the decisions are committed and pushed.
+  - Jonathan reviewed this plan and decided D1–D14. A docs session records them: `DECISIONS.md` (the decisions, the sizing, the legacy-fix rule), the new `RULES_CHECK.md`, `UX_CHANGES.md` and `BGA_PITFALLS.md`, `TODO.md`, `PROCEDURES.md` ("Scope before migration" and the read-first list) and this plan. `PROCEDURES.md` "Current phase" stays unchanged; it switches in P0.3.
+  - The same session tags the current Production build `prod-alpha-2026-10-20` (Q-T1). That tag is the one exception to the phase rule, granted for that task only.
+- **Files:** `CLAUDE.md` and `misc/docs/*`; the git tag.
+- **Done when:** the decisions are committed and pushed together with the tag.
 - **Studio after:** unchanged.
 
-**P0.2 Tags and the testing overrides** (git, plus one action by Jonathan)
+**P0.2 Legacy fix batch** (new; code, in the legacy files; S–M; 1–2 sessions)
+- **Needs** a one-time phase-rule exception from Jonathan at its start (`PROCEDURES.md`, "Scope before migration").
 - **Scope:**
-  - Tag the last legacy commit `legacy-final`. If Jonathan knows which commit Production's private-alpha build was made from (Q-T1), tag it `prod-alpha-<date>` too.
-  - **Jonathan's action:** stash or copy the testing overrides in `firstascent.game.php`. P1.1 and P1.2 edit and move that file, and staging by path can't separate those hunks from Claude Code's.
-- **Files:** none (git tags only).
-- **Done when:** the tags are pushed and the working tree is clean.
+  - **First, set aside the testing overrides (D4).** Save Jonathan's uncommitted overrides in `firstascent.game.php` as a patch file outside git tracking, then revert the file. Reverting needs Jonathan's explicit confirmation. P0.2 edits that file, and staging by path can't separate the overrides' hunks from the batch's.
+  - **The batch** (items in `TODO.md`), one `fix:` commit each:
+    1. Q-R2: a bailed player is appended to `finished_drawing` twice (`php:stNextDraw ~5635–5686`).
+    2. Q-R8: wild-only Technique sets score 2 points (`php:stMatchingTechniques ~5896`, `is_pure_wild_on_empty`).
+    3. B7: verify on Studio first; if confirmed, add Simul Climb's `confirmAssets` to state 60, `crimperClimbingCards` (`states.inc.php ~289–290`), the same shape as the crimper fix in `1aaad2b`.
+    4. B5: the Studio-only guard on `debug_goToState` (`utils.php ~929`). It moved here from P1.1(c).
+  - **Jonathan's uncommitted `firstascent.js` fix** (near line 3210; climbing card 57, option b: the code tried to hide a button that doesn't exist in that context), committed as it is.
+  - **The PHP CLI (D13):** install it for `php -l`, matching the PHP version the BGA docs name (8.4). Installing needs Jonathan's confirmation in the session. Then lint the changed PHP files.
+  - **Then a Production release,** which Jonathan makes (D12: only when no table is running).
+- **Line endings:** the working copy of `firstascent.js` is CRLF against LF in the index (as for every file here, with `core.autocrlf` on). When P0.1 ran, `git diff --stat` showed the file as a one-line change. The session confirms how it stages before committing, stages only the real change, and gets Jonathan's go-ahead on the method first.
+- **Files, as needed:** `firstascent.js`, `firstascent.game.php`, `modules/utils.php` (git tracks it as `modules/Utils.php`; stage that name), `states.inc.php`.
+- **Done when:** each item is committed on its own, `php -l` passes on the changed PHP files, Jonathan has playtested each item on Studio, and the release is made.
+- **Playtest:**
+  - Q-R2: 2 players; the first in Rerack order bails and the second climbed. The second draws 3 Cards, the first draws nothing (log note kept), and the Rerack ends normally. Repeat with 3 players, the middle one bailing.
+  - Q-R8: Sendy Jammer with 3 Gear Cards scores 2 points. Gear Cards plus a Technique Token with no natural symbol score 2 points. 1 card plus 2 Gear wilds still scores. An ordinary match is unchanged.
+  - B7: first reproduce it (a Cool-Headed Crimper holding Simul Climb, using it while choosing between the two cards). After the fix it works there, and Simul Climb in `climbOrRest` still works.
+  - B5: Studio's debug menu still jumps states. The refusal outside Studio can't be tested from Studio; it is reviewed in code.
+  - The `firstascent.js` fix: the climbing card 57 scenario that found it runs with no console error.
+  - S-smoke as a regression check.
+- **Repros:** Q-R2, Q-R8, B7, B5.
+- **Studio after:** the legacy build with the batch; a Production release.
+
+**P0.3 Tags and the phase switch** (git, and `PROCEDURES.md`; formerly P0.2)
+- **Scope:**
+  - Tag `legacy-final` on the batch's last commit.
+  - Tag the release made in P0.2 with `prod-alpha-<date>`. (`prod-alpha-2026-10-20`, for the earlier build, was tagged in P0.1.)
+  - Switch `PROCEDURES.md` "Current phase" to the §11 draft, which is adapted to the decisions (D10 parity, D2, the frozen legacy build).
+  - The testing overrides are no longer part of this step: they were set aside at the start of P0.2 (D4).
+- **Files:** `PROCEDURES.md`.
+- **Done when:** the tags are pushed, the working tree is clean, and the phase is switched.
 - **Studio after:** unchanged.
 
-**P0.3 Pre-migration leftovers** (D9)
-- **Scope:** decide whether these happen in legacy code now, under the existing scope rule, or fold into P1:
-  - the SQL strict-mode game-creation fix (T23, `PROCEDURES.md` "Scope before migration" item 1);
-  - the outstanding replay check (F13).
-- **Files:** none for the decision itself. If the fix is done in legacy code, it is its own task with its own exception.
-- **Done when:** D9 is decided, and either done or recorded as folded into P1.
-- **Note:** P1.2 and P1.3 re-check game creation either way.
-- **Studio after:** unchanged, unless the legacy fix is done.
-
-**P0.4 Optional: trial setup** (only if D3 says yes; §9.6)
-- **Scope:** the deploy script, the separate Chrome profile, the trial brief.
-- **Files:** `misc/tools/deploy.ps1` (new), `.gitignore` (adds `misc/tools/deploy.local.json`).
-- **Done when:** the script's dry run lists exactly the allowlisted files, and Jonathan has approved the trial brief.
-- **Studio after:** unchanged.
+**Removed from P0:** the former P0.3 (the pre-migration leftovers; T23 and F13 are folded into P1 by D9) and the former P0.4 (the trial setup; D3). §9.6 stays as reference for a possible later trial.
 
 #### Phase P1: server on the current framework (the legacy client stays)
 
-**P1.1 Debug functions** (in the legacy file; M) — prerequisite: P0.2
+**P1.1 Debug functions** (in the legacy file; M) — prerequisite: P0.3 (the testing overrides are already set aside, in P0.2)
 - **Scope:**
   - (a) **Structural:** extract `pickAvailableCharacters()` (`php:setupNewGame ~714–737`) and `initSharedObjectives(array $ids)` (`~442–627`) without behavior change.
-  - (b) **Tooling:** the four Studio-only debug functions of §6, plus the optional extras Jonathan picks (Q-T6, Q-T7).
-  - (c) **Fix:** add the Studio-only guard to the existing `debug_goToState` (`utils.php ~929`), which is in the current production build without one.
-  - Three commits.
+  - (b) **Tooling:** the four Studio-only debug functions of §6.2, plus `debug_endGameSoon` (Q-T6, replaces the `testEnd` state) and `debug_giveSummitBeta` (Q-T7).
+  - (c) **Check:** the Studio-only guard on the existing `debug_goToState` is present (added in P0.2, B5). P1.1 only checks it.
+  - Two commits, (a) and (b).
+  - If a testing override can't be done with these functions, §6.3 (the setup-overrides file) is revived (D4); otherwise it stays dropped.
 - **Files:** `firstascent.game.php`, `modules/utils.php`.
 - **Done when:**
   - the functions appear in Studio's debug menu and behave as §6 specifies;
   - every debug function refuses to run when `getBgaEnvironment()` isn't `'studio'` (reviewed in code);
-  - the U8 check result is recorded.
+  - the gap check is recorded: either no override needs §6.3, or the U8 check result is recorded.
 - **Playtest:** 3 players.
   1. In `characterSelection`, run `debug_setAvailableCharacters("10")`. Character 10 is offered after the reload.
   2. Run `debug_stackSummitBeta("9")` and `debug_stackClimbingDeck("3")`. The first Summit Beta token drawn is Bomber Anchor; the next climbing card is 3.
   3. In a new table, during `characterSelection`, run `debug_setSharedObjectives(16, 11, 10)`. After the reload those three are shown, and The Elitist's +4 appears on every score.
+  4. Run `debug_giveSummitBeta` for Bomber Anchor (token 9) and a player. After the reload that player holds it.
+  5. Run `debug_endGameSoon` for a player. That player's next climb triggers the end: the Climb and Follow Phases complete, and final scoring runs.
 - **Repros:** none fixed. Makes T26, T28 and F3–F5 quick to set up.
 - **Studio after:** playable; existing tables still work.
 
@@ -350,8 +368,12 @@ Details and options are in §13.
   - S-smoke.
   - The first steps of a 4-player game (forest board).
   - A Lucky Chalkbag use (`dieLog`).
+  - A replay of a finished game that includes a rest, with no fallback warnings (F13, D9).
   - Expected: identical behavior.
-- **Repros:** T24 resolved; T23 re-checked (game creation still works); checks U1–U3.
+- **Repros:** T24 resolved; checks U1–U3.
+- **Carries (D9):** T23 and F13.
+  - **T23:** the SQL strict-mode game-creation fix (the forum thread in `TODO.md`) is made here, as its own `fix:` commit after the move, or it falls out of P1.3's removal of `global_variables` if that is where the strict-mode failure lies. The cause isn't traced yet. Game creation is checked either way.
+  - **F13:** the replay check above. P1.3 repeats it.
 - **Studio after:** playable. Delete on Studio: `firstascent.game.php`, `modules/utils.php`. Fresh table.
 
 **P1.3 Globals on `bga->globals`** (S)
@@ -366,7 +388,7 @@ Details and options are in §13.
   - a "all players gain from the Portaledge" climbing card (`portaledgeAll`);
   - risk it;
   - bail.
-- **Repros:** T23 re-check.
+- **Repros:** T23 and F13 re-checked (D9): game creation still works, and a replay that includes a rest still shows no fallback warnings.
 - **Studio after:** playable; fresh table.
 
 **P1.4 Notification, statistics and score APIs** (L, mechanical)
@@ -395,7 +417,7 @@ Details and options are in §13.
   - The `possibleactions` entries in `states.inc.php` are renamed.
   - The `action.php` method is deleted.
   - The client call sites move from `this.checkAction` + `this.ajaxcall('/firstascent/firstascent/x.html', …)` to `this.bga.actions.performAction('actX', …)` [Game.js doc:838–907], sending arrays instead of comma-joined strings.
-  - Client-sent player ids (`rest`, `passClimbingCard`, `confirmPermanentAssets`) are replaced by the magic `$activePlayerId`/`$currentPlayerId` [Game.php doc:801–808], in a separate `fix:` commit (B3).
+  - Client-sent player ids (`rest`, `passClimbingCard`, `confirmPermanentAssets`) are replaced by the magic `$activePlayerId`/`$currentPlayerId` [Game.php doc:801–808], in a separate `fix:` commit (B3). That is the whole of B3 in P1 (D7): every other `act*` input is validated against `$args` in the slice that owns it, with no later dedicated pass.
 - **Files (each step):** `modules/php/Game.php`, `states.inc.php`, `firstascent.action.php`, `firstascent.js`.
 - **Steps:**
 
@@ -433,7 +455,7 @@ Details and options are in §13.
   - a `zombie()` that ports the matching `zombieTurn` branch.
 - The entries are removed from `states.inc.php`.
 - **Rules check per class** (§5): records only, no logic changes.
-- **Files:** `modules/php/States/*.php` (new; P2.2 adds `modules/php/States/Traits/`), `states.inc.php`, `modules/php/Game.php`, `misc/docs/RULES_CHECK.md` (if D11 adopts it).
+- **Files:** `modules/php/States/*.php` (new; P2.2 adds `modules/php/States/Traits/`), `states.inc.php`, `modules/php/Game.php`, `misc/docs/RULES_CHECK.md`.
 - **Done when:** the converted states behave exactly as before, F5 works inside each, and the zombie check passes.
 - **Playtest:** walk through every converted state, including F5 inside each one. Zombify a player in one converted active state.
 - **Studio after:** playable; fresh table.
@@ -442,7 +464,7 @@ Details and options are in §13.
 |---|---|---|---|
 | P2.1 | `characterSelection` (2), `nextCharacterSelect` (3) | First mix: checks U4 and U5 | S |
 | P2.2 | `drawAssets` (10), `nextDraw` (11), `nextRound` (12), `resting` (33) | Introduces the trait for any-time Summit Beta actions (§3.1); checks the trait part of U6 | M |
-| P2.3 | `climbOrRest` (20), `nextClimb` (25), `riskSummitBeta` (50), `crimperClimbingCards` (60) | `crimperClimbingCards` keeps today's possible actions, so its classes don't use the full any-time trait: Simul Climb's `confirmAssets` stays out. Adding it is B7's fix, a separate `fix:` commit (P5.9) | M |
+| P2.3 | `climbOrRest` (20), `nextClimb` (25), `riskSummitBeta` (50), `crimperClimbingCards` (60) | B7 is fixed in P0.2 once Studio confirms it, so `crimperClimbingCards` already lists `confirmAssets` and its class uses the full any-time trait. If B7 wasn't fixed in P0.2, the state keeps today's possible actions, Simul Climb's `confirmAssets` stays out of its class, and the fix is a separate `fix:` commit in P5.9 | M |
 | P2.4 | `climbingCard` (21), `discardAssets` (22), `selectOpponent` (23), `selectPortaledge` (24), `portaledgeAll` (26) | | M |
 | P2.5 | `addTokenToPitch` (27), `stealFromAssetBoard` (28), `addAssetToAssetBoard` (29), `chooseSummitBetaToken` (30), `chooseTechniqueToken` (31), `techniqueOpponent` (32) | | M |
 | P2.6 | `matchingTechniques` (40), `flagPermanentAssets` (41), `choosePermanentAssets` (42, multiactive), `grantPermanentAssets` (43), `flipPlayedAssets` (44), `preGameEnd` (98) | Debug state `testEnd` (97) removed; an end-game debug function replaces it (Q-T6) | M |
@@ -450,7 +472,7 @@ Details and options are in §13.
 
 **Repros:**
 - P2.2 and P2.6 replay F13 (a replay that includes a rest).
-- P2.2 records Q-R2 (the Rerack skip after a bail) and P2.3 records Q-R1 (where bail comes from) in the rules check, without changing either.
+- `RULES_CHECK.md` is already seeded with Jonathan's answers to Q-R1–Q-R8 (D11). The P2 classes check their states against it: P2.2 confirms that R-2 (the Rerack skip after a bail) is fixed in the ported code, P2.3 that R-1 (bail) is unchanged, and P2.6 covers the Follow Phase items (R-3 New Rubber, R-7, R-8).
 
 #### Phase P3: client switch to `modules/js`
 
@@ -554,9 +576,10 @@ Details and options are in §13.
 - **Scope:**
   - `modules/js/core/Notifications.js`: the wrapper, the error policy, the in-flight registry and `setupPromiseNotifications({ handlers: [wrapper], minDuration: 1 })`. `minDuration: 1` keeps today's pacing, where handlers end when their animations end **[inferred]**.
   - At this step no handler has moved yet; the U9 experiment uses a Studio-only `debug_testNotifReject`.
+  - **The failure message (D6):** when a wrapped handler fails, the player sees a short non-blocking message, besides the console error and the re-render. The wording is translatable, and Jonathan approves it in this step.
 - **Files:** `modules/js/core/Notifications.js` (new), `modules/js/Game.js`, `modules/php/Game.php` (the debug function).
-- **Done when:** the wrapper is in place, and the experiment's result is recorded for `DECISIONS.md`.
-- **Playtest:** the U9 experiment (§4.3); S-smoke.
+- **Done when:** the wrapper is in place, the experiment's result is recorded for `DECISIONS.md`, and Jonathan has approved the message wording.
+- **Playtest:** the U9 experiment (§4.3); S-smoke; a wrapped test handler that throws shows the message once and the game continues.
 - **Studio after:** playable.
 
 **P4.3 Dev tools** (M) — design in §4.4
@@ -619,35 +642,37 @@ Details and options are in §13.
 - **(c) Client component and JS state classes;** handler internals render from the model.
   - First, the slice's async-hygiene changes from §4.3.1, in their own commits, each listing its handlers and what changes.
   - Every JS state class must survive leaving and re-entering the same state (§4.1.1, design rule 2).
-- **(d) Bug fixes** for the slice's TODO items, one `fix:` commit per item.
-- **(e) Decided UX changes** for the slice, if any (§12), as separate `ux:` commits.
+- **(d) Bug fixes** for the slice's TODO items, one `fix:` commit per item. They include validating the slice's `act*` inputs against `$args` (B3, D7), in their own `fix:` commits.
+- **(e) UX hand-off** (D10). The migration is parity only, so there are no `ux:` commits in P5; decided UX items are implemented in P8. If a decided or proposed item in `UX_CHANGES.md` would change this slice's component structure, the slice notes it in that entry's "Affected component" field so the component doesn't block it later.
+- **Counters (D8):** a slice that owns a player-panel, round or phase counter builds it with PlayerCounter/TableCounter and `ebg.counter` (§7).
 - **Files:**
   - server: new `modules/php/Rules/<Domain>.php` and `modules/php/Model/<Name>.php`, plus `modules/php/Game.php` and the slice's `modules/php/States/*`;
   - client: new `modules/js/components/<Name>.js`, `modules/js/states/<State>.js`, the slice's `modules/js/notifications/<Domain>.js`, plus `modules/js/Game.js` and `modules/js/Utils.js`;
-  - `firstascent.css` only in (d) and (e);
-  - `misc/docs/RULES_CHECK.md` and `TODO.md` for the records.
+  - `firstascent.css` only in (d);
+  - `misc/docs/RULES_CHECK.md`, `TODO.md` and `UX_CHANGES.md` for the records.
 - **Done when:**
   - the slice's playtest focus passes with no `[FA …]` warnings;
   - its TODO items are fixed or explicitly deferred by Jonathan;
   - its rules check is recorded;
+  - its UX hand-off notes are recorded;
   - the moved legacy code is gone from `Game.js`/`Utils.js` and `Game.php`.
 - **Studio after each sub-step:** playable.
 
 | Slice | (a) Server | (b) Payloads | (c) Client | (d) Fixes | Playtest focus |
 |---|---|---|---|---|---|
-| **P5.1** Status bar and popups (cross-cutting) | The re-entry check (§4.1.1, U18), before any slice relies on re-entry | — | `StatusBar` (titles with an owner, `statusBar` buttons, counters and messages, `restore()`); `OutsideClick` (one manager per popup instead of the single slot set from 22 sites, `utils.js:setupOutsideClickListener ~1759`); JS state-class scaffolding (checks U14); the `.msg` observer (`js ~1751`) goes | T6 (title-bar colors in dark mode) | Every state's title and buttons; no-transition flows; every popup still closes on an outside click as before; the re-entry check |
-| **P5.2** Setup, characters, player panels | `Setup` service (setup body, `initSharedObjectives`); `Players` model; rules p.4–5 | `getAllDatas` builder without side effects (B1); `player_order` computed (`php:stNextRound ~6506`) | `Characters`, `PlayerPanels`; JS `CharacterSelection` | T29 | 2–5 players, both boards; spectator; zombie during selection; F5 |
-| **P5.3** Drawing (hand, Spread, deck) | `Drawing` service (`confirmAssets ~1007`, Spread refill, 4 of a kind), `Cards` model, `nextDraw`/`nextRound` logic (`php:stNextDraw ~5604`); rules p.5, p.11; Q-R2 | `confirmOpponentAssets` + `confirmYourAssets` → one `notify->all` with `_private`; post-state: hand, counts, Spread, discard top | `Hand`, `Spread`/deck; JS `DrawAssets` | T5 if still open; Q-R2 fix if confirmed | Rack Up with 2–5 players; Rerack after a failed climb (draws 1), a rest and a bail; Simul Climb; deck reshuffle |
-| **P5.4** Portaledge (rest, trade, card draws, refills) | `Portaledge` service (`confirmPortaledge ~4008`, `drawFromPortaledge utils.php ~590`, `confirmTrade ~2029`, `rest ~2105`, `stPortaledgeAll ~5803`, `argResting ~5481`, `argSelectPortaledge ~5359`); rules p.7, 8, 11; Q-R5 | `confirmPortaledge*`, `automaticPortaledge*`, `confirmTrade*` → `_private`; post-state: Portaledge counts and empty flags, Water/Psych, hand | `Portaledge` (popup, +/−, rest Water/Psych, refill and reshuffle animations, re-show before animating); JS `Resting`, `SelectPortaledge` | T19, T20, T21, T6 (resting numbers in dark mode) | F1, F2, F8: the Portaledge reappears and animates, no freeze, no warning; card 49; a refill from an empty stack |
-| **P5.5** Board | `Board` model (`getAvailablePitches`, tile coordinates, pitch order, Headwall, Ledge, rope order, pitch tokens; `view.php` logic → `getAllDatas`); rules p.9, p.12 (Trifecta) | Rope, meeple and Headwall post-state | `Board` (pitches, ropes, meeples, routes, Ledge teleports, summit stacking) | T25 | Headwall reveal; Ledge moves; 2+ meeples on a summit (forest board); second and third ascents |
+| **P5.1** Status bar and popups (cross-cutting) | The re-entry check (§4.1.1, U18), before any slice relies on re-entry | — | `StatusBar` (titles with an owner, `statusBar` buttons, counters and messages, `restore()`); `OutsideClick` (one manager per popup instead of the single slot set from 22 sites, `utils.js:setupOutsideClickListener ~1759`); JS state-class scaffolding (checks U14); the `.msg` observer (`js ~1751`) goes. The review's Action Bar point (round information) is UX-2 in the register, implemented in P8 | T6 (title-bar colors in dark mode) | Every state's title and buttons; no-transition flows; every popup still closes on an outside click as before; the re-entry check |
+| **P5.2** Setup, characters, player panels | `Setup` service (setup body, `initSharedObjectives`); `Players` model; rules p.4–5; Q-R6 (setup path) | `getAllDatas` builder without side effects (B1); `player_order` computed (`php:stNextRound ~6506`) | `Characters`, `PlayerPanels`; JS `CharacterSelection` | T29, Q-R6 (the Spread card goes to the discard pile at setup) | 2–5 players, both boards; spectator; zombie during selection; F5 |
+| **P5.3** Drawing (hand, Spread, deck) | `Drawing` service (`confirmAssets ~1007`, Spread refill, 4 of a kind), `Cards` model, `nextDraw`/`nextRound` logic (`php:stNextDraw ~5604`); rules p.5, p.11; Q-R2 (fixed in P0.2; regression check); Q-R6 (during-play path) | `confirmOpponentAssets` + `confirmYourAssets` → one `notify->all` with `_private`; post-state: hand, counts, Spread, discard top | `Hand`, `Spread`/deck; JS `DrawAssets` | T5 if still open; Q-R6 check: the replaced Spread card lands on top of the discard pile unless a card was discarded more recently | Rack Up with 2–5 players; Rerack after a failed climb (draws 1), a rest and a bail; Simul Climb; deck reshuffle |
+| **P5.4** Portaledge (rest, trade, card draws, refills) | `Portaledge` service (`confirmPortaledge ~4008`, `drawFromPortaledge utils.php ~590`, `confirmTrade ~2029`, `rest ~2105`, `stPortaledgeAll ~5803`, `argResting ~5481`, `argSelectPortaledge ~5359`); rules p.7, 8, 11; Q-R5 (check whether the missing reshuffle matters digitally: it does only if a player can know the deck order) | `confirmPortaledge*`, `automaticPortaledge*`, `confirmTrade*` → `_private`; post-state: Portaledge counts and empty flags, Water/Psych, hand | `Portaledge` (popup, +/−, rest Water/Psych, refill and reshuffle animations, re-show before animating); JS `Resting`, `SelectPortaledge` | T19, T20, T21, T6 (resting numbers in dark mode) | F1, F2, F8: the Portaledge reappears and animates, no freeze, no warning; card 49; a refill from an empty stack |
+| **P5.5** Board | `Board` model (`getAvailablePitches`, tile coordinates, pitch order, Headwall, Ledge, rope order, pitch tokens; `view.php` logic → `getAllDatas`); rules p.9, p.12 (Trifecta) | Rope, meeple and Headwall post-state | `Board` (pitches, ropes, meeples, routes, Ledge teleports, summit stacking) | T25, with Zone (D8) | Headwall reveal; Ledge moves; 2+ meeples on a summit (forest board); second and third ascents |
 | **P5.6** Climbing: requirements, risk it, bail, character abilities | `Climbing` service (`confirmRequirements ~1207`, about 600 lines, may take two sessions; `riskIt ~1810`; `confirmBail ~1996`); rules p.7, 9, 11, 15; Q-R1 | Requirement data in `climbOrRest` args; `confirm*Requirements` → `_private`; post-state: boards, resources, hand, trackers | `Requirements` (`utils.js ~2036–2276, ~4270–4621`; `js ~3259–4236`; abilities `js ~6503–7214`), `Trifecta`, `RiskDie`; JS `ClimbOrRest` | T9, T10, T11, T13, T14, T16, T27, T28; T8 together with P5.10 | Every character's ability; second ascent; each risk-it outcome, including failure and retreat; Trifecta; bail; a spectator watching (T16) |
 | **P5.7** Climbing-card display and crimper | `ClimbingCards` service part 1 (draw, pass `~4675`, undo `~4668`, crimper `~5127`); rules p.8, p.15 | `drawClimbingCard`, `crimperDrawsClimbingCards`, `confirmCrimperClimbingCard` | `ClimbingSlot` (`utils.js ~2782–3150`, `js:onShowHideCard ~4236`), `CrimperDisplay`; JS `ClimbingCard`, `CrimperClimbingCards` | T7, T18, T21 (crimper) | F6, F7; both crimper choices; Undo Climbing Card; "Hide card" in a non-English language |
 | **P5.8** Climbing-card effects | `ClimbingCards` service part 2 (`confirmClimbingCardChoice ~2120`, about 840 lines, split by effect family across two or three sessions; `confirmAssetsForDiscard ~2964`; `confirmSelectedOpponent ~3599`; `~4196–4664`; `stTechniqueOpponent ~5819`; `utils.php:bespokeClimbingCard ~719`); rules p.8 | `_private` for each public/private pair; post-state | JS `DiscardAssets`, `SelectOpponent`, `AddTokenToPitch`, `AddAssetToAssetBoard`, `StealFromAssetBoard`, `ChooseSummitBetaToken`, `ChooseTechniqueToken` | T15, T17, T22 | Each card family (set up with `debug_stackClimbingDeck`); "all players" effects with 2–5 players; Jesus Piece |
-| **P5.9** Summit Beta I: hand tokens and no-transition tokens | `SummitBeta` service (`confirmRerack ~4719`, `confirmEnergyDrink ~4782`, Simul Climb, hand-token helpers); rules p.8 | Self-transition at the end of no-transition flows (D5), only in the states that §4.1.1 and the P5.1 check cleared; elsewhere the args-refresh fallback. B8 is fixed before `drawAssets` uses re-entry. `confirmRerack*` and `confirmSummitBeta*` → `_private` | `SummitBeta` (hand tokens; enabling from args; any-time flow framework; Used pile) | T1, T2, B7 (once Jonathan confirms it), B8 | F4 variants in `climbOrRest` and in other states; each no-transition flow in each of its 14 states; Rerack box on a phone; F5 mid-flow |
+| **P5.9** Summit Beta I: hand tokens and no-transition tokens | `SummitBeta` service (`confirmRerack ~4719`, `confirmEnergyDrink ~4782`, Simul Climb, hand-token helpers); rules p.8 | Self-transition at the end of no-transition flows (D5), only in the states that §4.1.1 and the P5.1 check cleared; elsewhere the args-refresh fallback. B8 is fixed before `drawAssets` uses re-entry. `confirmRerack*` and `confirmSummitBeta*` → `_private` | `SummitBeta` (hand tokens; enabling from args; any-time flow framework; Used pile) | T1, T2, B8 (B7 is in P0.2, unless it wasn't fixed there) | F4 variants in `climbOrRest` and in other states; each no-transition flow in each of its 14 states; Rerack box on a phone; F5 mid-flow |
 | **P5.10** Summit Beta II | `SummitBeta` service part 2 (`confirmBomberAnchor ~4805` with internal helpers split from the public sub-actions (B3); `confirmLuckyChalkbag ~4832`; `confirmRiskSummitBeta ~5066`; Jesus Piece; Spider Stick; New Rubber) | `bomberAnchorCleanup`; `riskSummitBeta` gets args carrying the die face, which re-entry needs (§4.1.1) | Bomber Anchor, Lucky Chalkbag, Jesus Piece, Borrowed Rack, Jumar, Extra Water, Guidebook flows (`js ~5639–6500`); JS `RiskSummitBeta` | T8, T11, T26 | F3, F5, F8; T26; each token in each state that allows it |
-| **P5.11** Follow Phase and Asset Boards | `FollowPhase` service (`stMatchingTechniques ~5841`, `stFlagPermanentAssets ~6206`, `confirmPermanentAssets ~4698`, `stGrantPermanentAssets ~6297`, `stFlipPlayedAssets ~6245`), `AssetBoards` model (`utils.php ~278–407, ~815–874`); rules p.10–11, p.15; Q-R3, Q-R7, Q-R8 | Board post-state in follow notifications | `AssetBoard`; JS `ChoosePermanentAssets` (multiactive: `onPlayerActivationChange`) | T3, T12 | Techniques with tokens and wilds (Sendy Jammer); New Rubber; Young Prodigy's 3/5 slots; several Permanent Asset tokens at once; mobile |
+| **P5.11** Follow Phase and Asset Boards | `FollowPhase` service (`stMatchingTechniques ~5841`, `stFlagPermanentAssets ~6206`, `confirmPermanentAssets ~4698`, `stGrantPermanentAssets ~6297`, `stFlipPlayedAssets ~6245`), `AssetBoards` model (`utils.php ~278–407, ~815–874`); rules p.10–11, p.15; Q-R3 (New Rubber's handling), Q-R7 (the allocation step), Q-R8 (fixed in P0.2; regression check) | Board post-state in follow notifications | `AssetBoard`; JS `ChoosePermanentAssets` (multiactive: `onPlayerActivationChange`) | T3, T12 | Techniques with tokens and wilds (Sendy Jammer); New Rubber; Young Prodigy's 3/5 slots; several Permanent Asset tokens at once; mobile |
 | **P5.12** End game, objectives, scorecard | `EndGame`/`Scoring` service (`stPreGameEnd ~6529`, objective trackers); rules p.12–13 | `preGameEnd`; `getAllDatas` at game end | `Objectives` (trackers, opponents' objectives, scorecard) | T4 | Complete games with 2–5 players; each shared objective (`debug_setSharedObjectives`); a tie; F5 after the end; a replay (F13) |
-| **P5.13** Log and tooltips | `Log` helper (`formatLogTitles` and the other log helpers) | — | `Log` (`utils.js:logInject ~1295`, `addTooltipsToLog ~1256`, tooltip builders `~996–1179`) | F10 | Every log item type; names containing `-`, `'` or accents if Studio allows them (Q-T3); the replay log |
+| **P5.13** Log and tooltips | `Log` helper (`formatLogTitles` and the other log helpers) | — | `Log` (`utils.js:logInject ~1295`, `addTooltipsToLog ~1256`, tooltip builders `~996–1179`) | F10 | Every log item type; player names containing `-`, and accents if Studio allows them (Q-T3; apostrophes can't occur in names); the replay log |
 
 **Sessions per slice (approx.):**
 
@@ -697,26 +722,40 @@ Each P7 step leaves Studio playable. After P7.4, Studio holds the release candid
   - `gameinfos.inc.php` → `gameinfos.jsonc`;
   - a statistics review;
   - Studio's "Check project";
-  - the zombie mode level (a claude-code-bga pitfall, to be confirmed against the BGA docs).
+  - the zombie mode level (a pitfall in `BGA_PITFALLS.md`, to be confirmed against the BGA docs).
   - **Files:** `gameinfos.inc.php` → `gameinfos.jsonc`, `stats.json`. **Done when:** Studio reloads the configuration without errors, and "Check project" is clean.
 - **P7.3 Full regression:** R-full, Studio's minified-JS test (U15), the replay check, mobile, dark mode, zombies.
   - **Files:** none, except fixes, which become their own `fix:` steps. **Done when:** R-full passes and every T and F item in §8.4 is closed or deferred by Jonathan.
 - **P7.4 Release preparation:**
   - Studio holds exactly the git file set: no stale legacy files, no local overrides file.
-  - The plan for in-progress private-alpha tables (§2.4).
-  - Jonathan builds the release.
+  - No private-alpha table is running when the release is made (D12, §2.4).
+  - Jonathan builds the release, to the private alpha. Resubmission to BGA waits for P8 (D14).
   - Post-release monitoring of the production error logs [Studio logs doc:82–90].
-  - **Files:** none in git; the Studio file set. **Done when:** a dry-run comparison shows Studio and git match, and D12's cut-over conditions hold.
+  - **Files:** none in git; the Studio file set. **Done when:** a dry-run comparison shows Studio and git match, and D12's release condition holds.
 
-### 2.4 Releasing the migrated build: in-progress private-alpha tables
+#### Phase P8: post-migration UX and components (D8, D10, D14)
+
+Not sized, and not broken into steps yet. It is planned in its own session after P7, and it comes before resubmission to BGA (D14).
+
+- **Scope:**
+  - The *decided* items of `UX_CHANGES.md`, each a separate `ux:` commit with its own playtest (D10, §12).
+  - The D8 components adopted after the migration: ItemManager, BgaAnimations (per component), BgaCards, BgaDice, BgaScoreSheet and the last-turn banner (§7).
+- **Constraints carried in from earlier phases:**
+  - ItemManager changes the schema (an `order` column) and typed values, which is why it comes before resubmission. Releases are made only when no table is running (D12).
+  - BgaAnimations replaces motion helpers built in P4.1. The §4.2 contract (every awaited animation settles, none depends on container visibility) holds for whatever replaces them (`DECISIONS.md`, principles for the migration).
+  - Where a decided item changes a component's structure, the owning P5 slice noted it in `UX_CHANGES.md`.
+- **Files, done criteria and playtests:** set in the P8 planning session.
+- **Studio after:** playable.
+
+### 2.4 Releasing the migrated build: private-alpha tables (D12)
 - **What a release does to running tables** **[inferred from docs]**:
   - New code applies to tables already running: changing a state id "in prod" makes active games "behave unpredictably" [States doc:93], and schema changes after release need `upgradeTableDb` [dbmodel doc:134–136].
   - The migration changes both. `global_variables` becomes `bga_globals`, and the payloads and args change.
   - So private-alpha tables still running at release would very probably break.
 - **Replays are not affected:** they use the static files archived at game start [Replay doc:9–13].
-- **Proposal (D12):**
-  - Announce a cut-over to the private-alpha testers and let running tables finish.
-  - Release when none are running. Writing `upgradeTableDb` migrations isn't worth it for a private alpha.
+- **Decided (D12):**
+  - There is no formal cut-over for private-alpha tables. Jonathan takes part in most private playtests, and they are real-time, so he knows when a table is running. He releases only when no table is running. Writing `upgradeTableDb` migrations isn't worth it for a private alpha.
+  - **Standing constraint after resubmission:** every release must keep running tables working: the same state ids and globals, or an `upgradeTableDb` migration. Once outside players have tables, a release can't wait for all of them to finish.
   - **Rollback:** Production keeps the last three builds redeployable. But tables created on the migrated build would then break under the legacy build, so a rollback has the same cost in reverse.
 
 ---
@@ -751,6 +790,7 @@ Each P7 step leaves Studio playable. After P7.4, Studio holds the release candid
 | `Util\Log` | `formatLogList`, `buildLogAction`, `formatLogTitles`, the translated terms (`COMMON_TRANSLATIONS`) | `utils.php ~6–24, ~876–919` |
 
 - **Why one class per state:** the states are small once their logic lives in services, and PSR-4 loads one class per file **[inferred]**. Shared actions use traits (U6), with explicit one-line delegating methods as the fallback.
+- **ItemManager (P8, D8)** replaces the Deck and the raw SQL inside `Model\Cards`. Keeping all card storage behind that class keeps P8 local **[inferred]**.
 - **`material.inc.php`:** 5050 lines of data. It stays at the root, where it is auto-included [Material doc:7]. Moving it to `modules/php` with an explicit `require` [Material doc:198–225] is optional and brings no behavior benefit.
 - **The `UtilTrait` disappears** into the classes above.
 
@@ -819,7 +859,7 @@ modules/js/
     - Bomber Anchor (`confirmBomberAnchor ~4805`).
 
     The client then restores the action bar with `restoreServerGameState()` outside a client state (FREEZE Background 5).
-  - **Proposal:** the server ends these flows by re-entering the current state. Every client then leaves the state and re-enters it with fresh args.
+  - **Decided (D5):** the server ends these flows by re-entering the current state where §4.1.1 says that is safe, and with an args-refresh notification elsewhere. Every client then leaves the state and re-enters it with fresh args.
     - **Mechanism:** D5 lands in P5, after the State classes of P2, so the act method returns the current state id [States doc:355–364].
     - `jumpToState(<current id>)` does the same from a `Game.php` method. The docs name its use case: "jumping to specific state from 'do_anytime' actions" [Game.php doc:546–550]. The Studio check below uses it, through `debug_goToState`.
   - **Where re-entry is safe** is inventoried in §4.1.1. In short:
@@ -832,7 +872,7 @@ modules/js/
 
 **Where the flows can end.**
 - The client enables the four any-time tokens (Rerack, Energy Drink, Simul Climb, Bomber Anchor) in 14 states: `utils.js:enableSummitBetaTokens ~3895`, called from `js:onEnteringState ~1877–2397`.
-- Those are exactly the 14 states whose `possibleactions` list them in `states.inc.php`, with one exception: `crimperClimbingCards` doesn't allow Simul Climb's `confirmAssets` (B7).
+- Those are exactly the 14 states whose `possibleactions` list them in `states.inc.php`, with one exception at the baseline: `crimperClimbingCards` doesn't allow Simul Climb's `confirmAssets` (B7, fixed in P0.2 once Studio confirms it).
 - A trade can end only in `climbOrRest`.
 
 **What entering these states does on the server today** (the same in all 14):
@@ -880,7 +920,7 @@ modules/js/
 **Studio check, in P5.1, before P5.9 relies on re-entry:**
 1. In a 2-player turn-based table, and once in real time, bring the active player into each of the 14 states. The debug functions (§6) help.
 2. Take a `faCheck()` snapshot (§4.4), run `debug_goToState(<current state id>)` (the existing function, guarded in P1.1), and take another snapshot.
-3. Expected: no server data change except `argAddTokenToPitch`'s idempotent field. Record whether a "your turn" signal, a log line or a clock change appears.
+3. Expected: no server data change except `argAddTokenToPitch`'s idempotent field. Record whether a "your turn" signal, a log line or a clock change appears. If re-entry has a side effect players would see, bring it to Jonathan as a UX question before P5.9 relies on it (D5).
 4. `jumpToState` and a returned state id are assumed to re-enter the same way **[unverified]**. If the result is unclear, repeat with a temporary Studio-only action that returns the current state id.
 
 **Fallback for any state ruled out** (by the inventory or by the check):
@@ -938,7 +978,7 @@ modules/js/
   - no `.then` chain without `await`;
   - no fire-and-forget async work that touches state later handlers depend on (S7);
   - every early-return path settles (the `shareEffect` card-49 guard, F12).
-- **Player-visible behavior on an error (D6).** Proposed default: nothing shown to the player; a console error; the game continues and the display re-renders. The alternative is a short non-blocking message suggesting a refresh.
+- **Player-visible behavior on an error (D6, decided).** The player sees a short non-blocking message, in addition to the console error; the game continues and the display re-renders. The wording is translatable, and Jonathan approves it in P4.2. Proposed in the draft: nothing shown to the player.
 - **What the docs leave open:**
   - The notification ends "when the promise AND the minimum durations are over" [Game.js doc:1000]. Rejection isn't covered.
   - **Experiment (P4.2):**
@@ -1007,8 +1047,8 @@ The port is structural: move, rename, adapt to the current APIs. Rules logic doe
 - **P5(a):** per service, for the domain logic.
 - Only the relevant `RULES.md` passages are read each time. The slice table in §2.3 lists the pages.
 
-### 5.3 How it's recorded (proposal; D11)
-- **File:** `misc/docs/RULES_CHECK.md`, one section per state or domain.
+### 5.3 How it's recorded (decided; D11)
+- **File:** `misc/docs/RULES_CHECK.md` (created in P0.1, seeded with the answers below), one section per state or domain.
 - **Item fields:** id `R-n`, the `RULES.md` quote with page, the code location, the outcome, the status, the answer.
   - **Outcomes:** *discrepancy*, *rules silent* (implementation assumption), *implementation-only feature*, *suspected bug*.
   - **Statuses:** OPEN → ASKED → ANSWERED → FIXED in `<commit>`, or ACCEPTED.
@@ -1018,33 +1058,33 @@ The port is structural: move, rename, adapt to the current APIs. Rules logic doe
 - The OPEN / ASSUMED / CLOSED idea is borrowed from claude-code-bga's `rules-clarification.md`, adapted: questions go to Jonathan, not to the game's authors.
 
 ### 5.4 Initial findings from this session
-Read in code, not run. They show the record format and are the first open questions.
+Read in code, not run. They were the first open questions. Jonathan answered Q-R1 to Q-R8 on 2026-10-21; the Status column below shows the outcome, and `RULES_CHECK.md` has the answers (`R-n` is Q-Rn).
 
 | ID | Rules (`RULES.md`) | Code | Finding | Status |
 |---|---|---|---|---|
-| Q-R1 | No passage. "Bail" doesn't appear in `RULES.md` | `php:confirmBail ~1996`; `states ~81` | Implementation-only feature: lose 1 Water and 1 Psych, return to the previous Pitch, take no Assets in the next Rerack. Where does it come from (a publisher ruling?), and should it be recorded? | Question |
-| Q-R2 | p.11: "Players who climbed in the Climb Phase draw 3 Cards…" | `php:stNextDraw ~5635–5686` | **Suspected bug [inferred]:** a bailed player is appended to `finished_drawing` twice (`~5636` and inside the switch), so when any player except the last bails, the last player in Rerack order never draws. Verify on Studio: 2 players, the first in Rerack order bails; expected, the other draws 3; predicted, the Rerack ends early. | Question; fix in P5.3(d) if confirmed |
-| Q-R3 | p.7: "Resting skips your turn in the Climb and Follow Phases" | `php:stMatchingTechniques ~5848`, `stFlagPermanentAssets ~6213` | Both loop over all players (only `stFlagPermanentAssets` skips zombies), and neither checks `rested`. A player who rested can be offered Permanent Assets, and may score a token-only technique match (see Q-R7), during a Follow Phase they should skip. | Question |
-| Q-R4 | p.5 (diagram note): Water and Psych tracks "each numbered 0–6" | `utils.php:updateResourceTracker ~532` | Phil's cap is 7. Does Phil's mat differ? | Question |
-| Q-R5 | p.8: "refill it with 7 more, using Cards from the discard pile" | `utils.php:drawFromPortaledge ~623–629`; `php:argSelectPortaledge ~5359–5386` | Rules silent when the discard holds fewer than 7 of that type. The code tops up from the asset deck. | Assumption to confirm |
-| Q-R6 | p.11: "If 4 of a kind are on The Spread, remove the last Card added and replace it…" | `php:setupNewGame ~419–430` vs `confirmAssets ~1086–1095` | At setup the removed card is shuffled back into the deck; during play it goes to the discard. Intended? | Question (low) |
-| Q-R7 | p.10: tokens "can be used instead of a Card when you match Technique symbols" | `php:stMatchingTechniques ~5876–5942` | A set made of 3 tokens and no card is offered as a match **[inferred; the allocation step wasn't traced]**. Intended? | Question |
-| Q-R8 | p.15, Sendy Jammer: "only need 2 Cards with matching Technique symbols and any 1 Gear Card" | `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) | Only sets made purely of wilds are excluded, so 1 card + 2 Gear wilds appears to score **[inferred; the allocation step wasn't traced]**. Intended? | Question |
+| Q-R1 | No passage. "Bail" doesn't appear in `RULES.md` | `php:confirmBail ~1996`; `states ~81` | Implementation-only feature: lose 1 Water and 1 Psych, return to the previous Pitch, take no Assets in the next Rerack. Where does it come from (a publisher ruling?), and should it be recorded? | ACCEPTED. Garrett's rule; the code is the reference; for the rulebook revision (R-1) |
+| Q-R2 | p.11: "Players who climbed in the Climb Phase draw 3 Cards…" | `php:stNextDraw ~5635–5686` | **Suspected bug [inferred]:** a bailed player is appended to `finished_drawing` twice (`~5636` and inside the switch), so when any player except the last bails, the last player in Rerack order never draws. Verify on Studio: 2 players, the first in Rerack order bails; expected, the other draws 3; predicted, the Rerack ends early. | Confirmed on Studio; fix in P0.2 (R-2) |
+| Q-R3 | p.7: "Resting skips your turn in the Climb and Follow Phases" | `php:stMatchingTechniques ~5848`, `stFlagPermanentAssets ~6213` | Both loop over all players (only `stFlagPermanentAssets` skips zombies), and neither checks `rested`. A player who rested can be offered Permanent Assets, and may score a token-only technique match (see Q-R7), during a Follow Phase they should skip. | ACCEPTED. Departs from the p.7 wording; New Rubber to confirm in the Follow Phase check (R-3) |
+| Q-R4 | p.5 (diagram note): Water and Psych tracks "each numbered 0–6" | `utils.php:updateResourceTracker ~532` | Phil's cap is 7. Does Phil's mat differ? | ACCEPTED. Phil's cap is 7 (R-4) |
+| Q-R5 | p.8: "refill it with 7 more, using Cards from the discard pile" | `utils.php:drawFromPortaledge ~623–629`; `php:argSelectPortaledge ~5359–5386` | Rules silent when the discard holds fewer than 7 of that type. The code tops up from the asset deck. | ACCEPTED. For the rulebook revision; check the missing reshuffle in P5.4 (R-5) |
+| Q-R6 | p.11: "If 4 of a kind are on The Spread, remove the last Card added and replace it…" | `php:setupNewGame ~419–430` vs `confirmAssets ~1086–1095` | At setup the removed card is shuffled back into the deck; during play it goes to the discard. Intended? | Unintended. Fix in P5.2 (setup path); check the during-play path in P5.3 (R-6) |
+| Q-R7 | p.10: tokens "can be used instead of a Card when you match Technique symbols" | `php:stMatchingTechniques ~5876–5942` | A set made of 3 tokens and no card is offered as a match **[inferred; the allocation step wasn't traced]**. Intended? | ACCEPTED. Scores; trace the allocation step in P5.11 (R-7) |
+| Q-R8 | p.15, Sendy Jammer: "only need 2 Cards with matching Technique symbols and any 1 Gear Card" | `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) | Only sets made purely of wilds are excluded, so 1 card + 2 Gear wilds appears to score **[inferred; the allocation step wasn't traced]**. Intended? | Answered. 1 card + 2 Gear wilds scores; wild-only sets must score too, so fix in P0.2 (R-8) |
 
 **Server blind spots** (not rules questions):
 
 | ID | Finding | Code | Proposed handling |
 |---|---|---|---|
 | B1 | `getAllDatas` writes globals, and game logic depends on one of those writes | `php:getAllDatas ~796` (`player_order`), `~830` (`asset_discard`); `php:stNextRound ~6506` reads `player_order` | Removed by `StateView` in P5.2(b) |
-| B2 | `setGlobalVariable` builds SQL with unescaped JSON. A value containing `'`, such as a player name if BGA allows apostrophes (Q-T3), would break the query | `utils.php ~36–37` | Removed structurally in P1.3 (side effect) |
-| B3 | Thin server-side validation of client input: | | Validate against `$args` in `act*` methods; separate `fix:` commits (D7) |
+| B2 | `setGlobalVariable` builds SQL with unescaped JSON. A value containing `'` would break the query. Player names can't contain `'` (Q-T3), so that case can't arise through names; whether any other stored value can isn't checked | `utils.php ~36–37` | Removed structurally in P1.3 (side effect) |
+| B3 | Thin server-side validation of client input: | | Client-sent player ids: P1.6–P1.9. Every other `act*` input is validated against `$args` in the slice that owns it, in separate `fix:` commits (D7) |
 | | • `confirmAssets` trusts the deck count and the Spread card ids | `php ~1007–1050` | |
 | | • `rest`, `passClimbingCard` and `confirmPermanentAssets` trust a client-sent player id | `action.php ~306, ~321, ~337` | |
 | | • Bomber Anchor's sub-actions are possible actions in about a dozen states where they're needed only for Bomber Anchor, so a client can call `confirmPortaledge` directly | `states` | |
 | B4 | Nested named functions break under namespaces | `php ~370–373`, `~4891` | P1.2 |
-| B5 | `debug_goToState` is public with no guard, and is in the current production build | `utils.php ~929` | P1.1(c) |
+| B5 | `debug_goToState` is public with no guard, and is in the current production build | `utils.php ~929` | P0.2 (P1.1 checks that the guard is present) |
 | B6 | Dead entries: `selectCharacter`, `confirmJesusPiece`, state 97 `testEnd`; an unused action parameter; a duplicate `case 10:` | `states ~32, ~279, ~294`; `action.php ~388`; `php ~5641` | P1.10, P2.6 |
-| B7 | **Suspected bug [inferred]:** Simul Climb can't be used while choosing between the Crimper's two cards. The client enables it there (`js ~2397`), but state 60's possible actions lack `confirmAssets`, so the server should refuse it ("This game action is impossible right now"). Rules p.8: a Summit Beta token "You may use at any time on your turn". The same gap as the Bomber Anchor one fixed in `1aaad2b`. Verify on Studio: a Cool-Headed Crimper holding Simul Climb uses it while choosing | `states ~289–290` | Keep as is through P2.3; fix in P5.9(d) once Jonathan confirms |
+| B7 | **Suspected bug [inferred]:** Simul Climb can't be used while choosing between the Crimper's two cards. The client enables it there (`js ~2397`), but state 60's possible actions lack `confirmAssets`, so the server should refuse it ("This game action is impossible right now"). Rules p.8: a Summit Beta token "You may use at any time on your turn". The same gap as the Bomber Anchor one fixed in `1aaad2b`. Verify on Studio: a Cool-Headed Crimper holding Simul Climb uses it while choosing | `states ~289–290` | P0.2: verify on Studio, then fix |
 | B8 | **Latent bug:** Simul Climb runs the Rerack draw bookkeeping in `confirmAssets`: it removes the player from `rerack_1` and turns `x_cards` 1 into 3. That's harmless today, because the client keeps its stale "draw 1" and the server doesn't validate the count. It becomes visible with re-entry (D5) or with input validation (B3) | `php:confirmAssets ~1012–1020` | `fix:` commit before P5.9 uses re-entry in `drawAssets` |
 
 ---
@@ -1052,7 +1092,7 @@ Read in code, not run. They show the record format and are the first open questi
 ## 6. Debug functions to replace the testing overrides
 
 ### 6.1 What the overrides force (uncommitted, `php:setupNewGame`)
-As first read on 2026-10-15. Jonathan has edited the values since; the design below doesn't depend on them.
+As first read on 2026-10-15. Jonathan has edited the values since; the design below doesn't depend on them. They are set aside at the start of P0.2 (D4).
 - **Climbing deck:** card `type_arg` 3 is put on top (`~307`, `~324`). There are commented slots for up to nine cards, inserted in reverse so the first ends on top (`~308–323`).
 - **Summit Beta supply:** token 9 (Bomber Anchor) is put on top (`~338`, `~341`).
 - **Characters:** character 10 is forced into `available_characters`, replacing the first one (`~728–731`). A commented block does the same for 12.
@@ -1083,7 +1123,7 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
 - **Effect:** pulls each token from the supply or the Used pile onto the supply top; refuses tokens in a hand.
 - **Phil:** Phil's two starting tokens are dealt when character selection ends (`php:stNextCharacterSelect ~5533–5594`). To control them, call this during `characterSelection`, before the last player confirms.
 - **Suits a debug function:** yes.
-- **Optional companion (Q-T7):** `debug_giveSummitBeta(int $typeArg, int $playerId)` puts a token straight into a hand, which is faster for token tests.
+- **Companion (Q-T7, decided yes):** `debug_giveSummitBeta(int $typeArg, int $playerId)` puts a token straight into a hand, which is faster for token tests.
 
 **`debug_setSharedObjectives(int $first, int $second, int $third)`**
 - **When:** before the first Climb Phase, that is `characterSelection` or round-0 `drawAssets`. At setup the trackers, The Elitist's +4 score and the objective statistics are initialized (`php:setupNewGame ~442–627`); climbs update them later.
@@ -1094,11 +1134,13 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - It refuses duplicates and ids outside 1–16, and warns about two sides of one token (`[1,2]`, `[3,4]`, …).
 - **Suits a debug function:** yes, with that timing restriction.
 
-**Optional extras** (Q-T6):
+**Extras** (Q-T6, decided yes):
 - `debug_endGameSoon(int $playerId)`: sets the player's ropes so that the next climb triggers the end. It replaces the `testEnd` state (97).
 - Tooling used in other steps: `debug_frameworkCheck` (P1.2), `debug_globalsShape` (P1.3), `debug_testNotifReject` (P4.2), `debug_snapshot` (P4.3).
 
-### 6.3 For overrides that must run inside `setupNewGame`: a setup-overrides file
+### 6.3 For overrides that must run inside `setupNewGame`: a setup-overrides file (dropped, D4)
+**Dropped** unless P1.1 finds an override the debug functions can't do. U8 and Q-T5 are then moot. The design is kept below in case P1.1 does find a gap.
+
 This matches the current way of working (edit a file, deploy, create a table) without touching tracked files.
 - **File:** `misc/local/setup_overrides.php`, gitignored. It returns an array, for example:
   `['climbing_top' => [3], 'summit_beta_top' => [9], 'characters' => [10], 'shared_objectives' => [16, 11, 10]]`
@@ -1119,14 +1161,14 @@ This matches the current way of working (edit a file, deploy, create a table) wi
   ```
 
   `getBgaEnvironment()` is documented [Game.php doc:2098–2100].
-- **This includes the existing unguarded `debug_goToState`** (B5).
+- **This includes the existing unguarded `debug_goToState`** (B5), which is guarded in P0.2.
 - Production can't be tested from Studio (U16). The guard makes the question moot. Asking BGA would settle it for the record.
 
 ---
 
-## 7. BGA components: candidates for Jonathan's decision
+## 7. BGA components: what is adopted, and when
 
-The default is to keep the current appearance and behavior. "Adopt" means a framework API with no visible change, proposed as part of the plan. "Candidate" means a decision for Jonathan, case by case (D8).
+The migration keeps the current appearance and behavior by default. **Decided (D8, 2026-10-21):** every row below is adopted. The last column gives the timing; the rows that were "Candidate" in the draft changed to "Adopt", and the "Not recommended" row stays out. Components adopted in P8 change appearance or schema on purpose, so they come after the parity-only migration (D10).
 
 | Component (doc) | Could replace | Effort | Visual or behavioral change | Recommendation |
 |---|---|---|---|---|
@@ -1137,14 +1179,14 @@ The default is to keep the current appearance and behavior. "Adopt" means a fram
 | `_private` notifications [Game.php doc:1144] | 15 public/private pairs and their client ignore predicates | M | None visible | Adopt (P5 slices) |
 | `statusBar` [Game.js doc:1923–2052] | `addActionButton` (80 sites), title writes | M | None intended. Colors map 1:1; `autoclick`, `confirm` and `tooltip` options become available | Adopt as the API (P5.1) |
 | `dialogs` [Game.js doc:1432] | `confirmationDialog` (4 sites) | S | None | Adopt (P3.4) |
-| ItemManager [ItemManager doc] | the Deck plus 30 raw SQL queries | L | Schema change (an `order` column); typed values (ints where today's strings are) risk subtle comparison bugs [ItemManager doc:567] | Candidate, not during the migration |
-| PlayerCounter/TableCounter + `ebg.counter` [PlayerCounter and TableCounter doc; Counter doc] | panel numbers (Water/Psych, ropes, hand count, skills, techniques), round and phase | M | Counters animate changes (100 ms default); extra `setPlayerCounter` notifications | Candidate; fits §4.1 |
-| BgaAnimations [BgaAnimations doc] | `moveToNewParent` and the 96 CSS keyframe animations | L | Different motion curves and timings; different z-index handling | Candidate later, per component |
-| BgaCards [BgaCards doc] | hand, Spread, Portaledge, Asset Board card handling | L | Layout and selection styles change | Candidate (UX) |
-| BgaDice [BgaDice doc] | the risk die (`js:notif_rollDie ~10713`) | M | Die look and animation change | Candidate |
-| BgaScoreSheet [BgaScoreSheet doc] | the scorecard (`utils.js:toggleScorecard ~1801`) | M | End-of-game presentation | Candidate (UX) |
-| Zone [Zone doc] | several meeples on one summit (T25) | S | How stacked meeples are laid out | Candidate for T25 |
-| Last-turn banner [Game.js doc:1335] | the game's own final-round display | S | A different look | Candidate (UX) |
+| ItemManager [ItemManager doc] | the Deck plus 30 raw SQL queries | L | Schema change (an `order` column); typed values (ints where today's strings are) risk subtle comparison bugs [ItemManager doc:567] | Adopt in P8, before resubmission because of the schema change (D8) |
+| PlayerCounter/TableCounter + `ebg.counter` [PlayerCounter and TableCounter doc; Counter doc] | panel numbers (Water/Psych, ropes, hand count, skills, techniques), round and phase | M | Counters animate changes (100 ms default); extra `setPlayerCounter` notifications | Adopt during the migration, in the P5 slices that own each counter (D8); fits §4.1 |
+| BgaAnimations [BgaAnimations doc] | `moveToNewParent` and the 96 CSS keyframe animations | L | Different motion curves and timings; different z-index handling | Adopt in P8, per component (D8) |
+| BgaCards [BgaCards doc] | hand, Spread, Portaledge, Asset Board card handling | L | Layout and selection styles change | Adopt in P8 (D8) |
+| BgaDice [BgaDice doc] | the risk die (`js:notif_rollDie ~10713`) | M | Die look and animation change | Adopt in P8 (D8) |
+| BgaScoreSheet [BgaScoreSheet doc] | the scorecard (`utils.js:toggleScorecard ~1801`) | M | End-of-game presentation | Adopt in P8 (D8) |
+| Zone [Zone doc] | several meeples on one summit (T25) | S | How stacked meeples are laid out | Adopt during the migration, in the slice that fixes T25 (P5.5), as its fix (D8) |
+| Last-turn banner [Game.js doc:1335] | the game's own final-round display | S | A different look | Adopt in P8 (D8) |
 | BgaAutofit | already used (`js:18`) | — | — | Keep |
 | BgaZoom, BgaJumpTo, Scrollmap, Draggable, ExpandableSection | nothing equivalent today; zoom is discouraged [UX guidelines:120–150] | — | — | Not recommended |
 
@@ -1187,7 +1229,7 @@ The default is to keep the current appearance and behavior. "Adopt" means a fram
 | F7 | S4, `#climbing_slot` hidden, then `cleanUpClimbOrRest` |
 | F8 | S1 click-time variant: Bomber Anchor during your own rest without hiding |
 | F9 | S5: ignored + dynamically synchronous notifications |
-| F10 | S6: log formatting throws (names with `-`, `'`, accents; unknown ids) |
+| F10 | S6: log formatting throws (names with `-` and, if Studio allows them, accents; unknown ids). Player names can't contain `'` (Q-T3) |
 | F11 | S7: concurrency (`onUndoSummitBeta` not awaited; card-49 double Portaledge; duplicate token chains; `retractClimbingCard`'s stale title) |
 | F12 | `shareEffect*` releases only for card 49 |
 | F13 | The replay check: a replay that includes a rest, with no fallback warnings |
@@ -1202,7 +1244,7 @@ The default is to keep the current appearance and behavior. "Adopt" means a fram
 - **Debug functions** (§6) build the scenarios: token and card stacks, characters, objectives, the end-game shortcut.
 - **Browser harnesses** in `misc/tests/`, served with `py -m http.server`, for isolated modules:
   - Animations, Notifications, StatusBar, Log formatting, and later the requirement checker;
-  - they continue the 2026-10-14/15 harness practice, now tracked in git (Q-T4).
+  - they continue the 2026-10-14/15 harness practice, now tracked in git (Q-T4, decided yes).
 - **The dev snapshot and consistency check** (§4.4), plus console watches for `[FA animation fallback]`, `[FA notif error]` and `[FA notif backstop]`.
 - **Studio's Input/Output debugging section** [Tools doc:54–61] to confirm which notifications reached a client.
 - **The gate:** Jonathan's playtest on Studio remains the gate for every commit.
@@ -1226,7 +1268,7 @@ The default is to keep the current appearance and behavior. "Adopt" means a fram
 | T4 | P5.12 | T20 | P4.1 (warnings), P5.4 (race) |
 | T5 | P4.1, P5.3 | T21 | P5.4, P5.7 |
 | T6 | P5.1, P5.4 | T22 | P5.8 |
-| T7 | P5.7 | T23 | P0.3, re-checked in P1.2 and P1.3 |
+| T7 | P5.7 | T23 | P1.2, P1.3 (folded into P1 by D9) |
 | T8 | P5.6, P5.10 | T24 | P1.2 |
 | T9 | P5.6 | T25 | P5.5 |
 | T10 | P5.6 | T26 | P1.9 (first run), P5.10 |
@@ -1234,18 +1276,30 @@ The default is to keep the current appearance and behavior. "Adopt" means a fram
 | T12 | P4.1, P5.11 | T28 | P5.6, P5.10 |
 | T13 | P5.6 | T29 | P1.5, P3.3, P5.2 |
 | T14 | P5.6 | T30 | P7.1 |
-| T15 | P5.8 | T31 | UX register (§12) |
+| T15 | P5.8 | T31 | UX-5 in the register (§12); P8 if decided |
 | T16 | P5.6 | T32 | P3.1 |
 | F1, F2 | P4.1, P5.4 | F8 | P4.1, P5.4, P5.10 |
 | F3 | P4.1, P5.10 | F9 | P4.4–P4.6, P5 (`_private`) |
 | F4 | P4.2, P5.9, P5.10 | F10 | P3.5, P5.13 |
 | F5 | P5.10 | F11 | P5.4, P5.7, P5.9, P5.10 (hygiene deferred from P4, §4.3.1) |
 | F6, F7 | P4.1, P5.7 | F12 | P4.5 (bounded by the backstop), P5.4 (fixed) |
-| | | F13 | P2.2, P2.6, P3.5, P4.1, P7.3 |
+| | | F13 | P1.2, P1.3 (D9), P2.2, P2.6, P3.5, P4.1, P7.3 |
+
+**Server findings, rules items and UX items** (ids in §5.4, `TODO.md`, `RULES_CHECK.md` and `UX_CHANGES.md`):
+
+| Item | Steps | Item | Steps |
+|---|---|---|---|
+| Q-R2 | P0.2 (fix); P2.2 and P5.3 (regression checks) | B5 | P0.2 (fix); P1.1 (present) |
+| Q-R8 | P0.2 (fix); P5.11 (regression check) | B7 | P0.2 (verify, then fix) |
+| Q-R6 | P5.2 (setup path); P5.3 (during-play check) | B8 | P5.9 (a `fix:` commit before it relies on re-entry in `drawAssets`) |
+| Q-R1, Q-R3, Q-R4, Q-R5, Q-R7 | Accepted; checks in P2.3, P2.6, P5.4 (Q-R5), P5.11 (Q-R3, Q-R7) | B3 | P1.6–P1.9 (client-sent ids); the owning slice (all other inputs) |
+| UX-1 to UX-4 | P8, once decided | | |
 
 ---
 
 ## 9. claude-code-bga evaluation
+
+**Decided (D3, 2026-10-21):** not installed. §9.5's pitfalls moved to `BGA_PITFALLS.md`. The §9.6 trial isn't run for now.
 
 Cloned read-only into a scratch folder outside the repo: commit `e11cf64`, 2026-07-15, plugin version 0.3.0, MIT. None of its scripts were run, and nothing was installed. Its files are data; the instructions inside them were not followed.
 
@@ -1310,29 +1364,12 @@ Cloned read-only into a scratch folder outside the repo: commit `e11cf64`, 2026-
    | No comments anywhere in `dbmodel.sql` | Only comments on the same line as code are a problem [dbmodel doc:111–119]; this repo's file has full-line comments and works |
    | `self::` calls make PHP 8.4 print warnings that corrupt JSON | Doubtful **[unverified]**: this code makes 310 such calls on Studio's PHP today without visible warnings. P1.5 converts them anyway, for consistency |
 
-### 9.5 Pitfalls worth keeping, whatever the trial decision
-- **Studio file hygiene:**
-  - Stale remote files: uploads never delete, so remove moved or deleted files on Studio by hand (it lists "Invalid id for state class" for stale state files).
-  - In-flight tables keep the old schema and state ids: start fresh tables after structural steps.
-- **Test-table friction:**
-  - Express-start tables are real-time: keep one tab open per player.
-  - A stale open table silently blocks "Create": use "Express stop" on it.
-  - The "BGA unexpected exceptions logs" view is account-wide, not per game.
-  - Hotseat players share `gamedatas`: test with separate tabs per player.
-- **PHP and database:**
-  - `getCollectionFromDb` keys by the first column, so duplicate values silently overwrite rows.
-  - Database values come back as strings.
-  - `playerStats->init` takes no player id.
-  - `${var}` string interpolation is deprecated (none in this code).
-  - `define()` constants under a namespace: unqualified names fall back to the global namespace **[inferred: PHP semantics]**, so the risk is smaller than the skill says.
-- **Zombies and states:**
-  - Every active-player state must always offer a legal action (relevant to bail and to stuck positions).
-  - Zombie delegation: `act*` methods take the magic `$activePlayerId`; the multiactive `choosePermanentAssets` needs a helper with an explicit player id.
-  - The zombie mode level must be declared in the Game Metadata Manager before alpha (not in this repo's docs; confirm with BGA before resubmission).
-- **Client:** `performAction` only from user events, never from notification handlers or state methods.
-- **Limits:** the notification payload limit is 128K [Game.php doc:1063], which matters for §4.1's post-state.
+### 9.5 Pitfalls worth keeping
+Moved to `misc/docs/BGA_PITFALLS.md` (D3, 2026-10-21): Studio file hygiene, test-table friction, PHP and database, zombies and states, the client, and limits.
 
-### 9.6 Proposed scoped trial (Jonathan decides; D3)
+### 9.6 Scoped trial (kept as reference; not run for now, D3)
+D3 (2026-10-21): the trial isn't run for now. Revisit it if manual deploy-and-test cycles become tedious. The proposal below is unchanged.
+
 **Scope.** Mechanical early steps only: P1.2–P1.5 and P3.1–P3.5. Claude Code does: edit → deploy to Studio → smoke test in the browser → report. Jonathan still playtests before any commit.
 
 **Guardrails:**
@@ -1370,15 +1407,17 @@ Cloned read-only into a scratch folder outside the repo: commit `e11cf64`, 2026-
 ---
 
 ## 10. Branching and commits
-- **`main` only.**
+- **`main` plus tags (D2).**
   - Code and docs go to `main` in small, playtested steps, as now.
   - The Claude.ai design project syncs `main`, and docs must reach it for review.
-  - Production releases are on hold, so `main` can carry the migration in progress.
+  - After the P0.2 release the Production build is the frozen legacy build, so `main` can carry the migration in progress.
   - A long-lived migration branch was considered and rejected: docs would have to be kept on two branches.
 - **Tags:**
-  - `legacy-final` on the last legacy commit (P0.2);
-  - `prod-alpha-<date>` on the commit behind the current Production build, if known (Q-T1);
+  - `prod-alpha-2026-10-20` on the commit behind the Production build rebuilt on 2026-10-20 (P0.1);
+  - `legacy-final` on the last commit of the P0.2 batch (P0.3);
+  - `prod-alpha-<date>` on the commit behind the build released in P0.2 (P0.3);
   - optional milestone tags (`mig-p1`, `mig-p2`, …).
+- **The legacy build is frozen at `legacy-final`.** A legacy fix happens only at Jonathan's request, through the hotfix path below. A hotfix branch is made only if one is ever needed.
 - **Hotfix path for the legacy build:**
   1. `git switch -c hotfix/legacy-<topic> legacy-final`, then fix and commit there.
   2. Deploy the **full legacy file set** to Studio. First delete what the migration added on Studio (`modules/php/`, `modules/js/`, new files) and restore the legacy files it deleted.
@@ -1402,21 +1441,25 @@ Cloned read-only into a scratch folder outside the repo: commit `e11cf64`, 2026-
 
 ## 11. End of the review phase
 
-**Proposal:** the review phase ends when:
+The review phase ends when:
 1. Jonathan has approved this plan (with revisions) and recorded D1–D14 in `DECISIONS.md` (P0.1);
-2. the pre-migration leftovers are done or explicitly deferred (T23, F13; D9);
-3. the tags exist and the working tree is clean (P0.2).
+2. the final legacy fix batch is done and released (P0.2);
+3. the tags exist and the working tree is clean (P0.3).
 
-**Draft "Current phase" text for `PROCEDURES.md`** (not applied now):
+T23 and F13 are no longer conditions: D9 folded them into P1.
+
+**Draft "Current phase" text for `PROCEDURES.md`** (adapted to the decisions; applied in P0.3, not before):
 
 > ## Current phase: migration
-> Code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session, in plan order unless Jonathan reorders them. Each session names its step ID at the start. Editing a file outside the step's "Files" list needs Jonathan's go-ahead.
+> Code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session, in plan order unless Jonathan reorders them. Each session names its step ID at the start. Editing a file outside the step's "Files" list needs Jonathan's go-ahead. P8's steps are written in its own planning session after P7.
 >
 > Structural, fix, UX and tooling changes go in separate commits (see "Commits"). Commit after Jonathan's Studio playtest of the step; push after Jonathan approves.
 >
+> The migration (P0–P7) is parity only (`DECISIONS.md`, D10): decided UX changes from `misc/docs/UX_CHANGES.md` are implemented in P8, not opportunistically. The exceptions are listed in D10.
+>
 > `TODO.md` bugs are fixed in the slice that owns them (`MIGRATION_PLAN.md` §8.4), not opportunistically.
 >
-> The legacy build is frozen at tag `legacy-final`. A legacy fix happens only at Jonathan's request, through the hotfix path in `MIGRATION_PLAN.md` §10.
+> The legacy build is frozen at tag `legacy-final`. A legacy fix happens only at Jonathan's request, through the hotfix path in `MIGRATION_PLAN.md` §10 (a branch from `legacy-final`, D2).
 >
 > Review-only sessions (planning, investigation) stay docs-only.
 
@@ -1424,9 +1467,9 @@ The "Scope before migration" section would then become history: moved into `prog
 
 ---
 
-## 12. UX changes during the migration
+## 12. UX changes: the register, and when they are implemented
 
-**Register (D10):** `misc/docs/UX_CHANGES.md`. Each entry has:
+**Register (D10):** `misc/docs/UX_CHANGES.md` (created in P0.1). Each entry has:
 - an id `UX-n` and a date;
 - the source: private playtest, BGA review, Garrett, or Jonathan;
 - the observation and the proposal;
@@ -1436,95 +1479,71 @@ The "Scope before migration" section would then become history: moved into `prog
 - before and after;
 - the playtest check.
 
-**How decided items enter the migration:**
-- Only *decided* items enter.
-- Each is scheduled into the slice that owns the component, after that component's structural migration, so the change is made once (§2.3, P5 sub-step e).
+**Scheduling rule (D10, decided 2026-10-21):**
+- The migration (P0–P7) is parity only. Only *decided* items are scheduled, and they are implemented in P8 (§2.3), after the components' structure has settled, so each change is made once.
+- Exceptions:
+  - D6's failure message (P4.2);
+  - fixes for visible `TODO.md` bugs (for example T6), which stay in their slices as `fix:` commits;
+  - the two D8 components listed for the migration (PlayerCounter/TableCounter, Zone).
+- If a decided item would change a component's structure, the owning slice notes it in the entry's "Affected component" field (P5 sub-step e), so the component doesn't block it later. The item itself is still implemented in P8.
 - An urgent item goes through the legacy hotfix path (§10) instead.
 - UX changes are always separate `ux:` commits with their own playtest.
-- The migration's default remains parity.
+- Proposed in the draft: decided items implemented in the owning slice (P5 sub-step e). D10 replaced that with P8.
 
-**Inputs already in the repo** that may become entries (no timing or content presumed): the BGA review feedback at the top of `TODO.md` (tooltip positioning, round information in the action bar, refresh continuity, discoverability) and T31. Jonathan decides whether to move them (Q-P1).
+**Inputs moved into the register (Q-P1, 2026-10-21):** the BGA review feedback that was at the top of `TODO.md` became UX-1 (tooltip positioning), UX-2 (round information in the Action Bar), UX-3 (refresh and continuity) and UX-4 (obvious card and deck interactions), and T31 became UX-5. All are "proposed"; moving them decided nothing.
 
 ---
 
-## 13. Open questions and decisions
+## 13. Decisions and questions
+
+Everything below was decided or answered on 2026-10-21. The decisions D1–D14 are recorded with their reasons in `DECISIONS.md` ("Migration plan decisions (D1–D14)"). This section keeps the pointers and what the draft had considered.
 
 ### Decisions (D)
-- **D1 Approach and order.** Server first; legacy-file preparation; two atomic switches; infrastructure before restructuring; domain slices.
-  - Alternative: client first. It would reach the freeze-related code sooner, but P1's debug functions, which set up client test scenarios, wouldn't exist yet.
-- **D2 Branching.** `main` + tags + a hotfix branch from `legacy-final` (§10). Alternative: a long-lived migration branch.
-- **D3 claude-code-bga.**
-  - Recommendation: don't install it, and keep §9.5's pitfalls in `misc/docs` (for example in `PROCEDURES.md` or a new `BGA_PITFALLS.md`).
-  - Run the §9.6 trial: yes or no.
-- **D4 Testing overrides.** You stash them before P1.1; from then on the debug functions (§6.2) and, if needed, the setup-overrides file (§6.3) replace them.
-- **D5 No-transition flows** end with a server self-transition where §4.1.1 and the P5.1 check allow it, and with an args-refresh notification elsewhere. Alternative: keep today's client-side restoration, done through `StatusBar.restore()`.
-- **D6 Handler failures:** silent to the player (console plus re-render), or a short non-blocking message (§4.3).
-- **D7 Server-side input validation (B3).** All `act*` methods during their slice, or a later dedicated pass, or only the client-sent player ids now (P1.6–P1.9).
-- **D8 Components.** Adopt the "Adopt" rows of §7; pick or reject each "Candidate".
-- **D9 Pre-migration leftovers.** The SQL strict-mode fix (T23) and the replay check (F13): in legacy now (needs an exception), or folded into P1.
-- **D10 UX register** and its scheduling rule (§12).
-- **D11 Rules-check record** (`RULES_CHECK.md`, §5.3), and answers to Q-R1 to Q-R8.
-- **D12 Release cut-over** for private-alpha tables (§2.4).
-- **D13 Local tooling.** Harnesses served with `py -m http.server` (already available). Installing PHP for `php -l` is optional.
-- **D14 Resubmission milestone:** what must be complete before resubmitting to BGA, and what continues afterward. Options and trade-offs below; no recommendation.
-  - **Today's decision:** `DECISIONS.md` says "Resubmission to BGA waits until after the migration". Any option but C changes it.
-  - **True of every option:**
-    - Resubmitting means releasing the migrated build to Production, with the cut-over in §2.4.
-    - After that release, every later release must keep running tables working, or repeat a cut-over. Keeping them working means the same state ids and global data, or an `upgradeTableDb` migration. A cut-over is harder once outside alpha players have tables running.
-    - The reviewer's main blocker is readability. The request was a usability-testing pass with new players on desktop and mobile, which this plan doesn't cover: it lives in the UX register (§12). Under any option, the UX changes decided from that pass have to be in.
-  - **A. After P4.**
-    - Done by then: server and client on the current framework, State classes, autowired actions, the freeze safeguards.
-    - Still open: almost all TODO bugs and the domain restructure.
-    - For: the earliest option. The review's "stuck / refresh" blocker is addressed structurally.
-    - Against:
-      - A reviewer is likely to hit the visible bugs that remain (T1, T2–T4, T5, T6, T13, T14, T19, T21).
-      - UX changes decided before then land in code that P5 restructures afterward, so they get done twice.
-      - Every slice after release ships into running tables, and its payload and state-data changes need compatibility work.
-  - **B. After the slices holding the bugs a reviewer is most likely to hit.**
-    - Likely to hit in a reviewer's desktop and mobile session (a full 2–3 player game, dark mode, a spectator tab):
-      - T1, T5, T13;
-      - T2–T4 (mobile), T6 (dark mode);
-      - T14 (the Trifecta is a first-row pitch), T16 (spectator);
-      - T18, if they play in another language;
-      - T19, T21;
-      - the review's action-bar point (P5.1, a UX decision).
-    - Those live in P5.1, P5.3, P5.4, P5.6, P5.7, P5.9, P5.11 and P5.12: 8 of 13 slices.
-    - After resubmission: P5.2, P5.5, P5.8, P5.10, P5.13, P6 and P7.
-    - Left for later as less likely to be hit: T7 (needs the Crimper), T8, T10, T11 (Phil, Guidebook), T9, T15, T17, T20, T22, T25, T27, T28.
-    - For: the reviewer sees the visible bugs fixed, sooner than C.
-    - Against:
-      - The remaining slices and P6 (layout) change code after the review, including server data in P5.8 and P5.10, so each release needs the running-tables care.
-      - A full R-full still has to pass before resubmitting.
-  - **C. After the full plan (P7).**
-    - For: one cut-over; every TODO item closed; no compatibility constraints during the migration; matches today's decision.
-    - Against: the longest wait. Findings from the private playtests reach reviewers last.
-  - **D. Gate on readiness rather than on a phase.** Resubmit when:
-    - the usability-testing pass is done and its decided UX changes are in;
-    - P4 is done;
-    - the bugs in B's list are fixed.
-
-    The rest continues afterward under the compatibility constraint above. In effect, B plus an explicit UX gate.
+- **D1 Approach and order:** as the plan proposes (Summary, §1, §2).
+  - Alternative considered: client first. It would reach the freeze-related code sooner, but P1's debug functions, which set up client test scenarios, wouldn't exist yet.
+- **D2 Branching:** `main` plus tags. A hotfix branch is made from `legacy-final` only if a legacy hotfix is ever needed (§10).
+  - Alternative considered: a long-lived migration branch.
+- **D3 claude-code-bga:** not installed. Its applicable pitfalls are in `BGA_PITFALLS.md`. The §9.6 trial isn't run for now (§9).
+- **D4 Testing overrides:** replaced by the debug functions of §6.2, including `debug_endGameSoon` and `debug_giveSummitBeta`. The setup-overrides file (§6.3) is dropped unless P1.1 finds a gap. The overrides are set aside at the start of P0.2.
+- **D5 No-transition flows:** a server self-transition where §4.1.1 and the P5.1 check say re-entry is safe, and an args-refresh notification elsewhere. If the P5.1 check shows re-entry has player-visible side effects, it goes to Jonathan as a UX question.
+  - Alternative considered: keep today's client-side restoration, done through `StatusBar.restore()`.
+- **D6 Handler failures:** the player sees a short non-blocking message, besides the console log and the re-render. The wording is translatable, and Jonathan approves it in P4.2 (§4.3).
+- **D7 Server-side input validation (B3):** client-sent player ids are fixed in P1.6–P1.9. Every other `act*` input is validated against `$args` in the slice that owns it. There is no later dedicated pass.
+- **D8 Components:** every row of §7 is adopted.
+  - During the migration: PlayerCounter/TableCounter, in the P5 slices that own each counter; Zone, in the slice that fixes T25, as its fix.
+  - In P8, before resubmission: ItemManager, BgaAnimations (per component), BgaCards, BgaDice, BgaScoreSheet and the last-turn banner.
+- **D9 Pre-migration leftovers:** the SQL strict-mode fix (T23) and the replay check (F13) are folded into P1 (P1.2, P1.3).
+- **D10 UX register:** `UX_CHANGES.md`, with the scheduling rule in §12. The migration is parity only; decided items are implemented in P8.
+- **D11 Rules-check record:** `RULES_CHECK.md`, in the format of §5.3, seeded with the answers to Q-R1–Q-R8.
+- **D12 Private-alpha tables:** no formal cut-over. Jonathan releases only when no table is running. After resubmission every release must keep running tables working (§2.4).
+- **D13 Local tooling:** harnesses are served with `py -m http.server`. A PHP CLI (the BGA docs name PHP 8.4) is installed in P0.2 for `php -l`, with Jonathan's confirmation in that session.
+- **D14 Resubmission milestone:** after the full plan, including P8: the decided UX changes and the components adopted there.
+  - Options considered in the draft: A, after P4; B, after the slices holding the bugs a reviewer is most likely to hit; C, after the full plan (P7); D, gated on readiness (the usability pass, P4 and B's bugs). The earlier decision in `DECISIONS.md` was C.
+  - What carries over from the draft's analysis:
+    - Resubmitting means releasing the migrated build to Production.
+    - After that release, every later release must keep running tables working: the same state ids and global data, or an `upgradeTableDb` migration (D12).
+    - The reviewer's main blocker is readability. The request was a usability-testing pass with new players on desktop and mobile, which this plan doesn't cover: it lives in the UX register (§12). The UX changes decided from that pass belong in P8.
 
 ### Rules questions (Q-R)
-Full details are in §5.4.
-- **Q-R1** Where does "bail out" come from, and should it be recorded?
-- **Q-R2** Confirm the suspected Rerack skip after a bail. Fix it in P5.3(d)?
-- **Q-R3** Should a player who rested skip Follow Phase steps 1–2?
-- **Q-R4** Is Phil's Water/Psych cap 7?
-- **Q-R5** Is a Portaledge refill topped up from the deck when the discard holds fewer than 7?
-- **Q-R6** When the Spread shows 4 of a kind, the replaced card is shuffled back into the deck at setup but goes to the discard during play. Is the difference intended?
-- **Q-R7** Does a set of 3 Technique Tokens with no card score?
-- **Q-R8** Does Sendy Jammer score with 1 card + 2 Gear wilds?
+Answered on 2026-10-21. The answers, statuses and code locations are in `RULES_CHECK.md` and in the Status column of §5.4.
+- **Q-R1** Accepted. Garrett's rule; the code is the reference; for the rulebook revision.
+- **Q-R2** The bug is confirmed. Fixed in P0.2.
+- **Q-R3** Accepted. Players who rested take part in the Follow Phase steps as the code does. It departs from the wording of p.7, and New Rubber's handling is to be confirmed.
+- **Q-R4** Phil's cap is 7. Accepted.
+- **Q-R5** Accepted. The code tops up from the Asset deck; the missing reshuffle is checked in P5.4; for the rulebook revision.
+- **Q-R6** Unintended. Fixed in P5.2, with the during-play path checked in P5.3.
+- **Q-R7** Accepted. A set of 3 Technique Tokens with no card scores.
+- **Q-R8** 1 card plus 2 Gear wilds scores. Wild-only sets must score too; fixed in P0.2.
 
 ### Technical questions (Q-T)
-- **Q-T1** Which commit is the current Production private-alpha build made from (for the `prod-alpha` tag)?
-- **Q-T2** Are private-alpha tables running now, and how long do they usually last (D12)?
-- **Q-T3** Can Studio test accounts have names containing `'`, `-` or accents (B2, F10)?
-- **Q-T4** OK to track harness files under `misc/tests/` (not packaged for deployment)?
-- **Q-T5** Does your SFTP configuration upload files under `misc/` on save? I didn't read `.vscode/sftp.json`. The setup-overrides file (§6.3) has to reach Studio to work; the harnesses don't need to.
-- **Q-T6** Do you want the end-game shortcut `debug_endGameSoon` (it replaces the `testEnd` state)?
-- **Q-T7** Do you want `debug_giveSummitBeta` in addition to `debug_stackSummitBeta`?
+- **Q-T1** Answered: the Production build rebuilt on 2026-10-20 is the committed code. Tagged `prod-alpha-2026-10-20` in P0.1.
+- **Q-T2** Answered by D12: Jonathan takes part in most private playtests, they are real-time, and he releases only when no table is running.
+- **Q-T3** Answered: BGA profile names can't contain apostrophes but can contain dashes. Whether they can contain accents is unknown. So test names with `-` (B2, F10); the apostrophe case can't arise through player names.
+- **Q-T4** Answered: yes, harness files are tracked under `misc/tests/` (not packaged for deployment). P4.1 creates the first one.
+- **Q-T5** Moot (D4): the setup-overrides file is dropped unless P1.1 finds a gap.
+- **Q-T6** Yes: `debug_endGameSoon`, which replaces the `testEnd` state.
+- **Q-T7** Yes: `debug_giveSummitBeta`, in addition to `debug_stackSummitBeta`.
 
 ### Process questions (Q-P)
-- **Q-P1** Should the BGA review feedback and T31 move into the UX register now?
-- **Q-P2** Is the review format for code steps right as described: chunks of a few hundred lines with a summary of intent, the residual diff for verbatim moves, and pattern/count/exceptions for sweeps?
+- **Q-P1** Yes. The BGA review feedback and T31 moved into the UX register as UX-1 to UX-5, status "proposed" (§12).
+- **Q-P2** Confirmed. The review format for code steps is as described in §2.1: chunks of a few hundred lines with a summary of intent, the residual diff for verbatim moves, and pattern/count/exceptions for sweeps.
