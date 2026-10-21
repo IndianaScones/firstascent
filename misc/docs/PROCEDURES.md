@@ -1,6 +1,6 @@
 # Procedures
 
-Working rules for Claude Code sessions in this repo. Read this file at the start of every session, together with the latest entry in `progress.md` and `misc/docs/DECISIONS.md`.
+Working rules for Claude Code sessions in this repo. Read this file at the start of every session, together with the latest entry in `progress.md` and `misc/docs/DECISIONS.md`. Consult `misc/docs/BGA_PITFALLS.md` before any step that touches Studio files, test tables, PHP or database code, zombies and states, or the client.
 
 ## Current phase: review
 Until Jonathan says otherwise, **do not modify code files.** Only create or edit files in `misc/docs/` and `CLAUDE.md`. Jonathan will say when this phase ends; update this section then.
@@ -8,14 +8,23 @@ Until Jonathan says otherwise, **do not modify code files.** Only create or edit
 One-time exceptions to this rule are granted per task. When one is granted, note it in that session's `progress.md` entry. Exceptions never carry over to later tasks or change the phase.
 
 ## Scope before migration
-Until the migration starts, only three code tasks are in scope:
-1. The SQL strict-mode game creation fix.
-2. The two targeted freeze fixes:
+Until the migration starts, only these code tasks are in scope:
+1. The two targeted freeze fixes:
    - the fallback in `animationPromise` (`modules/utils.js`);
    - the null guards at the three confirmed `trade_button` sites in `firstascent.js`.
 
    The freeze investigation itself is closed (`DECISIONS.md`, "The freezes are the top priority").
-3. Simple fixes for regressions from the recent Portaledge refactor (`DECISIONS.md`, "Regressions from the Portaledge refactor are fixed in the legacy code"). The first is the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
+2. Simple fixes for regressions from the recent Portaledge refactor. The first is the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
+3. **Next: the legacy fix batch (P0.2 in `MIGRATION_PLAN.md`).** It is the last legacy code task. After the tag `legacy-final` the legacy build is frozen (`DECISIONS.md`, "The legacy build gets one final fix batch, then it is frozen"). The batch, whose items are in `TODO.md`:
+   - Q-R2: a bailed player is appended to `finished_drawing` twice (`php:stNextDraw`);
+   - Q-R8: wild-only Technique sets score 2 points (`php:stMatchingTechniques`);
+   - B7: Simul Climb in `crimperClimbingCards`; verify on Studio before fixing;
+   - B5: the Studio-only guard on `debug_goToState` (`modules/utils.php`);
+   - Jonathan's uncommitted `firstascent.js` fix (climbing card 57), committed as it is;
+   - installing a PHP CLI for `php -l`, which needs Jonathan's confirmation in that session;
+   - before all of that, setting aside Jonathan's testing overrides in `firstascent.game.php` (saved as a patch outside git; reverting the file needs his explicit confirmation).
+
+The SQL strict-mode game creation fix (T23) is no longer a legacy task: it is folded into P1 (`DECISIONS.md`, D9).
 
 Don't fix other `TODO.md` bugs in legacy code, including the other bugs the freeze investigation found. Their reproduction steps serve as regression tests for the migrated code.
 

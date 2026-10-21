@@ -2,119 +2,6 @@
 
 Tags: `[state]` = the interface falling out of sync with the actual game state; `[?]` = unsure which section the item belongs in (best guess).
 
-## BGA review feedback
-
-* Tooltip positioning: the bottom-left tooltip can still overlap the BGA footer. Please constrain tooltips within the usable game/page area.
-* Action Bar: Round information should not be permanently displayed by modifying/hacking the Action Bar layout. Persistent round/state information belongs in the game area if needed.
-* Refresh/continuity issues: the game can become stuck in situations where the interface does not refresh properly. This is blocking and needs to be fixed.
-* Make card/deck interactions obvious. If clicking cards and/or the deck is the intended action, please use clear highlights, selectable states, contextual hints, or other visual feedback. Players should not have to discover valid interactions by trial and error.
-
-The final point there is expanded upon here:
-
-"Dear IndianaScones0,
-
-Hello Jonathan,
-
-Thanks for the detailed reply and for trying to address the previous feedback.
-
-I want to clarify the situation because I think we are now focusing too much on individual UI techniques — for example whether a box-shadow or a “+” icon technically matches an example from the Guidelines — while the remaining issue is broader.
-
-First Ascent is still not ready for Alpha.
-
-The main problem is that the interface is still difficult to read and understand at first glance for someone who does not already know the game.
-
-The Guidelines are not intended as a checklist where complying with each individual item automatically means the overall UX is successful. A highlight can technically follow the guideline and still not be sufficiently clear once it is placed inside a visually dense interface.
-
-Regarding your specific example: the raised cards and the “+” symbol on the Asset deck are reasonable visual cues in isolation. The issue is that, in the context of the complete screen, there are many competing elements and interaction patterns. A new player still has to understand:
-
-what is currently actionable;
-
-where they should look first;
-
-what can be clicked;
-
-what is information versus interaction;
-
-what changes after an action;
-
-and how to recover if they make the wrong choice.
-
-This is why I strongly recommend that the next step is not another isolated UI adjustment based only on our written feedback.
-
-Please run usability tests with several players who:
-
-have not played First Ascent before;
-
-have not been shown how your BGA interface works;
-
-ideally have different levels of familiarity with BGA;
-
-test both desktop and mobile;
-
-and play a meaningful portion of the game, preferably a complete game.
-
-During those tests, avoid explaining the interface. Observe where they hesitate, what they try to click, what they fail to notice, when they need to read the rules to understand the UI, and when the layout or screen movement makes them lose track of what is happening.
-
-This was already recommended during the July review, specifically because several of the remaining problems are easier to identify through real player behaviour than through another developer-to-reviewer discussion.
-
-At this stage, I would particularly look for:
-
-Immediate readability: can a new player understand the important parts of the screen within a few seconds?
-
-Action discoverability: can they identify valid cards, decks and board interactions without guessing?
-
-Visual hierarchy: is the current decision more prominent than secondary information?
-
-Layout stability: does the screen remain stable instead of jumping or moving the player away from the relevant area?
-
-Mobile usability: can the complete flow be played comfortably without truncated, misplaced or oversized components?
-
-Consistency: do similar actions behave and look similar throughout the game?
-
-Recovery and continuity: can players always understand what state the game is in after an action or refresh?
-
-The latest review also still identified concrete issues with wide-screen containment, tooltip positioning, persistent round information in the Action Bar, refresh/continuity, and interaction discoverability. Those points still need to be addressed as part of this broader pass.
-
-I appreciate that a significant amount of work has already gone into the adaptation. However, after several review cycles, I think the most useful thing now is to step away from individual fixes and validate the complete experience with fresh players.
-
-Please come back with a revised version after that testing pass rather than making another small isolated change to the current interface.
-
-Relevant Studio Guidelines:
-
-A.1 — Layout arrangement
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#A.1_Layout_arrangement
-
-A.2 — Action Bar
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#A.2_Action_Bar
-
-B.1 — Tooltips
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#B.1_Tooltips
-
-C.2 — Highlights & Glowing auras
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#C.2_Highlights_&_Glowing_auras
-
-C.4 — Sizing & responsiveness
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#C.4_Sizing_&_responsiveness
-
-E.1 — Design for all
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#E.1_Design_for_all
-
-F.2 — Refresh & Continuity
-
-https://en.doc.boardgamearena.com/BGA_Studio_Guidelines#F.2_Refresh_&_Continuity
-
-Not ready for Alpha. A broader usability pass with new players is required before the next submission.
-
-Best,
-
-Ian"
-
 ## Client bugs
 
 * [state] at some point, my summit beta token still appeared selectable during opponent's turn (it was not actually selectable, just a visual issue)
@@ -168,6 +55,22 @@ Ian"
 * [?] benighted - shared technique token climbing card discarded after current player choose a token but before next player chooses one
 * Fix this SQL game creation strict mode issue: https://boardgamearena.com/forum/viewtopic.php?t=48813
 * `firstascent.game.php` requires `modules/utils.php`, but git tracks the file as `modules/Utils.php`. A deploy from a fresh clone to Studio (case-sensitive filesystem) would break the require. Expected to be resolved by the migration's file restructure.
+* Q-R2 (confirmed): a bailed player is appended to `finished_drawing` twice, so the Rerack ends early. Planned fix: P0.2 (legacy fix batch)
+
+  * repro, on Studio: 2 players; the first in Rerack order bails, and the second climbed
+  * observed: the first player draws nothing, with a log note that they bailed. The second player is skipped, and the next round's Climb Phase starts. No errors or warnings. Expected: the second player draws 3 Cards (RULES.md p.11)
+  * code: `php:stNextDraw ~5635–5686`
+* Q-R8: Technique sets made only of wilds don't score. Planned fix: P0.2 (legacy fix batch)
+
+  * expected: wild-only Technique sets score 2 points: Sendy Jammer with 3 Gear Cards, or Gear Cards plus Technique Tokens with no natural symbol. The technique type of such a set may be chosen arbitrarily
+  * code: `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) excludes these sets
+* B7 (suspected): Simul Climb is offered in state 60 (`crimperClimbingCards`), but the server should refuse it, because `confirmAssets` isn't one of that state's possible actions. It's the same shape as the crimper fix in `1aaad2b`. Verify on Studio before fixing. Planned fix: P0.2 (legacy fix batch)
+
+  * repro: a Cool-Headed Crimper holding Simul Climb tries to use it while choosing between the Crimper's two cards
+  * code: `states.inc.php ~289–290`
+* B5: `debug_goToState` (`modules/utils.php ~929`) has no Studio-only guard, and it is in the Production build. Add the guard (throw when `getBgaEnvironment()` isn't `'studio'`). Planned fix: P0.2 (legacy fix batch); moved from P1.1(c)
+* Q-R6: at setup, the Spread card replaced for 4 of a kind is shuffled back into the deck (`php:setupNewGame ~419–430`). It should go to the discard pile, on top. Also check that the during-play path (`php:confirmAssets ~1086–1095`) puts the card on top of the discard pile, unless a card was discarded more recently. Planned fix: P5.2 (setup path); P5.3 (during-play check)
+* B8 (latent): Simul Climb runs the Rerack draw bookkeeping in `php:confirmAssets ~1012–1020` (it drops the player from `rerack_1` and turns `x_cards` 1 into 3), so `drawAssets` data is wrong on re-entry. Harmless today. Must be fixed before any slice relies on re-entering `drawAssets` (`MIGRATION_PLAN.md` §4.1.1). Planned fix: P5.9 (a `fix:` commit before it relies on re-entry)
 
 ## Test scenarios
 
@@ -187,5 +90,4 @@ Ian"
 ## Planned improvements
 
 * [?] remove vestiges of toggle buttons (search toggle in game.js and utils.js)
-* ref card says if climber rests, lay down their meeple
 * [?] declare the implicit globals: `last_replacement` (js:7997, 8361), `args` (js:8196; utils:3182, 3218), `start_pos`, `end_pos`, `x_diff`, `y_diff` (js:13261–13266), `climbing_card` (js:1231). Assigning to an undeclared variable throws in strict mode, which ES modules use, so the migrated code can't keep them

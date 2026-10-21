@@ -4,6 +4,8 @@
 > Page numbers from the original are marked as `<!-- p. N -->` because the rules cross-reference them.
 > Decorative illustrations are omitted; diagrams are summarized in *[Diagram: …]* notes.
 
+> **Project note:** this file transcribes the printed rulebook and is not changed to match the implementation. Rulings that differ from or add to the printed rulebook (for example bail out, the Portaledge top-up, rested players in the Follow Phase, wild-only Technique sets) are recorded in `misc/docs/RULES_CHECK.md`.
+
 ## Icon legend (used throughout this file)
 
 The original uses icons in place of words. They are written here in square brackets:
