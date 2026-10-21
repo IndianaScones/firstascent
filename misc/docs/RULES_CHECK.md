@@ -45,8 +45,8 @@ All answers below are Jonathan's, recorded 2026-10-21.
 - **Code:** `utils.php:drawFromPortaledge ~623–629`; `php:argSelectPortaledge ~5359–5386`. The code tops up from the Asset deck.
 - **Outcome:** rules silent when the discard pile holds fewer than 7 Cards of the type.
 - **Status:** ACCEPTED. For the rulebook revision.
-- **Answer:** a refill takes Cards from the discard pile first. If that doesn't find 7 of the type, the rest come from the Asset deck, which is then reshuffled. The code tops up from the deck without the reshuffle.
-- **Note for the Portaledge slice (P5.4):** check whether the missing reshuffle matters digitally. It matters only if a player can know the deck order.
+- **Answer:** a refill takes Cards from the discard pile first. If that doesn't find 7 of the type, the rest come from the Asset deck, which is then reshuffled. The code tops up from the deck. Whether it also reshuffles the Asset deck afterwards hasn't been checked.
+- **Note for the Portaledge slice (P5.4):** check whether the code reshuffles the Asset deck after the top-up. If it doesn't, that matters digitally only if a player can know the deck order.
 
 ## Follow Phase
 

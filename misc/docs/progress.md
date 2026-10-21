@@ -33,6 +33,12 @@ A docs session. Jonathan decided D1–D14 and answered the rules questions (Q-R1
 - **Q-T3 answered:** BGA profile names can't contain apostrophes but can contain dashes; accents are unknown. Recorded in plan §13. B2 (§5.4), F10 (§8.1) and the P5.13 playtest focus now say to test names with dashes, and that the apostrophe case can't arise through player names.
 - **Q-T4 answered:** yes, harness files are tracked under `misc/tests/`. Recorded in plan §13 and §8.2.
 
+**Corrections after the patch review** (a third docs commit, staged by explicit path)
+- **`TODO.md`, B7:** rewritten so it can't be misread. The server's refusal of Simul Climb in state 60 is predicted, not yet verified on Studio; the refusal is the bug, because Simul Climb should be usable there (`RULES.md` p.8).
+- **`DECISIONS.md`:** "(D2, D9)" removed from the legacy-fix section, because the batch was Jonathan's decision on 2026-10-21 and isn't one of D1–D14. D6 now says the message is for now, to be revisited after the P4.2 playtest if it proves noisy; the plan's four mentions of D6 say the same.
+- **Portaledge top-up (Q-R5):** whether the code reshuffles the Asset deck after the top-up hasn't been checked. `RULES_CHECK.md` R-5 and the plan (§5.4, P5.4, §13) now say so instead of saying the reshuffle is missing; P5.4 checks it.
+- **`PROCEDURES.md`, "Scope before migration":** item 1 (the freeze fixes, `948f472` and `88209ef`) and item 2 (the Portaledge regressions) marked done; item 2 is superseded by item 3.
+
 **Interpretations to confirm**
 - T23's fix is placed in P1.2 (its own `fix:` commit) or falls out of P1.3's removal of `global_variables`; the cause isn't traced.
 - Q-R6 is mapped to P5.2 (setup path) with the during-play check in P5.3; B8 to P5.9.

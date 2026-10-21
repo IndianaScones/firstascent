@@ -9,12 +9,12 @@ One-time exceptions to this rule are granted per task. When one is granted, note
 
 ## Scope before migration
 Until the migration starts, only these code tasks are in scope:
-1. The two targeted freeze fixes:
+1. The two targeted freeze fixes (done: `948f472` and `88209ef`, playtested and pushed 2026-10-14):
    - the fallback in `animationPromise` (`modules/utils.js`);
    - the null guards at the three confirmed `trade_button` sites in `firstascent.js`.
 
    The freeze investigation itself is closed (`DECISIONS.md`, "The freezes are the top priority").
-2. Simple fixes for regressions from the recent Portaledge refactor. The first is the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
+2. Simple fixes for regressions from the recent Portaledge refactor (done: `5df6cd3`, `0114572`, `1aaad2b` and `fd78ef9`, playtested and pushed 2026-10-15; superseded by item 3). The first was the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
 3. **Next: the legacy fix batch (P0.2 in `MIGRATION_PLAN.md`).** It is the last legacy code task. After the tag `legacy-final` the legacy build is frozen (`DECISIONS.md`, "The legacy build gets one final fix batch, then it is frozen"). The batch, whose items are in `TODO.md`:
    - Q-R2: a bailed player is appended to `finished_drawing` twice (`php:stNextDraw`);
    - Q-R8: wild-only Technique sets score 2 points (`php:stMatchingTechniques`);

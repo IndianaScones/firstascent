@@ -64,7 +64,7 @@ Tags: `[state]` = the interface falling out of sync with the actual game state; 
 
   * expected: wild-only Technique sets score 2 points: Sendy Jammer with 3 Gear Cards, or Gear Cards plus Technique Tokens with no natural symbol. The technique type of such a set may be chosen arbitrarily
   * code: `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) excludes these sets
-* B7 (suspected): Simul Climb is offered in state 60 (`crimperClimbingCards`), but the server should refuse it, because `confirmAssets` isn't one of that state's possible actions. It's the same shape as the crimper fix in `1aaad2b`. Verify on Studio before fixing. Planned fix: P0.2 (legacy fix batch)
+* B7 (suspected): Simul Climb is offered in state 60 (`crimperClimbingCards`), but the server refuses it (predicted, not yet verified on Studio), because `confirmAssets` isn't one of that state's possible actions. The refusal is the bug: Simul Climb should be usable there (RULES.md p.8, "at any time on your turn"). It's the same shape as the crimper fix in `1aaad2b`. Verify on Studio before fixing. Planned fix: P0.2 (legacy fix batch)
 
   * repro: a Cool-Headed Crimper holding Simul Climb tries to use it while choosing between the Crimper's two cards
   * code: `states.inc.php ~289–290`
