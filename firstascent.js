@@ -3207,7 +3207,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     asset_card.classList.add('selected_asset');
                     spread_draw_num++;
                     if (deck_draw_num + spread_draw_num === this.cards_to_draw) {
-                        $('plus_one').style.display = 'none';
+                        if ($('plus_one')) { $('plus_one').style.display = 'none'; }
                         spread.querySelectorAll('.asset').forEach(ele => {
                             if (!ele.classList.contains('selected_asset')) {
                                 ele.classList.remove('cursor', 'selectable');
