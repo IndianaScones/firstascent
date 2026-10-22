@@ -5846,8 +5846,6 @@ class FirstAscent extends Bga\GameFramework\Table
             $techniques = $resource_tracker[$id]['asset_board']['techniques'];
             arsort($techniques);
             $tokens = $resource_tracker[$id]['symbol_tokens'];
-            $initial_wild_techniques = $techniques['wild'];
-            $wild_techniques = $initial_wild_techniques;
 
             $gained_points = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
             $played_tokens = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
@@ -5857,248 +5855,69 @@ class FirstAscent extends Bga\GameFramework\Table
             $hand_sb_tokens = $this->getHandSummitBetaTokens($id);
             $new_rubber_available = array_search('6', $hand_sb_tokens);
             
-            $potential_allocations = [];
+            // --- Phases 1-3: Find the allocation that makes the most sets ---
+            // Every use of New Rubber (0 or 1) and of each type's Technique Tokens is tried. The one kept makes the most sets,
+            // then uses the least New Rubber, then the fewest tokens. Wilds and New Rubber first complete the sets that need
+            // the fewest of them; the rest make wild-only sets, which keep the type 'wild'.
+            $wild_cards = $techniques['wild'];
+            $max_new_rubber = $new_rubber_available ? 1 : 0;
 
-            // --- Phase 1: Calculate initial points from card icons alone and leftovers ---
-            $initial_leftovers = [];
-            foreach($techniques_types as $type) {
-                $value = $techniques[$type];
-
-                $points_from_cards = floor($value / 3);
-                $gained_points[$type] += $points_from_cards;
-                $initial_leftovers[$type] = $value % 3;
-
-                // --- Phase 2A: Calculate potential gains for this type ---
-            
-                $tokens_of_type = $tokens[$type];
-                $remaining_for_next_set = 3 - $initial_leftovers[$type];
-
-                if ($remaining_for_next_set > 0) {
-                    
-                    // ----------------------------------------------------
-                    // Potential Match 1: PRIORITY WILDS (Tokens -> Wilds -> Rubber)
-                    // *Actually the logic provided in prompt was Wilds -> Tokens -> Rubber
-                    // but we will keep your structure which worked for max wild usage
-                    // ----------------------------------------------------
-                    $wild_to_use_p1 = min($wild_techniques, $remaining_for_next_set);
-                    $remaining_after_wild = $remaining_for_next_set - $wild_to_use_p1;
-                    $tokens_to_use_p1 = min($tokens_of_type, $remaining_after_wild);
-                    
-                    $new_rubber_to_use_p1 = 0;
-                    if ($remaining_after_wild - $tokens_to_use_p1 > 0 && $new_rubber_available) {
-                        $new_rubber_to_use_p1 = 1;
+            $token_combinations = [[]];
+            foreach ($techniques_types as $type) {
+                $extended_combinations = [];
+                foreach ($token_combinations as $combination) {
+                    for ($used = 0; $used <= max(0, $tokens[$type]); $used++) {
+                        $extended_combinations[] = $combination + [$type => $used];
                     }
+                }
+                $token_combinations = $extended_combinations;
+            }
 
-                    if ($wild_to_use_p1 + $tokens_to_use_p1 + $new_rubber_to_use_p1 == $remaining_for_next_set) {
-                        $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p1 == 0 && $new_rubber_to_use_p1 == 0);
-                        if (!$is_pure_wild_on_empty) {
-                            $potential_allocations[$type . '_wild_priority'] = [
-                                'type' => $type,
-                                'points' => 1,
-                                'tokens_used' => $tokens_to_use_p1,
-                                'wild_used' => $wild_to_use_p1,
-                                'new_rubber_used' => $new_rubber_to_use_p1,
-                                'is_wild_only' => false,
-                                'icons_needed' => $initial_leftovers[$type],
-                            ];
+            $best_allocation = null;
+            for ($rubber = 0; $rubber <= $max_new_rubber; $rubber++) {
+                foreach ($token_combinations as $tokens_used) {
+                    $wild_units = $wild_cards + $rubber;
+                    $sets = [];
+                    $completion_costs = [];
+                    foreach ($techniques_types as $type) {
+                        $symbols = $techniques[$type] + $tokens_used[$type];
+                        $sets[$type] = intdiv($symbols, 3);
+                        if ($symbols % 3 > 0) { $completion_costs[$type] = 3 - $symbols % 3; }
+                    }
+                    asort($completion_costs);
+                    foreach ($completion_costs as $type => $cost) {
+                        if ($cost <= $wild_units) {
+                            $sets[$type]++;
+                            $wild_units -= $cost;
                         }
                     }
-                    
-                    // ----------------------------------------------------
-                    // Potential Match 2: PRIORITY TOKENS (Tokens -> Wilds -> Rubber)
-                    // ----------------------------------------------------
-                    $tokens_to_use_p2 = min($tokens_of_type, $remaining_for_next_set);
-                    $remaining_after_tokens = $remaining_for_next_set - $tokens_to_use_p2;
-                    $wild_to_use_p2 = min($wild_techniques, $remaining_after_tokens);
-                    
-                    $new_rubber_to_use_p2 = 0;
-                    if ($remaining_after_tokens - $wild_to_use_p2 > 0 && $new_rubber_available) {
-                        $new_rubber_to_use_p2 = 1;
-                    }
+                    $wild_only_sets = intdiv($wild_units, 3);
+                    $total_sets = array_sum($sets) + $wild_only_sets;
+                    $total_tokens = array_sum($tokens_used);
 
-                    if ($tokens_to_use_p2 + $wild_to_use_p2 + $new_rubber_to_use_p2 == $remaining_for_next_set) {
-                        $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p2 == 0 && $new_rubber_to_use_p2 == 0);
-                        if (!$is_pure_wild_on_empty) {
-                             // Only add if distinct from P1
-                            if (!isset($potential_allocations[$type . '_wild_priority']) || 
-                                $tokens_to_use_p2 != $tokens_to_use_p1 || 
-                                $wild_to_use_p2 != $wild_to_use_p1 || 
-                                $new_rubber_to_use_p2 != $new_rubber_to_use_p1) {
-                                
-                                $potential_allocations[$type . '_token_priority'] = [
-                                    'type' => $type,
-                                    'points' => 1,
-                                    'tokens_used' => $tokens_to_use_p2,
-                                    'wild_used' => $wild_to_use_p2,
-                                    'new_rubber_used' => $new_rubber_to_use_p2,
-                                    'is_wild_only' => false,
-                                    'icons_needed' => $initial_leftovers[$type],
-                                ];
-                            }
-                        }
-                    }
-
-                    // ----------------------------------------------------
-                    // Potential Match 3: PRIORITY RUBBER (Tokens -> Rubber -> Wilds)
-                    // This ensures we have a fallback option if Wilds are consumed elsewhere.
-                    // ----------------------------------------------------
-                    if ($new_rubber_available) {
-                        $tokens_to_use_p3 = min($tokens_of_type, $remaining_for_next_set);
-                        $remaining_after_tokens_p3 = $remaining_for_next_set - $tokens_to_use_p3;
-                        
-                        $new_rubber_to_use_p3 = 0;
-                        if ($remaining_after_tokens_p3 > 0) {
-                            $new_rubber_to_use_p3 = 1;
-                        }
-                        
-                        $remaining_after_rubber_p3 = $remaining_after_tokens_p3 - $new_rubber_to_use_p3;
-                        $wild_to_use_p3 = min($wild_techniques, $remaining_after_rubber_p3);
-
-                        if ($tokens_to_use_p3 + $new_rubber_to_use_p3 + $wild_to_use_p3 == $remaining_for_next_set) {
-                             $is_pure_wild_on_empty = ($initial_leftovers[$type] == 0 && $tokens_to_use_p3 == 0 && $new_rubber_to_use_p3 == 0);
-                             
-                             if (!$is_pure_wild_on_empty) {
-                                // Check uniqueness against P1 and P2
-                                $is_unique = true;
-                                foreach (['_wild_priority', '_token_priority'] as $suffix) {
-                                    if (isset($potential_allocations[$type . $suffix])) {
-                                        $existing = $potential_allocations[$type . $suffix];
-                                        if ($existing['tokens_used'] == $tokens_to_use_p3 && 
-                                            $existing['wild_used'] == $wild_to_use_p3 && 
-                                            $existing['new_rubber_used'] == $new_rubber_to_use_p3) {
-                                            $is_unique = false;
-                                            break;
-                                        }
-                                    }
-                                }
-
-                                if ($is_unique) {
-                                    $potential_allocations[$type . '_rubber_priority'] = [
-                                        'type' => $type,
-                                        'points' => 1,
-                                        'tokens_used' => $tokens_to_use_p3,
-                                        'wild_used' => $wild_to_use_p3,
-                                        'new_rubber_used' => $new_rubber_to_use_p3,
-                                        'is_wild_only' => false,
-                                        'icons_needed' => $initial_leftovers[$type],
-                                    ];
-                                }
-                            }
-                        }
+                    $is_better = $best_allocation === null
+                        || $total_sets > $best_allocation['total_sets']
+                        || ($total_sets == $best_allocation['total_sets'] && $rubber < $best_allocation['rubber'])
+                        || ($total_sets == $best_allocation['total_sets'] && $rubber == $best_allocation['rubber'] && $total_tokens < $best_allocation['total_tokens']);
+                    if ($is_better) {
+                        $best_allocation = [
+                            'total_sets' => $total_sets,
+                            'rubber' => $rubber,
+                            'total_tokens' => $total_tokens,
+                            'sets' => $sets,
+                            'wild_only_sets' => $wild_only_sets,
+                            'tokens_used' => $tokens_used,
+                        ];
                     }
                 }
             }
-            
-            // --- Phase 2B: Add potential Wilds-Only Match ---
-            $wild_only_points = floor($wild_techniques / 3);
-            if ($wild_only_points > 0) {
-                $potential_allocations['wild_only'] = [
-                    'type' => 'wild',
-                    'points' => $wild_only_points,
-                    'tokens_used' => 0,
-                    'wild_used' => $wild_only_points * 3,
-                    'new_rubber_used' => 0,
-                    'is_wild_only' => true,
-                    'icons_needed' => 0, // No card icons of specific type needed
-                ];
+
+            foreach ($techniques_types as $type) {
+                $gained_points[$type] += $best_allocation['sets'][$type];
+                $played_tokens[$type] += $best_allocation['tokens_used'][$type];
             }
-
-            // --- Phase 2C: Determine optimal allocation by sorting ---
-            
-            uasort($potential_allocations, function($a, $b) {
-                
-                // Priority 1: New Rubber Used (Ascending) - Save New Rubber
-                if ($a['new_rubber_used'] != $b['new_rubber_used']) {
-                    return $a['new_rubber_used'] <=> $b['new_rubber_used'];
-                }
-                
-                // Priority 2: Tokens Used (Ascending) - Save Tokens
-                if ($a['tokens_used'] != $b['tokens_used']) {
-                    return $a['tokens_used'] <=> $b['tokens_used'];
-                }
-
-                // Priority 3: Specific Card Icons Used (Descending) - Prioritize clearing Card Leftovers
-                // A match that uses specific card icons (value > 0) should beat a Wild-Only match (value 0)
-                // provided they both use the same amount of tokens (checked above).
-                if ($a['icons_needed'] != $b['icons_needed']) {
-                    return $b['icons_needed'] <=> $a['icons_needed'];
-                }
-
-                // Priority 4: Wild Used (Descending) - Spend Wilds
-                // Now that we've prioritized specific cards, we prefer options that use Wilds 
-                // over options that might imply using tokens (though tokens are strictly handled in Prio 2).
-                if ($a['wild_used'] != $b['wild_used']) {
-                    return $b['wild_used'] <=> $a['wild_used'];
-                }
-                
-                // Priority 5: Points (Descending) - Maximize total points
-                return $b['points'] <=> $a['points'];
-            });
-
-            // --- Phase 3: Commit to the optimal allocation and update resources ---
-            
-            $committed_wild_used = 0;
-            $committed_tokens_used = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
-            $committed_card_icons_used = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0];
-
-            foreach ($potential_allocations as $key => $allocation) {
-                $type = $allocation['type'];
-                
-                $can_commit = true;
-                
-                // 1. Check Wild Techniques
-                if ($committed_wild_used + $allocation['wild_used'] > $initial_wild_techniques) {
-                    $can_commit = false;
-                }
-
-                // 2. Check New Rubber
-                if ($allocation['new_rubber_used'] && $new_rubber_used) {
-                    $can_commit = false;
-                }
-
-                // 3. Check Type-Specific Tokens
-                if (!$allocation['is_wild_only']) {
-                    $tokens_needed_for_match = $allocation['tokens_used'];
-                    $available_tokens_of_type = $tokens[$type] - $committed_tokens_used[$type];
-                    
-                    if ($tokens_needed_for_match > $available_tokens_of_type) {
-                        $can_commit = false;
-                    }
-                }
-                
-                // 4. Check Card Icons (CRITICAL for preventing double-counting card icons)
-                if (!$allocation['is_wild_only']) {
-                    $icons_needed = $allocation['icons_needed'];
-                    // Total icons available is the initial leftover (since points from sets of 3 were handled in Phase 1)
-                    $total_icons_available = $initial_leftovers[$type]; 
-                    
-                    if ($committed_card_icons_used[$type] + $icons_needed > $total_icons_available) {
-                        $can_commit = false;
-                    }
-                }
-
-
-                if ($can_commit) {
-                    // Commit this allocation!
-                    
-                    $committed_wild_used += $allocation['wild_used'];
-                    $new_rubber_used = $new_rubber_used || $allocation['new_rubber_used'];
-                    
-                    if (!$allocation['is_wild_only']) {
-                        $gained_points[$type] += $allocation['points'];
-                        $committed_tokens_used[$type] += $allocation['tokens_used'];
-                        $played_tokens[$type] += $allocation['tokens_used'];
-                        
-                        // Commit Card Icons
-                        $committed_card_icons_used[$type] += $allocation['icons_needed'];
-                        
-                    } else {
-                        $gained_points['wild'] = ($gained_points['wild'] ?? 0) + $allocation['points'];
-                    }
-                }
-            }
-            
-            $wild_techniques = $initial_wild_techniques - $committed_wild_used;
+            if ($best_allocation['wild_only_sets'] > 0) { $gained_points['wild'] = $best_allocation['wild_only_sets']; }
+            $new_rubber_used = $best_allocation['rubber'] === 1;
             
             // --- Phase 4: Final resource and point updates ---            
             if (array_sum(array_values($gained_points)) > 0) { 
