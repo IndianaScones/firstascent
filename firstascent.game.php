@@ -5630,8 +5630,7 @@ class FirstAscent extends Bga\GameFramework\Table
             $this->setGlobalVariable('phase', clienttranslate('Rerack'));
             $this->gamestate->nextState('resting');
 
-        } else if ($bailed_pitch[$player_id] !== null) {
-            $finished_drawing[] = $player_id;
+        } else if ($bailed_pitch[$player_id] !== null && !in_array($player_id, $finished_drawing)) {
             self::notifyAllPlayers('log_only', clienttranslate('${player_name} bailed out and does not gain any Assets during Rerack'), [
                 'player_name' => self::getActivePlayerName(),
             ]);
