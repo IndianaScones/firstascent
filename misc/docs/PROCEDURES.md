@@ -15,7 +15,7 @@ Until the migration starts, only these code tasks are in scope:
 
    The freeze investigation itself is closed (`DECISIONS.md`, "The freezes are the top priority").
 2. Simple fixes for regressions from the recent Portaledge refactor (done: `5df6cd3`, `0114572`, `1aaad2b` and `fd78ef9`, playtested and pushed 2026-10-15; superseded by item 3). The first was the Bomber Anchor click-time errors in `firstascent.js`: the `#draw_counter` writes in `onSelectPortaledge`, the unguarded `#available_sb_message` removals, and `bomber_anchor` surviving Undo Token.
-3. **Next: the legacy fix batch (P0.2 in `MIGRATION_PLAN.md`).** It is the last legacy code task. After the tag `legacy-final` the legacy build is frozen (`DECISIONS.md`, "The legacy build gets one final fix batch, then it is frozen"). The batch, whose items are in `TODO.md`:
+3. **The legacy fix batch (P0.2 in `MIGRATION_PLAN.md`; done: `bb780d7`, `b91ebb3`, `512ce89`, `53570af` and `4d87e62`, plus the harness `6ee82c1`, playtested 2026-10-22; the Production release is still pending).** It is the last legacy code task. After the tag `legacy-final` the legacy build is frozen (`DECISIONS.md`, "The legacy build gets one final fix batch, then it is frozen"). The batch, whose items are in `TODO.md`:
    - Q-R2: a bailed player is appended to `finished_drawing` twice (`php:stNextDraw`);
    - Q-R8: wild-only Technique sets score 2 points (`php:stMatchingTechniques`);
    - B7: Simul Climb in `crimperClimbingCards`; verify on Studio before fixing;
@@ -46,6 +46,10 @@ UX and usability decisions belong to Jonathan and Garrett (the game's publisher)
 
 ## When unsure
 - If the rules are ambiguous, or the code contradicts `RULES.md` (excluding Guide Mode), ask Jonathan rather than guessing. Quote the `RULES.md` passage (with page number) and the code location.
+
+## Installs and agreements
+- Installing software, and accepting any terms or agreements, need Jonathan's confirmation in that session before the command runs.
+- This includes command-line flags such as winget's `--accept-source-agreements` (even for a search) and `--accept-package-agreements`. Name the agreement and the flag when asking.
 
 ## Code conventions
 - Never assume a fixed length for player IDs (for example, expecting 7 digits). Treat them as opaque identifiers.

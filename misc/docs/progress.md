@@ -2,6 +2,80 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-22 (P0.2: the legacy fix batch)
+
+Started 2026-10-21, finished 2026-10-22. The code part of P0.2 is committed and playtested; the Production release is pending (Jonathan makes it). Not pushed yet.
+
+**Phase-rule exception:** one, for this task only. The "Current phase" section of `PROCEDURES.md` is unchanged; it switches in P0.3. Besides `CLAUDE.md` and `misc/docs/`, it allowed:
+- `firstascent.game.php`: saving Jonathan's testing overrides as a patch outside the repo and reverting the file (after his confirmation); applying or reversing the patch only at his request; editing `stNextDraw` (Q-R2) and `stMatchingTechniques` (Q-R8);
+- `states.inc.php`: `confirmAssets` in state 60, only after B7 was confirmed on Studio;
+- `modules/utils.php` (tracked as `modules/Utils.php`): the guard on `debug_goToState`;
+- `firstascent.js`: committing Jonathan's one-line fix as it was, and no other edit;
+- installing a PHP 8.4 CLI, after he confirmed the method;
+- git: one `fix:` commit per item and one `docs:` commit; a normal push after his approval. No tags (P0.3 makes them), no deploys and no Production actions (Jonathan does both).
+
+**Extensions Jonathan granted during the task:**
+- activating the overrides for one table (Table A): copy the clean file outside the repo, apply the patch, uncomment and set the values, then restore the file from the copy, checked by hash (not with `git checkout` or `git apply -R`);
+- committing the harness under `misc/tests/` as a separate `tool:` commit;
+- a new "Installs and agreements" section in `PROCEDURES.md`, outside "Scope before migration".
+
+**Files outside the repo**, in `D:\Documents\BGA Studio\firstascent-overrides\`:
+- `2026-10-21-p0.2-overrides.patch`: Jonathan's overrides (three hunks in `setupNewGame`, 24 changed lines, all comments as saved). `git apply --check` passed against the reverted file.
+- `firstascent.game.php.with-overrides`: the full file before the revert.
+- `firstascent.game.php.clean-qr2-qr8`: HEAD plus Q-R2 and Q-R8, restored after Table A was created (SHA-256 `9f6c2d9bfabafb7f7a1ac1fe3db664a1b76334e3391a46e5eea0bbbcab10cdea`). The working file matched it before staging.
+
+**PHP CLI:** PHP 8.4.25 (ZTS, x64) from the winget package `PHP.PHP.8.4`, the official zip from `downloads.php.net` with its hash checked. It is in `%LOCALAPPDATA%\Microsoft\WinGet\Packages\PHP.PHP.8.4_Microsoft.Winget.Source_8wekyb3d8bbwe\`, which winget added to the user PATH. Jonathan's "install" covered `--accept-package-agreements` (PHP License 3.01). Earlier, a `winget search` ran with `--accept-source-agreements` before he had confirmed anything; he flagged it, and `PROCEDURES.md` now has "Installs and agreements".
+
+**Commits** (staged by explicit path, in this order):
+- `bb780d7` fix: Q-R2. Only its hunk was staged, with `git apply --cached`.
+- `b91ebb3` fix: Q-R8. The rest of `firstascent.game.php`, with `git add`; afterwards `git diff firstascent.game.php` was empty.
+- `512ce89` fix: B7.
+- `53570af` fix: B5.
+- `4d87e62` fix: Jonathan's `firstascent.js` fix (climbing card 57, option b), committed unchanged; it staged as a one-line change.
+- `6ee82c1` tool: the harness, `misc/tests/technique_matching.php`.
+- The `docs:` commit with this entry.
+
+**Q-R2:** the bail branch of `stNextDraw` appended the player before its switch and again inside it. The count check runs before the append, so the extra entry skipped the next player. Removing the extra append exposed a second problem: `bailed_pitch` stays set until the player next climbs, so the Rerack's closing pass landed on a bailer who wasn't last and would have logged the bail note again. The branch now skips a player already in `finished_drawing`. The duplicate `case 10:` (B6) is harmless: the two labels share one body. Left for P1.10 and P2.6.
+
+**B7:** confirmed on Studio (refused) before the fix. In state 60, `confirmAssets`' B8 bookkeeping does nothing, the Spread and deck paths are the same as in `climbOrRest`, and the Simul Climb branch returns without a transition, so the Crimper's choice stays pending.
+
+**B5:** `getBgaEnvironment()` is a final public static method of `Bga\GameFramework\Table` (`_ide_helper.php:2304`; Game.php doc:2098), which `FirstAscent` extends. The guard throws `\BgaSystemException`, the class the trait already uses.
+
+**Q-R8 trace and fix**
+- Sets are formed from face-up Asset Board symbols (one per card; Sendy Jammer's Gear Cards and the five wild Gear Cards count as wilds), Technique Tokens, and New Rubber (one wild symbol, at most once).
+- The old code built per-type candidates in three orders plus one all-or-nothing wild-only block, sorted them by least New Rubber, least tokens, most card icons, most wilds, then points, and committed them greedily.
+- `is_pure_wild_on_empty` excluded only a per-type candidate of exactly 3 wilds, the same set as the wild-only block. No comment explained it; it came with the wild-only block in `309ffba` (2026-06-01). Wild-only sets already scored, with the type "wild" (logged "Wild"); nothing downstream reads the type except the log.
+- The old allocation didn't make the most sets. For example, 1 Balance token, 1 Precision token and 4 wilds scored 1 set (the most is 2). Removing the exclusion alone wouldn't have fixed that, could lose a set that scored before (1 Precision card, 1 Balance token, 1 Power token and 6 wilds: 3 sets became 2), and would have relabeled wild-only sets.
+- Jonathan chose an exhaustive search: the most sets, then the least New Rubber, then the fewest tokens; wild-only sets keep the type "wild". He accepted that token and New Rubber use can change, and that some log labels change ("Wild" in place of a type).
+- The rewrite: in `f2a7b12`, `stMatchingTechniques` is lines 5839–6203, and lines 5850–5851 and 5861–6102 (Phases 1–3) were replaced. In `b91ebb3` the new block is lines 5858–5920 of `stMatchingTechniques` (5838–6021). Phase 4 is unchanged.
+- Checks: the harness against two brute forces on 232,352 cases (up to 6 tokens per type and 9 wilds) found no failure, and never fewer sets than the old code. The whole function, run with stubbed framework calls and warnings as errors over 3,000 random 3-player rounds and an empty round, read no undefined variable or index.
+- Findings for R-3 and R-7 are in `RULES_CHECK.md`, as findings only. Jonathan's answer on the five wild Gear Cards is R-9 (the modelling is correct).
+
+**Playtest** (Studio, clean files deployed; all pass, with no console errors or `[FA …]` warnings):
+- Table A (3 players) was created with the overrides active: the climbing deck stacked 26, 23, 39, 57, 11, 21, 13, 18, 15; the Summit Beta supply Simul Climb, then New Rubber; characters 10 and 4 forced. The clean file was restored right after, checked by hash.
+- The `firstascent.js` fix (card 57, option b): pass.
+- B7: the Crimper used Simul Climb while choosing between the two cards. The Spread refilled, the token went to Used, the log read "IndianaScones1 uses Simul Climb and takes Toe Jam, Gaston, and Chalk Bag from the Spread", and both cards stayed choosable. The cards came back hidden behind "Show cards" until F5, the predicted glitch, now in `TODO.md` (P5.9).
+- Q-R8:
+  - R1: "No 2-Point Tokens are awarded for matching Techniques"; play moved on normally.
+  - R2, after reloading a Studio save and replaying the climb: Sendy "used 3 Precision Techniques, including New Rubber and gains one 2-Point Token/s". Which tokens remained wasn't recorded, so the R2 token use isn't verified.
+  - On another table, an ordinary match and a token-assisted set in one Follow Phase: 1 wild (Helmet), 1 Precision card (Gaston) and 3 Power cards (Heel Hook, Chicken Wing ×2) on the board, 2 Precision tokens in hand. The log read "IndianaScones1 used 3 Precision and 3 Power Techniques, including 1 Precision Technique Token/s and gains two 2-Point Token/s"; one token was used and the other kept (the fewest-tokens tie-break), and everything animated correctly.
+- Q-R2: pass in all three cases (2 players with the first bailing, on Table B; 3 players with the middle, then the first bailing, on a separate table). Each time one "bailed out" line, the others drew 3 Cards, and the Rerack ended normally.
+- B5: `debug_goToState` jumped to state 98; final scoring ran and the table ended, with no errors.
+- S-smoke (Table B, 2 players and a spectator): pass, including F5 in `climbOrRest` and in `resting`.
+
+**Coverage gaps:** a wild-only set and the exact New Rubber case (2 tokens of one type plus New Rubber and nothing else) weren't observed on Studio. The New Rubber case couldn't be reached as scripted: a Gear Card Sendy plays for a requirement counts as a wild, so it completed a set with New Rubber in R2. Both cases are covered by the harness and the strict full-function run, not by a Studio playtest. The B7 regression checks weren't run: Simul Climb in `climbOrRest`, and Bomber Anchor in state 60. The fix only adds `confirmAssets` to state 60's possible actions, so `climbOrRest` is untouched.
+
+**Other findings and records**
+- `php -l` flagged a `${var}` log string at `php:2638` (cards 15 and 24): in `TODO.md`, planned for P1.5; `BGA_PITFALLS.md` corrected.
+- `MIGRATION_PLAN.md` §6.1 now names the characters (10 Cool-Headed Crimper, 12 Buff Boulderer). During the session I said §6.1 called 12 Phil; it gave no name, and Phil is character 8.
+- Docs updated: `TODO.md` (Q-R2, Q-R8, B7 and B5 removed; the crimper display glitch and `php:2638` added), `RULES_CHECK.md` (R-2 and R-8 fixed, R-8 re-described, R-3 and R-7 findings, R-9 new), `MIGRATION_PLAN.md` (P0.2 status and the Q-R8 scope line, §5.4, §6.1, P1.5, P5.9, P5.11, §8.4), `PROCEDURES.md` (item 3 done; "Installs and agreements"), `BGA_PITFALLS.md`.
+
+**Release:** pending. Jonathan makes it when no table is running (D12), after Studio matches HEAD.
+
+**Next**
+1. The push, after Jonathan's approval; then his Production release.
+2. P0.3: tag `legacy-final` and the release (`prod-alpha-<date>`), then switch "Current phase" in `PROCEDURES.md`.
+
 ## 2026-10-21 (P0.1: migration decisions recorded)
 
 A docs session. Jonathan decided D1–D14 and answered the rules questions (Q-R1–Q-R8, Q-T1–Q-T4, Q-T6, Q-T7, Q-P1, Q-P2); this session recorded them.

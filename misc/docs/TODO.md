@@ -49,26 +49,14 @@ Tags: `[state]` = the interface falling out of sync with the actual game state; 
 * refillPortaledge - the first refill step uses card backs that are too large and slightly off target, in every refill since the Portaledge refactor. The shuffle step is correct
 * climbing card 49 (shared Gear draw) - race: both Portaledge draws run at once (the opponent's isn't awaited, js:10827/10830, 10866), so with a refill both refill the same deck at once. About 7 `[FA animation fallback]` warnings per refill; no flight to the opponent's hand counter
 * a hidden portaledge or crimper display should reappear before cards animate (desired behavior per Jonathan). Today cards fly in from the upper left, or from off-screen above the page
+* [state] crimper display after Simul Climb in `crimperClimbingCards` (state 60): the two Climbing Cards come back hidden behind "Show cards" (found in the P0.2 playtest, 2026-10-22). F5 shows them. Likely cause, read but not traced: `notif_confirmYourAssets` hides the display, then `onUndoSummitBeta` calls `restoreServerGameState()`, which recreates the "Hide cards" button, and clicks that button, so `onShowHideCard` (which toggles by the button's text) hides the display again. Planned fix: P5.9 (the return to the state after a no-transition flow), with P5.7's `CrimperDisplay` rendering visible on re-entry
 
 ## Server bugs
 
 * [?] benighted - shared technique token climbing card discarded after current player choose a token but before next player chooses one
 * Fix this SQL game creation strict mode issue: https://boardgamearena.com/forum/viewtopic.php?t=48813
 * `firstascent.game.php` requires `modules/utils.php`, but git tracks the file as `modules/Utils.php`. A deploy from a fresh clone to Studio (case-sensitive filesystem) would break the require. Expected to be resolved by the migration's file restructure.
-* Q-R2 (confirmed): a bailed player is appended to `finished_drawing` twice, so the Rerack ends early. Planned fix: P0.2 (legacy fix batch)
-
-  * repro, on Studio: 2 players; the first in Rerack order bails, and the second climbed
-  * observed: the first player draws nothing, with a log note that they bailed. The second player is skipped, and the next round's Climb Phase starts. No errors or warnings. Expected: the second player draws 3 Cards (RULES.md p.11)
-  * code: `php:stNextDraw ~5635–5686`
-* Q-R8: Technique sets made only of wilds don't score. Planned fix: P0.2 (legacy fix batch)
-
-  * expected: wild-only Technique sets score 2 points: Sendy Jammer with 3 Gear Cards, or Gear Cards plus Technique Tokens with no natural symbol. The technique type of such a set may be chosen arbitrarily
-  * code: `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) excludes these sets
-* B7 (suspected): Simul Climb is offered in state 60 (`crimperClimbingCards`), but the server refuses it (predicted, not yet verified on Studio), because `confirmAssets` isn't one of that state's possible actions. The refusal is the bug: Simul Climb should be usable there (RULES.md p.8, "at any time on your turn"). It's the same shape as the crimper fix in `1aaad2b`. Verify on Studio before fixing. Planned fix: P0.2 (legacy fix batch)
-
-  * repro: a Cool-Headed Crimper holding Simul Climb tries to use it while choosing between the Crimper's two cards
-  * code: `states.inc.php ~289–290`
-* B5: `debug_goToState` (`modules/utils.php ~929`) has no Studio-only guard, and it is in the Production build. Add the guard (throw when `getBgaEnvironment()` isn't `'studio'`). Planned fix: P0.2 (legacy fix batch); moved from P1.1(c)
+* `php:2638`, in `confirmClimbingCardChoice` (cards 15 and 24, option b: all other players gain 1 Gear Card): the log string `"[${new_asset_name}(${new_asset_type_arg[0]})]"` uses `${var}` interpolation, deprecated since PHP 8.2 (`php -l` warns on 8.4; found in P0.2). PHP also fills in the English card name before the log's own placeholders see it, so that name is likely not translated. Planned fix: P1.5 (PHP modernization sweep), in its own `fix:` commit, since the corrected string changes the log
 * Q-R6: at setup, the Spread card replaced for 4 of a kind is shuffled back into the deck (`php:setupNewGame ~419–430`). It should go to the discard pile, on top. Also check that the during-play path (`php:confirmAssets ~1086–1095`) puts the card on top of the discard pile, unless a card was discarded more recently. Planned fix: P5.2 (setup path); P5.3 (during-play check)
 * B8 (latent): Simul Climb runs the Rerack draw bookkeeping in `php:confirmAssets ~1012–1020` (it drops the player from `rerack_1` and turns `x_cards` 1 into 3), so `drawAssets` data is wrong on re-entry. Harmless today. Must be fixed before any slice relies on re-entering `drawAssets` (`MIGRATION_PLAN.md` §4.1.1). Planned fix: P5.9 (a `fix:` commit before it relies on re-entry)
 

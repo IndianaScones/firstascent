@@ -11,7 +11,7 @@ The record of where the code departs from `RULES.md`, or where the rules are sil
 - **Code locations** are approximate lines at the 2026-10-15 baseline (`php` is `firstascent.game.php`, `utils.php` is `modules/utils.php`).
 - **"For the rulebook revision"** marks answers that Garrett's revised printing should include.
 
-All answers below are Jonathan's, recorded 2026-10-21.
+All answers below are Jonathan's, recorded 2026-10-21 unless an item gives another date.
 
 ## Climbing
 
@@ -28,7 +28,7 @@ All answers below are Jonathan's, recorded 2026-10-21.
 - **Rules:** p. 11: "Players who climbed in the Climb Phase draw 3 Cards from The Spread and/or Asset Deck."
 - **Code:** `php:stNextDraw ~5635–5686`. A bailed player is appended to `finished_drawing` twice.
 - **Outcome:** suspected bug, now confirmed.
-- **Status:** ANSWERED. Fix in P0.2 (the legacy fix batch); then FIXED in `<commit>`.
+- **Status:** FIXED in `bb780d7` (P0.2), playtested on Studio 2026-10-22.
 - **Answer:** the bug is confirmed on Studio. With 2 players, when the first in Rerack order bails and the second climbed, the first draws nothing (with a log note that they bailed), the second is skipped, and the next round's Climb Phase starts, with no errors or warnings. The repro is in `TODO.md`.
 
 ### R-6 (Q-R6) The Spread card replaced for 4 of a kind
@@ -62,6 +62,10 @@ All answers below are Jonathan's, recorded 2026-10-21.
 - **Notes:**
   - This departs from the wording of `RULES.md` p. 7.
   - New Rubber's handling is to be confirmed during the Follow Phase rules check (P2.6, P5.11).
+- **Findings from the P0.2 trace** (the code after `b91ebb3`; findings only, no behavior change for rested players):
+  - New Rubber is used automatically, at most once per Follow Phase, and only when no allocation without it makes as many sets.
+  - It counts as one wild symbol. It can complete a set of any type (for example 2 Technique Tokens plus New Rubber), and it can now end up in a wild-only set (2 wilds plus New Rubber, logged "Wild").
+  - The loop covers every player, so a rested player holding 2 tokens of one type and New Rubber scores a set and uses up all three.
 
 ### R-7 (Q-R7) A set of 3 Technique Tokens
 - **Rules:** p. 10: Technique Tokens "can be used instead of a Card when you match Technique symbols."
@@ -69,16 +73,30 @@ All answers below are Jonathan's, recorded 2026-10-21.
 - **Outcome:** rules silent on a set made only of tokens.
 - **Status:** ACCEPTED.
 - **Answer:** a set of 3 Technique Tokens with no card scores. The code appears to match.
-- **Note:** the allocation step hasn't been traced yet. Confirm it during the Follow Phase rules check (P5.11).
+- **Findings from the P0.2 trace** (the code after `b91ebb3`):
+  - A set of 3 tokens of one type with no card scores.
+  - A type can now get more than one token-assisted set: 6 tokens of one type make two sets (the code before P0.2 made one).
+  - Tokens are used only where they add a set. P5.11 rechecks this as a regression check, with `misc/tests/technique_matching.php`.
 
-### R-8 (Q-R8) Sendy Jammer and wild-only sets
+### R-8 (Q-R8) Sendy Jammer, wild-only sets and the allocation
 - **Rules:** p. 15, Sendy Jammer: "You only need 2 Cards with matching Technique symbols and any 1 Gear Card to gain 2 points in the Follow Phase."
-- **Code:** `php:stMatchingTechniques ~5896` (`is_pure_wild_on_empty`) excludes sets made purely of wilds.
-- **Outcome:** suspected bug, partly confirmed.
-- **Status:** ANSWERED. Fix in P0.2 (the legacy fix batch); then FIXED in `<commit>`.
+- **Code:** `php:stMatchingTechniques`, the allocation (Phases 1–3).
+- **Outcome:** suspected bug, confirmed by the P0.2 trace: the allocation didn't make the most sets.
+- **Status:** FIXED in `b91ebb3` (P0.2), playtested on Studio 2026-10-22.
 - **Answer:**
-  - 1 card plus 2 Gear wilds scores. The technique type may be chosen arbitrarily. The code appears to allow this (the allocation step hasn't been traced yet).
-  - Wild-only sets also score (Sendy Jammer with 3 Gear Cards, or Gear Cards plus Technique Tokens with no natural symbol), again with an arbitrary technique type. The current code excludes them, which is a bug.
+  - 1 card plus 2 Gear wilds scores. Wild-only sets also score (Sendy Jammer with 3 Gear Cards, or Gear Cards plus Technique Tokens with no natural symbol). The technique type of such a set may be chosen arbitrarily: the code picks it, with no player choice.
+  - The allocation makes the most sets, then uses the least New Rubber, then the fewest Technique Tokens. Wild-only sets keep the type "wild" (logged "Wild"). Token and New Rubber use can differ from the code before P0.2, and some log labels change; accepted (2026-10-22).
+- **Trace (P0.2):**
+  - The code before the fix allocated with a greedy pass that saved New Rubber and tokens before it counted points. It spent wilds where a token would have done, then lacked wilds for another set. For example, 1 Balance card, 2 Balance tokens and 3 wilds scored one set instead of two.
+  - The `is_pure_wild_on_empty` exclusion, which the first reading (P0.1) named as the bug, wasn't the cause. It only kept the separate wild-only candidate from being listed under every type, and wild-only sets already scored through that candidate.
+  - The fix is an exhaustive search over New Rubber and token use. `misc/tests/technique_matching.php` checks it against two brute forces.
+
+### R-9 The five wild Gear Cards
+- **Rules:** p. 10: "a Card with multiple symbols can only count towards one set."
+- **Code:** `material.inc.php`, Asset Cards 26 (Locker), 27 (Rope), 29 (Helmet), 35 (Belay Device) and 36 (Harness), each `'wild' => 1`; `utils.php:getTechniqueType ~459`. They count as one technique symbol of any type ("wild"), for every player.
+- **Outcome:** none: the p. 10 rule covers these Cards, and the code matches it. Recorded because the modelling was questioned in P0.2.
+- **Status:** ACCEPTED.
+- **Answer (2026-10-22):** the five wild Gear Cards show every technique symbol and count as one symbol of the player's choice. The code's modelling is correct.
 
 ## Characters and resources
 
