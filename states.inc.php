@@ -287,7 +287,7 @@ $machinestates = array(
            "descriptionmyturn" => clienttranslate('${you} must choose a Climbing Card'),
            "type" => "activeplayer",
            "possibleactions" => array("confirmCrimperClimbingCard", "undoClimbingCard", "confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor",
-                                      "confirmAssetsForDiscard", "confirmPortaledge"),
+                                      "confirmAssetsForDiscard", "confirmPortaledge", "confirmAssets"),
            "transitions" => array("climbingCard" => 21, "addTokenToPitch" => 27, "zombiePass" => 25)
     ),
 
