@@ -927,6 +927,9 @@ trait UtilTrait {
    }
 
     public function debug_goToState(int $state=98) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \BgaSystemException('Studio only');
+        }
         $this->gamestate->jumpToState($state);
     }
 }
