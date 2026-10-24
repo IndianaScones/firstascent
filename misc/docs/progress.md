@@ -2,6 +2,66 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-23 (P0.3: tags and the phase switch)
+
+Git and docs only; no code changed. Two annotated tags went on `bc4a9c9`, and "Current phase" in `PROCEDURES.md` switched from review to migration. Jonathan released the P0.2 batch to Production during the session. The heading date is Jonathan's local date; BGA's date for the release is 2026-10-24. This entry supersedes the "Not pushed yet" and "Next" of the P0.2 entry below.
+
+**Phase-rule exception:** one, for this task only. Beyond `CLAUDE.md` and `misc/docs/`, it allowed:
+- creating two annotated tags, `legacy-final` and `prod-alpha-<release date>`, both on `bc4a9c9`, after Jonathan's go-ahead "tag";
+- pushing `main` (normal push) and those two tags by name, after his approval "push".
+
+Nothing else: no code file was edited, staged or committed; no deploys, Studio or Production actions; no installs or agreements. The session ran under the review-phase rules plus this exception from start to finish. Switching "Current phase" was the task's own scope; the new text governs later sessions, not this one.
+
+**Checks before tagging** (read-only; all passed)
+- `git fetch origin`; working tree clean; HEAD and `origin/main` both at `bc4a9c9`. `main` was already on origin, so the P0.2 entry's "Not pushed yet" is history.
+- `git log --oneline f2a7b12..bc4a9c9`: bb780d7, b91ebb3, 512ce89, 53570af, 4d87e62, 6ee82c1, bc4a9c9.
+- `git diff --stat 4d87e62 bc4a9c9`: 7 files, all under `misc/`. So the game files at `bc4a9c9` are identical to `4d87e62`.
+- `git diff --stat prod-alpha-2026-10-20 bc4a9c9`, outside `misc/` and `CLAUDE.md`: `firstascent.game.php`, `states.inc.php`, `modules/Utils.php`, `firstascent.js`.
+- Tags: `prod-alpha-2026-10-20` on `4701af1`, local and on origin; `legacy-final` and `prod-alpha-2026-10-24` existed nowhere (checked locally and with `git ls-remote`).
+
+**Release and Studio checks** (Jonathan's confirmation)
+- Studio matched `bc4a9c9`: he uploaded the four game files (`firstascent.game.php`, `states.inc.php`, `modules/utils.php`, `firstascent.js`), and Studio has no stray `modules/Utils.php`, only `modules/utils.php`.
+- Studio's `firstascent.game.php`: line 307 starts with `// $testing1`, line 728 is `//     $available_characters[] = '5';` and line 730 is `// if (!in_array('12', $available_characters)) {`. The task prompt had put the `'5'` line at 730. The file at `bc4a9c9` has it at 728, so Studio matched the repo and the prompt's number was wrong.
+- The release date was first given as 2026-10-15, the date of Production's previous deploys, which can't contain the batch (its commits are dated 2026-10-22). "Production release" means the deploy to the Production site, not the Studio sync. The session paused until Jonathan released the build.
+- **Release: 2026-10-24** (BGA's date, most likely Paris time or UTC; Jonathan's local date was still 2026-10-23). No private-alpha table was running (D12).
+- **Correction to the 2026-10-20 claim.** Production's build list shows the last three deploys as 2026-10-15, 2026-10-15 and 2026-10-24. There is no 2026-10-20 deploy, so "rebuilt on 2026-10-20" (`MIGRATION_PLAN.md` §10 and §13 Q-T1) doesn't match Production's record. The tag `prod-alpha-2026-10-20` and its message are untouched. The last build before 2026-10-24 is dated 2026-10-15. P0.1 found that only docs changed between `fd78ef9` and `4701af1`. So the tag marks the deployed game files if the build dated 2026-10-15 was made from `fd78ef9`'s files, as Jonathan's Q-T1 answer (Production runs the committed code) implies. What happened on 2026-10-20 isn't known. A note was added in both places in the plan; the P0.1 entry below is unchanged.
+
+**Tags** (annotated; both on `bc4a9c9`; `git rev-parse <tag>^{commit}` printed `bc4a9c9780b9adf7d7527f64a9fdb1609d618982` for each)
+- `legacy-final`: "the frozen legacy build (end of P0.2)". The message lists the P0.2 batch (bb780d7, b91ebb3, 512ce89, 53570af, 4d87e62), the harness 6ee82c1 and the docs record bc4a9c9, says the game files are identical to `4d87e62`, and says the build is frozen and legacy hotfixes follow `MIGRATION_PLAN.md` §10. It doesn't call `bc4a9c9` the last commit of the legacy framework, because later commits (this task's docs commit, and P1.1's debug functions in the legacy file) are still legacy-framework code.
+- `prod-alpha-2026-10-24`: the Production private-alpha build released on 2026-10-24, built from Studio matching `bc4a9c9`, with no private-alpha table running (D12). The message lists the game files changed since `prod-alpha-2026-10-20`.
+- **Why `bc4a9c9`:** it is the latest commit, as in P0.1, where `prod-alpha-2026-10-20` went on `4701af1` and not on the last code commit `fd78ef9`. The game files at `bc4a9c9` are identical to `4d87e62`; the two later commits touch `misc/` only. This task's docs commit lands after the tags, so the tags don't include it; that is intended.
+
+**Phase switch**
+- `PROCEDURES.md`: the whole "Current phase: review" section (heading, the rule and the one-time-exceptions paragraph) was replaced with the draft in `MIGRATION_PLAN.md` §11, verbatim and without the blockquote markers. The heading now reads "Current phase: migration". Every other section is unchanged, including "Installs and agreements".
+- `MIGRATION_PLAN.md`: the P0.2 status is done, with the release date; P0.3 has a status line; §10 names the commit in the two P0.3 tag lines and carries the 2026-10-20 note; §11 notes that its draft was applied in P0.3; Q-T1 carries the 2026-10-20 note. The header status (line 3) and P0.2's phase-rule line (line 301) were corrected after the search below.
+
+**"Scope before migration" retired.** The section was deleted after checking that each item is recorded elsewhere:
+- item 1, the freeze fixes (`948f472`, `88209ef`): the 2026-10-14 entry below; the closed investigation is in `DECISIONS.md`;
+- item 2, the Portaledge regressions (`5df6cd3`, `0114572`, `1aaad2b`, `fd78ef9`): the 2026-10-15 entry below and `DECISIONS.md` ("Already fixed under the earlier rule");
+- item 3, the legacy fix batch: the 2026-10-22 entry below (commits, playtest, overrides, PHP CLI) and `DECISIONS.md`, "The legacy build gets one final fix batch, then it is frozen";
+- T23: `DECISIONS.md`, D9;
+- the closing rule "don't fix other `TODO.md` bugs in legacy code": replaced by the new phase text (the legacy build is frozen at `legacy-final`; `TODO.md` bugs are fixed in the slice that owns them), and recorded in `DECISIONS.md` ("Every other bug found stays deferred to the migration"; the reproduction steps in `TODO.md` serve as regression tests);
+- the dropped step-2 diagnostic tooling: `DECISIONS.md`, "Step-2 diagnostic tooling … is dropped for the legacy code";
+- "being in scope does not lift the phase rule": no longer applicable.
+
+Nothing was found unrecorded, so nothing needed Jonathan's decision before the deletion.
+
+**Search of `CLAUDE.md` and `misc/docs/`** (excluding `misc/docs/bga/` and earlier `progress.md` entries) for "Scope before migration", "review phase", "Current phase" and "phase-rule exception":
+- `PROCEDURES.md`: the target of this task; edited.
+- `MIGRATION_PLAN.md` §11: the draft applied; note added.
+- `MIGRATION_PLAN.md:293–294`, P0.1's scope, and P0.3's own scope: they describe those steps as planned; left as they are.
+- `CLAUDE.md:48` ("It states the current phase and what may be edited"): still accurate; no edit.
+- `DECISIONS.md:65` and `FREEZE_INVESTIGATION.md:1` ("review-only"): they describe past sessions; no edit.
+- `RULES_CHECK.md:64`: "Follow Phase rules check" matched by accident; unrelated.
+- Two edits were proposed to Jonathan, because the text would mislead a future session, and made after his go-ahead:
+  - `MIGRATION_PLAN.md:3` said "Status: draft … no phase-rule exception was granted", although the plan was approved on 2026-10-21. Jonathan gave the replacement text: "Status: approved by Jonathan on 2026-10-21; decisions D1–D14 are recorded in `DECISIONS.md`. Drafted and revised in a review-only session on 2026-10-15." The line was checked to read as reported before it was replaced, and keeps its bold label;
+  - `MIGRATION_PLAN.md:301` (P0.2) cited `PROCEDURES.md`, "Scope before migration", a section that no longer exists. The parenthetical now reads "(granted for that task only; see the 2026-10-22 entry in `progress.md`)".
+
+**Docs commit and push:** one `docs:` commit, staged by explicit path, after Jonathan's "commit docs"; it lands after the tags. The docs commit and both tags are pushed (`git push origin main`, then the two tags by name, never `--tags`) after his approval ("push").
+
+**Next**
+1. P1.1, the debug functions (`MIGRATION_PLAN.md` §2.3 and §6). Its prerequisite, P0.3, is met once the push is done.
+
 ## 2026-10-22 (P0.2: the legacy fix batch)
 
 Started 2026-10-21, finished 2026-10-22. The code part of P0.2 is committed and playtested; the Production release is pending (Jonathan makes it). Not pushed yet.

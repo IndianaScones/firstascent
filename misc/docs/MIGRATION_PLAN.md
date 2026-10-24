@@ -1,6 +1,6 @@
 # Migration plan: legacy framework → current BGA framework
 
-**Status:** draft, revised after Jonathan's first review (2026-10-15). Written in review-only sessions: no code was changed and no phase-rule exception was granted. Nothing in this plan is decided until Jonathan records it in `DECISIONS.md`.
+**Status:** approved by Jonathan on 2026-10-21; decisions D1–D14 are recorded in `DECISIONS.md`. Drafted and revised in a review-only session on 2026-10-15.
 
 **Baseline:** commit `b0da67e` on `main`, plus Jonathan's uncommitted testing overrides in `firstascent.game.php` (read for §6, not touched).
 
@@ -297,8 +297,8 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** unchanged.
 
 **P0.2 Legacy fix batch** (new; code, in the legacy files; S–M; 1–2 sessions)
-- **Status (2026-10-22):** done except the release. The batch is committed and playtested: `bb780d7` (Q-R2), `b91ebb3` (Q-R8), `512ce89` (B7), `53570af` (B5), `4d87e62` (the `firstascent.js` fix), plus the harness `6ee82c1` (`tool:`). The Production release is pending; Jonathan makes it. Details in `progress.md`.
-- **Needs** a one-time phase-rule exception from Jonathan at its start (`PROCEDURES.md`, "Scope before migration").
+- **Status:** done. The batch is committed and playtested: `bb780d7` (Q-R2), `b91ebb3` (Q-R8), `512ce89` (B7), `53570af` (B5), `4d87e62` (the `firstascent.js` fix), plus the harness `6ee82c1` (`tool:`). Jonathan released it to Production on 2026-10-24 (BGA's date; his local date was 2026-10-23), with no private-alpha table running (D12). Details in `progress.md`.
+- **Needs** a one-time phase-rule exception from Jonathan at its start (granted for that task only; see the 2026-10-22 entry in `progress.md`).
 - **Scope:**
   - **First, set aside the testing overrides (D4).** Save Jonathan's uncommitted overrides in `firstascent.game.php` as a patch file outside git tracking, then revert the file. Reverting needs Jonathan's explicit confirmation. P0.2 edits that file, and staging by path can't separate the overrides' hunks from the batch's.
   - **The batch** (items in `TODO.md`), one `fix:` commit each:
@@ -323,6 +323,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** the legacy build with the batch; a Production release.
 
 **P0.3 Tags and the phase switch** (git, and `PROCEDURES.md`; formerly P0.2)
+- **Status:** done. Both annotated tags, `legacy-final` and `prod-alpha-2026-10-24`, are on `bc4a9c9`. The latest commit was chosen, as in P0.1, where `prod-alpha-2026-10-20` went on `4701af1`. The game files at `bc4a9c9` are identical to `4d87e62`, the last code commit; the later commits touch `misc/` only. `PROCEDURES.md` "Current phase" now holds the §11 draft, and "Scope before migration" is retired. Details in `progress.md`.
 - **Scope:**
   - Tag `legacy-final` on the batch's last commit.
   - Tag the release made in P0.2 with `prod-alpha-<date>`. (`prod-alpha-2026-10-20`, for the earlier build, was tagged in P0.1.)
@@ -1416,8 +1417,9 @@ D3 (2026-10-21): the trial isn't run for now. Revisit it if manual deploy-and-te
   - A long-lived migration branch was considered and rejected: docs would have to be kept on two branches.
 - **Tags:**
   - `prod-alpha-2026-10-20` on the commit behind the Production build rebuilt on 2026-10-20 (P0.1);
-  - `legacy-final` on the last commit of the P0.2 batch (P0.3);
-  - `prod-alpha-<date>` on the commit behind the build released in P0.2 (P0.3);
+    - Note (P0.3): Production's build list shows its last three deploys as 2026-10-15, 2026-10-15 and 2026-10-24, with no deploy on 2026-10-20, so "rebuilt on 2026-10-20" doesn't match Production's record. The tag keeps its name. The last build before 2026-10-24 is dated 2026-10-15. P0.1 found that only docs changed between `fd78ef9` and `4701af1`. So the tag marks the deployed game files if the build dated 2026-10-15 was made from `fd78ef9`'s files, as Jonathan's Q-T1 answer (Production runs the committed code) implies. What happened on 2026-10-20 isn't known.
+  - `legacy-final` on `bc4a9c9`, the latest commit at the end of P0.2; its game files are those of the batch's last code commit, `4d87e62` (P0.3);
+  - `prod-alpha-2026-10-24` on `bc4a9c9`, the commit behind the build released in P0.2 (P0.3). The release was made on 2026-10-24 by BGA's date; Jonathan's local date was 2026-10-23;
   - optional milestone tags (`mig-p1`, `mig-p2`, …).
 - **The legacy build is frozen at `legacy-final`.** A legacy fix happens only at Jonathan's request, through the hotfix path below. A hotfix branch is made only if one is ever needed.
 - **Hotfix path for the legacy build:**
@@ -1466,6 +1468,8 @@ T23 and F13 are no longer conditions: D9 folded them into P1.
 > Review-only sessions (planning, investigation) stay docs-only.
 
 The "Scope before migration" section would then become history: moved into `progress.md` or deleted.
+
+**Applied in P0.3:** the draft went into `PROCEDURES.md` unchanged (the heading reads "Current phase: migration"). The "Scope before migration" section was deleted; each of its items is recorded in `progress.md` (the 2026-10-14, 2026-10-15 and 2026-10-22 entries) or in `DECISIONS.md` (D9, for T23).
 
 ---
 
@@ -1538,7 +1542,7 @@ Answered on 2026-10-21. The answers, statuses and code locations are in `RULES_C
 - **Q-R8** 1 card plus 2 Gear wilds scores. Wild-only sets must score too; fixed in P0.2.
 
 ### Technical questions (Q-T)
-- **Q-T1** Answered: the Production build rebuilt on 2026-10-20 is the committed code. Tagged `prod-alpha-2026-10-20` in P0.1.
+- **Q-T1** Answered: the Production build rebuilt on 2026-10-20 is the committed code. Tagged `prod-alpha-2026-10-20` in P0.1. Note (P0.3): Production's build list shows no 2026-10-20 deploy; the last build before 2026-10-24 is dated 2026-10-15. The tag keeps its name; it marks the deployed game files if the 2026-10-15 build was made from `fd78ef9`'s files (§10).
 - **Q-T2** Answered by D12: Jonathan takes part in most private playtests, they are real-time, and he releases only when no table is running.
 - **Q-T3** Answered: BGA profile names can't contain apostrophes but can contain dashes. Whether they can contain accents is unknown. So test names with `-` (B2, F10); the apostrophe case can't arise through player names.
 - **Q-T4** Answered: yes, harness files are tracked under `misc/tests/` (not packaged for deployment). P4.1 creates the first one.
