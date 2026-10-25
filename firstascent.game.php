@@ -414,25 +414,7 @@ class FirstAscent extends Bga\GameFramework\Table
         // $this->setGlobalVariable('gear_num', $gear_num);
 
         // draw starting spread
-        $this->cards_and_tokens->pickCardsForLocation(4, 'asset_deck', 'the_spread');
-        $spread_assets = self::getCollectionFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'");
-        $polychrome = $this->checkSpread();
-        while ($polychrome === false) {
-
-            $discard_id = array_pop($spread_assets)['card_id'];
-            $this->cards_and_tokens->insertCardOnExtremePosition($discard_id, 'asset_deck', false);
-            $this->cards_and_tokens->shuffle('asset_deck');
-            $new_card = $this->cards_and_tokens->getCardOnTop('asset_deck');
-            $this->cards_and_tokens->moveCard($new_card['id'], 'the_spread');
-            $polychrome = $this->checkSpread();
-        }
-        $spread_assets = self::getCollectionFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'");
-        $spread_slot = 1;
-        foreach (array_values($spread_assets) as $asset) {
-            $card_id = $asset['card_id'];
-            $this->DbQuery("UPDATE cards_and_tokens SET card_location_arg='$spread_slot' WHERE card_id='$card_id'");
-            $spread_slot++;
-        }
+        $this->drawStartingSpread();
 
     // Set up board
 
@@ -449,6 +431,159 @@ class FirstAscent extends Bga\GameFramework\Table
 
         // testing
         // $current_shared_objectives = [16, 11, 10];
+
+        $this->initSharedObjectives($current_shared_objectives, $players);
+
+        // Set up tiles
+
+        if ($board === 'desert') {
+
+            // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
+            $ones = [ [1,3,6,8,11,13], [1,2,3,4,5,6] ];
+            $twos = [ [2,4,7,9,12,15,16,19,21,28,29], [13,14,15,16,17,18,19,20,21,22,23] ];
+            $threes = [ [17,20,23,25], [25,26,27,28] ];
+            $fours = [ [10,14,18,27,30], [29,30,31,32,33] ];
+            $fives = [ [22,24,26,31,32], [38,39,40,41,42,43] ];
+
+            // pitch order contains tiles that are printed on the board
+            $pitch_order = [];
+            $pitch_order[5] = 36;
+            $tiles_number = 32;
+
+        } else {
+
+            // var is point value of a tile, [0] array is tile locations on the forest board and [1] is css identifiers
+            $ones = [ [5,8,13,17,19,26], [1,2,3,4,5,6] ];
+            $twos = [ [2,4,9,14,16,20,23,27,36,37,39], [13,14,15,16,17,18,19,20,21,22,23] ];
+            $threes = [ [28,30,32,34], [25,26,27,28] ];
+            $fours = [ [12,24,35,38,40], [29,30,31,32,33] ];
+            $fives = [ [29,31,33,41,42,43], [38,39,40,41,42,43] ];
+
+            // pitch order contains tiles that are printed on the board
+            $pitch_order = [];
+            $pitch_order[1] = 9;
+            $pitch_order[3] = 10;
+            $pitch_order[6] = 36;
+            $pitch_order[7] = 24;
+            $pitch_order[10] = 12;
+            $pitch_order[11] = 8;
+            $pitch_order[15] = 11;
+            $pitch_order[18] = 37;
+            $pitch_order[21] = 7;
+            $pitch_order[22] = 35;
+            $pitch_order[25] = 34;
+            $tiles_number = 43;
+        }
+
+        $pitch_identifier = [];
+        for ($i=1; $i<=$tiles_number; $i++) {
+
+            if (in_array($i, $twos[0])) {
+                // pick a random pitch from the twos
+                shuffle($twos[1]);
+                $pitch_order[$i] = array_pop($twos[1]);
+
+            } else if (in_array($i, $ones[0])) {
+                shuffle($ones[1]);
+                $pitch_order[$i] = array_pop($ones[1]);
+
+            } else if (in_array($i, $fours[0])) {
+                shuffle($fours[1]);
+                $pitch_order[$i] = array_pop($fours[1]);
+
+            } else if (in_array($i, $fives[0])) {
+                shuffle($fives[1]);
+                $pitch_order[$i] = array_pop($fives[1]);
+
+            } else if (in_array($i, $threes[0])) {
+                shuffle($threes[1]);
+                $pitch_order[$i] = array_pop($threes[1]);
+            }
+
+            $pitch_identifier[$i] = strval($pitch_order[$i]);
+        }
+        $this->setGlobalVariable('pitch_identifier', $pitch_identifier);
+
+        // Write pitches into DB
+
+        $sql = "INSERT INTO board (pitch_location, pitch_id) VALUES ";
+        $sql_values = [];
+        foreach($pitch_order as $location => $pitch) {
+
+            $pitch_location = $location;
+            $pitch_id = $pitch;
+
+            $sql_values[] = "('$pitch_location','$pitch_id')";
+        }
+        $sql .= implode(',', $sql_values);
+        self::DbQuery($sql);
+
+
+        // Create character pool
+
+        $available_characters = $this->pickAvailableCharacters($players);
+
+        // TESTING
+        // if (!in_array('5', $available_characters)) {
+        //     array_shift($available_characters);
+        //     $available_characters[] = '5';
+        // }
+        // if (!in_array('12', $available_characters)) {
+        //     array_shift($available_characters);
+        //     $available_characters[] = '12';
+        // }
+
+        $this->setGlobalVariable('available_characters', $available_characters);
+        $this->setGlobalVariable('round', '0');
+        $this->setGlobalVariable('phase', clienttranslate('Setup'));
+
+        // Create personal objective pile
+        $personal_objective_deck = range(1, 12);
+        shuffle($personal_objective_deck);
+
+        // TESTING
+        // array_push($personal_objective_deck, 9);
+        // array_push($personal_objective_deck, 10);
+        // array_push($personal_objective_deck, 11);
+        // array_push($personal_objective_deck, 12);
+
+        $this->setGlobalVariable('personal_objective_deck', $personal_objective_deck);
+        $this->setGlobalVariable('personal_objectives', []);
+        $this->setGlobalVariable('personal_objectives_tracker', []);
+
+        // Track drawing assets during setup
+        $this->setGlobalVariable('draw_step', 1);
+        $this->setGlobalVariable('x_cards', 5);
+
+        // Activate last player
+        $player_count = count($players);
+        $last_player = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no` = '$player_count'");
+        $this->gamestate->changeActivePlayer($last_player);
+
+        /**** FOR TESTING ****/
+        /*foreach ($players as $player_id => $player) {
+            $this->cards_and_tokens->pickCardsForLocation(3, 'asset_deck', $player_id);
+        }
+*/
+        /************ End of the game initialization *****/
+    }
+
+    function pickAvailableCharacters(array $players): array {
+        $character_count = count($players) +1;
+        $character_pool = [ [1,2], [3,4], [5,6], [7,8], [9,10], [11,12] ];
+        shuffle($character_pool);
+        $available_characters = [];
+        for ($i=1; $i<=$character_count; $i++) {
+            $current_board = array_pop($character_pool);
+            shuffle($current_board);
+            $current_character = array_pop($current_board);
+            $available_characters[] = $current_character;
+        }
+        return $available_characters;
+    }
+
+    function initSharedObjectives(array $current_shared_objectives, array $players): void {
+        $board = $this->getGlobalVariable('board');
 
         $this->setGlobalVariable('current_shared_objectives', $current_shared_objectives);
 
@@ -623,148 +758,28 @@ class FirstAscent extends Bga\GameFramework\Table
             }
         }
         $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
+    }
 
-        // Set up tiles
+    function drawStartingSpread(): void {
+        $this->cards_and_tokens->pickCardsForLocation(4, 'asset_deck', 'the_spread');
+        $spread_assets = self::getCollectionFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'");
+        $polychrome = $this->checkSpread();
+        while ($polychrome === false) {
 
-        if ($board === 'desert') {
-
-            // var is point value of a tile, [0] array is tile locations on the desert board and [1] is css identifiers
-            $ones = [ [1,3,6,8,11,13], [1,2,3,4,5,6] ];
-            $twos = [ [2,4,7,9,12,15,16,19,21,28,29], [13,14,15,16,17,18,19,20,21,22,23] ];
-            $threes = [ [17,20,23,25], [25,26,27,28] ];
-            $fours = [ [10,14,18,27,30], [29,30,31,32,33] ];
-            $fives = [ [22,24,26,31,32], [38,39,40,41,42,43] ];
-
-            // pitch order contains tiles that are printed on the board
-            $pitch_order = [];
-            $pitch_order[5] = 36;
-            $tiles_number = 32;
-
-        } else {
-
-            // var is point value of a tile, [0] array is tile locations on the forest board and [1] is css identifiers
-            $ones = [ [5,8,13,17,19,26], [1,2,3,4,5,6] ];
-            $twos = [ [2,4,9,14,16,20,23,27,36,37,39], [13,14,15,16,17,18,19,20,21,22,23] ];
-            $threes = [ [28,30,32,34], [25,26,27,28] ];
-            $fours = [ [12,24,35,38,40], [29,30,31,32,33] ];
-            $fives = [ [29,31,33,41,42,43], [38,39,40,41,42,43] ];
-
-            // pitch order contains tiles that are printed on the board
-            $pitch_order = [];
-            $pitch_order[1] = 9;
-            $pitch_order[3] = 10;
-            $pitch_order[6] = 36;
-            $pitch_order[7] = 24;
-            $pitch_order[10] = 12;
-            $pitch_order[11] = 8;
-            $pitch_order[15] = 11;
-            $pitch_order[18] = 37;
-            $pitch_order[21] = 7;
-            $pitch_order[22] = 35;
-            $pitch_order[25] = 34;
-            $tiles_number = 43;
+            $discard_id = array_pop($spread_assets)['card_id'];
+            $this->cards_and_tokens->insertCardOnExtremePosition($discard_id, 'asset_deck', false);
+            $this->cards_and_tokens->shuffle('asset_deck');
+            $new_card = $this->cards_and_tokens->getCardOnTop('asset_deck');
+            $this->cards_and_tokens->moveCard($new_card['id'], 'the_spread');
+            $polychrome = $this->checkSpread();
         }
-
-        $pitch_identifier = [];
-        for ($i=1; $i<=$tiles_number; $i++) {
-
-            if (in_array($i, $twos[0])) {
-                // pick a random pitch from the twos
-                shuffle($twos[1]);
-                $pitch_order[$i] = array_pop($twos[1]);
-
-            } else if (in_array($i, $ones[0])) {
-                shuffle($ones[1]);
-                $pitch_order[$i] = array_pop($ones[1]);
-
-            } else if (in_array($i, $fours[0])) {
-                shuffle($fours[1]);
-                $pitch_order[$i] = array_pop($fours[1]);
-
-            } else if (in_array($i, $fives[0])) {
-                shuffle($fives[1]);
-                $pitch_order[$i] = array_pop($fives[1]);
-
-            } else if (in_array($i, $threes[0])) {
-                shuffle($threes[1]);
-                $pitch_order[$i] = array_pop($threes[1]);
-            }
-
-            $pitch_identifier[$i] = strval($pitch_order[$i]);
+        $spread_assets = self::getCollectionFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'");
+        $spread_slot = 1;
+        foreach (array_values($spread_assets) as $asset) {
+            $card_id = $asset['card_id'];
+            $this->DbQuery("UPDATE cards_and_tokens SET card_location_arg='$spread_slot' WHERE card_id='$card_id'");
+            $spread_slot++;
         }
-        $this->setGlobalVariable('pitch_identifier', $pitch_identifier);
-
-        // Write pitches into DB
-
-        $sql = "INSERT INTO board (pitch_location, pitch_id) VALUES ";
-        $sql_values = [];
-        foreach($pitch_order as $location => $pitch) {
-
-            $pitch_location = $location;
-            $pitch_id = $pitch;
-
-            $sql_values[] = "('$pitch_location','$pitch_id')";
-        }
-        $sql .= implode(',', $sql_values);
-        self::DbQuery($sql);
-
-
-        // Create character pool
-
-        $character_count = count($players) +1;
-        $character_pool = [ [1,2], [3,4], [5,6], [7,8], [9,10], [11,12] ];
-        shuffle($character_pool);
-        $available_characters = [];
-        for ($i=1; $i<=$character_count; $i++) {
-            $current_board = array_pop($character_pool);
-            shuffle($current_board);
-            $current_character = array_pop($current_board);
-            $available_characters[] = $current_character;
-        }
-
-        // TESTING
-        // if (!in_array('5', $available_characters)) {
-        //     array_shift($available_characters);
-        //     $available_characters[] = '5';
-        // }
-        // if (!in_array('12', $available_characters)) {
-        //     array_shift($available_characters);
-        //     $available_characters[] = '12';
-        // }
-
-        $this->setGlobalVariable('available_characters', $available_characters);
-        $this->setGlobalVariable('round', '0');
-        $this->setGlobalVariable('phase', clienttranslate('Setup'));
-
-        // Create personal objective pile
-        $personal_objective_deck = range(1, 12);
-        shuffle($personal_objective_deck);
-
-        // TESTING
-        // array_push($personal_objective_deck, 9);
-        // array_push($personal_objective_deck, 10);
-        // array_push($personal_objective_deck, 11);
-        // array_push($personal_objective_deck, 12);
-
-        $this->setGlobalVariable('personal_objective_deck', $personal_objective_deck);
-        $this->setGlobalVariable('personal_objectives', []);
-        $this->setGlobalVariable('personal_objectives_tracker', []);
-
-        // Track drawing assets during setup
-        $this->setGlobalVariable('draw_step', 1);
-        $this->setGlobalVariable('x_cards', 5);
-
-        // Activate last player
-        $player_count = count($players);
-        $last_player = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no` = '$player_count'");
-        $this->gamestate->changeActivePlayer($last_player);
-
-        /**** FOR TESTING ****/
-        /*foreach ($players as $player_id => $player) {
-            $this->cards_and_tokens->pickCardsForLocation(3, 'asset_deck', $player_id);
-        }
-*/
-        /************ End of the game initialization *****/
     }
 
     /*
