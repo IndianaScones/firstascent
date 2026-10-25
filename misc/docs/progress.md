@@ -2,6 +2,134 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-10-24 (P1.1, in progress: (a) done; (b1) next)
+
+The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. (b1) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
+
+**State at the stop**
+- **HEAD:** `4cdc882` (P1.1a), pushed. `main` and `origin/main` are level.
+- **Staged:** nothing.
+- **Unstaged:** `misc/docs/TODO.md`, `misc/docs/RULES_CHECK.md`, `misc/docs/MIGRATION_PLAN.md` and this file. They go in one `docs:` commit after Jonathan's "commit docs", and are pushed after his "push".
+- **Studio:** `firstascent.game.php` at `4cdc882`. The other game files are as at `bc4a9c9`.
+- **Files outside git:**
+  - In `D:\Documents\BGA Studio\`:
+    - `p1.1a.diff`: (a) with two extractions, superseded;
+    - `p1.1a-v2.diff`: (a) as committed;
+    - `p1.1-docs.diff`: this session's docs diff.
+  - The scratchpad of this session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`:
+    - the move scripts `p11a_move.php` and `p11a_move_spread.php`;
+    - the verbatim check `p11a_verify.php`;
+    - the equivalence harness `p11a_harness.php`;
+    - `head_game.php` (the file at `7e9d749`) and `mutant_game.php`.
+    - The harness stays out of the repo: it compares against HEAD's inline code, which no longer exists after (a).
+  - `D:\Documents\BGA Studio\firstascent-overrides\` was left untouched, read-only. Retiring it is Jonathan's decision.
+
+**Start check:** `git fetch origin`; HEAD `7e9d749`, level with `origin/main`, working tree clean.
+
+**Items**
+- **(a)** done: `4cdc882` `struct:`, playtested.
+- **(b1)** next: the six §6.2 functions, in a new session.
+- **(b2)** after (b1): the six functions under "Added in P1.1".
+- **(d)** after (b2): the scaffolding commit.
+- **(c)** confirmed: the guard on `debug_goToState` is at `utils.php:929–934` and throws `\BgaSystemException('Studio only')` outside Studio.
+
+**Gap check (D4)**
+- Every override in Jonathan's patch is reproduced by a planned function:
+  - the climbing deck by `debug_stackClimbingDeck` (the Table A stack: `"26,23,39,57,11,21,13,18,15"`);
+  - the Summit Beta supply by `debug_stackSummitBeta` (`"7,6"`);
+  - the characters by `debug_setAvailableCharacters` (`"10,4"`);
+  - the commented `[16, 11, 10]` by `debug_setSharedObjectives`.
+- Between setup and the first Climb Phase:
+  - nothing draws from the climbing deck;
+  - Summit Beta has one deal, Phil's two tokens at the end of character selection.
+  - So stacking during `characterSelection` matches the setup overrides (for Phil, before the last confirm).
+- **Not covered** by the planned functions: personal objectives, the Spread test, the three starting cards, the token moved to the Used pile, and the three forced die rolls.
+- **Jonathan's decision:** a new debug function for each (option A), in a separate (b2), the die hook reading its global only on Studio.
+  - The setup-time Spread redraw is reproducible through a third extraction, `drawStartingSpread()`, added to (a) at his go-ahead.
+  - §6.3 stays dropped; U8 and Q-T5 stay moot.
+- **Scaffolding:**
+  - Jonathan chose to remove everything in the scaffolding table, and the `php_debug()` stub, in a separate `struct:` commit, (d), after (b2).
+  - The "not testing" lines were my choices, which Jonathan accepted: remove the label at 806 and the old direction at 6340, and keep the rest.
+  - The list is in P1.1.
+
+**(a): the extraction** (`4cdc882`, `struct:`)
+- Three verbatim moves out of `setupNewGame`:
+  - `drawStartingSpread(): void` (was 417–435);
+  - `initSharedObjectives(array $current_shared_objectives, array $players): void` (was 453–625);
+  - `pickAvailableCharacters(array $players): array` (was 714–723).
+- Jonathan approved the `$players` parameter and the one added line, `$board = $this->getGlobalVariable('board');`. Case 12 (A Day in the Alpine) read `setupNewGame`'s local `$board`.
+- **Checks:**
+  - `php -l` passes; the only message is the known `${var}` deprecation, now at line 2653.
+  - The moved text is byte-identical to HEAD. The residual is 15 lines: 3 calls, 3 headers, 3 closing braces, the `return`, the `$board` line and 4 blank lines.
+  - Before the Spread move: the block has no `return`, and none of its variables is read later in `setupNewGame`.
+  - The harness (`p11a_harness.php`) made 21,440 runs, with no difference and no PHP warning (its error handler turns warnings into exceptions). Each run executes HEAD's inline code and the new method on the same input, and counts once.
+    - **Shared objectives, 13,440 runs:** every ordered triple of distinct ids 1–16, which is 3,360 (the 560 unordered sets in all 6 orders). That includes sets with both sides of one token, which setup can't produce. They ran once for each of 2, 3, 4 and 5 players.
+    - **Boards:** the board follows the player count, as setup chooses it: desert for 2 and 3 players, forest for 4 and 5. So each board ran with two player counts, not every count on both boards.
+    - **Characters, 8,000 runs:** seeds 1–2,000 for each of the four player counts.
+  - The harness fails if the `$board` line is removed.
+  - **Correction:**
+    - The `4cdc882` commit message says "2-5 players, both boards". That reads as every player count on both boards, which would have been 26,880 objective runs. The runs were as listed above.
+    - My Part 1 report proposed "all 560 sets". The harness ran the 3,360 ordered sets instead.
+    - The pushed commit is not amended.
+- **Staging:** `git add firstascent.game.php`, with CRLF converted to LF by autocrlf. `git diff --cached --stat` showed 172 insertions and 157 deletions, as Jonathan asked.
+
+**(a) playtest** (Studio, 2026-10-24; all pass)
+- `firstascent.game.php` deployed, F5 in every open tab.
+- **3 players, desert board:**
+  - 4 characters, all from different mats.
+  - Stonemaster, Ridgeline Challenge (South) and Smear Campaign, from different tokens.
+  - Scores all 0 (no Elitist).
+  - The Spread had 4 cards, one per slot, not all one type.
+- **5 players, forest board:**
+  - 6 characters, all from different mats.
+  - A Day in the Alpine, Star Stemmer and Stay in the Shade, from different tokens.
+  - Scores all 0.
+  - The Spread had 4 cards, one per slot, not all one type.
+- **Statistics** (the 3-player table, `debug_goToState(98)` after all characters were chosen):
+  - Final scoring ran, and the table ended in a tie at 0.
+  - "Points from Ridgeline Challenge South: 0", "Points from Smear Campaign: 0" and "Points from Stonemaster: 0".
+  - No line for the other 13 objectives.
+- **S-smoke** (2 players and a spectator):
+  - Character selection and Rack Up (Spread draws and refills), a climb and a rest, climbing card 56 with a Portaledge draw, the Follow Phase and the Rerack: no problems.
+  - F5 in `climbOrRest` and in `resting`: no problems.
+- **Console:** no errors and no `[FA …]` warnings.
+- **No replays:** no result came from a Studio save/restore.
+- **Jonathan's notes:**
+  - A Day in the Alpine was seen only on the forest board. So the `$board` line was confirmed by the harness and its mutation check, not on Studio.
+  - Neither the setup redraw (a starting Spread all of one type) nor The Elitist came up.
+
+**Findings**
+- **The setup redraw loop for 4 of a kind on the starting Spread** (`php:drawStartingSpread`; read in code, not run):
+  - It removes cards from the list of the four starting cards, read once.
+  - After four passes the list is empty, and a fifth pass reads a null card id.
+  - Odds: about 1 in 7,100 games, and about 1 in 92 calls of (b2)'s Spread function with four Gear on top.
+  - During the session I first gave 1 in 5,400 and 1 in 70. The recount puts each replacement in a 93-card deck.
+  - Recorded in `TODO.md`, with the planned fix proposed for P5.2 (to confirm), and as R-10 in `RULES_CHECK.md`, answered by Jonathan.
+- **`#[Debug(reload: true)]`** stays unverified in this file. The (b1) playtest checks it (§6.2).
+
+**Go-aheads given in this session** (beyond the step's files and this entry)
+- `misc/docs/TODO.md`:
+  - the redraw-loop entry, with the odds, the reproduction route and a proposed planned fix;
+  - Q-R6's citation changed to `php:drawStartingSpread`.
+- `misc/docs/RULES_CHECK.md`:
+  - a new item after R-6, requested as R-9 and recorded as R-10, because R-9 already exists (the five wild Gear Cards);
+  - Jonathan kept R-10;
+  - R-6 is unchanged (baseline convention).
+- `misc/docs/MIGRATION_PLAN.md`:
+  - §6.2 and P1.1's scope, with the design agreed in this session;
+  - P1.1's status, as the task allowed;
+  - §6.3's opening line (the gap-check result), at Jonathan's request in the docs review.
+- The (a) commit, and its push.
+
+**Pending decisions**
+- (b2): the details marked "proposed" in §6.2, confirmed at the start of (b2). That includes whether a repeated Asset `type_arg` means two copies; until decided, Q6 refuses duplicates.
+- The planned fix for the redraw loop: P5.2, with R-6's setup path (proposed). Once confirmed, §8.4 gets a row.
+- Retiring `D:\Documents\BGA Studio\firstascent-overrides\`.
+- "commit docs" and "push" for this docs commit.
+
+**Next**
+1. (b1) in a new session. Read §6.2 (the rules for every P1.1 function, then each function) and P1.1's playtest list for (b1).
+
 ## 2026-10-23 (P0.3: tags and the phase switch)
 
 Git and docs only; no code changed. Two annotated tags went on `bc4a9c9`, and "Current phase" in `PROCEDURES.md` switched from review to migration. Jonathan released the P0.2 batch to Production during the session. The heading date is Jonathan's local date; BGA's date for the release is 2026-10-24. This entry supersedes the "Not pushed yet" and "Next" of the P0.2 entry below.

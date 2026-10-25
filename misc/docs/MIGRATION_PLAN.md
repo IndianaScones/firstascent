@@ -338,24 +338,66 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 #### Phase P1: server on the current framework (the legacy client stays)
 
 **P1.1 Debug functions** (in the legacy file; M) — prerequisite: P0.3 (the testing overrides are already set aside, in P0.2)
-- **Scope:**
+- **Status:** in progress.
+  - (a) is done: `4cdc882`, playtested on Studio on 2026-10-24.
+  - (c) is confirmed.
+  - (b1) starts in a new session; (b2) and (d) follow.
+  - Details in `progress.md`.
+- **Scope** (updated in P1.1 on 2026-10-24: (b) is split, and (d) is new):
   - (a) **Structural:** extract `pickAvailableCharacters()` (`php:setupNewGame ~714–737`) and `initSharedObjectives(array $ids)` (`~442–627`) without behavior change.
-  - (b) **Tooling:** the four Studio-only debug functions of §6.2, plus `debug_endGameSoon` (Q-T6, replaces the `testEnd` state) and `debug_giveSummitBeta` (Q-T7).
-  - (c) **Check:** the Studio-only guard on the existing `debug_goToState` is present (added in P0.2, B5). P1.1 only checks it.
-  - Two commits, (a) and (b).
-  - If a testing override can't be done with these functions, §6.3 (the setup-overrides file) is revived (D4); otherwise it stays dropped.
+    - **Done** (`4cdc882`):
+      - `pickAvailableCharacters(array $players): array`;
+      - `initSharedObjectives(array $current_shared_objectives, array $players): void`, with one added line that reads the `board` global;
+      - a third extraction, `drawStartingSpread(): void`, for (b2)'s Spread function.
+    - The moved text is byte-identical.
+  - (b1) **Tooling:** the four Studio-only debug functions of §6.2, plus `debug_endGameSoon` (Q-T6, replaces the `testEnd` state) and `debug_giveSummitBeta` (Q-T7). The spec, with Jonathan's answers Q1–Q8, is in §6.2.
+  - (b2) **Tooling** (new in P1.1): the six functions under "Added in P1.1" in §6.2, for the overrides that the gap check found uncovered.
+  - (c) **Check:** the Studio-only guard on the existing `debug_goToState` is present (added in P0.2, B5). P1.1 only checks it. **Confirmed** in P1.1 (`utils.php ~929–934`).
+  - (d) **Structural, after (b2):** remove the commented testing scaffolding that the debug functions replace.
+    - **`firstascent.game.php`:** lines 307–322, 334, 336–339, 401–414, 432–433, 526–534, 544–548, 563–567, 1866, 2495, 4856 and 6470.
+    - Also the stale label at 806 ("FOR DEBUGGING THROUGH JAVASCRIPT", above live code) and the old starting-player direction at 6340.
+    - **`modules/utils.php`:** the `php_debug()` stub (223–226).
+    - **Kept:**
+      - 6391 and 6402, the commented personal-objective stat calls;
+      - the `upgradeTableDb` template;
+      - `utils.php ~33–35`.
+    - The line numbers are at `4cdc882`. (b2)'s die hook moves them, so locate each by content.
+  - **Commits:** four. (a) `struct:`, (b1) `tool:`, (b2) `tool:`, (d) `struct:`. Each is playtested on its own.
+  - **Gap check (D4), done in P1.1:** no override needs §6.3. Each one is covered by (b1) or (b2), including the setup-time Spread redraw, through `drawStartingSpread()`. §6.3 stays dropped, and U8 and Q-T5 stay moot.
 - **Files:** `firstascent.game.php`, `modules/utils.php`.
 - **Done when:**
   - the functions appear in Studio's debug menu and behave as §6 specifies;
   - every debug function refuses to run when `getBgaEnvironment()` isn't `'studio'` (reviewed in code);
-  - the gap check is recorded: either no override needs §6.3, or the U8 check result is recorded.
-- **Playtest:** 3 players.
-  1. In `characterSelection`, run `debug_setAvailableCharacters("10")`. Character 10 is offered after the reload.
-  2. Run `debug_stackSummitBeta("9")` and `debug_stackClimbingDeck("3")`. The first Summit Beta token drawn is Bomber Anchor; the next climbing card is 3.
-  3. In a new table, during `characterSelection`, run `debug_setSharedObjectives(16, 11, 10)`. After the reload those three are shown, and The Elitist's +4 appears on every score.
-  4. Run `debug_giveSummitBeta` for Bomber Anchor (token 9) and a player. After the reload that player holds it.
-  5. Run `debug_endGameSoon` for a player. That player's next climb triggers the end: the Climb and Follow Phases complete, and final scoring runs.
-- **Repros:** none fixed. Makes T26, T28 and F3–F5 quick to set up.
+  - the gap check is recorded: either no override needs §6.3, or the U8 check result is recorded. **Recorded:** none needs it;
+  - (b2)'s die hook reads its global only on Studio (reviewed in code).
+- **Playtest:**
+  - **(a):** done. New-table setup checks on both boards, statistics after `debug_goToState(98)`, and S-smoke (`progress.md`).
+  - **(b1):** 3 players.
+    1. In `characterSelection`, run `debug_setAvailableCharacters("10")`. Character 10 is offered after the reload.
+    2. Run `debug_stackSummitBeta("9")` and `debug_stackClimbingDeck("3")`. The first Summit Beta token drawn is Bomber Anchor; the next climbing card is 3.
+    3. In a new table, during `characterSelection`, run `debug_setSharedObjectives(16, 11, 10)`. After the reload those three are shown, and The Elitist's +4 appears on every score.
+    4. Run `debug_giveSummitBeta` for Bomber Anchor (token 9) and a player. After the reload that player holds it. Repeat for a second player: the token moves, and the first player no longer holds it (Q1).
+    5. Run `debug_endGameSoon` for a player. That player's next climb triggers the end: the Climb and Follow Phases complete, and final scoring runs.
+    6. **The statistics check (Q3):**
+       - In a new table, set the objectives with `debug_setSharedObjectives` in `characterSelection`.
+       - Climb once, then run `debug_endGameSoon` for that player and play to the end.
+       - The end-of-game statistics have one line for each objective in the new set and none for the replaced ones.
+    7. **Refusals:** each shows "Unexpected error" with its message, and nothing changes. The cases:
+       - `debug_setAvailableCharacters` outside `characterSelection`, with an id already chosen, with 0, or with a duplicate;
+       - `debug_stackClimbingDeck` for a card in play;
+       - `debug_stackSummitBeta` for a token in a hand;
+       - `debug_setSharedObjectives` in round 1, with a duplicate, or with 17;
+       - `debug_giveSummitBeta` with an unknown player id (the message lists the table's player ids and names);
+       - `debug_endGameSoon` for a player who hasn't climbed.
+    8. **Warnings in the log:**
+       - two characters from one mat, and a listed character whose mat's other side is already chosen;
+       - two sides of one objective token;
+       - `debug_endGameSoon` for a player with one climbed pitch.
+    9. **The `reload` check:** after each call, note whether the page reloads by itself.
+    - Scenarios 5 and 6 end the table, and Studio saves can't be restored after the end. Run them last, or on their own tables.
+  - **(b2):** one scenario per function, written at the start of (b2).
+  - **(d):** a new table's setup, and S-smoke.
+- **Repros:** none fixed. Makes T26, T28 and F3–F5 quick to set up. (b2)'s Spread function reproduces the setup redraw edge case (`TODO.md`, R-10).
 - **Studio after:** playable; existing tables still work.
 
 **P1.2 Move the server to `modules/php/Game.php`** (S review: two renames plus about 80 changed lines)
@@ -1105,6 +1147,35 @@ As first read on 2026-10-15. Jonathan has edited the values since; the design be
 ### 6.2 Debug functions
 All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribute is `Bga\GameFramework\Actions\Debug` [`_ide_helper.php ~15`]. Every one starts with the Studio-only guard (§6.4).
 
+**Rules for every P1.1 debug function** (decided in P1.1, 2026-10-24). Line numbers in this section's P1.1 additions are at `4cdc882`.
+- **Commits:** (b1) holds the six functions below, from `debug_setAvailableCharacters` to `debug_endGameSoon`. (b2) holds the six under "Added in P1.1". One `tool:` commit each, each playtested on its own.
+- **Placement:**
+  - `modules/utils.php` (`UtilTrait`), after `debug_goToState`, since §3.1's `Debug\DebugTrait` comes from there.
+  - Helpers get names without the `debug_` prefix, so they stay out of Studio's debug menu: "BGA will detect methods with this prefix" [Debugging doc:234].
+  - The setup helpers extracted in P1.1a (`pickAvailableCharacters`, `initSharedObjectives`, `drawStartingSpread`) stay in `firstascent.game.php`.
+- **Attribute:**
+  - Written fully qualified, `#[\Bga\GameFramework\Actions\Debug(reload: true)]`. The legacy files have no namespace and no `use` lines, so an unqualified `#[Debug]` would name `\Debug` **[inferred: PHP semantics]**.
+  - **[unverified]** Whether `reload` takes effect in this legacy-loaded file. The class already extends the current `Bga\GameFramework\Table`, and `debug_` discovery works in it (`debug_goToState`, P0.2).
+  - **Check (P1.1b1 playtest):** the page reloads by itself after a call. If it doesn't, F5 gives the same result; the playtest records which.
+- **Guard:**
+  - `throw new \Bga\GameFramework\SystemException('Studio only')`, as in §6.4. It's the current class [Game.php doc:1774–1775]; `\BgaSystemException` is deprecated [`_ide_helper.php ~3743`].
+  - The guard never fires on Studio, so it is reviewed in code. If the class didn't resolve, PHP would raise an Error before any change, so the refusal would still hold.
+  - `debug_goToState` keeps `\BgaSystemException` until P1.2 converts the legacy exception classes (§1.3).
+- **Refusals:**
+  - Refusals throw `\Bga\GameFramework\VisibleSystemException`, untranslated, shown as "Unexpected error" [Game.php doc:1777–1781]. The refusal playtests show that this namespace's exception classes load in the legacy file.
+  - Every input is validated before the first write. A thrown exception also cancels all database changes and notifications [Game.php doc:1751].
+  - Every function refuses in `gameEnd`.
+- **Player ids (Q5):** a player parameter takes the player id. A refused id gets a message that lists the table's player ids and names.
+- **Lists:**
+  - Comma-separated ids; the first is the top card, or the first dealt.
+  - Duplicates are refused (Q6), and so are ids outside the range.
+- **Warnings (Q8):**
+  - A game-log line: `$this->bga->notify->all('log_only', …)`.
+  - The type has no client handler, like the code's other log-only lines, and the log keeps the line after the reload.
+- **Current APIs:**
+  - New code uses `bga->notify`, `bga->playerStats` and `bga->playerScore` (`CLAUDE.md`: new code follows `bga/current/`). This is their first Studio run in this file.
+  - If one fails in the legacy-loaded file, the step stops and reports it. There is no fallback to the legacy calls.
+
 **`debug_setAvailableCharacters(string $ids)`**, for example `"10"` or `"10,12"`
 - **When:** `characterSelection` only.
 - **Effect:**
@@ -1113,6 +1184,12 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - It warns, without refusing, when two listed ids share a mat (`[1,2]`, `[3,4]`, …).
 - **Why it works:** the reload re-renders the selection from `gamedatas.available_characters` (`php:getAllDatas ~818`).
 - **Suits a debug function:** yes.
+- **Decided in P1.1 (2026-10-24):**
+  - Ids 1–12. Id 0, the zombie entry in `material.inc.php`, is refused. So are more ids than `available_characters` holds.
+  - "Already chosen" means any player's `player_names_and_colors[...]['character']`.
+  - It stores ints, as setup does. The old override pushed strings.
+  - It also warns when a listed id is the other side of a chosen character's mat, or of an available character that stays (Q4).
+  - The mats are the pairs in `pickAvailableCharacters` (`[1,2]` … `[11,12]`). The mat colors in `material.inc.php` match.
 
 **`debug_stackClimbingDeck(string $typeArgs)`**, for example `"3,14,19"`, first = top
 - **When:** any time.
@@ -1120,13 +1197,29 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - Pulls each card from the climbing deck or the climbing discard and puts it on top in order, using the same `insertCardOnExtremePosition` as the override.
   - It refuses a card that is in play or in the crimper display.
 - **Suits a debug function:** yes. It takes effect at the next draw.
+- **Decided in P1.1 (2026-10-24):**
+  - Ids 1–70.
+  - Cards are looked up with `card_type='climbing'`. The old setup override's query had no type filter, which worked only before the Summit Beta tokens and Asset cards were created.
+  - "In play or in the crimper display" is location `in_play`. The Crimper's two cards both go there (`php:confirmRequirements ~1791–1792`).
+  - Nothing draws from the climbing deck between setup and the first climb (the gap check). So a call during `characterSelection` gives exactly what the old setup override gave.
 
 **`debug_stackSummitBeta(string $typeArgs)`**, for example `"9"`, first = top
 - **When:** any time.
 - **Effect:** pulls each token from the supply or the Used pile onto the supply top; refuses tokens in a hand.
 - **Phil:** Phil's two starting tokens are dealt when character selection ends (`php:stNextCharacterSelect ~5533–5594`). To control them, call this during `characterSelection`, before the last player confirms.
 - **Suits a debug function:** yes.
+- **Decided in P1.1 (2026-10-24):**
+  - Ids 1–12.
+  - Phil's deal is the only Summit Beta draw between setup and the first Climb Phase (the gap check).
+  - In `chooseSummitBetaToken` it only reorders the supply, because the two offered tokens are recorded by id (`php:confirmClimbingCardChoice ~2619`).
+  - The stack holds until the supply runs out. Then `summitBetaReshuffle` (`utils.php ~584`) shuffles the Used pile back in.
 - **Companion (Q-T7, decided yes):** `debug_giveSummitBeta(int $typeArg, int $playerId)` puts a token straight into a hand, which is faster for token tests.
+  - **Decided in P1.1 (2026-10-24):**
+    - **When:** any time before the end.
+    - Ids 1–12. The player must be at the table and not a zombie.
+    - **From the supply or the Used pile:** the token moves to the hand (location `strval($playerId)`, as Phil's deal uses) and is added with `addHandSummitBeta` (`utils.php ~420`).
+    - **In another player's hand (Q1):** it moves, and is removed from that player's `hand_token_tracker` with `removeHandSummitBeta`.
+    - **Refused:** a token already in that player's hand, and the two tokens offered in `chooseSummitBetaToken` (`climbing_card_info['summit_beta_tokens']`), which `confirmChooseSummitBetaToken` later moves by id.
 
 **`debug_setSharedObjectives(int $first, int $second, int $third)`**
 - **When:** before the first Climb Phase, that is `characterSelection` or round-0 `drawAssets`. At setup the trackers, The Elitist's +4 score and the objective statistics are initialized (`php:setupNewGame ~442–627`); climbs update them later.
@@ -1136,13 +1229,82 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - Reloads, since `view.php` renders the objectives from the global (`view.php ~34–54`).
   - It refuses duplicates and ids outside 1–16, and warns about two sides of one token (`[1,2]`, `[3,4]`, …).
 - **Suits a debug function:** yes, with that timing restriction.
+- **Decided in P1.1 (2026-10-24):**
+  - **When (Q7):** the window above is kept: `round` is `'0'` and the state is `characterSelection` or `drawAssets`. Nothing reads or changes the set between setup and the first climb.
+  - **Pairs:** the token pairs come from `$shared_objectives_pool` in `setupNewGame` (`~422`), consistent with RULES p. 3 ("8 Objective Tokens — Double-sided"). `material.inc.php` has ids `'1'`–`'16'` and no pairing.
+  - **Types:** ids are passed as ints, because objective 10's check in `initSharedObjectives` is strict.
+  - **Revert, effect by effect:**
+    - `current_shared_objectives` and `shared_objectives_tracker` are overwritten by `initSharedObjectives`.
+    - If The Elitist (11) is in the current set, for each player: `player_score` −4 (`bga->playerScore`, `null` message), `score_tracker[...]['objectives']` −4, `shared_objectives_met` −1 and `shared_objectives_points` −4.
+    - The current set's own statistics (`stats.json` ids 42–57, one per objective; `the_elitist` is 52): their rows are deleted from the framework's `stats` table (option (i), Q3). After the call only the set in play has these statistics, as after a real setup, and `initStat` never meets an existing row.
+    - That table and its columns (`stats_type`, `stats_player_id`, `stats_value`) are undocumented. They appear only in an error message [Troubleshooting doc:29–31]. A code comment says so, and the name → id map is written out in the function with a comment pointing to `stats.json`.
+  - **Then:** `initSharedObjectives($ids, $this->loadPlayersBasicInfos())`.
+    - **[unverified]** Whether `loadPlayersBasicInfos()` gives `initSharedObjectives` what `setupNewGame`'s `$players` gave it. The P1.1a harness used setup's array only.
+    - **Check (P1.1b1):** which fields `initSharedObjectives` reads from `$players`.
+  - **Check (P1.1b1 playtest):** set the objectives, run `debug_endGameSoon`, play to the end, and check the end-of-game statistics. There is one line for each objective in the new set, and none for the replaced ones.
 
 **Extras** (Q-T6, decided yes):
 - `debug_endGameSoon(int $playerId)`: sets the player's ropes so that the next climb triggers the end. It replaces the `testEnd` state (97).
+  - **Decided in P1.1 (2026-10-24):**
+    - **How the end works today:**
+      - Each climb appends the hex to `pitch_tracker`, which starts as `['0']`.
+      - At the end of each Follow Phase, `stFlipPlayedAssets` (`~6120`) goes to `preGameEnd` when any tracker has 9 entries.
+      - The client shows 9 − the tracker's length as the rope count (js ~251).
+    - **Effect:**
+      - It inserts `'0'` entries right after the leading `'0'` until the tracker has 8 entries, which leaves one rope. Nothing else changes.
+      - The next climb makes 9 entries: the final-round banner appears (utils.js ~2292), and the game ends after that round's Follow Phase.
+      - Bail results are unchanged. `confirmBail` takes `[count − 2]`, or `'0'` when the tracker has fewer than 3 entries.
+    - **Refused:**
+      - A player who hasn't climbed (`pitch_tracker` is `['0']`). After the reload the client places the meeple only from `pitch_sets` (js ~286–358), so the meeple would vanish and the next climb would throw (Q2).
+      - A tracker with 8 or more entries.
+      - A zombie.
+      - `preGameEnd` and `gameEnd`.
+    - **Warned (Q2):** a player with exactly one climbed pitch. If they then have no available pitch, the client's bail highlight (js ~1939–1943) looks up `pitch_0_border` and throws.
+    - **Known, not handled:** with Grand Traverse in play and hexes 1, 2 and 3 climbed, its sequence check reads an undefined key `'0'`. That's a PHP warning, with no change in outcome.
+    - **Not chosen:** a debug global read by the end check. It would put a hook in game logic, and the client wouldn't show the last rope or the banner.
+    - **Replaying the end:** the table really ends, and Studio saves can't be restored after the end, so make a save before the triggering climb.
+    - `testEnd` itself is removed in P2.6. `states.inc.php` doesn't change in P1.1.
 - Tooling used in other steps: `debug_frameworkCheck` (P1.2), `debug_globalsShape` (P1.3), `debug_testNotifReject` (P4.2), `debug_snapshot` (P4.3).
 
+**Added in P1.1: the (b2) functions** (decided 2026-10-24)
+
+The P1.1 gap check (`progress.md`) found overrides that none of the functions above covers. Jonathan chose a debug function for each (option A), so §6.3 stays dropped. The purpose of each function is decided. The signatures and the details marked "proposed" were proposed in P1.1, and are confirmed at the start of (b2).
+
+- **`debug_stackPersonalObjectives(string $ids)`**
+  - **Replaces:** the personal-objective pushes in `setupNewGame` (544–548).
+  - **Proposed:**
+    - `characterSelection` only; ids 1–12.
+    - It moves the listed ids to the end of `personal_objective_deck`, so they are dealt in the order listed. `confirmCharacter` pops two per player (`~973–974`).
+    - It refuses ids already dealt (`personal_objectives`).
+    - The old override appended its ids, which could deal an objective twice. This function moves them, so it can't.
+- **`debug_stackAssetDeck(string $typeArgs)`**
+  - **Purpose:** puts Asset cards on top of `asset_deck`, first = top. It covers the during-play redraw for 4 of a kind (`php:confirmAssets ~1097–1107`).
+  - **Proposed:**
+    - Any time before the end.
+    - Cards come from the deck or the discard pile.
+    - It refuses cards in a hand, on an Asset Board, in the Spread or on the Portaledge.
+- **`debug_giveAssets(int $playerId, string $typeArgs)`**
+  - **Replaces:** the three starting cards in `setupNewGame` (563–567).
+  - **Decided:** it updates `resource_tracker` with `updateResourceTracker($player_id, 'add', null, null, $types)`, as normal draws do (`php:confirmAssets ~1056, ~1068`). The old override only moved the cards.
+  - **Proposed:** any time before the end; cards come from the deck or the discard pile.
+- **`debug_discardSummitBeta(string $typeArgs)`**
+  - **Replaces:** the token moved to the Used pile in `setupNewGame` (334).
+  - **Proposed:** it moves tokens from the supply to the top of the Used pile, first = top. It refuses tokens in a hand.
+- **`debug_forceDie(int $face)`**
+  - **Replaces:** the commented die rolls (`// $face_rolled = …` at 1866, 2495 and 4856).
+  - **Decided:** the three roll sites read the global only when `getBgaEnvironment() === 'studio'`, so outside Studio the rolls stay `bga_rand(1, 3)`. The sites are `riskIt` (`~1865`), the climbing card's risk die in `confirmClimbingCardChoice` (`~2494`) and `confirmLuckyChalkbag` (`~4855`).
+  - **Proposed:** faces 1–3, and 0 clears it. It applies to one roll only: the hook clears the global after use.
+- **`debug_redrawStartingSpread(string $typeArgs)`**
+  - **Replaces:** the Spread test in `setupNewGame` (401–414).
+  - **Decided:** it refills the Spread through the setup path, `drawStartingSpread()` (extracted in P1.1a), so `checkSpread` and the setup redraw loop run as they do at setup.
+  - **Proposed:**
+    - `characterSelection` only, because Rack Up hasn't drawn from the Spread yet.
+    - It moves the four Spread cards back into `asset_deck` and shuffles it, as at setup. Then it puts the listed Asset cards on top (an empty string skips that) and calls `drawStartingSpread()`.
+    - With four Gear cards on top, it reaches the redraw loop's edge case in about 1 call in 92 (`TODO.md`, R-10).
+- **Open for (b2):** an Asset `type_arg` names a card with several copies, so a repeated id could mean two copies. Q6 (duplicates refused) applies unless Jonathan decides otherwise.
+
 ### 6.3 For overrides that must run inside `setupNewGame`: a setup-overrides file (dropped, D4)
-**Dropped** unless P1.1 finds an override the debug functions can't do. U8 and Q-T5 are then moot. The design is kept below in case P1.1 does find a gap.
+**Dropped.** P1.1's gap check (2026-10-24) found no override that needs it, so it stays dropped, and U8 and Q-T5 stay moot. The design is kept below for reference.
 
 This matches the current way of working (edit a file, deploy, create a table) without touching tracked files.
 - **File:** `misc/local/setup_overrides.php`, gitignored. It returns an array, for example:

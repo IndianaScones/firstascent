@@ -38,6 +38,21 @@ All answers below are Jonathan's, recorded 2026-10-21 unless an item gives anoth
 - **Status:** ANSWERED. Fix in P5.2 (the setup path), with the during-play path checked in P5.3; then FIXED in `<commit>`.
 - **Answer:** the difference is unintended. The replaced card stays on the discard pile, on top unless a card was discarded more recently.
 
+### R-10 Which card a redraw for 4 of a kind removes, at setup
+- **Rules:** p. 11: "If 4 of a kind are on The Spread, remove the last Card added and replace it with a new Card from the deck."
+- **Code:** `php:drawStartingSpread` (moved unchanged out of `setupNewGame ~419–430` in P1.1a). The loop reads the four starting cards once, before it starts, and on each pass removes the last card left in that list.
+- **Outcome:** discrepancy. Two questions:
+  1. On a repeated redraw, does "the last Card added" mean the replacement just drawn? The code removes another starting card on each pass, never the replacement.
+  2. On the first pass, which of the four starting cards counts as the last added? The code takes the last row of its query, which has no `ORDER BY`. The order is unverified, probably card id.
+- **Status:** ANSWERED. Fix proposed for P5.2, with R-6's setup path (not yet confirmed; `TODO.md`); then FIXED in `<commit>`.
+- **Answer (2026-10-24):**
+  1. On a repeated redraw, "the last Card added" means the replacement just drawn.
+  2. On the first pass, the last added card is the one that goes to `#spread_slot4`.
+- **Notes:**
+  - See R-6 for where the removed card goes.
+  - The slots are numbered after the loop, from the same query (`card_location_arg` 1–4, shown in `#spread_slot1`–`#spread_slot4`). So on the first pass the code probably removes the card that slot 4 would get **[inferred; unverified]**.
+  - The list never includes the replacements, so after four passes it is empty. A fifth pass reads a null card id (`TODO.md`).
+
 ## Portaledge
 
 ### R-5 (Q-R5) Refilling a Portaledge stack
