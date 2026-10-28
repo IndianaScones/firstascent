@@ -2,36 +2,171 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
-## 2026-10-24 (P1.1, in progress: (a) done; (b1) next)
+## 2026-10-24 (P1.1, in progress: (a) and (b1) done; (b2) next)
 
-The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. (b1) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
+The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. The (b1) session started 2026-10-26 and stopped 2026-10-28 with (b1) committed. (b2) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
+
+**Compaction.** The (b1) session was auto-compacted once, after the implementation and before the closing report. No unplanned git action happened. The session prompt asks for this entry to be updated at the next checkpoint after a compaction. That update was due with the closing report. It was made later, on 2026-10-27, after Jonathan's review and before the playtest. This final update replaces it.
 
 **State at the stop**
-- **HEAD:** `4cdc882` (P1.1a), pushed. `main` and `origin/main` are level.
+- **HEAD:** `c5500ec` (P1.1b1, `tool:`), pushed at Jonathan's "push". `main` and `origin/main` are level.
 - **Staged:** nothing.
-- **Unstaged:** `misc/docs/TODO.md`, `misc/docs/RULES_CHECK.md`, `misc/docs/MIGRATION_PLAN.md` and this file. They go in one `docs:` commit after Jonathan's "commit docs", and are pushed after his "push".
-- **Studio:** `firstascent.game.php` at `4cdc882`. The other game files are as at `bc4a9c9`.
+- **Unstaged:**
+  - `misc/docs/MIGRATION_PLAN.md`: P1.1's status and three §6.2 markers;
+  - `misc/docs/BGA_PITFALLS.md`: the debug menu's player links (go-ahead below);
+  - this file.
+  - They go in one `docs:` commit. Jonathan's message asked for that commit and for its push.
+- **Studio:**
+  - `modules/utils.php` as at `c5500ec`, deployed for the playtest;
+  - `firstascent.game.php` at `4cdc882`;
+  - the other game files as at `bc4a9c9`.
 - **Files outside git:**
   - In `D:\Documents\BGA Studio\`:
-    - `p1.1a.diff`: (a) with two extractions, superseded;
-    - `p1.1a-v2.diff`: (a) as committed;
-    - `p1.1-docs.diff`: this session's docs diff.
-  - The scratchpad of this session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`:
-    - the move scripts `p11a_move.php` and `p11a_move_spread.php`;
-    - the verbatim check `p11a_verify.php`;
-    - the equivalence harness `p11a_harness.php`;
-    - `head_game.php` (the file at `7e9d749`) and `mutant_game.php`.
-    - The harness stays out of the repo: it compares against HEAD's inline code, which no longer exists after (a).
-  - `D:\Documents\BGA Studio\firstascent-overrides\` was left untouched, read-only. Retiring it is Jonathan's decision.
+    - `p1.1b1.diff`: (b1) as committed, 285 lines (`modules/Utils.php | 275 +`);
+    - `p1.1b1-docs.diff`: this docs diff;
+    - from the previous session, unchanged: `p1.1a.diff`, `p1.1a-v2.diff` and `p1.1-docs.diff`.
+  - The scratchpad of the (b1) session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\032e89f2-8e43-4bcd-9f68-3c63b37b8733\scratchpad\`:
+    - the stub harness `p11b1_harness.php`, run as `php p11b1_harness.php <repo>`. It stays out of the repo;
+    - `cached.diff`, the staged diff compared with `p1.1b1.diff`.
+  - The previous session's scratchpad (`…\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`), unchanged.
+  - `D:\Documents\BGA Studio\firstascent-overrides\`, untouched. Retiring it is Jonathan's decision.
 
-**Start check:** `git fetch origin`; HEAD `7e9d749`, level with `origin/main`, working tree clean.
+**Start check ((b1) session):** `git fetch origin`; HEAD `a5b9306`, level with `origin/main`, working tree clean. `git diff --stat 4cdc882 HEAD` touches only `misc/docs/`, so the game files are as at `4cdc882`.
+
+**Start check (first session):** `git fetch origin`; HEAD `7e9d749`, level with `origin/main`, working tree clean.
 
 **Items**
 - **(a)** done: `4cdc882` `struct:`, playtested.
-- **(b1)** next: the six §6.2 functions, in a new session.
-- **(b2)** after (b1): the six functions under "Added in P1.1".
+- **(b1)** done: `c5500ec` `tool:`, playtested.
+- **(b2)** next, in a new session: the six functions under "Added in P1.1".
 - **(d)** after (b2): the scaffolding commit.
 - **(c)** confirmed: the guard on `debug_goToState` is at `utils.php:929–934` and throws `\BgaSystemException('Studio only')` outside Studio.
+
+**(b1): the six debug functions** (`c5500ec`, `tool:`)
+- The six §6.2 functions are in `modules/utils.php` (`UtilTrait`), after `debug_goToState`: 275 inserted lines and no other change. `firstascent.game.php` is unchanged.
+- The helpers are `parseDebugIds`, `checkDebugId`, `checkDebugPlayer`, `otherSideOf` and `logDebugWarning`.
+- **My choices where §6.2 leaves the detail open**, flagged to Jonathan with the diff:
+  - state checks use `$this->gamestate->getCurrentMainState()->name`;
+  - the stats delete filters on the stat ids and on the table's player ids;
+  - a card or token in a location other than the allowed ones is refused (defensive; it can't happen today);
+  - list items may have spaces around the ids;
+  - warnings start with "Debug warning: ".
+- **Where the current APIs are used:**
+  - `bga->playerScore` and `bga->playerStats` are called only in the Elitist revert;
+  - `bga->notify` only in `logDebugWarning`;
+  - the unchanged `initSharedObjectives` keeps the legacy calls (`initStat`, `incStat`, and `DbQuery` for the +4).
+- **Checks:**
+  - `php -l` passes. The only message is the known `${var}` deprecation at `firstascent.game.php:2653`.
+  - The stub harness passes 17,064 checks. It loads the real trait, the real `initSharedObjectives` text, `material.inc.php` and `stats.json`. Its error handler turns PHP warnings into exceptions.
+  - It covers:
+    - every refusal, and that nothing changes before it;
+    - the guard;
+    - the stacking order;
+    - the token moves, with Q1's reindexing;
+    - the `pitch_tracker` padding;
+    - the attributes and the `debug_` names.
+  - **The Elitist-revert equivalence runs, 1,612:** 403 for each of 2, 3, 4 and 5 players. Each set is a target exactly once.
+    - The "from" sets: three fixed sets that contain 11, plus 400 random ordered sets.
+    - Per player count, 53–65 runs revert The Elitist, and about half share an objective with the target.
+  - **Mutants:** all 11 were caught. One needed an extra test with the ids listed in the other order.
+- **Pre-code checks:**
+  1. **`$players`:** `initSharedObjectives` reads only its keys, so `loadPlayersBasicInfos()` gives it the same input. Recorded in §6.2.
+  2. **Citations at HEAD:** three are off.
+     - getAllDatas `~818`: `available_characters` is at 831.
+     - stNextCharacterSelect `~5533–5594`: the function is at 5537–5616, and Phil's deal at 5546–5607.
+     - The "When" of `debug_setSharedObjectives`, `setupNewGame ~442–627`, is stale:
+       - the set is drawn at 422–430 and passed at 435;
+       - `initSharedObjectives` is 585–761, with The Elitist's +4 at 682–697 and the objective statistics at 751–759.
+     - The rest match within a line or two, including the client citations (read only).
+     - §6.2 is left unchanged, as the session prompt required.
+  3. **The `stats` table:**
+     - Troubleshooting:29–30: the error message, with the columns and the unique key `stats_table_id`;
+     - `dbmodel.sql:15`: a standard table; Troubleshooting:411 also mentions it;
+     - stats.json doc:35: a table statistic and a player statistic may share an id. The only table statistic here is 90;
+     - Tools and tips:34: "Go to game database" opens phpMyAdmin;
+     - `_ide_helper.php` has only the signatures of the stat methods.
+- **Staging:**
+  - `git add modules/Utils.php`, the tracked name. `git ls-files --eol` showed `i/lf w/crlf`.
+  - `git diff --cached --stat` showed 275 insertions, and the staged diff was byte-identical to `p1.1b1.diff`.
+  - Note: `git show <rev>:<path>` applies the working-tree line-ending conversion, so it shows CRs that the blob doesn't have. `git cat-file blob` and `git ls-files --eol` show the index as stored.
+- **Line endings of the docs:**
+  - The Edit tool in this session wrote LF to the docs it edited: `MIGRATION_PLAN.md`, `BGA_PITFALLS.md` and this file. The other docs are CRLF in the working copy.
+  - All three were set back to CRLF before the docs commit. Git shows no change from this.
+- **Jonathan's review before the deploy:** six questions, answered from the code, found no bug. They covered:
+  - `isPlayerZombie`;
+  - the shape of the offered Summit Beta tokens;
+  - the stat id map;
+  - the location and type strings;
+  - the Elitist-revert runs;
+  - the stubbed framework methods.
+- The review found one gap. Nothing in the playtest checked the refusal of a Summit Beta token on offer in `chooseSummitBetaToken`. The harness built the offered list itself rather than through `getCardsOnTop`.
+- **Playtest additions approved by Jonathan.** P1.1's playtest list in the plan stays unchanged.
+  - **Scenario 6 addition** (in the session prompt), on Table C:
+    1. `debug_setSharedObjectives(16, 11, 10)`: every score goes up by 4.
+    2. Then `debug_setSharedObjectives(1, 3, 5)`, a set without 11 and without both sides of one token.
+    3. Expected: every score drops by 4, and the end-of-game statistics show lines only for the second set.
+    - `bga->playerScore` and `bga->playerStats` are called only in the Elitist revert.
+  - **Scenario 7 addition, the offered token** (approved 2026-10-27, after the review), on Table A after scenario 4 and before scenario 5:
+    1. Just before a climb, `debug_stackSummitBeta("5,6")` and `debug_stackClimbingDeck("19")`.
+    2. The climber takes option B of Hangry partner (19).
+    3. Expected: the two tokens offered are 5 and 6, in that order.
+    4. `debug_giveSummitBeta(5, <player id>)` is refused with "Summit Beta token 5 is offered in chooseSummitBetaToken".
+    5. Then choosing a token works as usual.
+
+**(b1) playtest** (Studio, 3 players, desert board; results reported 2026-10-28; all pass)
+- `modules/utils.php` deployed, F5 in every open tab.
+- **Done when:** the debug menu shows the six functions next to `debug_goToState`, and none of the five helpers.
+- **The debug menu and player ids:**
+  - For an `int $playerId` parameter, the popin lists the table's player names as links. Clicking one fills in that player's id.
+  - Future playtest lists don't need the "try player id 1" workaround.
+  - Recorded in `BGA_PITFALLS.md` ("Test-table friction").
+- **Table A:**
+  - **Scenario 1:** passed. Crag Mama stayed, and the Q4 warning appeared in the log.
+  - **Scenario 2:** passed. The starting player, the Cool-Headed Crimper, climbed.
+    - The first climbing card drawn was 3, "Party above you forgot some gear".
+    - The first Summit Beta token drawn was Bomber Anchor, gained from that card.
+  - **Scenario 4:** passed.
+    - Bomber Anchor was already in player X's hand from card 3. Giving it to another player moved it, and it left X's hand.
+    - Player id 1 was refused, with the table's ids and names listed.
+  - **The scenario 7 addition (offered token):** passed.
+    - On card 19, option B, giving a token offered in `chooseSummitBetaToken` was refused with the expected message.
+    - Jonathan's report doesn't separately mention the order of the offered tokens (5, then 6) or the choice that followed.
+  - **Scenario 5:** passed.
+    - 1 Rope after the reload, and the next climb showed "This is the final round!".
+    - The Climb and Follow Phases completed, then final scoring, and the table ended. There was no Rerack.
+- **Table B, scenario 3:** passed. Off-Width Aficionado, The Elitist and All-Arounding were shown, every score was 4, and there was no warning.
+- **Table C, scenario 6:** passed, including the addition.
+  - The two `debug_setSharedObjectives` calls gave +4, then −4.
+  - `debug_endGameSoon` after one climb logged the warning, which stayed after a refresh.
+  - The end-of-game statistics had "Points from…" lines only for Ridgeline Challenge North, Stay in the Shade and Jolly Jammer.
+  - Neither "Shared Objectives scored" nor "Points gained from Shared Objectives" included The Elitist. "Points gained…" equals the sum of the three lines.
+- **Refusals (7):** all passed.
+  - `debug_setAvailableCharacters`: the four cases, plus listing more characters than remain: "More characters listed (4) than available_characters holds (3)".
+  - `debug_stackClimbingDeck`: refused in both `crimperClimbingCards` and `climbingCard`.
+  - `debug_stackSummitBeta` on a token in a hand:
+    - Jonathan set it up with `debug_giveSummitBeta`, not after scenario 4.
+    - The first attempt gave an unexpected result, which Jonathan puts down to a misstep of his. What it showed isn't recorded, and it wasn't investigated.
+    - Repeated from a Studio save/restore replay, it refused with the expected message.
+  - `debug_setSharedObjectives`: all three cases.
+  - `debug_giveSummitBeta` with an unknown player, and `debug_endGameSoon` for a player who hasn't climbed: passed.
+- **Warnings (8):** all passed. The shared-objective pair warning was tested with (1, 2, 3).
+- **The reload check (9):**
+  - A successful call reloads the page of the window that made it.
+  - A refusal doesn't reload.
+  - Other open windows need a manual F5.
+  - Recorded in §6.2.
+- **APIs on Studio:** `bga->notify`, `bga->playerScore`, `bga->playerStats`, `getCurrentMainState()` and `VisibleSystemException` all worked in this file. The guard's `SystemException` never fires on Studio, so it is reviewed in code only.
+- **Replays:** one result came from a Studio save/restore replay, the `debug_stackSummitBeta` refusal for a token in a hand. The rest came from live play.
+- **Jonathan's game note:**
+  - A player can't be left with no available pitch after their first climbed pitch.
+  - It takes at least 3 climbed pitches to reach a position that forces a bail, or fewer only with help from opponents.
+  - So the case behind the one-pitch warning is rare in practice.
+
+**Go-aheads in the (b1) session**
+- **Outside the step's list:** `misc/docs/BGA_PITFALLS.md`, one item under "Test-table friction": the debug menu fills in player ids. Jonathan's go-ahead, 2026-10-28.
+- The other docs edits are those the session prompt allows: this entry, P1.1's status, and three §6.2 markers (`reload`, `loadPlayersBasicInfos()`, and the `stats` table's columns).
+- Jonathan approved the two playtest additions above. The plan's list is unchanged.
+- The (b1) commit and its push, and this docs commit and its push.
 
 **Gap check (D4)**
 - Every override in Jonathan's patch is reproduced by a planned function:
@@ -125,10 +260,11 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 - (b2): the details marked "proposed" in §6.2, confirmed at the start of (b2). That includes whether a repeated Asset `type_arg` means two copies; until decided, Q6 refuses duplicates.
 - The planned fix for the redraw loop: P5.2, with R-6's setup path (proposed). Once confirmed, §8.4 gets a row.
 - Retiring `D:\Documents\BGA Studio\firstascent-overrides\`.
-- "commit docs" and "push" for this docs commit.
 
 **Next**
-1. (b1) in a new session. Read §6.2 (the rules for every P1.1 function, then each function) and P1.1's playtest list for (b1).
+1. (b2) in a new session.
+   - Read §6.2's "Added in P1.1", and confirm the details marked "proposed" at the start (above).
+   - Its playtest lists can rely on the debug menu's player links.
 
 ## 2026-10-23 (P0.3: tags and the phase switch)
 

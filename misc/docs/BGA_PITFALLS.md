@@ -15,6 +15,9 @@ Moved from `MIGRATION_PLAN.md` §9.5 (decision D3, 2026-10-21). They come from t
 - **A stale open table silently blocks "Create".** Use "Express stop" on it.
 - **The "BGA unexpected exceptions logs" view is account-wide,** not per game.
 - **Hotseat players share `gamedatas`.** Test with separate tabs per player.
+- **The debug menu fills in player ids.**
+  - For a debug function's `int $playerId` parameter, Studio's popin lists the table's player names as links. Clicking one fills in that player's id, so there's no need to look the ids up first.
+  - Seen on Studio in the P1.1b1 playtest (2026-10-28), not in claude-code-bga.
 
 ## PHP and database
 - **`getCollectionFromDb` keys by the first column.** Duplicate values silently overwrite rows.

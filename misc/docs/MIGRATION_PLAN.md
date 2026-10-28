@@ -340,8 +340,9 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 **P1.1 Debug functions** (in the legacy file; M) — prerequisite: P0.3 (the testing overrides are already set aside, in P0.2)
 - **Status:** in progress.
   - (a) is done: `4cdc882`, playtested on Studio on 2026-10-24.
+  - (b1) is done: `c5500ec`, playtested on Studio (results reported 2026-10-28).
   - (c) is confirmed.
-  - (b1) starts in a new session; (b2) and (d) follow.
+  - (b2) starts in a new session; (d) follows.
   - Details in `progress.md`.
 - **Scope** (updated in P1.1 on 2026-10-24: (b) is split, and (d) is new):
   - (a) **Structural:** extract `pickAvailableCharacters()` (`php:setupNewGame ~714–737`) and `initSharedObjectives(array $ids)` (`~442–627`) without behavior change.
@@ -1155,8 +1156,7 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - The setup helpers extracted in P1.1a (`pickAvailableCharacters`, `initSharedObjectives`, `drawStartingSpread`) stay in `firstascent.game.php`.
 - **Attribute:**
   - Written fully qualified, `#[\Bga\GameFramework\Actions\Debug(reload: true)]`. The legacy files have no namespace and no `use` lines, so an unqualified `#[Debug]` would name `\Debug` **[inferred: PHP semantics]**.
-  - **[unverified]** Whether `reload` takes effect in this legacy-loaded file. The class already extends the current `Bga\GameFramework\Table`, and `debug_` discovery works in it (`debug_goToState`, P0.2).
-  - **Check (P1.1b1 playtest):** the page reloads by itself after a call. If it doesn't, F5 gives the same result; the playtest records which.
+  - **Checked (P1.1b1 playtest, scenario 9):** `reload` takes effect in this legacy-loaded file. After a successful call, the window that made it reloads by itself. A refusal doesn't reload, and other open windows need a manual F5.
 - **Guard:**
   - `throw new \Bga\GameFramework\SystemException('Studio only')`, as in §6.4. It's the current class [Game.php doc:1774–1775]; `\BgaSystemException` is deprecated [`_ide_helper.php ~3743`].
   - The guard never fires on Studio, so it is reviewed in code. If the class didn't resolve, PHP would raise an Error before any change, so the refusal would still hold.
@@ -1237,10 +1237,10 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
     - `current_shared_objectives` and `shared_objectives_tracker` are overwritten by `initSharedObjectives`.
     - If The Elitist (11) is in the current set, for each player: `player_score` −4 (`bga->playerScore`, `null` message), `score_tracker[...]['objectives']` −4, `shared_objectives_met` −1 and `shared_objectives_points` −4.
     - The current set's own statistics (`stats.json` ids 42–57, one per objective; `the_elitist` is 52): their rows are deleted from the framework's `stats` table (option (i), Q3). After the call only the set in play has these statistics, as after a real setup, and `initStat` never meets an existing row.
-    - That table and its columns (`stats_type`, `stats_player_id`, `stats_value`) are undocumented. They appear only in an error message [Troubleshooting doc:29–31]. A code comment says so, and the name → id map is written out in the function with a comment pointing to `stats.json`.
+    - That table and its columns (`stats_type`, `stats_player_id`, `stats_value`) are undocumented. They appear only in an error message [Troubleshooting doc:29–31], which also names the unique key `stats_table_id` on type and player (P1.1b1 pre-code check 3). A code comment says so, and the name → id map is written out in the function with a comment pointing to `stats.json`.
+    - **Checked (P1.1b1 playtest, scenarios 3 and 6, with the scenario 6 addition):** the delete on `stats_type` and `stats_player_id` runs without an SQL error. After two calls, the end-of-game statistics show lines only for the last set, so the replaced sets' rows were deleted. `stats_value` isn't used, so it stays unchecked.
   - **Then:** `initSharedObjectives($ids, $this->loadPlayersBasicInfos())`.
-    - **[unverified]** Whether `loadPlayersBasicInfos()` gives `initSharedObjectives` what `setupNewGame`'s `$players` gave it. The P1.1a harness used setup's array only.
-    - **Check (P1.1b1):** which fields `initSharedObjectives` reads from `$players`.
+    - **Checked (P1.1b1 pre-code check 1):** `loadPlayersBasicInfos()` gives `initSharedObjectives` what `setupNewGame`'s `$players` gave it. The method reads only the keys of `$players`, never the values (`foreach ($players as $player_id => $player)` at 689, 740, 747 and 755), and both arrays are keyed by player id. The P1.1b1 stub harness gave identical results with both arrays in 13,440 runs (every ordered set, 2–5 players).
   - **Check (P1.1b1 playtest):** set the objectives, run `debug_endGameSoon`, play to the end, and check the end-of-game statistics. There is one line for each objective in the new set, and none for the replaced ones.
 
 **Extras** (Q-T6, decided yes):
