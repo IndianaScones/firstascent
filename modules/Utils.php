@@ -932,4 +932,279 @@ trait UtilTrait {
         }
         $this->gamestate->jumpToState($state);
     }
+
+    // Studio-only debug functions (MIGRATION_PLAN.md section 6.2). Each validates every input before its first write.
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_setAvailableCharacters(string $ids) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name !== 'characterSelection') {
+            throw new \Bga\GameFramework\VisibleSystemException('debug_setAvailableCharacters runs only in characterSelection');
+        }
+        $listed = $this->parseDebugIds($ids, 1, 12, 'character');
+        $available = array_map('intval', $this->getGlobalVariable('available_characters', true));
+        if (count($listed) > count($available)) {
+            throw new \Bga\GameFramework\VisibleSystemException('More characters listed (' . count($listed) . ') than available_characters holds (' . count($available) . ')');
+        }
+        $chosen = [];
+        foreach ($this->getGlobalVariable('player_names_and_colors', true) as $player) {
+            if (isset($player['character'])) { $chosen[] = (int)$player['character']; }
+        }
+        foreach ($listed as $id) {
+            if (in_array($id, $chosen, true)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Character $id is already chosen");
+            }
+        }
+
+        // each listed id not yet available replaces a random unlisted entry
+        $unlisted_slots = array_keys(array_diff($available, $listed));
+        shuffle($unlisted_slots);
+        foreach ($listed as $id) {
+            if (!in_array($id, $available, true)) { $available[array_pop($unlisted_slots)] = $id; }
+        }
+        $this->setGlobalVariable('available_characters', $available);
+
+        foreach ($listed as $id) {
+            $other = $this->otherSideOf($id);
+            if (in_array($other, $listed, true)) {
+                if ($id < $other) { $this->logDebugWarning("characters $id and $other are the two sides of one mat"); }
+            }
+            else if (in_array($other, $chosen, true)) {
+                $this->logDebugWarning("character $id is the other side of the mat of chosen character $other");
+            }
+            else if (in_array($other, $available, true)) {
+                $this->logDebugWarning("character $id is the other side of the mat of available character $other");
+            }
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_stackClimbingDeck(string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $cards = [];
+        foreach ($this->parseDebugIds($typeArgs, 1, 70, 'climbing card') as $type_arg) {
+            $card = current($this->cards_and_tokens->getCardsOfType('climbing', $type_arg));
+            if ($card['location'] === 'in_play') {
+                throw new \Bga\GameFramework\VisibleSystemException("Climbing card $type_arg is in play or in the crimper display");
+            }
+            if (!in_array($card['location'], ['climbing_deck', 'climbing_discard'], true)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Climbing card $type_arg is in location {$card['location']}");
+            }
+            $cards[] = $card;
+        }
+
+        // inserted in reverse, so the first listed ends on top
+        foreach (array_reverse($cards) as $card) {
+            $this->cards_and_tokens->insertCardOnExtremePosition($card['id'], 'climbing_deck', true);
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_stackSummitBeta(string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $players = $this->loadPlayersBasicInfos();
+        $tokens = [];
+        foreach ($this->parseDebugIds($typeArgs, 1, 12, 'Summit Beta token') as $type_arg) {
+            $token = current($this->cards_and_tokens->getCardsOfType('summit_beta', $type_arg));
+            if (isset($players[$token['location']])) {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is in the hand of player {$token['location']}");
+            }
+            if (!in_array($token['location'], ['summit_beta_supply', 'summit_beta_discard'], true)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is in location {$token['location']}");
+            }
+            $tokens[] = $token;
+        }
+
+        // inserted in reverse, so the first listed ends on top
+        foreach (array_reverse($tokens) as $token) {
+            $this->cards_and_tokens->insertCardOnExtremePosition($token['id'], 'summit_beta_supply', true);
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_giveSummitBeta(int $typeArg, int $playerId) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $this->checkDebugId($typeArg, 1, 12, 'Summit Beta token');
+        $this->checkDebugPlayer($playerId);
+        $players = $this->loadPlayersBasicInfos();
+        $token = current($this->cards_and_tokens->getCardsOfType('summit_beta', $typeArg));
+        $location = $token['location'];
+        if ($location === strval($playerId)) {
+            throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $typeArg is already in the hand of player $playerId");
+        }
+        $offered_tokens = $this->getGlobalVariable('climbing_card_info', true)['summit_beta_tokens'] ?? [];
+        foreach ($offered_tokens as $offered_token) {
+            if ($offered_token['id'] == $token['id']) {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $typeArg is offered in chooseSummitBetaToken");
+            }
+        }
+        $hand_token_tracker = $this->getGlobalVariable('hand_token_tracker', true);
+        if (isset($players[$location])) {
+            $hand_token_tracker[$location] = $this->removeHandSummitBeta($hand_token_tracker[$location], $token['id']);
+        }
+        else if (!in_array($location, ['summit_beta_supply', 'summit_beta_discard'], true)) {
+            throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $typeArg is in location $location");
+        }
+
+        $this->cards_and_tokens->moveCard($token['id'], strval($playerId));
+        $hand_token_tracker[$playerId] = $this->addHandSummitBeta($hand_token_tracker[$playerId], $token['id']);
+        $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_setSharedObjectives(int $first, int $second, int $third) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        $state = $this->gamestate->getCurrentMainState()->name;
+        if ((string)$this->getGlobalVariable('round') !== '0' || !in_array($state, ['characterSelection', 'drawAssets'], true)) {
+            throw new \Bga\GameFramework\VisibleSystemException('debug_setSharedObjectives runs only in round 0, in characterSelection or drawAssets');
+        }
+        $ids = [$first, $second, $third];
+        foreach ($ids as $id) { $this->checkDebugId($id, 1, 16, 'shared objective'); }
+        if (count(array_unique($ids)) < 3) {
+            throw new \Bga\GameFramework\VisibleSystemException('Duplicate shared objective id in ' . implode(', ', $ids));
+        }
+        $players = $this->loadPlayersBasicInfos();
+        $current_shared_objectives = $this->getGlobalVariable('current_shared_objectives', true);
+
+        // revert The Elitist's setup effects (initSharedObjectives, case 11)
+        if (in_array(11, $current_shared_objectives)) {
+            $score_tracker = $this->getGlobalVariable('score_tracker', true);
+            foreach (array_keys($players) as $player_id) {
+                $this->bga->playerScore->inc($player_id, -4, null);
+                $score_tracker[$player_id]['objectives'] -= 4;
+                $this->bga->playerStats->inc('shared_objectives_met', -1, $player_id);
+                $this->bga->playerStats->inc('shared_objectives_points', -4, $player_id);
+            }
+            $this->setGlobalVariable('score_tracker', $score_tracker);
+        }
+
+        // Delete the current set's statistics, so initStat creates them again only for the new set.
+        // The framework's `stats` table and its columns (stats_type, stats_player_id) are undocumented:
+        // they appear only in an error message in the Troubleshooting doc.
+        $stat_ids = [ // ids from stats.json, one per shared objective
+            'ridgeline_challenge_north' => 42,
+            'ridgeline_challenge_south' => 43,
+            'stay_in_the_shade' => 44,
+            'stay_in_the_sun' => 45,
+            'jolly_jammer' => 46,
+            'smear_campaign' => 47,
+            'star_stemmer' => 48,
+            'exposure_junkie' => 49,
+            'grand_traverse' => 50,
+            'all-arounding' => 51,
+            'the_elitist' => 52,
+            'a_day_in_the_alpine' => 53,
+            'flake_freak' => 54,
+            'pull-up_champion' => 55,
+            'stonemaster' => 56,
+            'off-width_aficionado' => 57,
+        ];
+        $stat_types = [];
+        foreach ($current_shared_objectives as $id) { $stat_types[] = "'" . $stat_ids[$this->shared_objectives[(string)$id]['name']] . "'"; }
+        $stat_player_ids = [];
+        foreach (array_keys($players) as $player_id) { $stat_player_ids[] = "'$player_id'"; }
+        $this->DbQuery("DELETE FROM stats WHERE stats_type IN (" . implode(',', $stat_types) . ") AND stats_player_id IN (" . implode(',', $stat_player_ids) . ")");
+
+        $this->initSharedObjectives($ids, $players);
+
+        foreach ($ids as $id) {
+            $other = $this->otherSideOf($id);
+            if ($id < $other && in_array($other, $ids, true)) {
+                $this->logDebugWarning("shared objectives $id and $other are the two sides of one token");
+            }
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_endGameSoon(int $playerId) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if (in_array($this->gamestate->getCurrentMainState()->name, ['preGameEnd', 'gameEnd'], true)) {
+            throw new \Bga\GameFramework\VisibleSystemException('The game is ending or has ended');
+        }
+        $this->checkDebugPlayer($playerId);
+        $pitch_tracker = $this->getGlobalVariable('pitch_tracker', true);
+        $player_tracker = $pitch_tracker[$playerId];
+        if (count($player_tracker) === 1) {
+            throw new \Bga\GameFramework\VisibleSystemException("Player $playerId has not climbed a pitch");
+        }
+        if (count($player_tracker) >= 8) {
+            throw new \Bga\GameFramework\VisibleSystemException("Player $playerId already has one Rope or fewer");
+        }
+
+        // filler '0' entries after the leading '0' leave one Rope: the next climb makes 9 entries, which ends the game
+        $climbed_pitches = count($player_tracker) - 1;
+        array_splice($player_tracker, 1, 0, array_fill(0, 8 - count($player_tracker), '0'));
+        $pitch_tracker[$playerId] = $player_tracker;
+        $this->setGlobalVariable('pitch_tracker', $pitch_tracker);
+
+        if ($climbed_pitches === 1) {
+            $this->logDebugWarning("player $playerId has climbed one pitch: with no available pitch, the bail highlight looks up pitch_0_border and throws");
+        }
+    }
+
+    // Helpers for the debug functions. No debug_ prefix, so they stay out of Studio's debug menu.
+
+    function parseDebugIds(string $ids, int $min, int $max, string $what): array {
+        $parsed = [];
+        foreach (explode(',', $ids) as $part) {
+            $part = trim($part);
+            if (!preg_match('/^\d+$/', $part)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Invalid $what id '$part' in '$ids'");
+            }
+            $this->checkDebugId((int)$part, $min, $max, $what);
+            if (in_array((int)$part, $parsed, true)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Duplicate $what id $part in '$ids'");
+            }
+            $parsed[] = (int)$part;
+        }
+        return $parsed;
+    }
+
+    function checkDebugId(int $id, int $min, int $max, string $what): void {
+        if ($id < $min || $id > $max) {
+            throw new \Bga\GameFramework\VisibleSystemException("Invalid $what id $id: expected $min to $max");
+        }
+    }
+
+    function checkDebugPlayer(int $playerId): void {
+        $players = $this->loadPlayersBasicInfos();
+        if (!isset($players[$playerId])) {
+            $table_players = [];
+            foreach ($players as $player_id => $player) { $table_players[] = "$player_id ({$player['player_name']})"; }
+            throw new \Bga\GameFramework\VisibleSystemException("Player $playerId is not at this table. Players: " . implode(', ', $table_players));
+        }
+        if ($this->isPlayerZombie($playerId)) {
+            throw new \Bga\GameFramework\VisibleSystemException("Player $playerId is a zombie");
+        }
+    }
+
+    // character mats and shared objective tokens both pair 1-2, 3-4, 5-6, ...
+    function otherSideOf(int $id): int {
+        return $id % 2 === 1 ? $id + 1 : $id - 1;
+    }
+
+    function logDebugWarning(string $message): void {
+        $this->bga->notify->all('log_only', 'Debug warning: ' . $message, []);
+    }
 }
