@@ -1163,9 +1163,152 @@ trait UtilTrait {
         }
     }
 
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_stackPersonalObjectives(string $ids) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name !== 'characterSelection') {
+            throw new \Bga\GameFramework\VisibleSystemException('debug_stackPersonalObjectives runs only in characterSelection');
+        }
+        $listed = $this->parseDebugIds($ids, 1, 12, 'personal objective');
+        foreach ($this->getGlobalVariable('personal_objectives', true) as $player_id => $dealt) {
+            foreach ($listed as $id) {
+                if (in_array($id, array_map('intval', $dealt), true)) {
+                    throw new \Bga\GameFramework\VisibleSystemException("Personal objective $id is already dealt to player $player_id");
+                }
+            }
+        }
+        $deck = array_map('intval', $this->getGlobalVariable('personal_objective_deck', true));
+        foreach ($listed as $id) {
+            if (!in_array($id, $deck, true)) {
+                throw new \Bga\GameFramework\VisibleSystemException("Personal objective $id is not in personal_objective_deck");
+            }
+        }
+
+        // confirmCharacter pops from the end, so the first listed goes last. array_merge renumbers, so the global stays a JSON list.
+        $deck = array_merge(array_diff($deck, $listed), array_reverse($listed));
+        $this->setGlobalVariable('personal_objective_deck', $deck);
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_stackAssetDeck(string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $cards = $this->findDebugAssets($this->parseDebugIds($typeArgs, 1, 37, 'Asset card', true), ['asset_deck']);
+
+        // inserted in reverse, so the first listed ends on top
+        foreach (array_reverse($cards) as $card) {
+            if ($card['location'] === 'discard') { $this->updateAssetDiscard($card['id'], $card['type_arg'], 'remove'); }
+            $this->cards_and_tokens->insertCardOnExtremePosition($card['id'], 'asset_deck', true);
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_giveAssets(int $playerId, string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $this->checkDebugPlayer($playerId);
+        // updateResourceTracker reads the character (max Water/Psych, Sendy Jammer's wild Gear)
+        if (!isset($this->getGlobalVariable('player_names_and_colors', true)[$playerId]['character'])) {
+            throw new \Bga\GameFramework\VisibleSystemException("Player $playerId has not chosen a character yet");
+        }
+        $cards = $this->findDebugAssets($this->parseDebugIds($typeArgs, 1, 37, 'Asset card', true), ['asset_deck']);
+
+        foreach ($cards as $card) {
+            if ($card['location'] === 'discard') { $this->updateAssetDiscard($card['id'], $card['type_arg'], 'remove'); }
+            $this->cards_and_tokens->moveCard($card['id'], strval($playerId));
+        }
+        $this->updateResourceTracker($playerId, 'add', null, null, array_column($cards, 'type_arg'));
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_discardSummitBeta(string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        $players = $this->loadPlayersBasicInfos();
+        $offered_tokens = $this->getGlobalVariable('climbing_card_info', true)['summit_beta_tokens'] ?? [];
+        $tokens = [];
+        foreach ($this->parseDebugIds($typeArgs, 1, 12, 'Summit Beta token') as $type_arg) {
+            $token = current($this->cards_and_tokens->getCardsOfType('summit_beta', $type_arg));
+            if (isset($players[$token['location']])) {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is in the hand of player {$token['location']}");
+            }
+            if ($token['location'] === 'summit_beta_discard') {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is already in the Used pile");
+            }
+            if ($token['location'] !== 'summit_beta_supply') {
+                throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is in location {$token['location']}");
+            }
+            // the offered tokens stay in the supply, and confirmChooseSummitBetaToken moves them by id
+            foreach ($offered_tokens as $offered_token) {
+                if ($offered_token['id'] == $token['id']) {
+                    throw new \Bga\GameFramework\VisibleSystemException("Summit Beta token $type_arg is offered in chooseSummitBetaToken");
+                }
+            }
+            $tokens[] = $token;
+        }
+
+        // inserted in reverse, so the first listed ends on top
+        foreach (array_reverse($tokens) as $token) {
+            $this->cards_and_tokens->insertCardOnExtremePosition($token['id'], 'summit_beta_discard', true);
+        }
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_forceDie(int $face) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name === 'gameEnd') {
+            throw new \Bga\GameFramework\VisibleSystemException('The game has ended');
+        }
+        if ($face < 0 || $face > 3) {
+            throw new \Bga\GameFramework\VisibleSystemException("Invalid die face $face: expected 1 to 3, or 0 to clear");
+        }
+
+        // read and cleared by rollRiskDie at the next roll
+        $this->setGlobalVariable('forced_die_face', $face === 0 ? null : $face);
+    }
+
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_redrawStartingSpread(string $typeArgs) {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+        if ($this->gamestate->getCurrentMainState()->name !== 'characterSelection') {
+            throw new \Bga\GameFramework\VisibleSystemException('debug_redrawStartingSpread runs only in characterSelection');
+        }
+        $listed = trim($typeArgs) === '' ? [] : $this->parseDebugIds($typeArgs, 1, 37, 'Asset card', true);
+        // the Spread goes back into the deck before the stacking, so its cards count as deck cards
+        $cards = $this->findDebugAssets($listed, ['asset_deck', 'the_spread']);
+
+        $this->cards_and_tokens->moveAllCardsInLocation('the_spread', 'asset_deck');
+        $this->cards_and_tokens->shuffle('asset_deck');
+        // inserted in reverse, so the first listed ends on top
+        foreach (array_reverse($cards) as $card) {
+            if ($card['location'] === 'discard') { $this->updateAssetDiscard($card['id'], $card['type_arg'], 'remove'); }
+            $this->cards_and_tokens->insertCardOnExtremePosition($card['id'], 'asset_deck', true);
+        }
+        $this->drawStartingSpread();
+    }
+
     // Helpers for the debug functions. No debug_ prefix, so they stay out of Studio's debug menu.
 
-    function parseDebugIds(string $ids, int $min, int $max, string $what): array {
+    // $repeats keeps a repeated id: Asset type_args have several copies
+    function parseDebugIds(string $ids, int $min, int $max, string $what, bool $repeats = false): array {
         $parsed = [];
         foreach (explode(',', $ids) as $part) {
             $part = trim($part);
@@ -1173,7 +1316,7 @@ trait UtilTrait {
                 throw new \Bga\GameFramework\VisibleSystemException("Invalid $what id '$part' in '$ids'");
             }
             $this->checkDebugId((int)$part, $min, $max, $what);
-            if (in_array((int)$part, $parsed, true)) {
+            if (!$repeats && in_array((int)$part, $parsed, true)) {
                 throw new \Bga\GameFramework\VisibleSystemException("Duplicate $what id $part in '$ids'");
             }
             $parsed[] = (int)$part;
@@ -1206,5 +1349,46 @@ trait UtilTrait {
 
     function logDebugWarning(string $message): void {
         $this->bga->notify->all('log_only', 'Debug warning: ' . $message, []);
+    }
+
+    // One Asset card per listed type_arg, in the listed order. A repeated type_arg takes that many copies.
+    // Copies come from $deckLocations first, then the discard pile, bottom-most first. Too few copies is refused.
+    function findDebugAssets(array $typeArgs, array $deckLocations): array {
+        $players = $this->loadPlayersBasicInfos();
+        $available = [];
+        foreach (array_unique($typeArgs) as $type_arg) {
+            $copies = $this->cards_and_tokens->getCardsOfType('asset', $type_arg);
+            $available[$type_arg] = [];
+            $elsewhere = [];
+            foreach ($copies as $card) {
+                if (in_array($card['location'], $deckLocations, true) || $card['location'] === 'discard') { $available[$type_arg][] = $card; }
+                else { $elsewhere[] = isset($players[$card['location']]) ? "hand of player {$card['location']}" : $card['location']; }
+            }
+            usort($available[$type_arg], function ($a, $b) {
+                return [$a['location'] === 'discard', (int)$a['location_arg']] <=> [$b['location'] === 'discard', (int)$b['location_arg']];
+            });
+            $listed = count(array_keys($typeArgs, $type_arg, true));
+            if ($listed > count($available[$type_arg])) {
+                throw new \Bga\GameFramework\VisibleSystemException("Asset card $type_arg: $listed listed, but only " . count($available[$type_arg]) . ' of its ' . count($copies)
+                    . ' copies are in the deck or the discard pile' . ($elsewhere ? ' (elsewhere: ' . implode(', ', $elsewhere) . ')' : ''));
+            }
+        }
+        $cards = [];
+        foreach ($typeArgs as $type_arg) { $cards[] = array_shift($available[$type_arg]); }
+        return $cards;
+    }
+
+    // The risk die for riskIt, confirmClimbingCardChoice and confirmLuckyChalkbag.
+    // On Studio only, a face set by debug_forceDie replaces one roll and is cleared.
+    function rollRiskDie(string $site): int {
+        if ($this->getBgaEnvironment() === 'studio') {
+            $face = $this->getGlobalVariable('forced_die_face');
+            if ($face) {
+                $this->setGlobalVariable('forced_die_face', null);
+                $this->bga->notify->all('log_only', "Debug: the risk die is forced to $face ($site)", []);
+                return (int)$face;
+            }
+        }
+        return bga_rand(1, 3);
     }
 }

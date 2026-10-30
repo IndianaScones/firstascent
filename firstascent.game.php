@@ -1862,7 +1862,7 @@ class FirstAscent extends Bga\GameFramework\Table
             'i18n' => ['risk_log'],
         ));
 
-        $face_rolled = bga_rand(1, 3);
+        $face_rolled = $this->rollRiskDie('riskIt');
         // $face_rolled = 1;
 
         $requirements_num = 0;
@@ -2491,7 +2491,7 @@ class FirstAscent extends Bga\GameFramework\Table
                 break;
 
             case $risk_die:
-                $face_rolled = bga_rand(1, 3);
+                $face_rolled = $this->rollRiskDie('confirmClimbingCardChoice');
                 // $face_rolled = 1;
 
                 $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
@@ -4852,7 +4852,7 @@ class FirstAscent extends Bga\GameFramework\Table
         $player_name = self::getActivePlayerName();
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true)[$player_id];
         $available_psych = $resource_tracker['psych'];
-        $face_rolled = bga_rand(1, 3);
+        $face_rolled = $this->rollRiskDie('confirmLuckyChalkbag');
         // $face_rolled = 2;
         $use_case = $this->getGlobalVariable('risk_it') ? 'risk_it' : 'climbing_card';
 
