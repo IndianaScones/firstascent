@@ -2,34 +2,49 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
-## 2026-10-24 (P1.1, in progress: (a) and (b1) done; (b2) next)
+## 2026-10-24 (P1.1, in progress: (a), (b1) and (b2) done; (d) next)
 
-The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. The (b1) session started 2026-10-26 and stopped 2026-10-28 with (b1) committed. (b2) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
+The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. The (b1) session started 2026-10-26 and stopped 2026-10-28 with (b1) committed. The (b2) session started 2026-10-28 and stopped 2026-10-30 with (b2) committed. (d) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8 and his (b2) decisions, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
 
-**Compaction.** The (b1) session was auto-compacted once, after the implementation and before the closing report. No unplanned git action happened. The session prompt asks for this entry to be updated at the next checkpoint after a compaction. That update was due with the closing report. It was made later, on 2026-10-27, after Jonathan's review and before the playtest. This final update replaces it.
+**Compaction**
+- **(b1) session:** auto-compacted once, after the implementation and before the closing report. No unplanned git action happened. The session prompt asks for this entry to be updated at the next checkpoint after a compaction. That update was due with the closing report. It was made later, on 2026-10-27, after Jonathan's review and before the playtest.
+- **(b2) session:** auto-compacted once, on 2026-10-30, after the (b2) playtest list was written into P1.1 and before the closing message of that turn. The checkpoint update was missed in that turn. It was made at Jonathan's playtest report (2026-10-30), and the commit waited for his confirmation. No unplanned git action happened.
+- This final update replaces both checkpoint updates.
+
+**`MIGRATION_PLAN.md` overwritten during the (b2) playtest** (2026-10-30)
+- At 13:32:43 (the file's modification time), after this session's last edit of the file and before Jonathan's playtest report, the working file was replaced by the version committed at `f2a7b12` (2026-10-21), byte for byte, with LF endings.
+- It dropped everything committed to the plan since then, and the (b2) playtest list. Git didn't do it: the reflog had no entry after `8d02d04`, and there was no stash.
+- **Likely cause** (Jonathan): Inkwell, which he has closed.
+- **Restored** at Jonathan's go-ahead (2026-10-30):
+  - `git checkout HEAD -- misc/docs/MIGRATION_PLAN.md`, which wrote CRLF;
+  - then the (b2) list, re-applied from this session's own edit, read from the session transcript. The text is the approved one, and the stat is +101/−1, as before the overwrite.
+- **Checked:** `TODO.md` and this file held only this session's edits, in CRLF, and `git status` showed nothing else changed. The working copy's diff of the two code files was identical to `p1.1b2.diff`.
 
 **State at the stop**
-- **HEAD:** `c5500ec` (P1.1b1, `tool:`), pushed at Jonathan's "push". `main` and `origin/main` are level.
+- **HEAD:** `b8c0f79` (P1.1b2, `tool:`), pushed at Jonathan's "push". After `git fetch origin`, `main` and `origin/main` are level.
 - **Staged:** nothing.
 - **Unstaged:**
-  - `misc/docs/MIGRATION_PLAN.md`: P1.1's status and three §6.2 markers;
-  - `misc/docs/BGA_PITFALLS.md`: the debug menu's player links (go-ahead below);
+  - `misc/docs/MIGRATION_PLAN.md`: P1.1's status, its (b2) playtest list and an added (d) item; in §6.2, the (b2) decisions, the popin check and the `debug_setSharedObjectives` citation;
+  - `misc/docs/TODO.md`: the zombie entry (go-ahead below);
   - this file.
-  - They go in one `docs:` commit. Jonathan's message asked for that commit and for its push.
+  - They go in one `docs:` commit after Jonathan's "commit docs", pushed after his "push".
 - **Studio:**
-  - `modules/utils.php` as at `c5500ec`, deployed for the playtest;
-  - `firstascent.game.php` at `4cdc882`;
+  - `modules/utils.php` and `firstascent.game.php` as at `b8c0f79`, deployed for the playtest;
   - the other game files as at `bc4a9c9`.
 - **Files outside git:**
   - In `D:\Documents\BGA Studio\`:
-    - `p1.1b1.diff`: (b1) as committed, 285 lines (`modules/Utils.php | 275 +`);
-    - `p1.1b1-docs.diff`: this docs diff;
-    - from the previous session, unchanged: `p1.1a.diff`, `p1.1a-v2.diff` and `p1.1-docs.diff`.
-  - The scratchpad of the (b1) session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\032e89f2-8e43-4bcd-9f68-3c63b37b8733\scratchpad\`:
-    - the stub harness `p11b1_harness.php`, run as `php p11b1_harness.php <repo>`. It stays out of the repo;
-    - `cached.diff`, the staged diff compared with `p1.1b1.diff`.
-  - The previous session's scratchpad (`…\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`), unchanged.
+    - `p1.1b2.diff`: (b2) as committed, 245 lines (`firstascent.game.php | 6`, `modules/Utils.php | 188`);
+    - `p1.1b2-docs.diff`: this docs diff;
+    - from earlier sessions, unchanged: `p1.1b1.diff`, `p1.1b1-docs.diff`, `p1.1a.diff`, `p1.1a-v2.diff` and `p1.1-docs.diff`.
+  - The scratchpad of the (b2) session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\b0816e3d-91f3-4980-986b-0b61d9d0fb49\scratchpad\`. It stays out of the repo:
+    - the stub harness `p11b2_harness.php`, run as `php p11b2_harness.php <repo> [quiet]`;
+    - `p11b2_mutants.php`, run as `php p11b2_mutants.php <repo>`. It writes its copies to `mut/`, removed after the runs;
+    - `commit_b2.txt`, the commit message;
+    - `transcript_tools\`: the scripts that read the session transcript for the restore, the extracted edit, and `cached_b2.diff`, the staged diff compared with `p1.1b2.diff`.
+  - The (b1) session's scratchpad (`…\032e89f2-8e43-4bcd-9f68-3c63b37b8733\scratchpad\`), where `p11b1_harness.php` was run again for the (b1) regression check, and the first session's (`…\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`).
   - `D:\Documents\BGA Studio\firstascent-overrides\`, untouched. Retiring it is Jonathan's decision.
+
+**Start check ((b2) session):** `git fetch origin`; HEAD `8d02d04`, level with `origin/main`, working tree clean. `git diff --stat c5500ec HEAD` touches only `MIGRATION_PLAN.md`, `BGA_PITFALLS.md` and this file. `git diff --stat 4cdc882 HEAD -- firstascent.game.php` shows no change.
 
 **Start check ((b1) session):** `git fetch origin`; HEAD `a5b9306`, level with `origin/main`, working tree clean. `git diff --stat 4cdc882 HEAD` touches only `misc/docs/`, so the game files are as at `4cdc882`.
 
@@ -38,9 +53,116 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 **Items**
 - **(a)** done: `4cdc882` `struct:`, playtested.
 - **(b1)** done: `c5500ec` `tool:`, playtested.
-- **(b2)** next, in a new session: the six functions under "Added in P1.1".
-- **(d)** after (b2): the scaffolding commit.
+- **(b2)** done: `b8c0f79` `tool:`, playtested.
+- **(d)** next, in a new session: the scaffolding commit, with the citation refresh now in its scope.
 - **(c)** confirmed: the guard on `debug_goToState` is at `utils.php:929–934` and throws `\BgaSystemException('Studio only')` outside Studio.
+
+**(b2): the six debug functions** (`b8c0f79`, `tool:`)
+- **`modules/utils.php`:**
+  - the six functions of §6.2's "Added in P1.1", after `debug_endGameSoon`;
+  - two helpers at the end of the trait: `findDebugAssets` (copy selection and the shortage refusal) and `rollRiskDie` (the die hook);
+  - `parseDebugIds` gains `bool $repeats = false`. The (b1) calls pass four arguments, so their behavior doesn't change.
+- **`firstascent.game.php`:** only the three roll lines. Each `bga_rand(1, 3)` becomes `$this->rollRiskDie('<site>')`. The commented `// $face_rolled = …` lines stay, for (d).
+- **My choices where §6.2 leaves the detail open**, flagged to Jonathan with the diff:
+  - the die global is `forced_die_face`, since the game already uses `face_rolled` (`php:1946`, `5088`);
+  - the log line reads `Debug: the risk die is forced to N (<site>)`;
+  - a shortage message names where the other copies are, for example "(elsewhere: portaGear)";
+  - after a redraw, the Spread's slot order follows card id, as at setup, not the listed order;
+  - a redraw may list more than four cards: the extras stay on top of the deck;
+  - two defensive refusals that can't trigger today, as in (b1): an id missing from `personal_objective_deck`, and a token in a location other than the expected ones.
+- **Noted, not handled:** `debug_discardSummitBeta` can empty the supply. Phil's deal (`stNextCharacterSelect`) draws two tokens with no reshuffle, so it would fail on an empty supply, and card 19 would offer fewer than two tokens. Jonathan didn't ask for a refusal.
+- **Pre-code checks** (reported before the code was written):
+  1. **Asset cards held by id in the deck or the discard pile:** no state offers them by id, as `chooseSummitBetaToken` does for tokens. Two globals hold Asset ids:
+     - `asset_identifier`, a fixed map from card id to `type_arg`, which moving a card doesn't affect;
+     - `asset_discard`, which mirrors the discard pile. `getAllDatas` rewrites it (`php:841–843`), `updateAssetDiscard` (`utils.php:674`) maintains it, and `drawFromPortaledge` (`utils.php:638–644`) calls `playCard()` on an id read from it. I proposed a sync rather than a refusal (decided, below).
+  2. **The die global:** `getGlobalVariable` returns null for a missing key, and `setGlobalVariable` creates it with an upsert, so `setupNewGame` doesn't change. `getAllDatas` already reads `riskSummitBetaFace`, which setup never sets (`php:908`).
+  3. **The die sites:** all three are `bga_rand(1, 3)`, at `php:1865`, `2494` and `4855`, as §6.2 says. There's no other risk-die roll, including in `zombieTurn`. `confirmRiskSummitBeta` reuses the stored face.
+  4. **The Lucky Chalkbag reroll** runs in server state 50, `riskSummitBeta` (`states:273–282`). The face is stored in `riskSummitBetaFace` and redrawn on reload (`js:1394–1405`). Only the title "Reroll Risk Die?" (`js:6251`) is client-side. So `debug_forceDie` can be called between a roll and its reroll.
+  5. **The player panels:** the player's own panel shows the `resource_tracker` skills plus permanent skills, and the techniques with wilds (`utils.js:1462–1499`). Every panel shows the hand count, from the database (`php:863–864`), and Water and Psych, which a gift doesn't touch. `updateResourceTracker` also rewrites `max_water_psych` from the player's character.
+  6. **`personal_objective_deck`:** a JSON list of ints, `range(1,12)` shuffled (`php:541–550`). `confirmCharacter` pops from the end, and the first pop is dealt first (`php:971–982`). Nothing else reads it. It's read without `asArray`, so it must stay a JSON list after a removal.
+  7. **The Spread** is in the database only (`the_spread`, with the slot as `location_arg`). No global records it.
+  8. **`parseDebugIds`** refuses duplicates, and an empty string fails its digit check. I proposed the `$repeats` flag (implemented).
+- **Jonathan's answers during (b2)** (asked with the pre-code report, all as recommended, 2026-10-28): refuse `debug_giveAssets` for a player with no character; count Spread copies as deck copies in the redraw; keep `asset_discard` in sync; take the bottom-most copy first.
+- **Decisions recorded in §6.2** (2026-10-28):
+  - Each "Proposed" in "Added in P1.1" became "Decided (2026-10-28)", with Jonathan's details:
+    - `debug_forceDie`: a new call overwrites; one roll only; one Studio-only helper; a `log_only` line.
+    - `debug_discardSummitBeta`: the supply only, with the Used-pile and offered-token refusals.
+    - `debug_giveAssets`: the panels show the gift; no statistics; no hand limit.
+  - A new "Asset cards" item: the deck or the discard pile only, the deck first, the bottom-most copy first, and `asset_discard` kept in sync.
+  - The "Open for (b2)" line records the answer: a repeated `type_arg` means that many copies, refused if too few are available. This replaces Q6 for the three Asset functions only.
+  - The four answers above.
+  - The "When" of `debug_setSharedObjectives` now cites `initSharedObjectives`, not `setupNewGame ~442–627`.
+  - At Jonathan's go-ahead (2026-10-30), `debug_redrawStartingSpread` also records the popin check (playtest, scenario 2).
+- **Checks:**
+  - `php -l` passes on both files. The only message is the known `${var}` deprecation at `firstascent.game.php:2653`.
+  - **Stub harness** (`p11b2_harness.php`): 19,663 checks in the final run, before the commit, with no failure. Its error handler turns PHP warnings into exceptions. 61 earlier runs, after its test bugs were fixed, also passed.
+    - **It covers:** copy selection (deck before discard, bottom-most first); the shortage refusal, with nothing changed before it; the stacking order; the personal-objective deal order (2,000 random runs through the real deal code); the offered-token refusal, with the offer built through `getCardsOnTop` as card 19 builds it; the die helper on and off Studio (an overwrite, clearing with 0, one roll only, and the global never read off Studio); the six guards, the attributes and the `debug_` names.
+    - **Ran for real:** the whole of `modules/utils.php`, the text of `drawStartingSpread`, the deal block of `confirmCharacter`, and `material.inc.php`.
+    - **Stubbed:** the Deck methods; the global variables (in memory, with `utils.php`'s rule that a falsy value reads as null); the two SQL reads and the Spread-slot update; `loadPlayersBasicInfos`, `getCurrentMainState`, `getBgaEnvironment`, `bga->notify` and `bga_rand`; the exception classes and the `Debug` attribute. `incStat`, `initStat` and `getActivePlayerId` were stubbed to throw if called, and none was.
+    - **Its early failures were test bugs:** tests named fixed cards that were sometimes all on the Portaledge, and one assumed that no Gear prints a wild technique (26, 27, 29, 35 and 36 do).
+  - **Mutants** (`p11b2_mutants.php`): 28 of 29 caught. The survivor stores 0 instead of null for a cleared face, which behaves the same, because `getGlobalVariable` reads a stored 0 as null. The mutants also showed that an `array_values` call in `debug_stackPersonalObjectives` was redundant (`array_merge` renumbers), so it was removed.
+  - **R-10 in the harness:** runs of 3,000 four-Gear redraws gave between 1 in 71 and 1 in 115, around the 1 in 92 estimate.
+  - **(b1) regression:** the (b1) harness passes 17,063 checks. Its one failure is its count of `debug_` methods, which expected 7 and now finds 13.
+- **Jonathan's review before the deploy:** six questions, answered from the code with citations (2026-10-30). They found no bug in (b2). They covered:
+  - the stub strings and the id ranges;
+  - `personal_objectives` at setup;
+  - `asset_discard` and `getAllDatas`;
+  - how long `summit_beta_tokens` lasts;
+  - hand cards' `location_arg`, and the globals that list hand cards by id;
+  - the Deck doc citations.
+  - Question 4 found the zombie path in production code (`TODO.md`; go-ahead below).
+- **Staging:**
+  - `git add -- firstascent.game.php modules/Utils.php`, the tracked names. Both files were CRLF in the working copy, with LF in the index.
+  - `git diff --cached --stat` showed 2 files, 189 insertions and 5 deletions, the same as `p1.1b2.diff`'s stat. The staged diff was identical to `p1.1b2.diff`.
+
+**(b2) playtest** (Studio; results reported 2026-10-30; all pass)
+- `modules/utils.php` and `firstascent.game.php` deployed, F5 in every open tab.
+- **Table A** (3 players):
+  - **Scenario 0:** passed. The debug menu shows the six new functions next to the seven existing ones, and neither helper.
+  - **Scenario 1:** passed. The players were dealt the expected personal objectives.
+  - **Scenario 2:** passed.
+    - `("3,3,9,27")` gave two Hand Jam, Palming and Rope.
+    - Studio's popin submits an empty string, and `("")` gave four random cards. Recorded in §6.2.
+  - **Scenario 3:** passed. The deck card drawn was Palming, and the refill put a Palming and a Layback in the Spread.
+  - **Scenario 4:** passed.
+    - `"22,22,26"` was refused with the shortage refusal, and `"24,24,26"` was accepted, so G was 24.
+    - X's hand +3, Gear +3, G's technique +2 and Wild +1 for Locker, Water and Psych unchanged. After F5, the other tabs showed 8 cards in X's hand.
+  - **Scenario 5:** passed.
+    - **Extra refusal:** Jonathan first typed `"24,24,24,"`. It was refused as an invalid id, because of the trailing comma: `parseDebugIds` reads the empty item after it as an id.
+    - `"24,24,24"` was refused with the expected message.
+    - Step 3 took G from the discard pile. Step 4 gave Y the stacked G and the last G from the discard pile, and the player panels were right after F5.
+    - Step 5 was refused with the expected message.
+  - **Scenario 6:** passed.
+    - Extra Water was on top of the Used pile, and steps 2 and 3 were refused with the expected messages.
+    - On card 19, `("8")` was refused and `("10")` accepted. After the reload the offer was still 7 and 8, and the choice worked as usual.
+  - **Scenario 7:** passed, 7a to 7e.
+    - The log lines named the forced face and site as listed, and the rolls in 7b and after 7e had no "Debug:" line.
+    - In 7d, the -1 Card -1 Psych face was still shown after `debug_forceDie(1)`'s reload.
+    - No Summit Beta prompt appeared after the roll in 7a or 7b.
+  - **Scenario 8:** passed. Every listed refusal showed the expected message, and none reloaded the page.
+- **Table B, scenario 9:** five calls of `debug_redrawStartingSpread("22,24,30,31")`, all as expected, with no error. That's consistent with the R-10 estimate, and neither confirms nor contradicts it: at 1 in 92, five calls reach the edge case about 1 time in 19.
+- **APIs on Studio:** `bga->notify` (the `log_only` line) and `VisibleSystemException` worked, as in (b1).
+- **Replays:** Jonathan's report doesn't mention a Studio save/restore replay.
+- **Where the results come from:**
+  - **Jonathan's report, on Studio:** scenarios 0–9, the extra refusal, and the popin's empty string.
+  - **The harness and code review only:**
+    - The `gameEnd` refusals.
+    - The `asset_discard` sync. `getAllDatas` also rewrites that global from the database on every load (`php:getAllDatas ~841–843`; B1 in `MIGRATION_PLAN.md` §5.4), and the reload after each successful call runs it. So Studio can't show whether the sync ran. It becomes the only sync once P5.2 makes `getAllDatas` free of side effects. Until then the harness is its only check (mutants 19–21).
+    - The die helper's Studio check: `rollRiskDie` reads the global only on Studio. The harness checks the off-Studio path, which Studio can't show.
+    - The guard's `SystemException`, which never fires on Studio.
+
+**Go-aheads in the (b2) session**
+- **Outside the step's list:**
+  - `misc/docs/TODO.md`: one entry under "Server bugs" for the zombie path in `chooseSummitBetaToken` (`climbing_card_info` isn't cleared). Found while answering Jonathan's pre-deploy question 4. Jonathan's go-ahead, 2026-10-30.
+  - `MIGRATION_PLAN.md` §6.2, the `debug_redrawStartingSpread` entry: the popin check. Jonathan's go-ahead, 2026-10-30.
+- **Git, at Jonathan's go-ahead (2026-10-30):** restoring `MIGRATION_PLAN.md` from HEAD, above.
+- **In the step's list:**
+  - P1.1's status;
+  - the (b2) playtest list, approved 2026-10-30. At Jonathan's request, scenario 6's first note now says "the first three steps" and "the last step's stack", so it reads correctly however the list is rendered;
+  - §6.2's (b2) decisions, with the four answers;
+  - the `debug_setSharedObjectives` citation;
+  - (d)'s added item, the citation refresh. It carries Jonathan's go-ahead for `BGA_PITFALLS.md` (2026-10-28) into (d).
+- The (b2) commit and its push. This docs commit and its push wait for Jonathan's "commit docs" and "push".
 
 **(b1): the six debug functions** (`c5500ec`, `tool:`)
 - The six §6.2 functions are in `modules/utils.php` (`UtilTrait`), after `debug_goToState`: 275 inserted lines and no other change. `firstascent.game.php` is unchanged.
@@ -257,14 +379,15 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 - The (a) commit, and its push.
 
 **Pending decisions**
-- (b2): the details marked "proposed" in §6.2, confirmed at the start of (b2). That includes whether a repeated Asset `type_arg` means two copies; until decided, Q6 refuses duplicates.
 - The planned fix for the redraw loop: P5.2, with R-6's setup path (proposed). Once confirmed, §8.4 gets a row.
+- The fix step for the zombie path in `chooseSummitBetaToken` (`TODO.md`, found in (b2)): to be decided.
 - Retiring `D:\Documents\BGA Studio\firstascent-overrides\`.
 
 **Next**
-1. (b2) in a new session.
-   - Read §6.2's "Added in P1.1", and confirm the details marked "proposed" at the start (above).
-   - Its playtest lists can rely on the debug menu's player links.
+1. (d) in a new session: remove the commented testing scaffolding, in one `struct:` commit, with its list in P1.1.
+   - (b2) changed the three roll lines in place and added nothing above line 223 of `modules/utils.php`, so (d)'s line numbers still hold at `b8c0f79`. Checked: the commented die lines are at 1866, 2495 and 4856, and `php_debug()` is at 223.
+   - Its scope now also has the citation refresh in §6.2 and `BGA_PITFALLS.md` (go-ahead 2026-10-28).
+   - Playtest: a new table's setup, and S-smoke (P1.1).
 
 ## 2026-10-23 (P0.3: tags and the phase switch)
 

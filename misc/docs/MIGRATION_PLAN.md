@@ -341,8 +341,9 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Status:** in progress.
   - (a) is done: `4cdc882`, playtested on Studio on 2026-10-24.
   - (b1) is done: `c5500ec`, playtested on Studio (results reported 2026-10-28).
+  - (b2) is done: `b8c0f79`, playtested on Studio (results reported 2026-10-30).
   - (c) is confirmed.
-  - (b2) starts in a new session; (d) follows.
+  - (d) is next.
   - Details in `progress.md`.
 - **Scope** (updated in P1.1 on 2026-10-24: (b) is split, and (d) is new):
   - (a) **Structural:** extract `pickAvailableCharacters()` (`php:setupNewGame ~714–737`) and `initSharedObjectives(array $ids)` (`~442–627`) without behavior change.
@@ -363,6 +364,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
       - the `upgradeTableDb` template;
       - `utils.php ~33–35`.
     - The line numbers are at `4cdc882`. (b2)'s die hook moves them, so locate each by content.
+    - Refresh by function name, not line number, the drifted citations in §6.2 (the Phil note's `stNextCharacterSelect`; `getAllDatas` for `available_characters`) and in `misc/docs/BGA_PITFALLS.md` (the `${var}` log string, in `confirmClimbingCardChoice`). Jonathan's go-ahead for `BGA_PITFALLS.md`, 2026-10-28.
   - **Commits:** four. (a) `struct:`, (b1) `tool:`, (b2) `tool:`, (d) `struct:`. Each is playtested on its own.
   - **Gap check (D4), done in P1.1:** no override needs §6.3. Each one is covered by (b1) or (b2), including the setup-time Spread redraw, through `drawStartingSpread()`. §6.3 stays dropped, and U8 and Q-T5 stay moot.
 - **Files:** `firstascent.game.php`, `modules/utils.php`.
@@ -396,7 +398,107 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
        - `debug_endGameSoon` for a player with one climbed pitch.
     9. **The `reload` check:** after each call, note whether the page reloads by itself.
     - Scenarios 5 and 6 end the table, and Studio saves can't be restored after the end. Run them last, or on their own tables.
-  - **(b2):** one scenario per function, written at the start of (b2).
+  - **(b2):** approved by Jonathan on 2026-10-30. Items marked "(added)" were added in his review.
+    - **Table A** is a new table, 3 players, one tab each. It holds scenarios 1–8, in this order.
+      - Scenarios 1 and 2 must run before the last character is confirmed.
+      - After any successful call, press F5 in the other tabs before acting there. Only the calling window reloads, which (b1) confirmed.
+      - (added) Scenario 8's "In `characterSelection`" refusals also need `characterSelection`: run them right after scenario 2, before the last character is confirmed. The `debug_giveAssets` refusal needs a player who hasn't confirmed yet.
+      - (added) Don't choose Phil (8) at this table. His two starting tokens would come from the supply, and scenarios 6 and 7 need tokens 5–8 and 10 there.
+    0. **The debug menu** shows the six new functions next to the seven existing ones, and neither `findDebugAssets` nor `rollRiskDie`.
+    1. **`debug_stackPersonalObjectives`**, in `characterSelection` before anyone confirms.
+       - Run `debug_stackPersonalObjectives("9,10,11,12")`.
+       - The first player to confirm holds Glory Days of the Piton (9) and Social Butterfly (10).
+       - The second holds Full Body Workout (11) and National Parks Pass (12).
+    2. **`debug_redrawStartingSpread`**, after the first confirm.
+       - `("3,3,9,27")`: the Spread shows two Hand Jam, Palming and Rope, in any slot order.
+       - `("")`: a new Spread of four cards, not all of one type.
+         - Whether the popin submits an empty string is unknown.
+         - If it won't, or the server answers "Invalid Asset card id ''", try a single space (the code trims it). Report what happened either way.
+    3. **`debug_stackAssetDeck` order**, in Rack Up before the first draw.
+       - Run `debug_stackAssetDeck("9,9,17")`.
+       - The first drawer takes the four Spread cards and one deck card.
+       - Expected: the deck card is Palming, shown in the drawer's own log ("…from the deck"). The refilled Spread includes one Palming and one Layback.
+       - If the call is refused for a shortage, swap in another Slab or Face card.
+    4. **`debug_giveAssets` and the panels**, in round 1, at the start of player X's turn, from X's tab.
+       - (added) Choose an X who isn't Sendy Jammer (4), so the first set of expected counts applies.
+       - Note X's Gear, Face, Crack and Slab counts, the five technique icons, the hand count, Water and Psych.
+       - Run `debug_giveAssets(X, "22,22,26")`.
+         - If it's refused with "Asset card 22: 2 listed, but only 1 of its 2 copies … (elsewhere: …)", that's the shortage refusal, and nothing changes.
+         - Retry with another two-copy Gear: 24, 25, 28, 30, 31, 33 or 37. Call the accepted one G.
+         - (added) The retry is `debug_giveAssets(X, "G,G,26")`. If 22 is accepted, G is 22.
+       - Expected:
+         - X's hand has 3 more cards;
+         - Gear +3;
+         - G's own technique +2 (none for 28 or 33), and Wild +1 for Locker;
+         - Water and Psych unchanged;
+         - other tabs show the hand count +3 after F5;
+         - if X is Sendy Jammer, Wild +3 instead.
+    5. **Copies from the discard pile**, continuing X's turn.
+       1. X trades G, G and Locker to the Portaledge. The discard pile now holds them.
+       2. `debug_stackAssetDeck("G,G,G")` is refused: "Asset card G: 3 listed, but only 2 of its 2 copies are in the deck or the discard pile".
+       3. `debug_stackAssetDeck("G")` is accepted. It takes a G from the discard pile.
+       4. `debug_giveAssets(Y, "G,G")` gives Y the stacked G and the last G from the discard pile.
+       5. (added) `debug_stackAssetDeck("G")` is refused: "Asset card G: 1 listed, but only 0 of its 2 copies are in the deck or the discard pile (elsewhere: hand of player <Y>, hand of player <Y>)". This runs the refusal for copies outside the allowed locations.
+       - Expected: Y's hand +2 and Y's Gear +2. The discard pile holds only Locker, so its top card is Locker, unless other cards were discarded earlier.
+    6. **`debug_discardSummitBeta`**
+       - (added) Run the first three steps in Rack Up, before the first climb (earlier than scenario 4). Climbing cards draw tokens from the top of the supply (`php:confirmClimbingCardChoice ~2237`). If the last step's stack is refused with "…is in the hand of player…", use other tokens.
+       1. `("5,6")`: the Used pile shows Extra Water on top.
+       2. `("5")` is refused: "Summit Beta token 5 is already in the Used pile".
+       3. Run `debug_giveSummitBeta(12, X)`, then `("12")`. It's refused: "…is in the hand of player <X>".
+       4. Just before player C's climb, run `debug_stackSummitBeta("7,8,10")` and `debug_stackClimbingDeck("19")`. C takes option B of card 19.
+          - The offer is Simul Climb and Guidebook.
+          - `("8")` is refused: "Summit Beta token 8 is offered in chooseSummitBetaToken".
+          - `("10")` is accepted: Jesus Piece goes on top of the Used pile.
+          - After the reload, the offer is still 7 and 8, and the choice works as usual.
+          - (added) Don't use Undo in `chooseSummitBetaToken` after these calls. Its restore point is taken when the climbing card is drawn (`php:confirmRequirements ~1813`), so Undo would also revert the discard of Jesus Piece.
+    7. **`debug_forceDie`**: call it just before the intended roll, with no other roll in between.
+       - (added) X holds token 12 from scenario 6. Per the code, no Summit Beta prompt should appear after a roll in 7a or 7b. If one does, that's a finding.
+       - **a. Overwrite, at `riskIt`:**
+         - Run `debug_stackClimbingDeck("35,43")`, then `debug_forceDie(3)`, then `debug_forceDie(1)`.
+         - X risks it on a pitch missing one Asset. The log shows, in order: "…takes a risk in attempting…", "Debug: the risk die is forced to 1 (riskIt)", "…rolls a checkmark and successfully climbs the pitch".
+       - **b. The next roll is normal:** X takes option B of Off route (35). There is no "Debug:" line, and the face is random.
+       - **c. At the climbing card:**
+         - Run `debug_forceDie(2)`. Y climbs without risking it and takes option B of Wasp nest (43).
+         - The log shows "…forced to 2 (confirmClimbingCardChoice)", then "…rolls -2 Cards and will choose an opponent and give them 2 Asset Cards".
+         - Y must not hold Lucky Chalkbag.
+       - **d. At the Lucky Chalkbag reroll:**
+         1. Run `debug_giveSummitBeta(11, Z)` and `debug_forceDie(3)`. Z risks it.
+         2. The log shows "…forced to 3 (riskIt)", and the title reads "may use a Summit Beta Token".
+         3. Run `debug_forceDie(1)` from Z's tab. After the reload, the -1 Card -1 Psych face and the title are still shown.
+         4. Z uses Lucky Chalkbag ("Reroll Risk Die?") and confirms. The log shows "…forced to 1 (confirmLuckyChalkbag)", then "…uses Lucky Chalkbag, rerolls a checkmark and successfully climbs the pitch".
+       - **e. Clear:** run `debug_forceDie(2)`, then `debug_forceDie(0)`. The next roll has no "Debug:" line.
+    8. **Refusals.** Each shows "Unexpected error" with its message, the page doesn't reload, and nothing changes.
+       - **In `characterSelection`:**
+         - `debug_giveAssets(<a player with no character>, "1")`: "Player <id> has not chosen a character yet";
+         - `debug_stackPersonalObjectives("9")` after it's dealt: "Personal objective 9 is already dealt to player <id>";
+         - `("5,5")`: "Duplicate…";
+         - `("13")`: "Invalid personal objective id 13: expected 1 to 12";
+         - `debug_redrawStartingSpread("22,22,22")`: "Asset card 22: 3 listed, but only…".
+       - **Later:**
+         - `debug_stackPersonalObjectives("1")` and `debug_redrawStartingSpread("1")`: "…runs only in characterSelection";
+         - `debug_stackAssetDeck("38")`: "Invalid Asset card id 38: expected 1 to 37";
+         - `debug_forceDie(4)`: "Invalid die face 4: expected 1 to 3, or 0 to clear";
+         - the other refusals in scenarios 4–6.
+       - The `gameEnd` refusals are covered by the harness and code review only.
+    - **Table B** is a new, optional table with 2 players, in `characterSelection`.
+    9. **The four-Gear redraw**
+       - Run `debug_redrawStartingSpread("22,24,30,31")` three to five times.
+       - Expected: the Spread isn't four Gear, because the setup loop replaced some.
+       - About 1 call in 92 fails with an error instead. That's probably R-10, not a (b2) bug. Report the error text.
+       - Running it on its own table keeps a failure away from Table A.
+    - **Where the expected results come from**
+      - **Confirmed on Studio in (b1):**
+        - "Unexpected error" for refusals (also in the docs);
+        - the reload of only the calling window;
+        - the player links in the debug menu.
+      - **From reading the code, so a mismatch is a finding:**
+        - every message and log text;
+        - which numbers the panels show;
+        - in Rack Up, the deck cards are drawn before the Spread refills;
+        - the top cards shown on the discard and Used piles;
+        - the order of the personal-objective deal;
+        - the die face surviving a reload in `riskSummitBeta`.
+      - **Unknown:** whether the popin submits an empty string.
   - **(d):** a new table's setup, and S-smoke.
 - **Repros:** none fixed. Makes T26, T28 and F3–F5 quick to set up. (b2)'s Spread function reproduces the setup redraw edge case (`TODO.md`, R-10).
 - **Studio after:** playable; existing tables still work.
@@ -1222,7 +1324,7 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
     - **Refused:** a token already in that player's hand, and the two tokens offered in `chooseSummitBetaToken` (`climbing_card_info['summit_beta_tokens']`), which `confirmChooseSummitBetaToken` later moves by id.
 
 **`debug_setSharedObjectives(int $first, int $second, int $third)`**
-- **When:** before the first Climb Phase, that is `characterSelection` or round-0 `drawAssets`. At setup the trackers, The Elitist's +4 score and the objective statistics are initialized (`php:setupNewGame ~442–627`); climbs update them later.
+- **When:** before the first Climb Phase, that is `characterSelection` or round-0 `drawAssets`. At setup the trackers, The Elitist's +4 score and the objective statistics are initialized (`php:initSharedObjectives`, called from `setupNewGame` since P1.1a); climbs update them later.
 - **Effect:**
   - Reverts the current set's setup effects (The Elitist's +4 and its statistic).
   - Runs `initSharedObjectives(ids)` (extracted in P1.1a).
@@ -1268,40 +1370,62 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
 
 **Added in P1.1: the (b2) functions** (decided 2026-10-24)
 
-The P1.1 gap check (`progress.md`) found overrides that none of the functions above covers. Jonathan chose a debug function for each (option A), so §6.3 stays dropped. The purpose of each function is decided. The signatures and the details marked "proposed" were proposed in P1.1, and are confirmed at the start of (b2).
+The P1.1 gap check (`progress.md`) found overrides that none of the functions above covers. Jonathan chose a debug function for each (option A), so §6.3 stays dropped. The purpose of each function is decided. The signatures and the details marked "proposed" were proposed in P1.1. Jonathan decided them at the start of (b2), on 2026-10-28, with four more answers given during (b2).
 
 - **`debug_stackPersonalObjectives(string $ids)`**
   - **Replaces:** the personal-objective pushes in `setupNewGame` (544–548).
-  - **Proposed:**
+  - **Decided (2026-10-28), as proposed:**
     - `characterSelection` only; ids 1–12.
     - It moves the listed ids to the end of `personal_objective_deck`, so they are dealt in the order listed. `confirmCharacter` pops two per player (`~973–974`).
     - It refuses ids already dealt (`personal_objectives`).
     - The old override appended its ids, which could deal an objective twice. This function moves them, so it can't.
 - **`debug_stackAssetDeck(string $typeArgs)`**
   - **Purpose:** puts Asset cards on top of `asset_deck`, first = top. It covers the during-play redraw for 4 of a kind (`php:confirmAssets ~1097–1107`).
-  - **Proposed:**
+  - **Decided (2026-10-28):**
     - Any time before the end.
-    - Cards come from the deck or the discard pile.
-    - It refuses cards in a hand, on an Asset Board, in the Spread or on the Portaledge.
+    - Cards come from the deck or the discard pile, as "Asset cards" below says.
 - **`debug_giveAssets(int $playerId, string $typeArgs)`**
   - **Replaces:** the three starting cards in `setupNewGame` (563–567).
   - **Decided:** it updates `resource_tracker` with `updateResourceTracker($player_id, 'add', null, null, $types)`, as normal draws do (`php:confirmAssets ~1056, ~1068`). The old override only moved the cards.
-  - **Proposed:** any time before the end; cards come from the deck or the discard pile.
+  - **Decided (2026-10-28):**
+    - Any time before the end. Cards come from the deck or the discard pile, as "Asset cards" below says.
+    - The player panels (Gear, skill, Water/Psych and technique icon counts) show the gift after the reload.
+    - It doesn't touch the end-of-game statistics.
+    - There is no hand limit (RULES.md p. 11), so the number of cards isn't checked.
+    - It refuses a player who hasn't chosen a character yet. `updateResourceTracker` reads the player's character (the maximum Water and Psych, and Sendy Jammer's wild Gear).
 - **`debug_discardSummitBeta(string $typeArgs)`**
   - **Replaces:** the token moved to the Used pile in `setupNewGame` (334).
-  - **Proposed:** it moves tokens from the supply to the top of the Used pile, first = top. It refuses tokens in a hand.
+  - **Decided (2026-10-28):**
+    - Ids 1–12. It moves tokens from the supply to the top of the Used pile, first = top. Only the supply is allowed.
+    - **Refused:**
+      - a token in a hand;
+      - a token already in the Used pile;
+      - the two tokens offered in `chooseSummitBetaToken` (`climbing_card_info['summit_beta_tokens']`), refused as `debug_giveSummitBeta` refuses them. They are still in the supply while on offer, and `confirmChooseSummitBetaToken` moves them by id.
 - **`debug_forceDie(int $face)`**
   - **Replaces:** the commented die rolls (`// $face_rolled = …` at 1866, 2495 and 4856).
   - **Decided:** the three roll sites read the global only when `getBgaEnvironment() === 'studio'`, so outside Studio the rolls stay `bga_rand(1, 3)`. The sites are `riskIt` (`~1865`), the climbing card's risk die in `confirmClimbingCardChoice` (`~2494`) and `confirmLuckyChalkbag` (`~4855`).
-  - **Proposed:** faces 1–3, and 0 clears it. It applies to one roll only: the hook clears the global after use.
+  - **Decided (2026-10-28):**
+    - Faces 1–3, and 0 clears it. A new call overwrites the face set before.
+    - It applies to one roll only, at whichever of the three sites rolls next.
+    - The three sites call one helper, named without the `debug_` prefix (`rollRiskDie`). The helper reads the global only when `getBgaEnvironment() === 'studio'`. Otherwise, and when no face is set, it returns `bga_rand(1, 3)`. It clears the global after using it.
+    - When a forced face is used, a game-log line names the face and the site, sent with `$this->bga->notify->all('log_only', …)`. It isn't a warning, so it doesn't have `logDebugWarning`'s "Debug warning: " prefix.
+    - The commented `// $face_rolled = …` lines at the sites stay; (d) removes them.
 - **`debug_redrawStartingSpread(string $typeArgs)`**
   - **Replaces:** the Spread test in `setupNewGame` (401–414).
   - **Decided:** it refills the Spread through the setup path, `drawStartingSpread()` (extracted in P1.1a), so `checkSpread` and the setup redraw loop run as they do at setup.
-  - **Proposed:**
+  - **Decided (2026-10-28), as proposed:**
     - `characterSelection` only, because Rack Up hasn't drawn from the Spread yet.
     - It moves the four Spread cards back into `asset_deck` and shuffles it, as at setup. Then it puts the listed Asset cards on top (an empty string skips that) and calls `drawStartingSpread()`.
     - With four Gear cards on top, it reaches the redraw loop's edge case in about 1 call in 92 (`TODO.md`, R-10).
-- **Open for (b2):** an Asset `type_arg` names a card with several copies, so a repeated id could mean two copies. Q6 (duplicates refused) applies unless Jonathan decides otherwise.
+  - **Decided (2026-10-28):** copies in the Spread count as deck copies when the list is checked, since they are in the deck when the listed cards are stacked.
+  - **Checked (P1.1b2 playtest, scenario 2):** Studio's debug popin submits an empty string, and `("")` deals a new Spread with no listed cards.
+- **Asset cards** in `debug_stackAssetDeck`, `debug_giveAssets` and `debug_redrawStartingSpread` (decided 2026-10-28):
+  - Allowed locations: the deck or the discard pile only. Every other location is refused: a hand, an Asset Board, the Spread (except in the redraw, above) or the Portaledge.
+  - When copies are in both, the deck's are taken first. Within the deck or the discard pile, the bottom-most copy is taken first.
+  - A copy taken from the discard pile is also removed from the `asset_discard` global (`updateAssetDiscard`), so the global stays in sync with the pile.
+- **Open for (b2), answered 2026-10-28:** an Asset `type_arg` names a card with several copies, so a repeated id could mean two copies.
+  - **Answer:** a `type_arg` is the material's number in `material.inc.php`. In the three Asset functions, a repeated `type_arg` means that many copies. The call is refused if fewer copies are in the allowed locations.
+  - This replaces Q6's duplicate refusal for these three functions only. Every other list keeps Q6, and the (b1) functions don't change.
 
 ### 6.3 For overrides that must run inside `setupNewGame`: a setup-overrides file (dropped, D4)
 **Dropped.** P1.1's gap check (2026-10-24) found no override that needs it, so it stays dropped, and U8 and Q-T5 stay moot. The design is kept below for reference.
