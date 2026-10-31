@@ -507,7 +507,22 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Scope:**
   - `git mv firstascent.game.php modules/php/Game.php`: namespace `Bga\Games\FirstAscent`, `class Game extends \Bga\GameFramework\Table`.
   - `git mv modules/Utils.php modules/php/UtilTrait.php` (namespaced trait). This removes the casing problem (T24).
-  - String callables → closures; exception classes (§1.3); add `debug_frameworkCheck()`.
+  - String callables → closures; exception classes (§1.3); add `debug_frameworkCheck()`. Resolved on 2026-10-31 from the token-based inventory of the two files at HEAD, with Jonathan's go-ahead:
+    - **Headers.**
+      - `Game.php`: `namespace Bga\Games\FirstAscent;` replaces the `require_once('modules/utils.php')` line, and `extends Bga\GameFramework\Table` becomes `extends \Bga\GameFramework\Table`. A class name without a leading backslash is resolved relative to the current namespace, and class names have no fallback to the global namespace, so inside `Bga\Games\FirstAscent` the old form would name `Bga\Games\FirstAscent\Bga\GameFramework\Table`.
+      - `UtilTrait.php`: `namespace Bga\Games\FirstAscent;` after the `<?php` line.
+      - No `declare(strict_types=1)`, no re-indentation, no `self::` changes.
+    - **Trait loading.**
+      - The `require_once` is deleted. The trait loads through the PSR-4 autoload [Game.php doc:2105–2113]. That `use UtilTrait;` triggers the autoload is **[inferred]**: the docs describe the autoload for classes.
+      - The fallback, `require_once __DIR__ . '/UtilTrait.php';`, is held back. If Studio reports the trait not found: stop, report, and propose the fallback before changing anything.
+    - **Four closures.**
+      - `sortGear`, `sortFace`, `sortCrack` and `sortSlab` are nested named functions in `php:setupNewGame`, passed to `array_filter` as strings. They become the variables `$sortGear`, `$sortFace`, `$sortCrack` and `$sortSlab` (same bodies), and the four `array_filter` calls take the variable.
+      - The names collide with no existing variable: `setupNewGame` has 68 distinct variables, none containing "sort", and uses no `extract`, `compact`, `$$` or `global`. Neither file uses the four names anywhere.
+    - **`dieLog` unchanged.** It is a nested function in `php:confirmLuckyChalkbag`, called directly (`$die_log = dieLog(...)`), not as a string. A direct unqualified call tries the current namespace first, so it should keep working **[inferred]**. The Lucky Chalkbag playtest shows what happens; §1.3 is corrected from that result.
+    - **Exceptions.**
+      - `\BgaSystemException` (`utils.php:isPlayerZombie`, `utils.php:debug_goToState`) → `\Bga\GameFramework\SystemException`.
+      - `feException` (`php:zombieTurn`) → `\Bga\GameFramework\VisibleSystemException` [Game.php doc:1753–1781]. Reading the old defaults (`$expected = false, $visibility = true`) as "visible" is **[inferred]**; the alternative is `SystemException`, whose message is hidden from the player. Review-only: the playtest doesn't exercise this line.
+      - No other legacy exception class and no `catch` exists in either file. The new classes extend `\Exception`, not `feException`.
   - **Unchanged:** `states.inc.php`, `action.php`, `view.php`, `.tpl`, root `material.inc.php`, the client.
 - **Files:** `firstascent.game.php` → `modules/php/Game.php`; `modules/Utils.php` → `modules/php/UtilTrait.php`.
 - **Done when:** a game plays end to end, and `debug_frameworkCheck` reports `Bga\Games\FirstAscent\Game`.
