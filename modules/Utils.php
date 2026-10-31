@@ -220,11 +220,6 @@ trait UtilTrait {
         return $available_pitches;
     }
 
-    function php_debug() {
-
-        //$this->dump("variable", variable);
-    }
-
     function adjacentInArray($arr, $val1, $val2) {
 
         for ($i=0; $i<count($arr)-1; $i++) {

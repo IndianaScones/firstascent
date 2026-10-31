@@ -304,22 +304,6 @@ class FirstAscent extends Bga\GameFramework\Table
         }
         $this->cards_and_tokens->createCards($climbing_cards, 'climbing_deck');
         $this->cards_and_tokens->shuffle('climbing_deck');
-        // $testing1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 3");
-        // $testing2 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 14");
-        // $testing3 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 19");
-        // $testing4 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 30");
-        // $testing5 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 9");
-        // $testing6 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 8");
-        // $testing7 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 14");
-        // $testing8 = $this->getUniqueValueFromDB("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type_arg` = 3");
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing8, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing7, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing6, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing5, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing4, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing3, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing2, 'climbing_deck', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testing1, 'climbing_deck', true);
 
         // add summit beta tokens
         $summit_beta_tokens = array();
@@ -331,12 +315,7 @@ class FirstAscent extends Bga\GameFramework\Table
             );
         }
         $this->cards_and_tokens->createCards($summit_beta_tokens, 'summit_beta_supply');
-        // $this->cards_and_tokens->pickCardsForLocation(1, 'summit_beta_supply', 'summit_beta_discard');
         $this->cards_and_tokens->shuffle('summit_beta_supply');
-        // $testingSB1 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=7");
-        // $testingSB2 = $this->getUniqueValueFromDb("SELECT `card_id` FROM `cards_and_tokens` WHERE `card_type`='summit_beta' AND `card_type_arg`=8");
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB2, 'summit_beta_supply', true);
-        // $this->cards_and_tokens->insertCardOnExtremePosition($testingSB1, 'summit_beta_supply', true);
 
         // add asset cards
         $asset_cards = array();
@@ -398,21 +377,6 @@ class FirstAscent extends Bga\GameFramework\Table
             $this->cards_and_tokens->moveCard($slab_to_ledge[$i]['card_id'], 'portaSlab', $i);
         }
 
-        // ****** SPREAD TESTING ******
-
-        // $assets_50 = $this->cards_and_tokens->getCardsOnTop(50, 'asset_deck');
-        // $types = [];
-        // $gear_num = 0;
-        // foreach ($assets_50 as $asset) {
-        //     $type = $this->getAssetType($asset['type_arg']);
-        //     $types[] = $type;
-        //     if ($type === 'gear') {
-        //         $this->cards_and_tokens->insertCardOnExtremePosition($asset['id'], 'asset_deck', true);
-        //         $gear_num++;
-        //     }
-        // }
-        // $this->setGlobalVariable('gear_num', $gear_num);
-
         // draw starting spread
         $this->drawStartingSpread();
 
@@ -428,9 +392,6 @@ class FirstAscent extends Bga\GameFramework\Table
             $current_objective = array_pop($current_objective_tile);
             $current_shared_objectives[] = $current_objective;
         }
-
-        // testing
-        // $current_shared_objectives = [16, 11, 10];
 
         $this->initSharedObjectives($current_shared_objectives, $players);
 
@@ -523,16 +484,6 @@ class FirstAscent extends Bga\GameFramework\Table
 
         $available_characters = $this->pickAvailableCharacters($players);
 
-        // TESTING
-        // if (!in_array('5', $available_characters)) {
-        //     array_shift($available_characters);
-        //     $available_characters[] = '5';
-        // }
-        // if (!in_array('12', $available_characters)) {
-        //     array_shift($available_characters);
-        //     $available_characters[] = '12';
-        // }
-
         $this->setGlobalVariable('available_characters', $available_characters);
         $this->setGlobalVariable('round', '0');
         $this->setGlobalVariable('phase', clienttranslate('Setup'));
@@ -540,12 +491,6 @@ class FirstAscent extends Bga\GameFramework\Table
         // Create personal objective pile
         $personal_objective_deck = range(1, 12);
         shuffle($personal_objective_deck);
-
-        // TESTING
-        // array_push($personal_objective_deck, 9);
-        // array_push($personal_objective_deck, 10);
-        // array_push($personal_objective_deck, 11);
-        // array_push($personal_objective_deck, 12);
 
         $this->setGlobalVariable('personal_objective_deck', $personal_objective_deck);
         $this->setGlobalVariable('personal_objectives', []);
@@ -560,11 +505,6 @@ class FirstAscent extends Bga\GameFramework\Table
         $last_player = $this->getUniqueValueFromDb("SELECT `player_id` FROM `player` WHERE `player_no` = '$player_count'");
         $this->gamestate->changeActivePlayer($last_player);
 
-        /**** FOR TESTING ****/
-        /*foreach ($players as $player_id => $player) {
-            $this->cards_and_tokens->pickCardsForLocation(3, 'asset_deck', $player_id);
-        }
-*/
         /************ End of the game initialization *****/
     }
 
@@ -802,8 +742,6 @@ class FirstAscent extends Bga\GameFramework\Table
 
         // !! We must only return informations visible by this player !!
         $current_player_id = (array_key_exists(self::getCurrentPlayerId(), $result['players'])) ? self::getCurrentPlayerId() : null;
-
-        // FOR DEBUGGING THROUGH JAVASCRIPT
 
         // Turn order
         $this->setGlobalVariable('player_order', self::getCollectionFromDb("SELECT player_no, player_id FROM player", true));
@@ -1863,7 +1801,6 @@ class FirstAscent extends Bga\GameFramework\Table
         ));
 
         $face_rolled = $this->rollRiskDie('riskIt');
-        // $face_rolled = 1;
 
         $requirements_num = 0;
         foreach ($pitch_requirements as $type => $num) {
@@ -2492,7 +2429,6 @@ class FirstAscent extends Bga\GameFramework\Table
 
             case $risk_die:
                 $face_rolled = $this->rollRiskDie('confirmClimbingCardChoice');
-                // $face_rolled = 1;
 
                 $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                 $lucky_chalkbag = array_search('11', $hand_sb_tokens) ? true : false;
@@ -4853,7 +4789,6 @@ class FirstAscent extends Bga\GameFramework\Table
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true)[$player_id];
         $available_psych = $resource_tracker['psych'];
         $face_rolled = $this->rollRiskDie('confirmLuckyChalkbag');
-        // $face_rolled = 2;
         $use_case = $this->getGlobalVariable('risk_it') ? 'risk_it' : 'climbing_card';
 
         if ($use_case === 'risk_it') {
@@ -6337,7 +6272,6 @@ class FirstAscent extends Bga\GameFramework\Table
         $player_order = $this->getGlobalVariable('player_order', true);
         $current_num = intval(array_search($starting_player, $player_order));
         $new_num = $current_num > 1 ? $current_num-1 : $this->getPlayersNumber();
-        // $new_num = $current_num < $this->getPlayersNumber() ? $current_num+1 : '1';
         $new_starting_player = $player_order[$new_num];
 
         $this->setGlobalVariable('starting_player', $new_starting_player);
@@ -6467,7 +6401,6 @@ class FirstAscent extends Bga\GameFramework\Table
             'objectives_msg' => $objectives_msg,
         ]);
 
-        // $this->gamestate->nextState('testEnd');
         $this->gamestate->nextState('gameEnd');
     }
     
