@@ -1300,6 +1300,30 @@ trait UtilTrait {
         $this->drawStartingSpread();
     }
 
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_frameworkCheck() {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+
+        // the file of the running class, not of this trait: it shows which main PHP file the framework loaded
+        $file = (string)(new \ReflectionClass($this))->getFileName();
+        // shown relative to the game folder, the one that holds gameinfos.inc.php
+        $shown = $file;
+        for ($folder = dirname($file); dirname($folder) !== $folder; $folder = dirname($folder)) {
+            if (is_file($folder . '/gameinfos.inc.php')) {
+                $shown = substr($file, strlen($folder) + 1);
+                break;
+            }
+        }
+
+        $this->bga->notify->all('log_only', 'Framework check: running class ${runningClass}, parent class ${parentClass}, declared in ${file}', [
+            'runningClass' => get_class($this),
+            'parentClass' => get_parent_class($this),
+            'file' => $shown,
+        ]);
+    }
+
     // Helpers for the debug functions. No debug_ prefix, so they stay out of Studio's debug menu.
 
     // $repeats keeps a repeated id: Asset type_args have several copies
