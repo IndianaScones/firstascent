@@ -23,7 +23,7 @@ Moved from `MIGRATION_PLAN.md` §9.5 (decision D3, 2026-10-21). They come from t
 - **`getCollectionFromDb` keys by the first column.** Duplicate values silently overwrite rows.
 - **Database values come back as strings.**
 - **`playerStats->init` takes no player id** (P1.4).
-- **`${var}` string interpolation is deprecated.** One remains: a log string at `php:2638` (cards 15 and 24), found by `php -l` in P0.2. It is in `TODO.md`, planned for P1.5.
+- **`${var}` string interpolation is deprecated.** One remains: a log string in `php:confirmClimbingCardChoice` (cards 15 and 24), found by `php -l` in P0.2. It is in `TODO.md`, planned for P1.5.
 - **`define()` constants under a namespace.** Unqualified names fall back to the global namespace **[inferred: PHP semantics]**, so the risk is smaller than claude-code-bga says.
 
 ## Zombies and states

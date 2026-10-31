@@ -338,12 +338,12 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 #### Phase P1: server on the current framework (the legacy client stays)
 
 **P1.1 Debug functions** (in the legacy file; M) — prerequisite: P0.3 (the testing overrides are already set aside, in P0.2)
-- **Status:** in progress.
+- **Status:** done.
   - (a) is done: `4cdc882`, playtested on Studio on 2026-10-24.
   - (b1) is done: `c5500ec`, playtested on Studio (results reported 2026-10-28).
   - (b2) is done: `b8c0f79`, playtested on Studio (results reported 2026-10-30).
   - (c) is confirmed.
-  - (d) is next.
+  - (d) is done: `2cc1d9e`, playtested on Studio (2026-10-30).
   - Details in `progress.md`.
 - **Scope** (updated in P1.1 on 2026-10-24: (b) is split, and (d) is new):
   - (a) **Structural:** extract `pickAvailableCharacters()` (`php:setupNewGame ~714–737`) and `initSharedObjectives(array $ids)` (`~442–627`) without behavior change.
@@ -363,7 +363,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
       - 6391 and 6402, the commented personal-objective stat calls;
       - the `upgradeTableDb` template;
       - `utils.php ~33–35`.
-    - The line numbers are at `4cdc882`. (b2)'s die hook moves them, so locate each by content.
+    - The line numbers are at `4cdc882`. (b2) changed the three roll lines in place, so the numbers still held at `b8c0f79`; (d) located each item by content.
     - Refresh by function name, not line number, the drifted citations in §6.2 (the Phil note's `stNextCharacterSelect`; `getAllDatas` for `available_characters`) and in `misc/docs/BGA_PITFALLS.md` (the `${var}` log string, in `confirmClimbingCardChoice`). Jonathan's go-ahead for `BGA_PITFALLS.md`, 2026-10-28.
   - **Commits:** four. (a) `struct:`, (b1) `tool:`, (b2) `tool:`, (d) `struct:`. Each is playtested on its own.
   - **Gap check (D4), done in P1.1:** no override needs §6.3. Each one is covered by (b1) or (b2), including the setup-time Spread redraw, through `drawStartingSpread()`. §6.3 stays dropped, and U8 and Q-T5 stay moot.
@@ -553,7 +553,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - `self::` → `$this->` on instance methods (310 sites).
   - Deck through `$this->bga->deckFactory->createDeck('cards_and_tokens')` (`getNew` is deprecated in `_ide_helper.php ~2274`).
   - Check for fixed-length player id assumptions (T29). None found so far.
-  - The `${var}` log string at `php:2638` (cards 15 and 24), in its own `fix:` commit, since the corrected string changes the log (`TODO.md`).
+  - The `${var}` log string in `php:confirmClimbingCardChoice` (cards 15 and 24), in its own `fix:` commit, since the corrected string changes the log (`TODO.md`).
 - **Files:** `modules/php/Game.php`, `modules/php/UtilTrait.php`.
 - **Done when:** no `self::` call to an instance method remains, and the Deck comes from the factory.
 - **Playtest:** S-smoke.
@@ -1284,7 +1284,7 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
   - Each listed id not yet chosen replaces a random unlisted entry in `available_characters`. The count stays at the remaining selectors + 1.
   - It refuses ids already chosen.
   - It warns, without refusing, when two listed ids share a mat (`[1,2]`, `[3,4]`, …).
-- **Why it works:** the reload re-renders the selection from `gamedatas.available_characters` (`php:getAllDatas ~818`).
+- **Why it works:** the reload re-renders the selection from `gamedatas.available_characters` (`php:getAllDatas`).
 - **Suits a debug function:** yes.
 - **Decided in P1.1 (2026-10-24):**
   - Ids 1–12. Id 0, the zombie entry in `material.inc.php`, is refused. So are more ids than `available_characters` holds.
@@ -1308,7 +1308,7 @@ All of them are `#[Debug(reload: true)]` [Debugging doc:217–236]. The attribut
 **`debug_stackSummitBeta(string $typeArgs)`**, for example `"9"`, first = top
 - **When:** any time.
 - **Effect:** pulls each token from the supply or the Used pile onto the supply top; refuses tokens in a hand.
-- **Phil:** Phil's two starting tokens are dealt when character selection ends (`php:stNextCharacterSelect ~5533–5594`). To control them, call this during `characterSelection`, before the last player confirms.
+- **Phil:** Phil's two starting tokens are dealt when character selection ends (`php:stNextCharacterSelect`). To control them, call this during `characterSelection`, before the last player confirms.
 - **Suits a debug function:** yes.
 - **Decided in P1.1 (2026-10-24):**
   - Ids 1–12.

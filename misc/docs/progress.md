@@ -2,13 +2,14 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
-## 2026-10-24 (P1.1, in progress: (a), (b1) and (b2) done; (d) next)
+## 2026-10-24 (P1.1: done)
 
-The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. The (b1) session started 2026-10-26 and stopped 2026-10-28 with (b1) committed. The (b2) session started 2026-10-28 and stopped 2026-10-30 with (b2) committed. (d) starts in a new session. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8 and his (b2) decisions, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
+The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), at Jonathan's request. The (b1) session started 2026-10-26 and stopped 2026-10-28 with (b1) committed. The (b2) session started 2026-10-28 and stopped 2026-10-30 with (b2) committed. The (d) session ran on 2026-10-30: (d) was committed, playtested and pushed, and P1.1 closed in this entry. The spec for (b1) and (b2), with Jonathan's answers Q1–Q8 and his (b2) decisions, is in `MIGRATION_PLAN.md` §6.2. P1.1's updated scope, including (d) and its list, is in P1.1. This entry doesn't repeat them.
 
 **Compaction**
 - **(b1) session:** auto-compacted once, after the implementation and before the closing report. No unplanned git action happened. The session prompt asks for this entry to be updated at the next checkpoint after a compaction. That update was due with the closing report. It was made later, on 2026-10-27, after Jonathan's review and before the playtest.
 - **(b2) session:** auto-compacted once, on 2026-10-30, after the (b2) playtest list was written into P1.1 and before the closing message of that turn. The checkpoint update was missed in that turn. It was made at Jonathan's playtest report (2026-10-30), and the commit waited for his confirmation. No unplanned git action happened.
+- **(d) session:** no compaction noticed before this entry was written. No unplanned git action happened. No doc changed without an edit.
 - This final update replaces both checkpoint updates.
 
 **`MIGRATION_PLAN.md` overwritten during the (b2) playtest** (2026-10-30)
@@ -21,27 +22,33 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 - **Checked:** `TODO.md` and this file held only this session's edits, in CRLF, and `git status` showed nothing else changed. The working copy's diff of the two code files was identical to `p1.1b2.diff`.
 
 **State at the stop**
-- **HEAD:** `b8c0f79` (P1.1b2, `tool:`), pushed at Jonathan's "push". After `git fetch origin`, `main` and `origin/main` are level.
+- **HEAD:** `2cc1d9e` (P1.1d, `struct:`), pushed at Jonathan's "push". After `git fetch origin`, `main` and `origin/main` are level.
 - **Staged:** nothing.
 - **Unstaged:**
-  - `misc/docs/MIGRATION_PLAN.md`: P1.1's status, its (b2) playtest list and an added (d) item; in §6.2, the (b2) decisions, the popin check and the `debug_setSharedObjectives` citation;
-  - `misc/docs/TODO.md`: the zombie entry (go-ahead below);
+  - `misc/docs/MIGRATION_PLAN.md`: P1.1's status and (d)'s scope sentence, §6.2's two citations, and the `${var}` line in P1.5's scope;
+  - `misc/docs/BGA_PITFALLS.md` and `misc/docs/TODO.md`: the `${var}` citation, by function name;
   - this file.
   - They go in one `docs:` commit after Jonathan's "commit docs", pushed after his "push".
 - **Studio:**
-  - `modules/utils.php` and `firstascent.game.php` as at `b8c0f79`, deployed for the playtest;
+  - `modules/utils.php` and `firstascent.game.php` as at `2cc1d9e`, deployed for the (d) playtest;
   - the other game files as at `bc4a9c9`.
 - **Files outside git:**
   - In `D:\Documents\BGA Studio\`:
-    - `p1.1b2.diff`: (b2) as committed, 245 lines (`firstascent.game.php | 6`, `modules/Utils.php | 188`);
-    - `p1.1b2-docs.diff`: this docs diff;
-    - from earlier sessions, unchanged: `p1.1b1.diff`, `p1.1b1-docs.diff`, `p1.1a.diff`, `p1.1a-v2.diff` and `p1.1-docs.diff`.
-  - The scratchpad of the (b2) session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\b0816e3d-91f3-4980-986b-0b61d9d0fb49\scratchpad\`. It stays out of the repo:
-    - the stub harness `p11b2_harness.php`, run as `php p11b2_harness.php <repo> [quiet]`;
-    - `p11b2_mutants.php`, run as `php p11b2_mutants.php <repo>`. It writes its copies to `mut/`, removed after the runs;
-    - `commit_b2.txt`, the commit message;
-    - `transcript_tools\`: the scripts that read the session transcript for the restore, the extracted edit, and `cached_b2.diff`, the staged diff compared with `p1.1b2.diff`.
-  - The (b1) session's scratchpad (`…\032e89f2-8e43-4bcd-9f68-3c63b37b8733\scratchpad\`), where `p11b1_harness.php` was run again for the (b1) regression check, and the first session's (`…\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`).
+    - `p1.1d.diff`: (d) as committed, 179 lines (`firstascent.game.php | 67`, `modules/Utils.php | 5`);
+    - `p1.1d-docs.diff`: this docs diff;
+    - from earlier sessions, unchanged: `p1.1b2.diff`, `p1.1b2-docs.diff`, `p1.1b1.diff`, `p1.1b1-docs.diff`, `p1.1a.diff`, `p1.1a-v2.diff` and `p1.1-docs.diff`.
+  - The scratchpad of the (d) session, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\47f2ee00-63ce-402a-befc-623621c9178b\scratchpad\`. It stays out of the repo:
+    - `items.php` (classifies each item), `remove_lines.php` (the removal), `tokcheck.php` (the token check), `eolcount.php` (the line-ending counts), `apply_docs.php` (this docs step's edits);
+    - `p11b2_harness_d.php`, the (b2) harness with the commented-die-line check relaxed, run as `php p11b2_harness_d.php <repo> [quiet]`;
+    - `commit_d.txt`, the commit message;
+    - `head/` (HEAD's blobs and the pre-change working copies), `headrepo/` (HEAD's files laid out for the harness), and the diffs `before_stage.diff`, `cached_d.diff` and `committed_d.diff`.
+  - The earlier scratchpads, unchanged (they stay out of the repo):
+    - the (b2) session's, `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\b0816e3d-91f3-4980-986b-0b61d9d0fb49\scratchpad\`. The (d) session ran its harness from there and changed nothing in it:
+      - the stub harness `p11b2_harness.php`, run as `php p11b2_harness.php <repo> [quiet]`;
+      - `p11b2_mutants.php`, run as `php p11b2_mutants.php <repo>`. It writes its copies to `mut/`, removed after the runs;
+      - `commit_b2.txt`, the commit message;
+      - `transcript_tools\`: the scripts that read the session transcript for the restore, the extracted edit, and `cached_b2.diff`, the staged diff compared with `p1.1b2.diff`;
+    - the (b1) session's (`…\032e89f2-8e43-4bcd-9f68-3c63b37b8733\scratchpad\`), where `p11b1_harness.php` was run again for the (b1) regression check, and the first session's (`…\2b85d47a-21c5-4b19-88da-a92b6dd232b6\scratchpad\`).
   - `D:\Documents\BGA Studio\firstascent-overrides\`, untouched. Retiring it is Jonathan's decision.
 
 **Start check ((b2) session):** `git fetch origin`; HEAD `8d02d04`, level with `origin/main`, working tree clean. `git diff --stat c5500ec HEAD` touches only `MIGRATION_PLAN.md`, `BGA_PITFALLS.md` and this file. `git diff --stat 4cdc882 HEAD -- firstascent.game.php` shows no change.
@@ -54,8 +61,67 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 - **(a)** done: `4cdc882` `struct:`, playtested.
 - **(b1)** done: `c5500ec` `tool:`, playtested.
 - **(b2)** done: `b8c0f79` `tool:`, playtested.
-- **(d)** next, in a new session: the scaffolding commit, with the citation refresh now in its scope.
+- **(d)** done: `2cc1d9e` `struct:`, playtested. The citation refresh is in the closing `docs:` commit.
 - **(c)** confirmed: the guard on `debug_goToState` is at `utils.php:929–934` and throws `\BgaSystemException('Studio only')` outside Studio.
+
+**(d): the scaffolding removal** (`2cc1d9e`, `struct:`)
+- **What:** 15 items, 72 deleted lines, no added lines, as a mechanical sweep (§2.1). The pattern is the commented-out testing scaffolding that the (b1) and (b2) debug functions replace, plus the dead `php_debug()` stub.
+  - **`firstascent.game.php`:** 14 items, 62 lines, plus 5 blank lines that the removal left doubled: 67 lines.
+    - `setupNewGame`, 8 items (56 lines): 307–322 (the climbing-deck `$testingN` lookups and stacking), 334 (the token moved to the Used pile), 336–339 (the Summit Beta supply's), 401–414 (the "SPREAD TESTING" block), 432–433 (the shared objectives override), 526–534 (the character-pool TESTING block), 544–548 (the personal objective deck TESTING block), 563–567 (the commented three-starting-cards loop).
+    - `getAllDatas`, 1 line: the label at 806, "FOR DEBUGGING THROUGH JAVASCRIPT". It sat above live code (`// Turn order` and the `player_order` write), which stays.
+    - `riskIt`, `confirmClimbingCardChoice`, `confirmLuckyChalkbag`, 3 lines: the commented `$face_rolled` line after each `rollRiskDie` call (1866, 2495, 4856).
+    - `stNextRound`, 1 line (6340): the old starting-player direction.
+    - `stPreGameEnd`, 1 line (6470): the commented jump to `testEnd`.
+  - **`modules/utils.php`:** the `php_debug()` stub (223–226), 4 lines, plus 1 doubled blank line: 5 lines. It was the only live code removed. Nothing calls it.
+  - **Blank lines:** five in `firstascent.game.php` (HEAD lines 415, 434, 535, 549 and 807) and one in `modules/utils.php` (227), each the blank line after a removed range. Two more went inside ranges: 402 and, in the stub, 225.
+  - **Kept:** 6391 and 6402 (the commented personal-objective stat calls), the `upgradeTableDb` template, and `utils.php` 33–35.
+  - **Numbers:** 67 + 5 = 72 deletions; the diff body has 72 `-` lines (64 with text, 8 blank) and no `+` line; 13 hunks in `firstascent.game.php` and 1 in `modules/Utils.php`.
+- **Start check:** `git fetch origin`; HEAD `a5118b2`, level with `origin/main`, working tree clean. `git diff --stat b8c0f79 HEAD` touched only `misc/docs/`. `git diff --stat 4cdc882 HEAD -- firstascent.game.php` showed `firstascent.game.php | 6`, (b2)'s three roll lines. No doc changed without an edit: at the stop before the deploy, `git status` showed only the two code files, and before the docs edits the four docs I edit had their earlier modification times and CRLF endings only.
+- **Pre-change checks** (reported before the removal; every result matched the plan):
+  1. **The items at HEAD.** The plan's line numbers still held. A token-based classifier (`items.php`) found no live token in any `firstascent.game.php` item, and their enclosing functions are those above. The `php_debug()` stub is a live method. Item 401–414 holds one blank line (402).
+  2. **No overlap** with the kept items or with the live `$this->rollRiskDie('<site>')` lines (1865, 2494, 4855), or with the live neighbours of 6340 and 6470.
+  3. **`php_debug`, whole repo** (all files, git-ignored `.vscode/` included; not `misc/docs/bga/`): one code hit, the declaration at `modules/utils.php:223`. No call, and no declaration in `firstascent.js`, `modules/*.js`, the `.tpl`, `action.php`, `states.inc.php`, `misc/tests/`, `_ide_helper.php` or `bga-framework.d.ts`. The other hits are prose in `MIGRATION_PLAN.md` and this file.
+  4. **MARKERS** of `misc/tests/technique_matching.php`: none is a removed line.
+- **How the lines were removed:** by a script (`remove_lines.php`), not the Edit tool, so the CRLF endings stayed byte for byte. The script checked each range's first and last line against the expected text, and that each removed line ended in CRLF, before it wrote anything.
+- **Checks** (scratch scripts outside the repo):
+  1. **`php -l`:** both files pass. The only message is the known `${var}` deprecation, now at `firstascent.game.php:2589`, in `confirmClimbingCardChoice` (2653 at `b8c0f79`; 64 removed lines sit above it). The earlier 2638 is the same string before (a): `php -l` on `4cdc882~1` reports 2638, and on `4cdc882` reports 2653.
+  2. **Token check** (`token_get_all` on HEAD's version and the working copy; `T_COMMENT`, `T_DOC_COMMENT` and `T_WHITESPACE` dropped; line endings normalised to LF first, because a `T_OPEN_TAG` token carries its newline and the HEAD blob is LF):
+     - `firstascent.game.php`: 42,286 tokens in both, **identical**. Compared with both the HEAD blob and the pre-change CRLF copy.
+     - `modules/utils.php`: 10,705 tokens at HEAD, 10,699 now. **The residual is exactly six tokens, only in HEAD: `function php_debug ( ) { }`.** None is only in the working copy.
+  3. **`php misc/tests/technique_matching.php`** with HEAD's `firstascent.game.php` as the baseline: all checks passed. The baseline comparison is identical (24,192, 188,160 and 20,000 cases; every other counter 0).
+  4. **The (b2) harness** (`p11b2_harness.php <repo> quiet`): passed 19,709, failed 1. The failure is its own check "three rollRiskDie sites, each followed by its commented line". Its regex requires the `// $face_rolled = N;` lines that (b2) left for (d). That is how the harness extracts text from the game file, not the code, so no game code changed for it. Because the regex then matched nothing, its per-site check (that each `rollRiskDie` call is inside the function it names) also ran on no site.
+     - **Covered by a scratch copy** (`p11b2_harness_d.php`, in the (d) scratchpad; the (b2) scratchpad is untouched) with the commented die line made optional: **passed 19,678, failed 0** on the working copy, including the per-site check. On HEAD's files the same copy passed 19,628, failed 0, and the original harness passed 19,687, failed 0.
+     - The pass counts vary between runs, because some of its runs are random. The R-10 line it prints (four Gear on top) stayed between about 1 in 77 and 1 in 125.
+- **Line endings, and why bash missed the CRs.**
+  - **Counts**, byte by byte (PHP): before the removal `firstascent.game.php` had 6,599 CRLF, 0 bare LF and 0 bare CR, and `modules/utils.php` had 1,393, 0 and 0. After it they have 6,532 (−67) and 1,388 (−5), still with no bare LF and no bare CR. The HEAD blobs are all LF (6,599 and 1,393 bare LF). Neither file ends with a newline, before or after, and the HEAD blobs don't either. `git ls-files --eol` shows `i/lf w/crlf` for both throughout.
+  - **The miss:** mid-session, `grep -c $'\r'` returned 0 and `sed -n Np | cat -A` showed no `^M`, although git reported `w/crlf`. The files had CRs all along. Git for Windows' `grep` (without `-U`) and `sed` (without `-b`) read in text mode and strip the CR at each line end. On a test file, plain `grep` counted 0 and `grep -U` counted 2; `sed` printed `a\n` and `sed -b` printed `a\r\n`. On the real file, `grep -cU` counted 6,532 lines with a CR, one for every line. `od -c`, `cat`, `head` and `wc -l` keep the bytes, and `head -3 | cat -A` shows `^M$`.
+  - **Effect:** none of the checks depended on those two tools for line endings. The removal script, the PHP counts, a PowerShell byte count and `git ls-files --eol` all read the bytes. For a CR check on these files, use `od`, PHP or `grep -U`.
+  - The diff file `p1.1d.diff` has no CR (179 LF lines), as `git diff` writes it.
+- **Diff and message:** `p1.1d.diff` (`D:\Documents\BGA Studio\`), 179 lines, 14 hunks. Jonathan confirmed that the diff matched what he reviewed. While he played the build, he asked for two changes to the message: the token moved to the Used pile listed on its own (334, "(1)", totals kept), and a sentence that the relaxed harness copy passes in full. The playtest line was filled in at commit time, in his words.
+- **Playtest** (Studio; results reported 2026-10-30; all pass)
+  - `firstascent.game.php` and `modules/utils.php` deployed, F5 in every open tab.
+  - **Table 1** (a new table, 2 players, as in the list): every check under "New table" passed, including the starting-player change after a full round.
+  - **Table 2** (a second new table, because Table 1 had already played a round for the last setup check): S-smoke passed, with no new console errors or `[FA …]` warnings.
+  - **The optional extra:** a "Risk it" on a pitch showed no "Debug:" line in the log.
+  - **No replays:** no Studio save/restore was used.
+  - **Where the results come from:** Jonathan's report only. It doesn't list the individual setup results (for example, whether The Elitist came up). Some of the list's expectations came from my reading of the code (three characters with 2 players, The Elitist's +4 by chance, the starting-player rotation) and the rest from earlier Studio runs. His report says all passed, so no mismatch was recorded.
+- **Staging, commit and push:**
+  - `git add -- firstascent.game.php modules/Utils.php`, the tracked names. `git diff --cached --stat`: 2 files, 72 deletions. The staged diff, compared with `cmp`, was identical to `p1.1d.diff`, and so was `git diff HEAD~1 HEAD` after the commit.
+  - Committed as `2cc1d9e` after Jonathan's "commit P1.1d", and pushed (a normal push) after his "push". After `git fetch origin`, `main` and `origin/main` are level.
+- **The citation refresh, and the search for 2638 and 2653** (`misc/docs/`, not `misc/docs/bga/`, not the older entries of this file):
+  - **Checked in the code first:** `stNextCharacterSelect` (5472) contains Phil's deal (the `// Phil` block, with two `pickCardForLocation('summit_beta_supply', …)` calls); `getAllDatas` (734) contains `available_characters` (769); `confirmClimbingCardChoice` (2070) contains the `${var}` log string (2589).
+  - **Edited, as named in the session prompt:** `BGA_PITFALLS.md:26` ("a log string in `php:confirmClimbingCardChoice`"); `TODO.md`, the "Server bugs" entry ("`php:confirmClimbingCardChoice`"); `MIGRATION_PLAN.md` P1.5's scope line ("in `php:confirmClimbingCardChoice`"); §6.2's two citations (the Phil note: "`php:stNextCharacterSelect`"; `debug_setAvailableCharacters`: "`php:getAllDatas`"); P1.1's status and (d)'s scope sentence.
+  - **Hits left as they are:**
+    - This file, lines in this entry from (a), (b1) and (b2): "`${var}` deprecation at `firstascent.game.php:2653`". They were true when written.
+    - `FREEZE_INVESTIGATION.md:472`: "2653" is a line number in a table of the closed investigation, unrelated to the log string.
+    - The P0.2 entry of this file (`php:2638`): an older entry, excluded.
+  - Other `php:` line citations in those docs (for example `getAllDatas ~796` and `~830` in §5.4) drifted too. They weren't named, so they weren't changed.
+- **Go-aheads in the (d) session**
+  - **Outside the step's list:**
+    - `misc/docs/BGA_PITFALLS.md`, the `${var}` item's citation: Jonathan's go-ahead of 2026-10-28, restated in the session prompt for 2026-10-30.
+    - `misc/docs/TODO.md`, the "Server bugs" entry that starts "`php:2638`, in `confirmClimbingCardChoice`", and the `${var}` line in `MIGRATION_PLAN.md` P1.5's scope: the same refresh, nothing else in either. Jonathan's go-ahead, 2026-10-30.
+  - **In the step's list:** this entry; P1.1's status and (d)'s scope sentence; §6.2's two citations.
+  - The (d) commit and its push. This docs commit and its push wait for Jonathan's "commit docs" and "push".
 
 **(b2): the six debug functions** (`b8c0f79`, `tool:`)
 - **`modules/utils.php`:**
@@ -384,10 +450,7 @@ The session started 2026-10-23 (Jonathan's local date) and stopped before (b1), 
 - Retiring `D:\Documents\BGA Studio\firstascent-overrides\`.
 
 **Next**
-1. (d) in a new session: remove the commented testing scaffolding, in one `struct:` commit, with its list in P1.1.
-   - (b2) changed the three roll lines in place and added nothing above line 223 of `modules/utils.php`, so (d)'s line numbers still hold at `b8c0f79`. Checked: the commented die lines are at 1866, 2495 and 4856, and `php_debug()` is at 223.
-   - Its scope now also has the citation refresh in §6.2 and `BGA_PITFALLS.md` (go-ahead 2026-10-28).
-   - Playtest: a new table's setup, and S-smoke (P1.1).
+1. P1.2 (move the server to `modules/php/Game.php`), in a new session. P1.1 is closed.
 
 ## 2026-10-23 (P0.3: tags and the phase switch)
 
