@@ -36,6 +36,7 @@ Decided by Jonathan on 2026-10-21, after reviewing `MIGRATION_PLAN.md`. The plan
   - **After the migration, in P8, before resubmission:** ItemManager, BgaAnimations (per component), BgaCards, BgaDice, BgaScoreSheet, and the last-turn banner. ItemManager must come before resubmission because of its schema change.
   - The "Not recommended" row stays out.
 - **D9 Pre-migration leftovers:** the SQL strict-mode fix (T23) and the replay check (F13) are folded into P1. Reason: P1.2 and P1.3 re-check game creation anyway, so no separate legacy task is needed. Plan: §2.3 (P1.2, P1.3).
+  - **Amendment (decided 2026-10-30, recorded 2026-11-02):** T23 is dropped. The item comes from a forum post from 2020, and Jonathan judges the issue benign. That is his judgement, not a verified fact: the cause was never traced. F13 stays folded into P1 (P1.2, P1.3).
 - **D10 UX register:** `UX_CHANGES.md`, in the format of §12, with a changed scheduling rule. Reason: UX changes made once, after the structure settles, avoid doing them twice in code that P5 restructures, and a parity-only migration stays reviewable. Plan: §12.
   - The migration (P0–P7) is parity only. Decided UX items are implemented in P8.
   - Exceptions: D6's message (P4.2); fixes for visible `TODO.md` bugs (for example T6), which stay in their slices as `fix:` commits; the two D8 components listed for the migration.
@@ -52,7 +53,7 @@ Decided by Jonathan on 2026-10-21, after reviewing `MIGRATION_PLAN.md`. The plan
 
 ## Most bugs are deferred to the migration
 
-Client-side visual and interaction bugs live in code being rebuilt, so fixing them in legacy code is wasted effort. Detailed reproduction steps in TODO.md serve as regression tests for the migrated code. Before migrating, only two things are done in legacy code: the freeze investigation with its two targeted fixes, and one final legacy fix batch (see "The legacy build gets one final fix batch, then it is frozen"). The SQL strict-mode game creation fix is folded into P1 (D9).
+Client-side visual and interaction bugs live in code being rebuilt, so fixing them in legacy code is wasted effort. Detailed reproduction steps in TODO.md serve as regression tests for the migrated code. Before migrating, only two things are done in legacy code: the freeze investigation with its two targeted fixes, and one final legacy fix batch (see "The legacy build gets one final fix batch, then it is frozen"). The SQL strict-mode game creation fix was folded into P1 (D9) and then dropped on 2026-10-30, as Jonathan's judgement (D9's amendment).
 
 
 

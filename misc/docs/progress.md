@@ -2,48 +2,29 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
-## 2026-11-02 (P1.2: in progress)
+## 2026-11-02 (P1.2: done)
 
-An "in progress" entry, rewritten at the second rollover checkpoint of P1.2 (the first was 2026-10-31, after the tool commit). P1.2 is not done: both code commits (`struct:` rename and adaptation) are made and pushed, and the closing docs (section 8 of the session prompt) are not started. The final P1.2 entry ("P1.2: done") replaces this one. A new session can finish P1.2 from this entry and P1.2's section of `MIGRATION_PLAN.md`; for anything not recorded here, the two session transcripts are listed under "Files outside git".
+P1.2 (move the server to `modules/php/Game.php`) is done. Its code commits are pushed and were playtested on Studio, and its closing docs are written by the session described under "This session". This entry replaces the "in progress" entry of 2026-11-02, which is at `0217be6` (`git show 0217be6:misc/docs/progress.md`; the entry starts at line 5 there). That version is the full text this one condenses. This entry keeps the facts, results, findings, decisions and state. It drops what only records process: the closing-docs checklist (done now) and the full quotes of code session 1's and 2's go-aheads (listed below, with pointers). Text kept from the earlier entry stays in the voice of the session that wrote it: "I" and "my report" mean code session 2 (in the record of code session 1, code session 1).
 
-P1.2 so far ran in two code sessions:
-- **Code session 1** (started 2026-10-30; transcript `2eb67ffe-…`): the start check, the `TODO.md` restore, section 4's checks, the tool commit `322754e`. Its record is kept at the end of this entry ("Record of code session 1").
-- **Code session 2** (started 2026-10-31 at 15:58 CDT with the prompt "P1.2 (continued): the rename, the adaptation, the deploy and the closing docs"; transcript `7de0b7e8-…`): the rename, the adaptation, the material fix, the playtest, the two commits, their push. Everything from here to "Next" is its record. It was auto-compacted twice (see "Compaction").
+P1.2 ran in three sessions:
+- **Code session 1** (started 2026-10-30; transcript `2eb67ffe-…`): the start check, the `TODO.md` restore, section 4's checks, the tool commit `322754e`. Its record is kept at the end of this entry.
+- **Code session 2** (started 2026-10-31 at 15:58 CDT with the prompt "P1.2 (continued): the rename, the adaptation, the deploy and the closing docs"; transcript `7de0b7e8-…`): the rename, the adaptation, the material fix, the playtest, the two code commits and their push, then the rollover entry (`0217be6`). It was auto-compacted twice (see "Compaction").
+- **This session** (2026-11-02; transcript `9beef41f-…`): the closing docs. Docs only.
 
 Times are Jonathan's local time (CDT until 2026-11-01 02:00, CST after), converted from the transcript's UTC timestamps.
 
-**State at the rollover**
-- **HEAD:** `c453c4a`, pushed at Jonathan's "push" (a normal push, no tags): `e3cf621..c453c4a  main -> main`, at 2026-11-01 23:52:59 −0600 (the `origin/main` reflog). Afterwards HEAD, `origin/main` and the remote's `main` (`git ls-remote`) were all `c453c4a`, and `git rev-list --left-right --count origin/main...HEAD` gave `0 0`.
-- **`git log --oneline -4`:**
-  - `c453c4a` struct: adapt the moved server files to the current framework (P1.2)
-  - `0bce03f` struct: move the server files to modules/php/ (P1.2, rename only)
+**State at the end of P1.2**
+- **HEAD at the start of this session:** `0217be6` (committed 2026-11-02 12:38:05 −0600, pushed at 12:38:13), level with `origin/main`, working tree clean, nothing staged.
+- **P1.2's commits,** oldest first, all pushed:
+  - `322754e` tool: add debug_frameworkCheck, a Studio-only check of the running class (P1.2) (code session 1)
   - `e3cf621` docs: P1.2 in progress (tool commit done; rollover checkpoint)
-  - `322754e` tool: add debug_frameworkCheck, a Studio-only check of the running class (P1.2)
-- **Staged:** nothing.
-- **Unstaged:** `misc/docs/MIGRATION_PLAN.md` (P1.2's playtest list, v3: its working-tree diff is byte-identical to `p1.2-playtest-v3.diff`, 95 lines, +78/−6, checked with `cmp`) and this file. They go into one `docs:` commit after Jonathan's "commit docs" (the diff for review is `p1.2-wip2-docs-v2.diff`, which supersedes `p1.2-wip2-docs.diff`) and are pushed after his "push". If that commit exists when you read this, HEAD is that commit on top of `c453c4a` and the two files are clean: run `git status` and `git log --oneline -4` first.
-- **Studio** (as far as I know; I can't see it): `modules/php/Game.php` (with the material fix, 350,578 bytes) and `modules/php/UtilTrait.php` (69,152 bytes), uploaded by Jonathan with WinSCP; they are the files committed in `c453c4a` (`Game.php` was not edited after the material fix). By his message of 2026-11-02 (items 1 and 2, quoted under "Go-aheads"): after deploy 1 he checked Studio's file list, `modules/php/` holds `Game.php` and `UtilTrait.php`, and the root `firstascent.game.php` and `modules/utils.php` are deleted; deploy 2 was `Game.php` only, and he didn't read its size (the 350,578 bytes above are the committed file, not a figure he saw on Studio). The root `material.inc.php` must be there: `Game.php` requires it in the constructor, and a missing file would be a fatal error (my reading), but his tables worked. The other Studio files are as in the P1.1 entry's "State at the stop".
+  - `0bce03f` struct: move the server files to modules/php/ (P1.2, rename only)
+  - `c453c4a` struct: adapt the moved server files to the current framework (P1.2)
+  - `0217be6` docs: P1.2 in progress (code commits pushed; second rollover checkpoint)
+  - this session's `docs:` commit, which adds this entry: after Jonathan's "commit docs", pushed after his "push". Its hash can't be written into the entry it contains; it is in my report.
+- **Pushes:** `e3cf621` (with its ancestor `322754e`) was on `origin/main` by 2026-10-31 15:41:25 −0500; `c453c4a` (with `0bce03f`) was pushed at Jonathan's "push", 2026-11-01 23:52:59 −0600 (`e3cf621..c453c4a  main -> main`), and `0217be6` on 2026-11-02 at 12:38:13 −0600. Normal pushes, no tags.
+- **Studio** (as far as I know; I can't see it): `modules/php/Game.php` (the committed file, with the material fix: 350,578 bytes) and `modules/php/UtilTrait.php` (69,152 bytes), uploaded by Jonathan with WinSCP; the root `firstascent.game.php` and `modules/utils.php` are deleted. The root `material.inc.php` must be there: `Game.php` requires it in the constructor. The other Studio files are as in the P1.1 entry's "State at the stop".
 - **Byte counts at `c453c4a`** (PHP, not `grep`): `Game.php` 350,578 bytes, CRLF 6,534; `UtilTrait.php` 69,152 bytes, CRLF 1,414; no bare LF or bare CR in either. `git ls-files --eol`: `i/lf w/crlf` for both.
-
-**Files outside git**
-- **In `D:\Documents\BGA Studio\`, from code session 2** (line counts re-checked with `wc -l` on 2026-11-02):
-  - `p1.2-move.diff` (8 lines): the rename commit, 2 files, 0 insertions, 0 deletions. **Approved** ("The code diffs are approved as reviewed (p1.2-move.diff, 8 lines; …)", 2026-10-31 21:43). It equalled the index before `0bce03f` was committed.
-  - `p1.2.diff` (79 lines, +15/−13): the adaptation before the material fix. **Approved as reviewed** (same message). **Superseded by `p1.2-v2.diff`.** This is the code that failed at table creation on Studio.
-  - `p1.2-v2.diff` (88 lines, +17/−13; `Game.php` 24, `UtilTrait.php` 6): `p1.2.diff` plus the material require. **The adaptation as committed in `c453c4a`:** before that commit the working-tree diff was byte-identical to this file and the cached stat matched it. **Approved** in his review before the redeploy; he didn't tell me then, and his message of 2026-11-02 (item 3, quoted under "Go-aheads") is the record. It was shown for review before the redeploy ("stop for my review before I redeploy"), the material go-ahead it implements is quoted below, and he then said "commit P1.2".
-  - `p1.2-playtest.diff` (85 lines, +68/−6): the first playtest list. **Approved with five changes** (message of 2026-10-31 22:02). **Superseded by `p1.2-playtest-v2.diff`.**
-  - `p1.2-playtest-v2.diff` (90 lines, +73/−6): the list with his five changes. **Superseded by `p1.2-playtest-v3.diff`.**
-  - `p1.2-playtest-v3.diff` (95 lines, +78/−6): v2 plus the material additions (root check, 1a's F5 and log check, 1e's count query) and the `Game.php` citations shifted by 2. Written on his instruction (the material go-ahead, item 2). **Current: it is the working-tree diff of `MIGRATION_PLAN.md`.** **Approved** in his review before the redeploy; he didn't tell me then, and his message of 2026-11-02 (item 3, quoted under "Go-aheads") is the record. He played from a copy of the list from before v3 (see "The playtest"). It is in `p1.2-wip2-docs-v2.diff`.
-  - `replay-fix-proposal.diff` (63 lines, `firstascent.js | 18`, 9 insertions, 9 deletions): the replay fix. **A proposal, not applied.** It is LF only and valid against `firstascent.js` at `c453c4a` (`git apply --check --cached` passed; the file is unchanged by P1.2).
-  - `p1.2-wip2-docs.diff` (565 lines): this entry and the playtest list as first written, for review. **Approved with five corrections** (his message of 2026-11-02, quoted under "Go-aheads"); **superseded by `p1.2-wip2-docs-v2.diff`**. Not overwritten.
-  - `p1.2-wip2-docs-v2.diff`: this entry with those corrections and the same playtest list, for review. Its line count and `--stat` are in my report to Jonathan, not here (they would change this file).
-- **From code session 1, unchanged:** `p1.2-tool.diff` (35 lines, committed as `322754e`), `p1.2-wip-docs.diff` (178 lines, committed as `e3cf621`), and the P1.1 diffs. `firstascent-overrides\` is untouched.
-- **Code session 2's scratchpad,** `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\7de0b7e8-dc7a-43aa-8211-303c7440cadf\scratchpad\`. It stays out of the repo:
-  - Inventories: `inventory.php` (copied from session 1's), `inv_game_now.txt`, `inv_utils_now.txt`; `list_new.php` (every `new <class>`), `top_level.php`.
-  - Checks: `tokcheck.php` (token check), `load_check.php` and `ide_stubs.php` (declaration check against the IDE stubs), `ns_semantics.php` (string callable versus closure under a namespace), `layout/` (the `require dirname(__DIR__, 2)` expression under another working directory), `cc.php` and `mat.php` (scratch tests that load `material.inc.php` into a scratch object), `tm_head.txt`, `tm_new.txt`, `tm_new2.txt` (`technique_matching.php` output).
-  - Edits, each by exact-match script with CRLF kept: `edit_adapt.php`, `edit_material.php`, `edit_plan_playtest.php`, `edit_plan_review.php`, `edit_plan_v3.php`, `edit_progress_update.php`, `edit_progress_winscp.php`, `edit_progress_material.php`, `edit_progress_replay.php`; their blocks `playtest_block.md`, `progress_update_block.md`, `progress_material_block.md`, `progress_replay_block.md`; the plan before each edit (`plan_before_review.md`, `plan_before_v3.md`).
-  - The material analysis: `propose_material.php`, `Game.cur.lf.php`, `Game.proposed.lf.php`, `delta_v1_v2.txt`; `head/` (the two files as at `fdf421b`, LF).
-  - The replay investigation: `notif_survey.php` with `notif_survey.txt` and `notif_survey2.txt`, `state_props.php`, `enclosing.php`, `replay_fix.php`, `rf/` (the two `firstascent.js` copies and the diff).
-  - Transcript readers written for this checkpoint: `user_msgs.php` and `asst_msgs.php` with their output folders `um2/` and `as2/`, `as2s/`; `region.php`. `msg_adapt.txt` is the adaptation commit message.
-- **Transcripts,** outside the repo, in `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\`: `7de0b7e8-dc7a-43aa-8211-303c7440cadf.jsonl` (code session 2; the session prompt is its first message) and `2eb67ffe-a03f-4360-b47e-050b6dd0ee93.jsonl` (code session 1).
 
 **Status of each item**
 - **5.2, the rename: committed** as `0bce03f` (`struct:`, "move the server files to modules/php/ (P1.2, rename only)"), 2026-11-01 19:29:43. `modules/php/` was created empty, then `git mv firstascent.game.php modules/php/Game.php` and `git mv modules/Utils.php modules/php/UtilTrait.php`. `git show -M --name-status` gives `R100` for both files, and `git show -M --format= 0bce03f` is byte-identical to `p1.2-move.diff` (checked with `cmp` on 2026-11-02). The message says the commit alone doesn't run on Studio (the class is still the global `FirstAscent` and the `require_once('modules/utils.php')` path is gone) and that the two commits were playtested together.
@@ -62,12 +43,12 @@ Times are Jonathan's local time (CDT until 2026-11-01 02:00, CST after), convert
     - No callback: 1 and 0.
     - Total 13 and 8 = 21. `debug_frameworkCheck` added 2 (`get_class($this)`, `get_parent_class($this)`), so 23 at HEAD; both take an object, so nothing to convert.
   - **The `$sortType` trace:** assigned once in each of `argSelectPortaledge` (`Game.php:5313`) and `drawFromPortaledge` (`UtilTrait.php:596`), both times a closure with `use ($type)`. No other assignment, so no value is a string naming a function.
-  - **The 50 versus 52 count** (answered to Jonathan, nothing edited): the trait at `fdf421b` has 52 `new` of a class name starting with a backslash: 2 `\BgaSystemException` (lines 919, 926), 12 `\Bga\GameFramework\SystemException` and 38 `\Bga\GameFramework\VisibleSystemException`. The "50" in session 1's line is the last two groups; its "3 legacy" is the two `\BgaSystemException` plus `feException` (game file, line 6488). So 50 + 3 = 53 = 52 in the trait + 1 in the game file, with no double count. A `new \Error` at trait line 34 sits in a block comment (lines 33–35).
+  - **The 50 versus 52 count** (answered to Jonathan, nothing edited): the trait at `fdf421b` has 52 `new` of a class name starting with a backslash (2 `\BgaSystemException`, 12 `\Bga\GameFramework\SystemException`, 38 `\Bga\GameFramework\VisibleSystemException`). Session 1's "50" is the last two groups, and its "3 legacy" is the two `\BgaSystemException` plus `feException` (game file, line 6488), so 50 + 3 = 53 = 52 in the trait + 1 in the game file, with no double count.
   - **Line numbers:** `Game.php` lines shift by +2 from line 30 on (the material require), for example the `${var}` deprecation 2589 → 2591, the Portaledge log lines 2145, 2147 and 2760 → 2147, 2149 and 2762, and `getAllDatas`'s material reads 761–770 → 763–772; `UtilTrait.php` lines after line 3 shift by +2 (the namespace). My report after 5.3 said `Game.php` lines were unchanged by the adaptation (this file never said so); that held only until the material fix. No citation refresh in this step, as decided.
   - **The namespace's case:** the docs and `_ide_helper.php` don't settle how the framework derives the namespace and class from `firstascent`. Studio did: the warnings of the first attempt and 1b name `Bga\Games\FirstAscent\Game`, declared in `modules/php/Game.php`.
 - **The material fix: committed** (inside `c453c4a`; a go-ahead outside the approved scope, quoted below).
   - **What it is:** two lines at `Game.php` 31–32, right after `parent::__construct()`: a comment and `require dirname(__DIR__, 2) . '/material.inc.php';`. It was applied by script with exact-match checks and CRLF kept.
-  - **Why:** the first Studio attempt failed. The record of that attempt and of the go-ahead follows, carried from the earlier updates of this entry; their repeats of the checks and of the line-number correction are under 5.3 above.
+  - **Why:** the first Studio attempt failed. The record of that attempt and of the go-ahead follows; the line-number correction is under 5.3 above.
   - **Studio attempt 1: Table 1 failed at creation** (Jonathan's report; the Studio reference is GS0 01/11 04:47:59; the code was as in `p1.2.diff`).
     - **First warning:** `Undefined property: Bga\Games\FirstAscent\Game::$asset_cards in modules/php/Game.php on line 326`, then `Trying to access array offset on null` at line 326.
     - **Loop and timeout:** later the same warning alternated between lines 709 and 713, the `while` loop of `drawStartingSpread` (`Game.php` 707–715 before the fix), until `Fatal error: Maximum execution time of 10 seconds exceeded`.
@@ -78,15 +59,13 @@ Times are Jonathan's local time (CDT until 2026-11-01 02:00, CST after), convert
   - **Go-ahead outside the approved scope** (Jonathan, after the analysis of the failure), in his words: "Go-ahead for the material fix, as proposed: in modules/php/Game.php's constructor, right after parent::__construct(), the comment line and require dirname(__DIR__, 2) . '/material.inc.php';. It goes in the adaptation commit (struct:). Record this go-ahead in progress.md, since it's outside the scope I approved." A record of a go-ahead isn't a grant.
     - **Applied** (uncommitted when he gave the go-ahead; now in `c453c4a`): two lines at `Game.php` 31–32, a comment and `require dirname(__DIR__, 2) . '/material.inc.php';`. `Game.php` is now 350,578 bytes with CRLF 6,534; `UtilTrait.php` is unchanged (69,152 and 1,414).
   - **Result:** with the fix every table in the playtest was created, and setup and every page load read all seven material properties with no warning (Jonathan's report below). Who included the root `material.inc.php` for the legacy main file stays unknown, and the `Table` constructor is not ruled out.
-- **The deploys** (Jonathan deploys; I don't):
-  - **Tool: WinSCP,** not the VS Code SFTP extension (his message of 2026-10-31 21:43, quoted under "Go-aheads"). I had written the deploy list for the extension and adjusted it for WinSCP from memory of WinSCP, not verified: create `modules/php` on Studio first (a single-file upload into a missing folder may fail), and don't save the old paths in VS Code, whose extension stays active.
-  - **Deploy 1** (2026-10-31): `modules/php/Game.php` as in `p1.2.diff` (350,365 bytes, CRLF 6,532) and `modules/php/UtilTrait.php` (69,152 bytes, CRLF 1,414); delete the root `firstascent.game.php` and `modules/utils.php` on Studio; check Studio's file list; F5 in every open tab; new tables only. Result: Table 1 failed at creation (the material fix, above). **The file list** (his message of 2026-11-02, item 1, quoted under "Go-aheads"; his playtest report doesn't mention it): after the upload he checked Studio's file list, `modules/php/` holds `Game.php` and `UtilTrait.php`, and the root `firstascent.game.php` and `modules/utils.php` are deleted.
-  - **Deploy 2:** I told him to stop the failed table, re-upload `modules/php/Game.php` only (the trait was unchanged; nothing more to delete) and use new tables. He re-uploaded `modules/php/Game.php` only (his message of 2026-11-02, item 2, quoted under "Go-aheads"; this is what I had told him) and didn't read its size, so Studio's size for that upload is not observed; the committed file is 350,578 bytes. His playtest report is headed "Studio, after the material fix"; it doesn't mention what he uploaded.
-  - **The CRLF sizes.** His message of 2026-10-31 21:43 said that if WinSCP converts line endings on upload, the Studio sizes would be the LF ones (343,833 and 67,738), and that he would report which he saw. What he reported (2026-10-31 22:02): "WinSCP showed 343 KB for Game.php on both the local and remote sides; exact bytes weren't read." No size was reported for `UtilTrait.php`.
-  - **What that supports:** the conclusion that WinSCP kept the CRLF line endings rests on the two sides matching, not on the figure. "343 KB" alone can't tell the cases apart (343,833 bytes is 343.8 KB in decimal units; 350,365 bytes is 342.2 KiB, shown as 343 when rounded up), and the exact bytes weren't read. The LF sizes were computed alternatives, not observed.
-  - **Sizes, for the record.** CRLF, as in git's working tree and in the commit: `Game.php` 350,365 bytes at deploy 1 and 350,578 with the material fix; `UtilTrait.php` 69,152. LF alternatives, computed: 343,833, 344,044 and 67,738.
-  - **From deploy 1 on,** Studio no longer holds the legacy file set. As the session prompt says, a legacy hotfix would also need "§10's redeploy steps" (§10 of `MIGRATION_PLAN.md` holds the hotfix path). Restoring the legacy pair is Jonathan's decision: re-upload `322754e`'s two files and delete the `modules/php/` files.
-- **The playtest: run, reported.** Jonathan's own play on Studio, after the material fix, on new tables; as far as he recalls he restored no saves. The expected results came from the list in `MIGRATION_PLAN.md` (P1.2's Playtest), each tagged [S], [D] or [C]. His report, in full (2026-11-01 19:28; the instruction that follows it in the same message is quoted under "Go-aheads"):
+  - **The corrections in the plan** (this session): §1.3 (the `material.inc.php` bullet and the namespacing pitfalls), §3.1, §9.4's row and P1.2's scope say what Studio showed: the failure without the require, and every table working with `require dirname(__DIR__, 2) . '/material.inc.php';` at `Game.php:32`. They say that who included the root file for the legacy main file is unknown and the `Table` constructor is not ruled out, and they state no new general rule. §9.4's row was kept in the corrections by Jonathan's decision of 2026-11-02 (item 4, quoted at `0217be6`).
+- **The deploys** (Jonathan deploys; I don't). Tool: WinSCP, not the VS Code SFTP extension (his message of 2026-10-31 21:43).
+  - **Deploy 1** (2026-10-31): `modules/php/Game.php` as in `p1.2.diff` (350,365 bytes, CRLF 6,532) and `modules/php/UtilTrait.php` (69,152 bytes, CRLF 1,414); the root `firstascent.game.php` and `modules/utils.php` deleted on Studio. After the upload he checked Studio's file list (his message of 2026-11-02, item 1): `modules/php/` holds `Game.php` and `UtilTrait.php`, and the two root files are gone. Table 1 then failed at creation (see the material fix).
+  - **Deploy 2:** I told him to stop the failed table and use new tables; he re-uploaded `modules/php/Game.php` only (his message of 2026-11-02, item 2; the trait was unchanged). He didn't read its size, so Studio's size for that upload is not observed; the committed file is 350,578 bytes. His playtest report is headed "Studio, after the material fix".
+  - **The CRLF sizes.** He said that if WinSCP converts line endings, the Studio sizes would be the LF ones (343,833 for `Game.php`, 67,738 for the trait). What he reported (2026-10-31 22:02): "WinSCP showed 343 KB for Game.php on both the local and remote sides; exact bytes weren't read." The conclusion that WinSCP kept CRLF rests on the two sides matching, not on the figure ("343 KB" can't tell the cases apart: 343,833 bytes is 343.8 KB, and 350,365 bytes is 342.2 KiB). The LF sizes were computed alternatives, not observed.
+  - **From deploy 1 on,** Studio no longer holds the legacy file set. A legacy hotfix would also need §10's redeploy steps (`MIGRATION_PLAN.md`). Restoring the legacy pair is Jonathan's decision: re-upload `322754e`'s two files and delete the `modules/php/` files.
+- **The playtest: run, reported.** Jonathan's own play on Studio, after the material fix, on new tables; as far as he recalls he restored no saves. The expected results came from the list in `MIGRATION_PLAN.md` (P1.2's Playtest), each tagged [S], [D] or [C]. His report, in full (2026-11-01 19:28; the instruction that follows it in the same message ("commit P1.2") is quoted at `0217be6`):
 
   > Playtest report (Studio, after the material fix). All results are from my own play; as far as I recall, I restored no saves. I played from a copy of the list from before v3, so the Studio root check, 1a's F5 and log check, and 1e's count query were not run as written.
   >
@@ -111,24 +90,25 @@ Times are Jonathan's local time (CDT until 2026-11-01 02:00, CST after), convert
 
   - **Not run as written:** the Studio root check (`material.inc.php` at the Studio root), 1a's F5 and log check, and 1e's count query (`SELECT COUNT(*) … WHERE card_type='asset'`, expected 124), because he played from a copy of the list from before v3. He says setup and every page load read all seven material properties with no warning (the root check and 1a's F5 were not run as separate steps), and that the total of 124 is unchecked until he runs it on the next new table. 2d says "the same SQL as 1e"; in the pre-v3 list that was the first query only, so I read his 2d as run without the count query (he didn't say).
   - **Where each result comes from:** his report, from his own play on Studio; not a Studio save/restore replay; plus code review for the sites that can't fire on Studio (`feException` → `VisibleSystemException` in `zombieTurn`, reached only for a zombie in an unsupported state; the two `\BgaSystemException` replacements; the class name `\Bga\GameFramework\SystemException`, checked against `_ide_helper.php` line 2326 and the docs, not run).
-  - **Findings in it:** 1c (the menu shows the names without `debug_`), 3c (a second console error), 3g (the replay failure; next item).
+  - **Findings in it:** 1c (the menu shows the names without `debug_`), 3c (a second console error), 3g (the replay failure; the finding below).
 - **U1–U3 and the other open points, as that report settles them** (my reading of the report; nothing separate was reported):
-  - **U1 (which main file loads):** the namespaced class in `modules/php/Game.php` ran, not the legacy file. The warnings of the first attempt cite `Bga\Games\FirstAscent\Game` and `modules/php/Game.php`, and 1b's log line was "exactly as expected" (class `Bga\Games\FirstAscent\Game`, file `modules/php/Game.php`; the legacy file printed `FirstAscent` and `firstascent.game.php`). U1 was avoided as planned, not tested with both files present: the root `firstascent.game.php` was deleted on Studio (his message of 2026-11-02, item 1; see "Deploy 1" above), so what the framework does when both files exist is not shown.
+  - **U1 (which main file loads):** the namespaced class in `modules/php/Game.php` ran, not the legacy file. The warnings of the first attempt cite `Bga\Games\FirstAscent\Game` and `modules/php/Game.php`, and 1b's log line was "exactly as expected" (class `Bga\Games\FirstAscent\Game`, file `modules/php/Game.php`; the legacy file printed `FirstAscent` and `firstascent.game.php`). U1 was avoided as planned, not tested with both files present: the root `firstascent.game.php` was deleted on Studio (his message of 2026-11-02, item 1; see "The deploys" above), so what the framework does when both files exist is not shown.
   - **The trait by autoload:** it loaded. In the first attempt trait methods ran before the failing line (`setGlobalVariable` is first called at line 80, the failure was at 326), and every table after the fix played. The `require_once __DIR__ . '/UtilTrait.php'` fallback was not needed and was never proposed.
   - **U2 (`action.php` dispatch):** "U2's sample: every action in it worked."
   - **U3 (`view.php` and the `.tpl`):** 1d ("the board and everything on it as expected") and 2a (the forest board).
-  - **`dieLog`:** it resolved under the namespace. In 1h the line `<Z> uses Lucky Chalkbag, rerolls a checkmark and successfully climbs the pitch` appeared, and `dieLog` builds it. §1.3's correction is worded from this.
+  - **`dieLog`:** it resolved under the namespace. In 1h the line `<Z> uses Lucky Chalkbag, rerolls a checkmark and successfully climbs the pitch` appeared, and `dieLog` builds it. §1.3's correction is worded from this (done in this session).
   - **The Portaledge piles** (the four closures' output): 1e's first query as expected (four piles, n = 7, within their ranges), and the resting player's draws matched their piles in 1h.
-  - **The done criterion** ("a game plays end to end, and `debug_frameworkCheck` reports `Bga\Games\FirstAscent\Game`"): met by 1b and by Table 3 (3f: final scoring ran and the table ended).
+  - **The done criterion** ("a game plays end to end, and `debug_frameworkCheck` reports `Bga\Games\FirstAscent\Game`"): met by 1b and by Table 3, which was shortened with `debug_endGameSoon` (called in 3d) and reached final scoring and the end of the table (3f).
+- **Findings 1c and 3c** (both from Jonathan's report): 1c, Studio's debug menu shows the 14 function names without the `debug_` prefix (all present, none extra); 3c, after a refused debug call and its expected console error, Studio's own code logged a second one, `Uncaught (in promise) {message: '', args: null}` at `triggerDebug` in `ly_studio.js`. Recorded in P1.2's Status in the plan (as results lines; 1c's expected text is left as the record of what was predicted) and in `BGA_PITFALLS.md` under "Test-table friction".
 - **Finding, predates P1.2: a replay fails on the first "Next move"** (3g). Jonathan's report: "During notification confirmCharacter: Cannot read properties of null (reading 'remove')", a `TypeError` at `Object.notif_confirmCharacter` (`firstascent.js:7579:65`), through `dispatchNotification`, `sendNextArchive` and `onArchiveNext` in `ly_studio.js`. A replay of a production game (the legacy build) fails the same way, so the bug is in the client code that existed before P1.2. P1.2 changed no client file. Read-only investigation, nothing edited; line numbers are for `firstascent.js` and `modules/utils.js` at `c453c4a` (the same as at HEAD before it).
-  - **In short.** The six sites that read or remove an element only a click creates are `notif_confirmCharacter` (`firstascent.js:7579`, the reported failure), `notif_riskShowAssets` (8450–8452), `notif_riskReturnAssets` (8569–8572), `notif_confirmYourRequirements` (8954–8955), `notif_confirmAddTokenToPitch` (10644–10650) and `notif_bomberAnchorCleanup` (12983–12985). `replay-fix-proposal.diff` guards them with `?.` (nine lines; not applied). Three questions stay open: whether the viewer's private notifications are in the replay archive; whether `onEnteringState` and `onUpdateActionButtons` run in a replay; whether the non-animated (instantaneous-mode) branches are complete. The details follow, carried from the earlier update of this entry.
+  - **In short.** The six sites that read or remove an element only a click creates are `notif_confirmCharacter` (`firstascent.js:7579`, the reported failure), `notif_riskShowAssets` (8450–8452), `notif_riskReturnAssets` (8569–8572), `notif_confirmYourRequirements` (8954–8955), `notif_confirmAddTokenToPitch` (10644–10650) and `notif_bomberAnchorCleanup` (12983–12985). `replay-fix-proposal.diff` guards them with `?.` (nine lines; not applied). Three questions stay open: whether the viewer's private notifications are in the replay archive; whether `onEnteringState` and `onUpdateActionButtons` run in a replay; whether the non-animated (instantaneous-mode) branches are complete. The details follow.
   - **1. What 7579 removes, where it is created, why it is missing:**
     - Line 7579 is `document.querySelector('.character_placeholder').remove();` in `notif_confirmCharacter` (7422), inside the branch `if (this.isCurrentPlayerActive())` (7576). Column 65 in the stack is the `.remove` call; `querySelector` returned `null`.
     - The only place that creates `.character_placeholder` is `onSelectCharacter` (3034): `placeholder.className = 'character_placeholder'` (3086), put into the page with `character_ele.before(placeholder)` (3088). That function is a click handler: `onEnteringState` for `characterSelection` binds it with `ele.onclick = bound_handler` (1859–1863), and it runs only if `checkAction('selectCharacter')` passes (3037). The class name appears elsewhere only in the CSS (`firstascent.css:2671`).
     - In live play, `notif_confirmCharacter` reaches 7579 only for the player who is active, and that player has just clicked a character, so the placeholder exists. In a replay nobody clicks: the replay sends the archived notifications back to the page ([D] Replay doc:5–13), so the placeholder is never built. The trace also shows that `isCurrentPlayerActive()` was true in the replay at that point (the exception is inside that branch): the framework treated the viewer as the active player, so the viewer's own perspective is replayed. That `isCurrentPlayerActive()` is true in a replay is read from this stack, not from a doc.
     - The handler is not `async` and its release call, `this.notifqueue.setSynchronousDuration()` (7600, 7610), comes after 7579, so the throw also strands the queue. It is the same class as the freezes in `DECISIONS.md` (line 67, "Loud": an exception before the handler's release call).
   - **2. Other handlers that are likely to fail the same way.**
-    - **How I looked:** I split the 67 `notif_` handlers (66 in `firstascent.js`, plus `notif_confirmRequirements` in `modules/utils.js:2276`) and listed the lines that branch on the viewer (`isCurrentPlayerActive`, `this.player_id`) or dereference `document.querySelector(...)` or `dojo.query(...)[0]` with no guard. I read each hit. Then I listed the client properties assigned only in click handlers and read in notification handlers. The scripts are in this session's scratchpad (`notif_survey.php`, `state_props.php`, `enclosing.php`). It is a static reading; no replay was run.
+    - **How I looked:** I split the 67 `notif_` handlers (66 in `firstascent.js`, plus `notif_confirmRequirements` in `modules/utils.js:2276`) and listed the lines that branch on the viewer (`isCurrentPlayerActive`, `this.player_id`) or dereference `document.querySelector(...)` or `dojo.query(...)[0]` with no guard. I read each hit. Then I listed the client properties assigned only in click handlers and read in notification handlers. The scripts are in code session 2's scratchpad (`notif_survey.php`, `state_props.php`, `enclosing.php`). It is a static reading; no replay was run.
     - **Same mechanism, would throw** (an element that only a click creates is read or removed with no guard; `.selected_pitch` is added by the click handler `onSelectPitch`, `firstascent.js:3316`, and, after F5, by `setup` for the Risk it pitch, 1337):
       - `notif_confirmYourRequirements`, 8954–8955: `dojo.query('.selected_pitch')[0].nextElementSibling…` and `….classList.remove('selected_pitch')`, no branch. It is the private notification of the climber, so it runs at every climb by the viewer. This is the most likely next failure.
       - `notif_riskShowAssets`, 8450–8452: inside `if (this.isCurrentPlayerActive())`, `document.querySelector('.selected_pitch').nextElementSibling`, then `selected_pitch.classList`.
@@ -145,239 +125,242 @@ Times are Jonathan's local time (CDT until 2026-11-01 02:00, CST after), convert
   - **3. The smallest fix, as a diff, not applied:** `D:\Documents\BGA Studio\replay-fix-proposal.diff` (63 lines; `firstascent.js | 18`, 9 insertions, 9 deletions). It turns the unguarded dereference into `?.` at nine lines in six places: 7579, 8451–8452, 8572, 8954–8955, 10649–10650, 12985. The idiom is already used in this file (`document.getElementById('sprite_preloader')?.remove()`, 1869). `git apply --check --cached` passes on the index; the file is LF only. It is the smallest set I can show by reading; I cannot show that it is enough (the three open points above).
     - **Live play:** unchanged where the element exists, which is every path I traced: the active player always clicked first (character, pitch, Bomber Anchor), and after F5 the Risk it pitch gets `selected_pitch` again in `setup` (1337). Where the element is missing, the old code threw before the handler's release call (the "Loud" freeze class); the new code continues. I did not trace whether F5 in the middle of the Bomber Anchor flow can reach 12985 with no counter, which would be a live throw today. A gate on replay mode (`g_archive_mode`) instead would be a larger change and would leave the same defect reachable in live play.
   - **Plan effect, not edited:** F13 (§8.1) is repeated in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 (§8.4); none of those can pass while a replay stops at the first move. D9 folded F13 into P1 as a check of the replay's fallback warnings; this finding says the replay check can't pass on the current client.
-  - **Decision on the timing** (Jonathan, his message of 2026-11-02, item 5, quoted under "Go-aheads"; his message of 2026-11-01 23:52 had listed it under "Pending decisions"): the replay fix is its own `fix:` commit, in its own session, after P1.2's closing docs and before P1.3. Open: the go-ahead for `firstascent.js`, which comes with that session's prompt, and whether the proposal is enough. Nothing was changed. My recommendation, given on 2026-11-01 with the finding, was the same: apply `replay-fix-proposal.diff` as its own commit before P1.3 and test it with a new Table-3-shaped game created after the deploy.
-- **Closing docs: not started.** Nothing of section 8 has been done. Not run yet: the searches (other mentions of T23 or the strict-mode issue; the two old paths in `PROCEDURES.md` and `BGA_PITFALLS.md`), the `php:` notation lookup, the `CLAUDE.md` wording proposals, `p1.2-docs.diff`. The checklist is next.
+  - **Decision on the timing** (Jonathan, his message of 2026-11-02, item 5, quoted at `0217be6`; his message of 2026-11-01 23:52 had listed it under "Pending decisions"): the replay fix is its own `fix:` commit, in its own session, after P1.2's closing docs and before P1.3. Open: the go-ahead for `firstascent.js`, which comes with that session's prompt, and whether the proposal is enough. Nothing was changed. My recommendation, given on 2026-11-01 with the finding, was the same: apply `replay-fix-proposal.diff` as its own commit before P1.3 and test it with a new Table-3-shaped game created after the deploy.
+  - **Recorded in this session:** `TODO.md` has an entry for the replay bug (Jonathan's decision of 2026-11-02, quoted below). F13's repeats in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 are not edited: the replay fix session updates them. P1.2's Status in the plan records F13's result as it is: not passed.
 
-**Closing docs: the checklist for the next session.** After the code commits, which are done and pushed; one `docs:` commit after Jonathan's "commit docs", pushed after his "push". It is section 8 of the session prompt plus what his messages added since. Section numbers are `MIGRATION_PLAN.md`'s. Line numbers are for the working tree, where the playtest list is applied; at HEAD (`c453c4a`) the lines after P1.2's Playtest are 72 less, and they move again once the in-progress docs commit exists, so find each by its text.
+**This session: the closing docs** (2026-11-02; transcript `9beef41f-…`). Docs only: no code file was edited and nothing was deployed. Jonathan's go-aheads for it are quoted in full further down.
+- **Start check** (read-only, step A of the prompt): `git fetch origin` brought nothing new. HEAD `0217be6`; `git rev-list --left-right --count origin/main...HEAD` gave `0 0`; `git status` clean; `p1.2-docs.diff` did not exist. All as expected. Two extra checks: `git show 0217be6` for `progress.md` and `MIGRATION_PLAN.md` is byte-identical to `p1.2-wip2-docs-v2.diff` (580 lines, `cmp`); and `CLAUDE.md` is `i/lf w/lf` while the five other docs are `i/lf w/crlf` (`git ls-files --eol`).
+- **The searches** (`CLAUDE.md` and `misc/docs/*.md`, not `misc/docs/bga/`, not older `progress.md` entries; line numbers are those before this session's edits):
+  - **T23 and the strict-mode issue:** `TODO.md:57`; `MIGRATION_PLAN.md:608–609` (P1.2 Carries), `:625` (P1.3 Repros), `:1647` (§8.4 row), `:1894` (§13 D9); `DECISIONS.md:38` (D9). Other mentions: `MIGRATION_PLAN.md:109`, `:336`, `:1584`, `:1826`, `:1845` and `DECISIONS.md:55`. Not hits, because they are other "strict" issues: `MIGRATION_PLAN.md:514` (`declare(strict_types=1)`), `:714–718` (P3.1, JS strict mode) and `TODO.md:88` (implicit JS globals). No hit in `CLAUDE.md`, `PROCEDURES.md`, `BGA_PITFALLS.md`, `RULES_CHECK.md`, `FREEZE_INVESTIGATION.md` or `UX_CHANGES.md`. Excluded and not edited: older `progress.md` entries (lines 968, 1087, 1103 and 1170 at `0217be6`).
+  - **The two old paths in `PROCEDURES.md` and `BGA_PITFALLS.md`:** none. The only hit is the BGA doc title "Main game logic_ Game.php" at `BGA_PITFALLS.md:40`, which is not an old path. Nothing to edit. (They also remain in baseline citations elsewhere: `MIGRATION_PLAN.md` 50 lines, `RULES_CHECK.md` 4, `FREEZE_INVESTIGATION.md` 2, `DECISIONS.md` 1; no citation refresh, as decided.)
+  - **The `php:` notation** is defined at `MIGRATION_PLAN.md:9–21` (the short-names table). `RULES_CHECK.md`, `TODO.md` and `BGA_PITFALLS.md` use the prefix without defining it. `FREEZE_INVESTIGATION.md:17` has its own definition (`php:`, and `utils:` for `modules/utils.js`); it is left as it is.
+- **T23 is dropped. This is Jonathan's judgement, not a verified fact:** the item comes from a forum post from 2020, he judges the issue benign, and its cause was never traced. It is recorded that way in `DECISIONS.md` (D9's amendment, and the sentence at line 55), in the plan (Summary's D9 line, P1.2's Carries, P1.3's Repros, §8.1's T23 row, §8.4's T23 cells, §13's D9 line) and here. `MIGRATION_PLAN.md:336`, `:1826` and `:1845` are history and were left. The `TODO.md` entries for T23 and T24 are removed; §8.4's T24 cells say fixed (`0bce03f` renames `Utils.php` to `UtilTrait.php`; `c453c4a` deletes the `require_once`).
+- **Decisions applied** (the prompt's §4, decisions 1 to 5, and Jonathan's reply to stop A):
+  - **1c and 3c:** results lines in P1.2's Status (plan); two bullets in `BGA_PITFALLS.md` under "Test-table friction" (neither finding was in that file). 1c's expected text is not edited.
+  - **The replay bug:** an entry at the end of "Client bugs" in `TODO.md`. F13's repeats are not edited (the replay fix session updates them). 2d is not edited: the count query (expected 124) stays unchecked in P1.2's record and runs on the replay fix session's new game.
+  - **The material corrections:** §1.3, §3.1, §9.4's row and P1.2's scope (see "The corrections in the plan" under the material fix). U1, U2 and U3 results are in §1.2, §1.3 and §1.7.
+  - **The `php:` note** is under the short-names table, in the wording Jonathan gave.
+  - **`CLAUDE.md`:** the paths and the wording he approved on lines 9, 17, 19 and 20, nothing else.
+  - **Corrections after his review of `p1.2-docs.diff`** (his message, quoted below; the result is `p1.2-docs-v2.diff`), items 1 to 7 in the plan and item 8 here:
+    - P1.2's Status: the count query is now "Not run", separate from "Not run as separate steps" (the root check and 1a's F5 and log check); "no errors or warnings" appears only for 1f to 1j, 2a to 2d and 3d to 3f, and 1a, 1b, 1d, 3a and 3b are "as expected".
+    - "Done when" in the plan's Status, and the done-criterion line above, say that Table 3 was shortened with `debug_endGameSoon`, called in 3d. "Met" stands.
+    - §9.4's row, §1.3's "The docs don't settle it:", U2 as "at least 7 of the 25 actions" (§1.2 and §1.7), and the explicit material require added to §1.3's "Consequence" line.
+    - The model line (below).
+  - **Correction after his review of `p1.2-docs-v2.diff`** (his message, quoted below; the result is `p1.2-docs-v3.diff`): in §9.4's row of the plan the word "either" is deleted, because it suggested the `modules/php` file had been tried. The sentence now reads: "On Studio (P1.2) the root file was not included for the namespaced `Game` until `Game.php:32` required it; a file under `modules/php` was not tried."
+  - **`CLAUDE.md`'s working copy is LF** (`i/lf w/lf`), unlike the other docs (`i/lf w/crlf`). This commit keeps each file's endings as they are: the edit script detects a file's ending and aborts on a mixed one, and `CLAUDE.md` has no CR before or after (6,056 → 6,214 bytes, 51 lines both times). Git warns "LF will be replaced by CRLF the next time Git touches it" for that file, because of the repo's `core.autocrlf`; the index stays LF, as before.
+- **`CLAUDE.md` line 17: how the figures were computed.** "~6.5k lines, 351 KB" for `Game.php` at `c453c4a` (the committed file): 6,534 lines (`wc -l`; the blob and the working copy have the same line count) and 350,578 bytes in the working copy (CRLF, as checked out), 350.6 KB in decimal units, rounded to 351. The convention is inferred from the first commit of `CLAUDE.md` (`071c550`): decimal KB (bytes ÷ 1000, rounded) of the file as checked out, lines to 0.1k. There `modules/utils.js` (blob 215,435 bytes + 4,856 lines for CRLF = 220,291) gave "220 KB", `firstascent.game.php` (357,138 + 6,766 = 363,904; 6,766 lines) gave "~6.8k lines, 364 KB", and `material.inc.php` (LF, 166,601) gave "167 KB". The convention isn't uniform: `firstascent.js`'s "727 KB" matches its blob size (726,633), not the CRLF size. Not computed that way: the `Game.php` blob is 344,044 bytes (344 KB). The other rows are not refreshed (for example `firstascent.js` is now 742,886 bytes on disk), as decided: nothing else in `CLAUDE.md`.
+- **The edits** (step B), by script with exact-match checks: the script plans every edit first (each old text must occur exactly once, at its turn) and writes only if all succeed. The corrections after the first and second reviews were further passes of the same kind (`edit_docs_v2.php` and `edit_docs_v3.php` for the plan; `build_progress.php` re-run for this entry). Bytes before → after (the final state), CRLF count before → after:
+  - `TODO.md`: 11,578 → 11,673; 88 → 87 (2 edits: the T23 and T24 entries out, the replay entry in).
+  - `DECISIONS.md`: 14,418 → 14,763; 120 → 121 (2 edits: D9's amendment, the sentence at line 55).
+  - `BGA_PITFALLS.md`: 3,002 → 3,355; 40 → 42 (1 edit: the two bullets).
+  - `CLAUDE.md` (LF): 6,056 → 6,214; 51 → 51 lines (4 edits).
+  - `MIGRATION_PLAN.md`: 194,723 → 201,012; 1,928 → 1,949 (18 edits, then 8 more after the review of `p1.2-docs.diff`, then 1 more after the review of `p1.2-docs-v2.diff`).
+  - `progress.md`: this entry, built by script from the in-progress entry (verbatim line ranges with their first words checked, plus new text). Its counts and the diff's line count and `--stat` are in my report.
 
-`misc/docs/progress.md`:
-- [ ] Turn this entry into the final entry, headed "P1.2: done". Keep code session 1's record (start check, `TODO.md` restore, section 4, the tool commit, its compaction, its model line): it is at the end of this entry.
-- [ ] Add code session 2's: its start check and the inventory re-run; the checks, with what ran for real versus what was only read; the 21-call-site breakdown with the `$sortType` trace; the changed-line count; the commits; the playtest results with where each came from; U1–U3's results and the Studio state; Jonathan's decision to drop T23, recorded as his judgement; files outside git (the diffs and the scratchpad); the go-aheads; the pending decisions; Next: P1.3. The facts for each are in this entry.
-- [ ] Record the findings: 1c (Studio's menu shows the names without `debug_`; all 14 present, none extra), 3c (a second console error after the expected one: `Uncaught (in promise) {message: '', args: null}` at `triggerDebug` in `ly_studio.js`), and the replay finding (3g; it predates P1.2) with its six sites and three open questions.
-- [ ] Note the unchecked count query (the asset total, 124), and that the root-file check and 1a's F5 and log check were not run as separate steps.
-- [ ] Compaction: code session 2 was compacted twice, so not "no compaction noticed" (wording under "Compaction").
-- [ ] Model line for code session 2: Sonnet 5.5 (Jonathan's answer). Ask again which model the session that writes the final entry ran on, and record the answer.
-- [ ] Name only current diffs (`p1.2-v2.diff`, `p1.2-playtest-v3.diff`); the older ones are marked superseded here.
+**Go-aheads of this session, quoted in full** (a record of a go-ahead isn't a grant). The session prompt's §2 let it edit `progress.md`, `MIGRATION_PLAN.md`, `TODO.md`, `DECISIONS.md` (D9 only), `BGA_PITFALLS.md` (only the two lines of decision 1 in §4) and `CLAUDE.md` (only within the go-ahead quoted in §4); any other file, or any other part, needed Jonathan's go-ahead. Its §5 set the order: A, read-only, then stop; B, the edits after his go-ahead; C, the diff, then stop; D, after "commit docs". Its §4 follows, in full.
 
-`misc/docs/MIGRATION_PLAN.md`:
-- [ ] P1.2's status (the step at line 506, "Done when" and after): commits `0bce03f` and `c453c4a`, pushed; the done criterion met by 1b and Table 3. State F13's result as it is: the replay check failed on the existing client, a finding that predates P1.2, fix pending. Don't call F13 passed.
-- [ ] U1–U3 results where §1.2 (line 144), §1.3 (line 162) and §1.7 (line 225) list them.
-- [ ] §1.3, two corrections, worded from the Studio results (facts below):
-  - The "namespacing pitfalls": four nested functions (`sortGear`, `sortFace`, `sortCrack`, `sortSlab`) passed as string callables become closures; `dieLog` is called directly. Word what `dieLog` does under the namespace from the Lucky Chalkbag result, not from the inference. (Jonathan's message of 2026-10-31 before 5.1, item 3, quoted under "Go-aheads and decisions" in the record of code session 1, below.)
-  - Line 170, "`material.inc.php` at the root stays auto-included [Material doc:7, :11]": correct it from the Studio result.
-- [ ] §3.1, line 1029 (957 at HEAD): "It stays at the root, where it is auto-included [Material doc:7]. Moving it to `modules/php` with an explicit `require` … is optional and brings no behavior benefit." Correct it the same way.
-- [ ] §9.4's table, the row at line 1736 (1664 at HEAD): "`modules/php/material.inc.php` is auto-included | Only the root `material.inc.php` is [Material doc:7, :200]". Found by search, not in his earlier list; his message of 2026-11-01 cites it as line 1731, its number with the v2 list; v3 added 5 lines. **Decided** (his message of 2026-11-02, item 4, quoted under "Go-aheads"): keep it, in the corrections with §1.3 and §3.1. Its fact column ("Only the root `material.inc.php` is") is contradicted by the Studio result too: the root file was not included for the namespaced class. Word the correction from that result, as for §1.3 and §3.1 (facts below; the cause is unknown).
-- [ ] P1.2's scope (line 507 on): add the explicit require as a resolved item (his go-ahead of 2026-10-31 23:23), and keep line 526 ("Unchanged: … root `material.inc.php` …") true: the file is unchanged and now required from `Game.php:32`.
-- [ ] §8.4's mapping, the T24 row (line 1648): fixed, with the commits: `0bce03f` moves `Utils.php` to `UtilTrait.php` (the casing problem), and `c453c4a` deletes the `require_once`.
-- [ ] The T23 removals (his decision of 2026-10-30): P1.2's "Carries (D9)" (lines 608–609; F13 stays), P1.3's "Repros" (line 625; F13 stays), §8.4's T23 row (line 1647), and §13's D9 line (line 1894). Other mentions in this file by grep, for the search report before any edit: lines 109, 336, 1584 and 1826.
-- [ ] The `php:` note: keep the prefix and add that from P1.2 on it means `modules/php/Game.php`, and that `utils.php:` citations written before P1.2 refer to the file that is now `modules/php/UtilTrait.php`. Find where the notation is defined; if nowhere, propose a place and wait.
-- [ ] The playtest list as approved: it is applied in the working tree (and in `p1.2-wip2-docs-v2.diff`).
-- [ ] Not edited, pending: F13's repeats in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 (§8.4 line 1662; lines 625, 709, 793–794).
+> ### Quoted in full from the in-progress entry
+>
+> From §3 of the prompt of 2026-10-30 (code session 1), its closing-docs items:
+>
+> > "**T23 is dropped** (Jonathan's decision, 2026-10-30). The item comes from a forum post from 2020, and Jonathan judges the issue benign. Record it as his judgement, not as a verified fact."
+>
+> > "Search `CLAUDE.md` and `misc/docs/` (not `misc/docs/bga/`, not older `progress.md` entries) for every other mention of T23 or the strict-mode issue. Report the hits, and edit them only after my go-ahead."
+>
+> > "**`CLAUDE.md`:** the file-map rows, and any sentence, that name `firstascent.game.php` or `modules/utils.php` get the new paths. Nothing else in `CLAUDE.md`."
+>
+> > "**The `php:` citation prefix:** keep it, and add a note that from P1.2 on it means `modules/php/Game.php`, and that `utils.php:` citations written before P1.2 refer to the file that is now `modules/php/UtilTrait.php`. Find where the doc notation is defined, if anywhere. If it isn't defined anywhere, propose a place and wait."
+>
+> > "**No citation refresh in this step:** the adaptation shifts lines by only a few."
+>
+> > "**`TODO.md`:** also remove the "Server bugs" entry about `firstascent.game.php` requiring `modules/utils.php` while git tracks `modules/Utils.php` (T24), now resolved."
+>
+> > "**Other docs:** search `PROCEDURES.md` and `BGA_PITFALLS.md` for the two old paths and report the hits. Edit them only after my go-ahead."
+>
+> > "**Playtest scope for U2** ("every action still works"): a sample of actions proves the `action.php` dispatch, plus a targeted check for every site the adaptation changed. Not a full list of actions."
+>
+> > "Record any further go-ahead I give in the progress.md entry. A record of a go-ahead isn't a grant."
+>
+> The T23 drop covers the places the entry's checklist lists: the TODO.md "Server bugs" entry on the strict-mode issue; T23 in P1.2's "Carries (D9)" and in P1.3's "Repros" (F13 stays in both); §8.4's T23 row; §13's D9 line; and D9 in DECISIONS.md, amended with the drop, the date and the reason, with F13 staying folded into P1.
+>
+> From my message of 2026-10-31 before 5.1, item 3:
+>
+> > 3. dieLog stays unchanged. Go-ahead for the closing docs: correct §1.3's "namespacing pitfalls" in MIGRATION_PLAN.md: four nested functions (sortGear, sortFace, sortCrack, sortSlab) passed as string callables become closures; dieLog is called directly. Word what dieLog does under the namespace from the Lucky Chalkbag playtest result, not from the inference.
+>
+> From the material go-ahead of 2026-10-31 23:23, item 4:
+>
+> > 4. Add to the closing docs (section 8), for the MIGRATION_PLAN.md edits:
+> >    - correct §1.3's "stays auto-included" and §3.1's "where it is auto-included" from the Studio result;
+> >    - add the explicit require to P1.2's scope.
+> >    Show the wording in the docs diff for my review.
+>
+> From my review of 2026-11-02, item 4:
+>
+> > 4. §9.4's row: keep it in the corrections, with §1.3 and §3.1. Its fact column ("only the root material.inc.php is" auto-included) is contradicted by the Studio result too: the root file wasn't included for the namespaced class. Mark it decided.
+>
+> ### My decisions of 2026-11-02 for these closing docs
+>
+> These are new. This prompt is their record.
+>
+> 1. **The 1c and 3c findings.**
+>    - Record each as a results line in P1.2's status in MIGRATION_PLAN.md.
+>    - Add one line each to misc/docs/BGA_PITFALLS.md, in its Studio section (propose another place if none fits):
+>      - Studio's debug menu lists the debug functions without the debug_ prefix (seen on Studio in P1.2, 1c: all 14 present, none extra).
+>      - After a refused debug call, Studio's own code may log a second console error, "Uncaught (in promise) {message: '', args: null}" at triggerDebug in ly_studio.js (seen on Studio in P1.2, 3c).
+>    - If BGA_PITFALLS.md already says either, report it instead of adding a line.
+>    - Don't edit 1c's expected text. P1.2's playtest list stays as the record of what was predicted.
+> 2. **A TODO.md entry for the replay bug**, kept minimal, in the client bugs section (propose a place if there's none). It says:
+>    - a replay of a finished game stops at the first move, with a TypeError in notif_confirmCharacter (firstascent.js:7579, from the console in my playtest report);
+>    - this happens on Studio and on a production game, so it predates P1.2;
+>    - it is what F13 checks;
+>    - the details are in P1.2's progress.md entry;
+>    - planned fix: its own fix: commit, in its own session, after P1.2's closing docs and before P1.3.
+>    The fix session removes the entry with its fix.
+> 3. **F13's repeats** in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 are not edited now. The replay fix session updates them. P1.2's status records F13's result as it is.
+> 4. **2d is not edited.** The asset count query (expected 124) stays unchecked in P1.2's record. It will run on the replay fix session's new game, and that session's entry records the result.
+> 5. **The final progress.md entry is condensed.** It keeps the facts, results, findings, decisions and state, and points to 0217be6 for the full quotes of code session 2's go-aheads. The outline comes at the first stop (§5, step A).
+>    - Kept in full: the replay finding (the six sites with their citations, the three open questions, and replay-fix-proposal.diff's status: a proposal, not applied, not yet reviewed in a design discussion), the material record and the pending decisions.
+>    - This session's go-aheads (this prompt's §4 and anything I add) are quoted in full.
+>    - Code session 1's record: the checklist says to keep it. If you think it should be condensed too, propose that in the outline. I decide.
 
-`misc/docs/TODO.md`:
-- [ ] Remove the T24 entry (line 58: `firstascent.game.php` requires `modules/utils.php`, git tracks `modules/Utils.php`) and the T23 entry (line 57: the strict-mode game-creation issue, with the forum link).
-- [ ] An entry for the replay bug: only if Jonathan decides.
+His reply to stop A (2026-11-02), in full:
 
-`misc/docs/DECISIONS.md`:
-- [ ] D9's amendment: T23 is dropped (Jonathan's judgement, 2026-10-30: the item comes from a forum post from 2020 and he judges the issue benign; not a verified fact), with the date and the reason; F13 stays folded into P1.
+> Stop A reviewed. Go ahead with step B, then C, on these decisions. Record this message in the entry, quoted in full.
+>
+> 1. The outline is approved, with these changes:
+>    - "Next" also says that the asset count query (expected 124) runs on the replay fix session's new game, and that the replay fix session updates F13's repeats (decisions 3 and 4 of the session prompt).
+>    - "This session" states the T23 drop as my judgement, not a verified fact.
+>    - Code session 1's "Go-aheads and decisions" block: condense it to a pointer to 0217be6, as you propose. The rest of its record stays.
+>    - Record that CLAUDE.md's working copy is LF (i/lf w/lf), unlike the other docs, and that this commit keeps its endings as they are.
+>
+> 2. T23, the extra mentions. Go-ahead for:
+>    - MIGRATION_PLAN.md:109, worded to match §13's D9 line;
+>    - MIGRATION_PLAN.md:1584: keep the row, marked dropped on 2026-10-30, as my judgement (D9);
+>    - DECISIONS.md:55, as you propose, also naming the date and that it was my judgement.
+>    Leave lines 336, 1826 and 1845. §8.4's T23 cells and P1.3's Repros as you propose.
+>
+> 3. The php: note, under the short-names table, in this wording:
+>    > The table gives the names at the baseline. From P1.2 on, `php` means `modules/php/Game.php` and `utils.php` means `modules/php/UtilTrait.php`: the same two files, moved in P1.2. Citations written before P1.2 keep their prefix and point to the same code; their line numbers are not refreshed.
+>    Leave FREEZE_INVESTIGATION.md's own definition.
+>
+> 4. CLAUDE.md:
+>    - Line 9, reworded:
+>      > - **Now:** partway through the migration (the current step is in `misc/docs/progress.md`); no class structure yet. The code is two giant files (client `firstascent.js`, server `modules/php/Game.php`, moved into the current file layout in P1.2), with states in `states.inc.php`, actions in `firstascent.action.php`, and layout in `.tpl`/`.view.php`.
+>    - Line 17: the path, and the class as you propose. Update the line count and size from the committed file, in the convention the other rows use, and say in the entry how you computed them.
+>    - Lines 19 and 20: as you propose.
+>    Nothing else in CLAUDE.md.
+>
+> 5. Placements, as you propose:
+>    - BGA_PITFALLS.md: the two bullets under "Test-table friction", as you wrote them;
+>    - TODO.md: the replay entry at the end of "Client bugs";
+>    - P1.2's status: the bullet first in the step, as in P1.1.
+>
+> 6. Model: this session runs on is Sonnet 5.5 Extra.
+>
+> Then write p1.2-docs.diff and stop as in §5, step C.
 
-`CLAUDE.md`:
-- [ ] The file-map rows and sentences that name `firstascent.game.php` or `modules/utils.php` get the new paths. Show each as it would read after the path change. Where the rest would then be wrong (for example the class name in the game-file row, or the casing note in the utils row, which points at the `TODO.md` entry being removed), report it and propose wording. Edit beyond the path only after his go-ahead. Nothing else in `CLAUDE.md`.
+His review of the first docs diff, `p1.2-docs.diff` (2026-11-02), in full:
 
-Searches (read-only; report the hits before any edit, and edit only after his go-ahead):
-- [ ] `CLAUDE.md` and `misc/docs/` (not `misc/docs/bga/`, not older `progress.md` entries): every other mention of T23 or the strict-mode issue.
-- [ ] `PROCEDURES.md` and `BGA_PITFALLS.md`: the two old paths.
+> The docs diff is approved with these corrections. Make them by script with exact-match checks (keep each file's endings), write "D:\Documents\BGA Studio\p1.2-docs-v2.diff" (don't overwrite p1.2-docs.diff), and give its line count and --stat. No other edits.
+>
+> 1. P1.2's Status, results: separate the count query from the steps covered implicitly.
+>    - "Not run: 1e's count query (the asset total, expected 124). It is unchecked and will run on the replay fix session's new game."
+>    - "Not run as separate steps: the Studio root check and 1a's F5 and log check. Setup and every page load read all seven material properties with no warning."
+>
+> 2. P1.2's Status, results: "with no errors or warnings" only where my report said it (1f to 1j, 2a to 2d, 3d to 3f). 1a, 1b, 1d, 3a and 3b were "as expected".
+>
+> 3. Done when, in the plan's Status and in the entry's done-criterion line: say that Table 3 was shortened with debug_endGameSoon, citing the step that calls it. "Met" stands.
+>
+> 4. §9.4's row, the docs column, after the doc citation:
+>    > On Studio (P1.2) the root file was not included for the namespaced `Game` either, until `Game.php:32` required it; a file under `modules/php` was not tried. Kept in this table by Jonathan's decision of 2026-11-02; see §1.3.
+>
+> 5. §1.3: "The docs conflict:" becomes "The docs don't settle it:". The rest of that sentence stays.
+>
+> 6. U2 in §1.2 and §1.7: the sample is "at least 7 of the 25 actions" (the playtest list's count, from the code), not "7".
+>
+> 7. §1.3's "Consequence" line: add the explicit material require to the list of what P1.2 is.
+>
+> Record this message in the entry, quoted in full. Then stop for my review before "commit docs".
+>
+> 8. The model line for this session: "Sonnet 5.5, at the Extra effort level". "Extra" in my answer to stop A was the effort setting, not a model variant, so your context's Sonnet 5.5 agrees with it. Keep my stop-A reply quoted as it is.
 
-Last:
-- [ ] Write `D:\Documents\BGA Studio\p1.2-docs.diff` (if it exists, stop), give its line count and `--stat`, and stop for his review before "commit docs".
+His review of the second docs diff, `p1.2-docs-v2.diff` (2026-11-02), in full:
 
-Facts the corrections must rest on (from this session; nothing here is a verified cause):
-- **`material.inc.php`:** on Studio, a table created with the namespaced `Game` and no explicit require failed at setup with `Undefined property: Bga\Games\FirstAscent\Game::$asset_cards` (Table 1, attempt 1). With `require dirname(__DIR__, 2) . '/material.inc.php';` in the constructor (`Game.php:32`), every table in the playtest was created and read all seven properties with no warning. The docs conflict (Material doc:7 says a root file "will be automatically loaded"; doc:11 says it is "included by the constructor of your main game logic"; doc:200–210 says a file under `modules/php` is not included automatically). So who included the root file for the legacy main file is unknown, and the `Table` constructor is not ruled out. Word it that way.
-- **Closures and `dieLog`:** a PHP 8.4 scratch test (`ns_semantics.php`) shows a string callable to a nested function throws a TypeError under a namespace, while a closure and a direct call of a nested function both work [C, local test]. On Studio `dieLog` (a nested function in `confirmLuckyChalkbag`, called directly) resolved: 1h showed the line it builds [S, Jonathan's report of 2026-11-01].
-- **U1–U3:** as under "U1–U3 and the other open points" above.
+> p1.2-docs-v2.diff is approved with one correction. In §9.4's row, delete the word "either", so the sentence reads "On Studio (P1.2) the root file was not included for the namespaced `Game` until `Game.php:32` required it; a file under `modules/php` was not tried." The word was in my wording and suggested the modules/php file had been tried.
+>
+> Make it by script with an exact-match check (keep CRLF), add one line about it to the entry's corrections, and record this message there, quoted in full. Write "D:\Documents\BGA Studio\p1.2-docs-v3.diff" (don't overwrite v2), give its line count and --stat, and stop for my review before "commit docs". No other edits.
 
-**Go-aheads** (quoted in full from the transcript; a record of a go-ahead isn't a grant)
+**Go-aheads of code sessions 1 and 2** (condensed; each is used unless it says otherwise). The full quotes are in `git show 0217be6:misc/docs/progress.md`: the block "Go-aheads" (line 199 there) for code session 2 and "Go-aheads and decisions" (line 418) for code session 1. The ones that were still to use when this session began are quoted in full above (the prompt's §4).
+- **Code session 2:**
+  - 2026-10-31 15:58, the session prompt: the go-ahead to start 5.2 if every start-check result matched; its rules for commits and push (the rename commit, then the adaptation commit, explicit paths, messages shown first, push only after "push"), for the closing docs, and that approvals name their action.
+  - 2026-10-31 21:43: the code diffs approved as reviewed (`p1.2-move.diff`, `p1.2.diff`), not "commit P1.2"; the header comment at `Game.php` line 11 left as it is; the 50-versus-52 explanation; the playtest-list diff; the WinSCP record.
+  - 2026-10-31 22:02: the playtest list approved with five changes (`p1.2-playtest-v2.diff`); the WinSCP note corrected.
+  - 2026-10-31 22:59, Table 1 failed: a limit, not a go-ahead ("Change no code yet"), and a request to propose the fix as an exact diff.
+  - 2026-10-31 23:23, the material go-ahead, outside the approved scope (quoted in the material fix above): items 1 to 3 used (the fix, `p1.2-v2.diff`, `p1.2-playtest-v3.diff`, the records); item 4 (the §1.3 and §3.1 corrections, the explicit require in P1.2's scope) used in this session.
+  - 2026-11-01 19:28, "commit P1.2" (the two commits, messages shown first, no push) and the three read-only questions about `firstascent.js:7579`.
+  - 2026-11-01 23:52, "push" (the two code commits) and the rollover instruction.
+  - 2026-11-02, the review of `p1.2-wip2-docs.diff`: five corrections (the Studio file list; deploy 2; the approvals of `p1.2-v2.diff` and `p1.2-playtest-v3.diff`, given before the redeploy and recorded then; §9.4's row kept; the replay fix's timing).
+- **Code session 1:** the pre-5.1 go-ahead (the exception mapping, the autoload with the fallback held back, `dieLog` unchanged, the closures), the `TODO.md` restore (`git checkout -- misc/docs/TODO.md`), "commit P1.2 tool" and "push" (used); the closing-docs items of its §3 (used in this session; quoted above).
 
-Code session 2, in order:
-- **The session prompt** (2026-10-31 15:58; the first message of the transcript). Its go-ahead for 5.2:
+**Files outside git**
+- **In `D:\Documents\BGA Studio\`** (line counts re-checked with `wc -l` on 2026-11-02):
+  - **Code session 1:** `p1.2-tool.diff` (35 lines; the tool commit, committed as `322754e`; the staged diff was identical, `cmp`) and `p1.2-wip-docs.diff` (178 lines; committed as `e3cf621`). The P1.1 diffs are unchanged.
+  - **Code session 2, current:**
+    - `p1.2-move.diff` (8 lines): the rename commit as committed (`0bce03f`). Approved.
+    - `p1.2-v2.diff` (88 lines, +17/−13; `Game.php` 24, `UtilTrait.php` 6): the adaptation as committed in `c453c4a` (byte-identical, `cmp`). Approved in his review before the redeploy; his message of 2026-11-02, item 3, is the record.
+    - `p1.2-playtest-v3.diff` (95 lines, +78/−6): P1.2's playtest list in the plan. Approved the same way. Committed in `0217be6`.
+    - `p1.2-wip2-docs-v2.diff` (580 lines): the in-progress entry and the playtest list. Committed as `0217be6` (byte-identical to that commit's patch of the two files, `cmp`).
+    - `replay-fix-proposal.diff` (63 lines; `firstascent.js` 9 insertions, 9 deletions): the replay fix. **A proposal, not applied, not yet reviewed in a design discussion.** LF only, and valid against `firstascent.js` at `c453c4a` (`git apply --check --cached` passed; P1.2 did not change the file).
+  - **Superseded, not overwritten:** `p1.2.diff` (79 lines; by `p1.2-v2.diff`; it is the code that failed at table creation), `p1.2-playtest.diff` (85) and `p1.2-playtest-v2.diff` (90) (by `p1.2-playtest-v3.diff`), `p1.2-wip2-docs.diff` (565; by `p1.2-wip2-docs-v2.diff`).
+  - **This session:** `p1.2-docs.diff` (856 lines), the closing docs as first written; approved with corrections and **superseded by `p1.2-docs-v2.diff`** (891 lines; approved with one correction and **superseded by `p1.2-docs-v3.diff`**). Neither was overwritten. The line count and `--stat` of the v3 diff are in my report.
+  - `firstascent-overrides\` is untouched.
+- **Scratchpads** (outside the repo; `C:\Users\Jonat\AppData\Local\Temp\claude\D--Documents-BGA-Studio-firstascent\<session id>\scratchpad\`):
+  - **Code session 1** (`2eb67ffe-…`): listed under "Files outside git, code session 1" at the end of this entry.
+  - **Code session 2** (`7de0b7e8-dc7a-43aa-8211-303c7440cadf`):
+    - Inventories: `inventory.php` (copied from session 1's), `inv_game_now.txt`, `inv_utils_now.txt`; `list_new.php` (every `new <class>`), `top_level.php`.
+    - Checks: `tokcheck.php` (token check), `load_check.php` and `ide_stubs.php` (declaration check against the IDE stubs), `ns_semantics.php` (string callable versus closure under a namespace), `layout/` (the `require dirname(__DIR__, 2)` expression under another working directory), `cc.php` and `mat.php` (scratch tests that load `material.inc.php` into a scratch object), `tm_head.txt`, `tm_new.txt`, `tm_new2.txt` (`technique_matching.php` output).
+    - Edits, each by exact-match script with CRLF kept: `edit_adapt.php`, `edit_material.php`, `edit_plan_playtest.php`, `edit_plan_review.php`, `edit_plan_v3.php`, `edit_progress_update.php`, `edit_progress_winscp.php`, `edit_progress_material.php`, `edit_progress_replay.php`; their blocks `playtest_block.md`, `progress_update_block.md`, `progress_material_block.md`, `progress_replay_block.md`; the plan before each edit (`plan_before_review.md`, `plan_before_v3.md`).
+    - The material analysis: `propose_material.php`, `Game.cur.lf.php`, `Game.proposed.lf.php`, `delta_v1_v2.txt`; `head/` (the two files as at `fdf421b`, LF).
+    - The replay investigation: `notif_survey.php` with `notif_survey.txt` and `notif_survey2.txt`, `state_props.php`, `enclosing.php`, `replay_fix.php`, `rf/` (the two `firstascent.js` copies and the diff).
+    - Transcript readers written for this checkpoint: `user_msgs.php` and `asst_msgs.php` with their output folders `um2/` and `as2/`, `as2s/`; `region.php`. `msg_adapt.txt` is the adaptation commit message.
+  - **This session** (`9beef41f-a691-48e9-9943-6a3dcb414126`): `edit_lib.php` (the shared exact-match edit helper), `edit_docs.php` (the edits to `TODO.md`, `DECISIONS.md`, `BGA_PITFALLS.md`, `CLAUDE.md` and `MIGRATION_PLAN.md`), `edit_docs_v2.php` and `edit_docs_v3.php` (the plan corrections after the first and second reviews), `build_progress.php` (builds this entry), `prompt_s4.md`, `stopA_msg.md`, `review1_msg.md` and `review2_msg.md` (the quoted go-aheads).
+- **Transcripts,** outside the repo, in `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\`: `2eb67ffe-a03f-4360-b47e-050b6dd0ee93.jsonl` (code session 1), `7de0b7e8-dc7a-43aa-8211-303c7440cadf.jsonl` (code session 2; the session prompt is its first message) and `9beef41f-a691-48e9-9943-6a3dcb414126.jsonl` (this session).
 
-  > If every result matches, this prompt is my go-ahead to start 5.2. The progress entry's "Next" says 5.2 starts when I say so. Otherwise stop and report.
+**Compaction**
+- **Code session 1:** auto-compacted once, during 5.1 (see its record below).
+- **Code session 2:** auto-compacted twice, so not "no compaction noticed". The transcript has two `compact_boundary` records, both `trigger: auto`: the first at line 1026, 2026-11-01 19:28:45, as his playtest report arrived (431,179 tokens before, 17,245 after); the second at line 1534, 2026-11-01 23:52:39, as his "push" message arrived (229,972 before, 18,209 after; a notice follows it: "Compacted using a summary written while you were away"). That session didn't see either happen; it knew of the first from the transcript only. After the second it re-read the prompt, his messages and its own reports from the transcript, and checked the commits, the diffs and the plan against git and the files. Its git writes were the two commits (2026-11-01 19:29:43 and 19:30:28) and the push (23:52:59).
+- **This session:** no compaction noticed (as of `p1.2-docs-v3.diff`).
 
-  Used: every start-check result matched, and 5.2 started. Its rules for commits and push (§7), which stand:
+**Model**
+- **Code session 1:** Sonnet 5.5 (Opus had been recommended for it in the design discussion, not in the session prompt).
+- **Code session 2:** Sonnet 5.5, Jonathan's answer to its question (2026-11-02). Its own context named the same model.
+- **This session:** Sonnet 5.5, at the Extra effort level (Jonathan's answer to my question, item 6 of his reply to stop A, as he corrected it in item 8 of his review of the first docs diff: "Extra" was the effort setting, not a model variant). My own context names the model Sonnet 5.5 (`claude-sonnet-5-5`), which agrees. His stop-A reply is quoted above as he wrote it.
 
-  > ## 7. Commits and push
-  >
-  > - After my playtest report and my "commit P1.2":
-  >   - first the rename commit (`struct:`), from the index as `git mv` left it;
-  >   - then the adaptation commit (`struct:`): stage `modules/php/Game.php` and `modules/php/UtilTrait.php` by explicit path.
-  > - Before each commit, check `git diff --cached --stat` against that diff's stat. After the rename commit, run `git show -M --stat` (100%).
-  > - Show each commit message before committing.
-  > - Never `git add -A`. Pushed commits are never amended.
-  > - Push only after my "push" (a normal push; no tags).
-
-  Its closing-docs rule (§8, heading and last line) and its rule on approvals (§9):
-
-  > ## 8. Closing docs (after the code commits; one `docs:` commit after my "commit docs", pushed after my "push")
-
-  > Write the docs diff to `"D:\Documents\BGA Studio\p1.2-docs.diff"`, give its line count and `--stat`, and stop for my review before "commit docs".
-
-  > - **Approvals name their action** ("commit P1.2", "push", "commit docs"). If a message is ambiguous while several actions are pending, ask.
-
-- **2026-10-31 21:43, after the review of the code diffs:**
-
-  > The code diffs are approved as reviewed (p1.2-move.diff, 8 lines; p1.2.diff, 79 lines). This isn't "commit P1.2": that still waits for my playtest.
-  >
-  > 1. Leave the header comment at Game.php line 11 as it is.
-  > 2. The progress entry records 50 `new` of an already-qualified class, plus 3 legacy exceptions; your re-run says 52 before the tool commit. Explain the difference with file:line citations, without editing anything. Is it the two \BgaSystemException counted in both categories?
-  > 3. Write the playtest-list edit as a diff: git diff -- misc/docs/MIGRATION_PLAN.md > "D:\Documents\BGA Studio\p1.2-playtest.diff". Give its path, line count and --stat, then stop for my review.
-  > 4. I'm deploying with WinSCP, not the VS Code SFTP extension. Record that in the progress entry. If WinSCP converts line endings on upload, the Studio sizes will be the LF sizes (343,833 and 67,738); I'll report which sizes I see.
-
-  Used: `p1.2-move.diff` and `p1.2.diff` approved (not "commit P1.2"); the header comment left as it is; the 50-versus-52 explanation; `p1.2-playtest.diff`; the WinSCP record.
-- **2026-10-31 22:02, the playtest list:**
-
-  > The playtest list is approved with these changes. Make them in the plan, by script with exact-match checks (CRLF kept), and give me the new diff's line count and --stat. No other edits.
-  >
-  > 1. Labels: "Table 1/2/3" with steps "1a–1j", "2a–2d", "3a–3g". "T1"–"T32" are TODO ids in the plan (§8.1).
-  > 2. 1e: the expected ranges are bounds. Say that each pile's lowest and highest card_type_arg fall within its range, not that they equal its ends.
-  > 3. 1h: cite the log line (file:line) that prints the number after the card 11 draw, and say whether it is the card_type_arg. If it is, say "card_type_arg" rather than "id".
-  > 4. 3e: "The final-round banner appears" has no source tag. Cite it, or remove it.
-  > 5. Add to 1h, after the other player rests, in the list's style:
-  >    - (added) The resting player's Portaledge draws: each card taken from a pile is of that pile's skill. From the design discussion, not the code; a mismatch is a finding.
-  >
-  > Also correct the WinSCP note in progress.md. WinSCP showed 343 KB for Game.php on both the local and remote sides; exact bytes weren't read. The conclusion that WinSCP kept CRLF comes from that comparison. The LF sizes were computed alternatives, not observed.
-  >
-  > I'm starting the playtest now.
-
-  Used: the five changes (`p1.2-playtest-v2.diff`) and the corrected WinSCP note.
-- **2026-10-31 22:59, Table 1 failed.** A limit, not a go-ahead:
-
-  > Studio playtest, Table 1: table creation failed. Change no code yet.
-
-  > Then propose the fix as an exact diff, without applying it. My expectation is one require of the root file by absolute path in the constructor, after parent::__construct(). Say which commit it belongs in, and what to add to the playtest. Stop for my go-ahead.
-
-- **2026-10-31 23:23, the material go-ahead** (outside the scope he had approved):
-
-  > Go-ahead for the material fix, as proposed: in modules/php/Game.php's constructor, right after parent::__construct(), the comment line and require dirname(__DIR__, 2) . '/material.inc.php';. It goes in the adaptation commit (struct:). Record this go-ahead in progress.md, since it's outside the scope I approved.
-  >
-  > 1. Apply it by script with exact-match checks, keeping CRLF. Re-run php -l, the token check (one new residual cluster, mapped to this go-ahead) and technique_matching.php with its case counts. Write "D:\Documents\BGA Studio\p1.2-v2.diff" (don't overwrite p1.2.diff), and give its line count and --stat.
-  > 2. Update P1.2's playtest list in the plan:
-  >    - your four additions (the root check before the tables, F5 and the log in 1a, the count query in 1e), each with its source tag;
-  >    - the Game.php citations in the list, which shift by 2 from line 30 on (for example 2145, 2147 and 2760).
-  >    Write "D:\Documents\BGA Studio\p1.2-playtest-v3.diff", with line count and --stat.
-  > 3. In progress.md:
-  >    - Record the failed table: the first warning, the loop at 707–713, and the timeout. Say that the docs don't say who includes the root material.inc.php for a legacy main file, so the cause is unknown. The legacy class had the same parent, Bga\GameFramework\Table, so that constructor isn't ruled out.
-  >    - Correct "Game.php lines are unchanged": after this fix they shift by +2 from line 30 on.
-  > 4. Add to the closing docs (section 8), for the MIGRATION_PLAN.md edits:
-  >    - correct §1.3's "stays auto-included" and §3.1's "where it is auto-included" from the Studio result;
-  >    - add the explicit require to P1.2's scope.
-  >    Show the wording in the docs diff for my review.
-  >
-  > Then stop for my review before I redeploy. Don't change anything else.
-
-  Used: the fix was applied and is in `c453c4a`; `p1.2-v2.diff` and `p1.2-playtest-v3.diff` were written; the failed table and the line-shift correction were recorded. **Not used yet:** item 4, the §1.3 and §3.1 corrections and the explicit require in P1.2's scope, with the wording shown in the docs diff for his review.
-- **2026-11-01 19:28, "commit P1.2"** (after the playtest report, which is quoted under "The playtest"):
-
-  > commit P1.2: the rename commit, then the adaptation commit, as section 7 says. Show each message before committing. Don't push yet.
-  >
-  > Then, read-only, with file:line citations:
-  > 1. What firstascent.js:7579 removes, where that element is created, and why it is missing in a replay.
-  > 2. Is any other notif_ handler likely to fail the same way in a replay? List the candidates with the reason. Say whether a replay could run to the end after a fix at 7579 alone, or what else would have to change.
-  > 3. Propose the smallest fix that lets a replay run to the end, as an exact diff, without applying it. Say how it changes live play, if at all.
-  >
-  > Record all of this in the progress entry, as a finding that predates P1.2. Then stop. Whether to fix it now, and under what go-ahead, is my decision.
-
-  Used: the two commits (`0bce03f`, `c453c4a`), not pushed at that point; the three read-only answers; the replay finding recorded above; then stopped. See the note under 5.2 on how the first message was shown.
-- **2026-11-01 23:52, "push" and the rollover instruction,** in full:
-
-  > push: the two P1.2 commits, 0bce03f and c453c4a. A normal push, no tags. Then show git log --oneline -4 and the state against origin/main.
-  >
-  > Then roll over. This session was auto-compacted, so don't start the closing docs. Update the in-progress entry at the top of misc/docs/progress.md (keep it a single entry, newest first) so a new session can finish P1.2 from it alone:
-  > - HEAD and push state; staged and unstaged changes.
-  > - Files outside git: every diff in D:\Documents\BGA Studio\ from this session, with line count and status (approved, superseded by which file, or proposal), and this session's scratchpad.
-  > - Each item's status:
-  >   - rename and adaptation (committed, with hashes);
-  >   - the material fix;
-  >   - the deploys (WinSCP; the CRLF sizes);
-  >   - the playtest results as I reported them, including what was not run;
-  >   - the replay finding, with the six sites and the three open questions;
-  >   - closing docs: not started.
-  > - What the closing docs must do: section 8 of this session's prompt, plus everything added since:
-  >   - correct §1.3, §3.1 and §9.4 (line 1731) on material.inc.php from the Studio result [my decision: keep or strike §9.4];
-  >   - add the explicit require to P1.2's scope;
-  >   - record the 1c finding (Studio's menu shows the names without debug_) and the 3c finding (ly_studio.js's uncaught promise);
-  >   - record the replay finding;
-  >   - note the unchecked count query.
-  >   Write it as a checklist, with the sections it touches.
-  > - Go-aheads given in this session, quoted in full from the transcript: my approvals of the diffs and the lists, the material go-ahead, "commit P1.2" and this "push". A record of a go-ahead isn't a grant.
-  > - Pending decisions:
-  >   - the replay fix  its own fix: commit, in its own session after P1.2's closing docs and before P1.3; the go-ahead for firstascent.js comes with that session's prompt;
-  >   - whether TODO.md gets an entry for the replay bug;
-  >   - F13 as a repeat in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3;
-  >   - whether 2d also runs the count query;
-  >   - the ones carried over: the zombie-path fix step, the redraw-loop fix, retiring the overrides folder.
-  > - The compaction, as you observed it.
-  > - The model: ask me which model this session ran on, and record my answer.
-  > - Next: a new session finishes P1.2's closing docs; then the replay fix decision; then P1.3.
-  >
-  > Stage nothing yet. Write the docs diff, covering progress.md and the playtest list already in MIGRATION_PLAN.md, to "D:\Documents\BGA Studio\p1.2-wip2-docs.diff". Give its line count and --stat, then stop for my review before "commit docs".
-
-  Used: the push (see "State at the rollover"); the rollover entry (this one); `p1.2-wip2-docs.diff` written. Not staged. "Stop for my review before 'commit docs'": **"commit docs" has not been given.**
-- **2026-11-02, the review of `p1.2-wip2-docs.diff`,** in full:
-
-  > The docs diff is approved with these corrections. Make them by script with exact-match checks (CRLF kept), write "D:\Documents\BGA Studio\p1.2-wip2-docs-v2.diff" (don't overwrite), and give its line count and --stat. No other edits.
-  >
-  > 1. Deploy 1: after the upload I checked Studio's file list. modules/php/ holds Game.php and UtilTrait.php, and the root firstascent.game.php and modules/utils.php are deleted. Record that, and change U1's line: the root file was deleted, so U1 was avoided as planned, not tested with both files present.
-  > 2. Deploy 2: I re-uploaded modules/php/Game.php only [confirm or edit]. I didn't read its size.
-  > 3. Approvals: p1.2-v2.diff (the adaptation as committed in c453c4a) and p1.2-playtest-v3.diff were approved in my review before the redeploy. I didn't tell you then. This message is the record.
-  > 4. §9.4's row: keep it in the corrections, with §1.3 and §3.1. Its fact column ("only the root material.inc.php is" auto-included) is contradicted by the Studio result too: the root file wasn't included for the namespaced class. Mark it decided.
-  > 5. The replay fix: the timing is decided (its own fix: commit, in its own session, after P1.2's closing docs and before P1.3). Under "Pending decisions", list only what is still open: the go-ahead for firstascent.js (with that session's prompt), and whether replay-fix-proposal.diff is enough (the three open questions).
-  >
-  > Then stop for my review before "commit docs".
-
-  Used: the five corrections, by script with exact-match checks and CRLF kept; `p1.2-wip2-docs-v2.diff` written (the first diff not overwritten). Item 3 is the record, made after the fact, of two approvals given before the redeploy: `p1.2-v2.diff` and `p1.2-playtest-v3.diff`. Items 1 and 2 are the Studio facts recorded under "Deploy 1" and "Deploy 2". Item 2's "[confirm or edit]": I read it as a check against my record, which says the same (Game.php only), so nothing was edited. Not a "commit docs": he asked for a stop for his review of the v2 diff, so **"commit docs" has not been given.**
-- **Not given:** "commit docs" (for this checkpoint's docs commit or the closing docs), "push" of any docs commit, the go-ahead to edit `firstascent.js` for the replay fix (it comes with that session's prompt), and any go-ahead to edit a doc outside the list in §1 of the session prompt (`progress.md`, `MIGRATION_PLAN.md`, `TODO.md`, `DECISIONS.md` for D9 only, `CLAUDE.md` within §3).
-- **Still to use, from code session 1** (quoted under "Go-aheads and decisions" in the record below): the closing-docs items of §3 of the prompt of 2026-10-30 (T23 dropped, the searches, `CLAUDE.md`, the `php:` prefix, no citation refresh, `TODO.md` T24, the other docs, U2's playtest scope) and "Record any further go-ahead I give in the progress.md entry".
-
-**Pending decisions**
-- **The replay fix,** still open:
-  - The go-ahead to edit `firstascent.js`: it comes with the prompt of the session that does the fix.
+**Pending decisions** (only what is still open)
+- **The replay fix,** which is next:
+  - The go-ahead to edit `firstascent.js` comes with the prompt of the session that does the fix.
   - Whether `replay-fix-proposal.diff` (not applied) is enough: the three open questions in the finding (private notifications in the replay archive; `onEnteringState` and `onUpdateActionButtons` in a replay; the non-animated branches). Testing it needs a new Table-3-shaped game created after the deploy.
-- **Whether `TODO.md` gets an entry for the replay bug.**
-- **F13 as a repeat** in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 (§8.4, line 1662): none of them can pass while a replay stops at the first move. Whether they stay, wait for the fix or change is not decided; the plan was not edited.
-- **Whether 2d also runs the count query.** 2d says "The same SQL as 1e, with the same expectations (n = 7, each pile's lowest and highest within its range)", which covers the first query only. I left it as it is in the v3 step and said so in my report ("say if you want it to cover the count query too").
 - **Carried over from the P1.1 entry, still open,** as written there:
   - "The planned fix for the redraw loop: P5.2, with R-6's setup path (proposed). Once confirmed, §8.4 gets a row."
   - "The fix step for the zombie path in `chooseSummitBetaToken` (`TODO.md`, found in (b2)): to be decided."
   - "Retiring `D:\Documents\BGA Studio\firstascent-overrides\`."
-- **Raised by me, not from his list:**
-  - Where the 1c and 3c findings go besides `progress.md` (for example a results line in P1.2's Playtest, a corrected expected text for 1c, a line in `BGA_PITFALLS.md` about Studio's debug menu). `BGA_PITFALLS.md` isn't in the list of docs the session prompt lets me edit, so that needs his go-ahead.
-  - The count query (124) stays unchecked until he runs it on a new table; the final entry should say whether he did.
-
-**Compaction** (code session 2, as I observed it)
-- **Not "no compaction noticed":** the session was auto-compacted twice. Jonathan's message of 2026-11-01 23:52 says "This session was auto-compacted". The transcript has two `compact_boundary` records, both `trigger: auto`:
-  - **First:** line 1026, 2026-11-01 19:28:45, written as his playtest report arrived. 431,179 tokens before (`preTokens`), 17,245 after. Its summary record is line 1030; that record's own timestamp (2026-11-01 00:22) is earlier than the boundary, the same out-of-order stamp as in code session 1.
-  - **Second:** line 1534, 2026-11-01 23:52:39, written as his "push" message arrived. 229,972 tokens before, 18,209 after. A notice follows it: "Compacted using a summary written while you were away · turn off with "idleCompaction": false in settings.json". The summary record (line 1538) is stamped 2026-11-01 20:32, about 55 minutes after my last turn ended (19:38), so it was written while he was away and applied when his message came in.
-- **What I observed:** I didn't see either compaction happen. My context for this checkpoint began with the second continuation summary, followed by the messages the transcript keeps verbatim (five `Read` results of scratchpad files and my own closing message of the previous turn), then his "push" message. The summary was written without those kept messages, which is why it says the closing message had not been written yet. I know of the first compaction from the transcript only: the first summary isn't in my context.
-- **What I did after it:** I re-read from the transcript the session prompt, each of his messages quoted above and my own reports (the start check and 5.2–5.3, the material analysis, the replay work), and checked the commits, the diffs and the plan's line numbers against git and the files, instead of relying on the summary. Every quotation in this entry is from the transcript.
-- **The prompt's rollover rule** (§9): "Roll over at the next checkpoint after an auto-compaction (a long session is reason enough)". This is that checkpoint. He said not to start the closing docs.
-- **Git writes in this session** (`git reflog`, no stash, no tag changes): the two commits (2026-11-01 19:29:43 and 19:30:28) and the push (23:52:59). The two `git mv` commands of 5.2 don't appear in the `HEAD` reflog.
-
-**Model**
-- **Code session 2:** Sonnet 5.5, Jonathan's answer to my question (2026-11-02). My own context named the same model.
-- **Code session 1:** Sonnet 5.5 (see its record below).
 
 **Next**
-- Jonathan reviews `p1.2-wip2-docs-v2.diff`; then "commit docs" (one `docs:` commit of `misc/docs/progress.md` and `misc/docs/MIGRATION_PLAN.md`, staged by explicit path) and "push".
-- A new session finishes P1.2's closing docs from the checklist above: the read-only searches and the `CLAUDE.md` wording first, then the edits, then `p1.2-docs.diff` with its line count and `--stat`, and a stop for his review before "commit docs". Docs only: the code commits are done and pushed.
-- Then the replay fix, as decided: its own `fix:` commit in its own session, after P1.2's closing docs and before P1.3. Still open: the go-ahead for `firstascent.js` (it comes with that session's prompt) and whether `replay-fix-proposal.diff` is enough (the three open questions).
+- Jonathan reviews `p1.2-docs-v3.diff`; then "commit docs" (one `docs:` commit, staged by explicit path) and, after that, "push".
+- Then the replay fix, in its own session, as its own `fix:` commit, after P1.2's closing docs and before P1.3. That session:
+  - gets the go-ahead for `firstascent.js` with its prompt, and decides whether `replay-fix-proposal.diff` is enough;
+  - tests the fix on a new finished game (Table 3's shape) created after the deploy, since replays use the files archived at game start;
+  - updates F13's repeats in P1.3, P2.2, P2.6, P3.5, P4.1 and P7.3 (decision 3 of this session's prompt);
+  - removes the replay entry from `TODO.md` with its fix;
+  - runs the asset count query on its new game, `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_type='asset';` (expected 124), and records the result in its entry (decision 4 of this session's prompt). It closes the count query that P1.2 left unchecked.
 - Then P1.3.
 
-**Record of code session 1** (2026-10-30/31; transcript `2eb67ffe-…`). Kept as written at the first checkpoint, except that its "not started" lines for 5.2 and 5.3, its "State at the stop", its "Pending decisions" (moved above) and its "Open" list (done, or in the checklist above) are left out, and a few words ("this session", "this docs diff") were changed to name code session 1.
+**Record of code session 1** (2026-10-30/31; transcript `2eb67ffe-…`). Kept as it was in the in-progress entry (`0217be6`), where it was carried from the first checkpoint, except that its "Go-aheads and decisions" block is now a pointer (below).
 
 **Compaction, code session 1** (as Jonathan observed it)
 - The session was auto-compacted once, during 5.1. Jonathan saw it in the app. I didn't see the event: my context then began with a continuation summary, followed by my section 4 report and his go-ahead for 5.1, verbatim. In the transcript, the summary record comes after the go-ahead message; its own timestamp (2026-10-31T05:37Z) is earlier than the go-ahead's (19:51Z), so I rely on the file order and on what he saw.
 - The prompt's rollover rule: "**Roll over** at the next checkpoint after an auto-compaction (a long session is reason enough)". This is that checkpoint: the tool commit is pushed, and 5.2 is not started.
-- **What I did after it:** re-read the session prompt and Jonathan's later messages from the transcript. Every quotation below is from there, not from the summary, and the start-check and `TODO.md` facts were re-read from the transcript's tool output. Nothing in this entry rests on the summary alone. The summary had dropped one instruction of §3 (where the `php:` notation is defined); it is in the closing-docs checklist above ("The `php:` note").
+- **What I did after it:** re-read the session prompt and Jonathan's later messages from the transcript. Every quotation below is from there, not from the summary, and the start-check and `TODO.md` facts were re-read from the transcript's tool output. Nothing in this entry rests on the summary alone. The summary had dropped one instruction of §3 (where the `php:` notation is defined); it was in the closing-docs checklist of the in-progress entry (`0217be6`) and is used in this session.
 - No unplanned git action happened. The one git write outside the plan, `git checkout -- misc/docs/TODO.md`, was approved (below).
 
 **Model, code session 1**
@@ -415,54 +398,7 @@ Code session 2, in order:
   - **After the move** the line should read `running class Bga\Games\FirstAscent\Game, parent class Bga\GameFramework\Table, declared in modules/php/Game.php`.
   - Committed after "commit P1.2 tool" (message: `commit_tool_msg.txt`) and pushed after "push".
 
-**Go-aheads and decisions** (quoted from the session prompt and Jonathan's messages)
-- **Status at the second checkpoint:** the items of the second list that concern 5.3 (the exception mapping, the leading backslash, the closures, `dieLog`, the playtest scope for U2) are used. The closing-docs items (T23 dropped, the searches, `CLAUDE.md`, the `php:` prefix, no citation refresh, `TODO.md` T24, the other docs) are not used yet; the checklist above lists them.
-- **Used up:**
-  - §3: "The commit plan in section 1, including `debug_frameworkCheck` first, in the legacy `modules/utils.php`." and the `debug_frameworkCheck` spec (done: `322754e`).
-  - The `TODO.md` restore: "Restore the working copy from the index: `git checkout -- misc/docs/TODO.md`. Its content matches HEAD, so nothing is lost. I approve this one command only."
-  - "commit P1.2 tool" and "Push." (2026-10-31).
-- **Given, to use in 5.3 and the closing docs** (§3 of the prompt, quoted):
-  - "`feException` and `\BgaSystemException` become the current classes named in §1.3, with the mapping cited from `misc/docs/bga/current/game-files/Main game logic_ Game.php - Board Game Arena.md`. `\BgaSystemException` includes the guard of `debug_goToState` (§6.2 says it keeps the legacy class until P1.2)."
-  - "Any other legacy exception class you find gets a leading backslash, for parity. Converting one of them is only proposed, never made, because the current `UserException` expects a `clienttranslate` message." (None exists.)
-  - "Nested named functions passed as string callables become closures, with the same parameters and body."
-  - "**T23 is dropped** (Jonathan's decision, 2026-10-30). The item comes from a forum post from 2020, and Jonathan judges the issue benign. Record it as his judgement, not as a verified fact." In the closing docs: remove the `TODO.md` "Server bugs" entry on the strict-mode game-creation issue; in `MIGRATION_PLAN.md` remove T23 from P1.2's "Carries" (F13 stays), from P1.3's "Repros" (F13 stays) and from §8.4's T23 row, and update §13's D9 line; in `DECISIONS.md` amend D9 with the drop, the date and the reason, with F13 staying folded into P1.
-  - "Search `CLAUDE.md` and `misc/docs/` (not `misc/docs/bga/`, not older `progress.md` entries) for every other mention of T23 or the strict-mode issue. Report the hits, and edit them only after my go-ahead."
-  - "**`CLAUDE.md`:** the file-map rows, and any sentence, that name `firstascent.game.php` or `modules/utils.php` get the new paths. Nothing else in `CLAUDE.md`."
-  - "**The `php:` citation prefix:** keep it, and add a note that from P1.2 on it means `modules/php/Game.php`, and that `utils.php:` citations written before P1.2 refer to the file that is now `modules/php/UtilTrait.php`. Find where the doc notation is defined, if anywhere. If it isn't defined anywhere, propose a place and wait."
-  - "**No citation refresh in this step:** the adaptation shifts lines by only a few."
-  - "**`TODO.md`:** also remove the "Server bugs" entry about `firstascent.game.php` requiring `modules/utils.php` while git tracks `modules/Utils.php` (T24), now resolved."
-  - "**Other docs:** search `PROCEDURES.md` and `BGA_PITFALLS.md` for the two old paths and report the hits. Edit them only after my go-ahead."
-  - "**Playtest scope for U2** ("every action still works"): a sample of actions proves the `action.php` dispatch, plus a targeted check for every site the adaptation changed. Not a full list of actions."
-  - "Record any further go-ahead I give in the progress.md entry. A record of a go-ahead isn't a grant."
-- **Jonathan's message of 2026-10-31, before 5.1** (in full):
-  > Go ahead with 5.1, on these resolutions:
-  >
-  > 1. feException in zombieTurn → \Bga\GameFramework\VisibleSystemException, as you recommend.
-  > 2. Delete the require_once and rely on PSR-4 autoload. If Studio reports the trait not found, stop and report; propose the require_once __DIR__ fallback before changing anything.
-  > 3. dieLog stays unchanged. Go-ahead for the closing docs: correct §1.3's "namespacing pitfalls" in MIGRATION_PLAN.md: four nested functions (sortGear, sortFace, sortCrack, sortSlab) passed as string callables become closures; dieLog is called directly. Word what dieLog does under the namespace from the Lucky Chalkbag playtest result, not from the inference.
-  > 4. Creating modules/php/ as an empty folder before the git mv is fine.
-  >
-  > Also:
-  > - Now, before 5.1: add these resolutions to P1.2's scope in MIGRATION_PLAN.md (the four closures, dieLog unchanged, the extends qualification, the exception mapping, autoload with the fallback held back), so a rollover works from the repo.
-  > - For the closures: check that the four variable names don't collide with existing locals in setupNewGame.
-  > - With the 5.3 diff: break the 21 callable- or name-taking call sites (13 in the game file, 8 in the trait) into categories that sum to 21.
-  > - In the playtest list: say what the four filtered arrays feed at setup, and what a new table shows from them, so a wrong filter result would be visible and not only a fatal error.
-  > - The adaptation came to about 15 lines against the plan's ~80; record that in progress.md.
-- **Jonathan's message after the tool playtest** (2026-10-31; after its report, in full):
-  > Playtest of the tool commit (Studio, fresh table): the debug menu lists 14 debug_ functions and no helper. Framework check logged exactly the line you expected for the legacy file, with the placeholders filled in.
-  >
-  > The session was auto-compacted during 5.1 (I saw it in the app). Per the rollover rule, this checkpoint is where we stop:
-  >
-  > 1. "commit P1.2 tool": show the message, stage modules/Utils.php only, check --cached --stat against p1.2-tool.diff, commit. Then wait for "push".
-  > 2. After the push, don't start 5.2. Write the "in progress" P1.2 entry at the top of misc/docs/progress.md. Include:
-  >    - HEAD and push state;
-  >    - staged and unstaged changes;
-  >    - files outside git (the diffs, this session's scratchpad);
-  >    - each item's status: the TODO.md restore, section 4's results, the tool commit and its playtest, 5.2–5.3 not started;
-  >    - the pending decisions and go-aheads, as written in the session prompt and my later messages, quoted rather than summarized where you still have them. Mark any you have only from the compaction summary;
-  >    - the open follow-ups: the 21-call-site breakdown, the playtest list (including what the four filtered arrays feed at setup), the 15 versus ~80 lines, the §1.3 correction, the TODO.md restore record;
-  >    - that the session was auto-compacted during 5.1, as I observed it.
-  > 3. Write the docs diff (progress.md and the MIGRATION_PLAN.md scope edit) to "D:\Documents\BGA Studio\p1.2-wip-docs.diff", give its line count and --stat, and stop for my review. It goes in one docs: commit after my "commit docs", pushed after "push".
+**Go-aheads and decisions, code session 1:** the full quotes (the session prompt's §3, Jonathan's message of 2026-10-31 before 5.1, and his message after the tool playtest) are in `git show 0217be6:misc/docs/progress.md`, in the block "Go-aheads and decisions" (line 418 there). The ones used up in code session 1 are the §3 mapping and the `debug_frameworkCheck` spec (`322754e`), the `TODO.md` restore, "commit P1.2 tool" and "Push."; the closing-docs items of §3 were used in this session and are quoted above in the prompt's §4. A record of a go-ahead isn't a grant.
 
 **Files outside git, code session 1**
 - In `D:\Documents\BGA Studio\`:

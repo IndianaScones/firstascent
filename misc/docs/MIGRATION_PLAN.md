@@ -19,6 +19,8 @@
   | tpl | `firstascent_firstascent.tpl` |
   | view.php | `firstascent.view.php` |
 
+  The table gives the names at the baseline. From P1.2 on, `php` means `modules/php/Game.php` and `utils.php` means `modules/php/UtilTrait.php`: the same two files, moved in P1.2. Citations written before P1.2 keep their prefix and point to the same code; their line numbers are not refreshed.
+
   Line numbers in js have shifted by about 16 lines since `FREEZE_INVESTIGATION.md` was written, so they differ from that document's.
 - **Doc citations:** `[short name:line]`. All paths are under `misc/docs/bga/`:
 
@@ -106,7 +108,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **D6** When a notification handler fails, the player sees a short non-blocking message, besides the console log and the re-render (§4.3). This is for now: revisit it after the P4.2 playtest if it proves noisy.
 - **D7** Client-sent player ids are fixed in P1.6–P1.9; every other `act*` input is validated in the slice that owns it (§5.4, B3).
 - **D8** All of §7's components are adopted: PlayerCounter/TableCounter and Zone during the migration; ItemManager, BgaAnimations, BgaCards, BgaDice, BgaScoreSheet and the last-turn banner in P8.
-- **D9** The SQL strict-mode fix (T23) and the replay check (F13) are folded into P1.
+- **D9** The replay check (F13) is folded into P1. The SQL strict-mode fix (T23) was folded in too, then dropped on 2026-10-30 (Jonathan's judgement, not a verified fact).
 - **D10** The UX change register `UX_CHANGES.md`. The migration is parity only; decided UX items are implemented in P8 (§12).
 - **D11** The rules-check record `RULES_CHECK.md` (§5).
 - **D12** No formal cut-over for private-alpha tables; releases only when no table is running (§2.4).
@@ -158,6 +160,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - No behavior changes, because every state that allows Bomber Anchor already lists both sub-actions (fix `1aaad2b`).
   - The underlying weakness (B3, §5.4) is unchanged.
 - **[unverified]** `action.php` still dispatches when the main class is the namespaced `Game`. **Check (P1.2):** every action still works.
+  - **Result (P1.2):** every action in the P1.2 sample worked (at least 7 of the 25 actions; a sample, not a full list) [S, Jonathan's report of 2026-11-01].
 
 ### 1.3 `firstascent.game.php` vs `modules/php/Game.php`: one main class only; switch atomically
 - **Docs:**
@@ -166,13 +169,19 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **[unverified]** Which file the framework loads if both exist on Studio.
   - Avoid the question: P1.2 deletes the root file on Studio in the same deploy. VS Code's uploadOnSave never deletes remote files **[inferred from how the extension uploads]**, so this is a manual step.
   - **Check (P1.2):** a Studio-only `debug_frameworkCheck()` logs the running class name, which should be `Bga\Games\FirstAscent\Game`.
+  - **Result (P1.2):** U1 was avoided as planned, not tested with both files present: the root file was deleted on Studio (Jonathan checked Studio's file list after the upload), so what the framework does when both exist is not shown. The namespaced class in `modules/php/Game.php` ran: 1b's log line was as expected, class `Bga\Games\FirstAscent\Game`, file `modules/php/Game.php` [S, Jonathan's report of 2026-11-01].
 - **Still auto-included or still used:**
-  - `material.inc.php` at the root stays auto-included [Material doc:7, :11].
+  - `material.inc.php` at the root: on Studio, the namespaced `Game` did not get it until its constructor required it explicitly (P1.2).
+    - The docs don't settle it: Material doc:7 says a root file is loaded automatically, doc:11 says the constructor of the main game logic includes it, and doc:200 says a file under `modules/php` is not included automatically.
+    - Studio: a table created with the namespaced `Game` and no explicit require failed at setup with `Undefined property: Bga\Games\FirstAscent\Game::$asset_cards`. With `require dirname(__DIR__, 2) . '/material.inc.php';` in the constructor (`Game.php:32`), every table in the playtest was created and read all seven material properties with no warning [S].
+    - So who included the root file for the legacy main file is unknown, and the `Table` constructor is not ruled out. P1.2 requires the file explicitly (Jonathan's go-ahead of 2026-10-31).
   - `view.php` keeps calling public methods through `$this->game` [legacy tpl doc:246–259]. This is **[unverified]** with the namespaced class. **Check (P1.2):** the board renders: shared objectives, pitches and the face-down Headwall all come from `view.php`.
-- **Namespacing pitfalls in this code** (to fix in P1.2):
-  - Nested named functions passed as string callables: `php:setupNewGame ~370–378` (`'sortGear'` to `array_filter`) and `php:confirmLuckyChalkbag ~4891` (`dieLog`). String callables are not resolved against the current namespace **[inferred from PHP semantics]**, so these become closures.
+    - **Result (P1.2):** 1d (the board and everything on it) and 2a (the forest board) were as expected [S, Jonathan's report of 2026-11-01].
+- **Namespacing pitfalls in this code** (fixed in P1.2):
+  - Four nested named functions, `sortGear`, `sortFace`, `sortCrack` and `sortSlab` in `php:setupNewGame ~370–378`, were passed to `array_filter` as string callables. A string callable naming a nested function throws a `TypeError` under a namespace (a PHP 8.4 scratch test, [C]), so they became closures.
+  - `dieLog`, a nested function in `php:confirmLuckyChalkbag ~4891`, is called directly, not as a string, and stays unchanged. The earlier text of this section listed it among the string callables; that was wrong. On Studio it resolved under the namespace: Lucky Chalkbag's use (1h) logged the line that `dieLog` builds [S, Jonathan's report of 2026-11-01].
   - `feException` (`php:zombieTurn ~6724`) and `\BgaSystemException` (`utils.php:isPlayerZombie ~924`) become the current exception classes [Game.php doc:1749–1781].
-- **Consequence:** P1.2 is one behavior-preserving move: `git mv`, new headers, the pitfalls above, and a manual Studio cleanup.
+- **Consequence:** P1.2 is one behavior-preserving move: `git mv`, new headers, the pitfalls above, the explicit `require` of `material.inc.php`, and a manual Studio cleanup.
 
 ### 1.4 Dojo client vs `modules/js/Game.js` and JS State classes: one entry point only; the current API is usable from the legacy file
 - **Docs:**
@@ -231,9 +240,9 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 
 | ID | Unverified behavior | Checked in |
 |---|---|---|
-| U1 | Which main PHP file wins when both exist (avoided by deleting) | P1.2 |
-| U2 | `action.php` dispatch with a namespaced `Game` | P1.2 |
-| U3 | `view.php` / `.tpl` with a namespaced `Game` | P1.2 |
+| U1 | Which main PHP file wins when both exist (avoided by deleting) | P1.2 (avoided: the root file was deleted; the namespaced class ran) |
+| U2 | `action.php` dispatch with a namespaced `Game` | P1.2 (the sample of at least 7 actions worked) |
+| U3 | `view.php` / `.tpl` with a namespaced `Game` | P1.2 (1d and 2a as expected) |
 | U4 | Transitions and `nextState` names across array states and State classes | P2.1 |
 | U5 | `zombieTurn` vs `zombie()` during the mix | P2.1 |
 | U6 | `#[PossibleAction]` methods provided through a PHP trait; a `Game.php` `act*` method called in a class state that doesn't declare it | P2.2, P2.7 |
@@ -504,6 +513,17 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** playable; existing tables still work.
 
 **P1.2 Move the server to `modules/php/Game.php`** (S review: two renames plus about 80 changed lines)
+- **Status:** done. Committed and pushed: `322754e` (`tool:`, `debug_frameworkCheck`), `0bce03f` (`struct:`, the rename) and `c453c4a` (`struct:`, the adaptation, with the material require). Playtested on Studio by Jonathan (reported 2026-11-01, after the material fix); details in `progress.md`.
+  - **Done when:** met. A game played to the end: Table 3, shortened with `debug_endGameSoon` (called in 3d), reached final scoring and the table ended (3f). And `debug_frameworkCheck` logged the expected line (1b: class `Bga\Games\FirstAscent\Game`, file `modules/php/Game.php`).
+  - **Results** (Jonathan's play on Studio, reported 2026-11-01):
+    - 1a, 1b, 1d, 3a and 3b were as expected. 1e's first query was as expected. 1f to 1j, 2a to 2d and 3d to 3f were as expected, with no errors or warnings. In 1h the line built by `dieLog` appeared, and the resting player's draws matched their piles.
+    - **U1:** avoided as planned, not tested with both files present: the root file was deleted on Studio (Jonathan checked Studio's file list). **U2:** every action in the sample worked. **U3:** the board rendered (1d, 2a). §1.2, §1.3 and §1.7 have the results.
+    - **1c:** Studio's debug menu lists the 14 functions without the `debug_` prefix (for example `stackClimbingDeck`); all 14 are present and none is extra. 1c's expected text below assumed the prefix. It is left as written, as the record of what was predicted.
+    - **3c:** the refusal was as expected (no reload, nothing changed). After the expected console error, Studio logged a second one: `Uncaught (in promise) {message: '', args: null}` at `triggerDebug` in `ly_studio.js`. It comes from Studio's own code.
+    - **3g (F13): not passed.** The replay of the finished game stops at the first "Next move" with a `TypeError` in `notif_confirmCharacter` (`firstascent.js:7579`). A replay of a production game fails the same way, so the failure predates P1.2; P1.2 changed no client file. The fix is pending, as its own `fix:` commit in its own session, after P1.2's closing docs and before P1.3 (`TODO.md`).
+    - **Not run:** 1e's count query (the asset total, expected 124). It is unchecked and will run on the replay fix session's new game.
+    - **Not run as separate steps:** the Studio root check and 1a's F5 and log check. Setup and every page load read all seven material properties with no warning.
+    - **Reviewed in code only:** the sites that never fire on Studio (see "Sites reviewed in code only" below).
 - **Scope:**
   - `git mv firstascent.game.php modules/php/Game.php`: namespace `Bga\Games\FirstAscent`, `class Game extends \Bga\GameFramework\Table`.
   - `git mv modules/Utils.php modules/php/UtilTrait.php` (namespaced trait). This removes the casing problem (T24).
@@ -523,7 +543,8 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
       - `\BgaSystemException` (`utils.php:isPlayerZombie`, `utils.php:debug_goToState`) → `\Bga\GameFramework\SystemException`.
       - `feException` (`php:zombieTurn`) → `\Bga\GameFramework\VisibleSystemException` [Game.php doc:1753–1781]. Reading the old defaults (`$expected = false, $visibility = true`) as "visible" is **[inferred]**; the alternative is `SystemException`, whose message is hidden from the player. Review-only: the playtest doesn't exercise this line.
       - No other legacy exception class and no `catch` exists in either file. The new classes extend `\Exception`, not `feException`.
-  - **Unchanged:** `states.inc.php`, `action.php`, `view.php`, `.tpl`, root `material.inc.php`, the client.
+  - **Explicit `require` of the root `material.inc.php`** (added 2026-10-31, on Jonathan's go-ahead, after the first Studio attempt failed at table creation): in the constructor of `Game.php`, right after `parent::__construct()`, a comment line and `require dirname(__DIR__, 2) . '/material.inc.php';` (`Game.php:31–32`). Without it the namespaced class had none of the seven material properties (`Undefined property … $asset_cards`), and setup's Spread loop ran until the 10-second timeout. It is in the adaptation commit `c453c4a`. Why the file was not included is unknown (§1.3).
+  - **Unchanged:** `states.inc.php`, `action.php`, `view.php`, `.tpl`, the root `material.inc.php` (the file itself; `Game.php:32` now requires it), the client.
 - **Files:** `firstascent.game.php` → `modules/php/Game.php`; `modules/Utils.php` → `modules/php/UtilTrait.php`.
 - **Done when:** a game plays end to end, and `debug_frameworkCheck` reports `Bga\Games\FirstAscent\Game`.
 - **Playtest:** written in the P1.2 code session (2026-10-31) for Jonathan's review. Steps are labeled by table and letter (1c, 3d).
@@ -605,9 +626,9 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
     - The class name `\Bga\GameFramework\SystemException` is checked against `_ide_helper.php` (line 2326) and the docs, not run. `VisibleSystemException` has run in the refusals [S].
   - **What the checks settle** (recorded in `progress.md` when run): U1 is avoided by deleting the root file, and 1b shows which file loaded. U2 by Table 1. U3 by 1d and 2a. Expected: identical behavior.
 - **Repros:** T24 resolved; checks U1–U3.
-- **Carries (D9):** T23 and F13.
-  - **T23:** the SQL strict-mode game-creation fix (the forum thread in `TODO.md`) is made here, as its own `fix:` commit after the move, or it falls out of P1.3's removal of `global_variables` if that is where the strict-mode failure lies. The cause isn't traced yet. Game creation is checked either way.
-  - **F13:** the replay check above. P1.3 repeats it.
+- **Carries (D9):** F13.
+  - **T23 is dropped** (Jonathan's decision of 2026-10-30). The item, the SQL strict-mode game-creation fix, comes from a forum post from 2020, and Jonathan judges the issue benign. That is his judgement, not a verified fact; the cause was never traced (`DECISIONS.md`, D9).
+  - **F13:** the replay check above. P1.3 repeats it. The replay check failed on the existing client in P1.2 (3g): see Status.
 - **Studio after:** playable. Delete on Studio: `firstascent.game.php`, `modules/utils.php`. Fresh table.
 
 **P1.3 Globals on `bga->globals`** (S)
@@ -622,7 +643,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - a "all players gain from the Portaledge" climbing card (`portaledgeAll`);
   - risk it;
   - bail.
-- **Repros:** T23 and F13 re-checked (D9): game creation still works, and a replay that includes a rest still shows no fallback warnings.
+- **Repros:** F13 re-checked (D9): a replay that includes a rest still shows no fallback warnings.
 - **Studio after:** playable; fresh table.
 
 **P1.4 Notification, statistics and score APIs** (L, mechanical)
@@ -1026,7 +1047,7 @@ Not sized, and not broken into steps yet. It is planned in its own session after
 
 - **Why one class per state:** the states are small once their logic lives in services, and PSR-4 loads one class per file **[inferred]**. Shared actions use traits (U6), with explicit one-line delegating methods as the fallback.
 - **ItemManager (P8, D8)** replaces the Deck and the raw SQL inside `Model\Cards`. Keeping all card storage behind that class keeps P8 local **[inferred]**.
-- **`material.inc.php`:** 5050 lines of data. It stays at the root, where it is auto-included [Material doc:7]. Moving it to `modules/php` with an explicit `require` [Material doc:198–225] is optional and brings no behavior benefit.
+- **`material.inc.php`:** 5050 lines of data. It stays at the root. The docs say a root file is loaded automatically [Material doc:7], but on Studio the namespaced `Game` did not get it until its constructor required it explicitly (`Game.php:32`, P1.2; §1.3). Moving the file to `modules/php` [Material doc:198–225] would change only where that require points; it is optional **[inferred]**.
 - **The `UtilTrait` disappears** into the classes above.
 
 ### 3.2 Client (`modules/js`, ES modules, vanilla JavaScript)
@@ -1581,7 +1602,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | T4 | Scorecard responsiveness | T20 | Card-49 race |
 | T5 | `asset_hand_to_board` z-indices | T21 | Hidden Portaledge or crimper display should reappear before animating |
 | T6 | Dark-mode colors (3 items) | T22 | Benighted technique-token card discarded too early |
-| T7 | Crimper Confirm hides the popup | T23 | SQL strict-mode game creation |
+| T7 | Crimper Confirm hides the popup | T23 | SQL strict-mode game creation (dropped 2026-10-30: Jonathan's judgement, D9) |
 | T8 | Phil and Summit Beta tokens after confirming a pitch (Jumar, Extra Water) | T24 | `utils.php` vs `Utils.php` casing |
 | T9 | `onSelectResource` math when risking | T25 | Summit meeple overlap (forest board) |
 | T10 | Phil, Trifecta and Guidebook requirement switching | T26 | Bomber Anchor in `selectPortaledge` and `riskSummitBeta` |
@@ -1644,8 +1665,8 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | T4 | P5.12 | T20 | P4.1 (warnings), P5.4 (race) |
 | T5 | P4.1, P5.3 | T21 | P5.4, P5.7 |
 | T6 | P5.1, P5.4 | T22 | P5.8 |
-| T7 | P5.7 | T23 | P1.2, P1.3 (folded into P1 by D9) |
-| T8 | P5.6, P5.10 | T24 | P1.2 |
+| T7 | P5.7 | T23 | Dropped 2026-10-30 (Jonathan's judgement, D9) |
+| T8 | P5.6, P5.10 | T24 | P1.2 (fixed: `0bce03f` renames `Utils.php` to `UtilTrait.php`, the casing problem; `c453c4a` deletes the `require_once`) |
 | T9 | P5.6 | T25 | P5.5 |
 | T10 | P5.6 | T26 | P1.9 (first run), P5.10 |
 | T11 | P5.6, P5.10 | T27 | P5.6 |
@@ -1733,7 +1754,7 @@ Cloned read-only into a scratch folder outside the repo: commit `e11cf64`, 2026-
    | The skill says | The docs here say |
    |---|---|
    | A State constructor takes only id and type: "no name, description, or transitions" | Those are documented parameters, and `descriptionMyTurn` is mandatory for active states [States doc:36–46, 77, 180] |
-   | `modules/php/material.inc.php` is auto-included | Only the root `material.inc.php` is [Material doc:7, :200] |
+   | `modules/php/material.inc.php` is auto-included | Only the root `material.inc.php` is [Material doc:7, :200]. On Studio (P1.2) the root file was not included for the namespaced `Game` until `Game.php:32` required it; a file under `modules/php` was not tried. Kept in this table by Jonathan's decision of 2026-11-02; see §1.3. |
    | "onEnteringState is NOT called after setup" | It is called after `setup` on a refresh [Game.js doc:62] |
    | `addActionButton` has no documented `confirm` or `tooltip` option | `statusBar.addActionButton` documents both [Game.js doc:1949–1965] |
    | Never pass a transition name to `setPlayerNonMultiactive` | It accepts "transition name, state id, or State class name" [Game.php doc:465–469] |
@@ -1891,7 +1912,7 @@ Everything below was decided or answered on 2026-10-21. The decisions D1–D14 a
 - **D8 Components:** every row of §7 is adopted.
   - During the migration: PlayerCounter/TableCounter, in the P5 slices that own each counter; Zone, in the slice that fixes T25, as its fix.
   - In P8, before resubmission: ItemManager, BgaAnimations (per component), BgaCards, BgaDice, BgaScoreSheet and the last-turn banner.
-- **D9 Pre-migration leftovers:** the SQL strict-mode fix (T23) and the replay check (F13) are folded into P1 (P1.2, P1.3).
+- **D9 Pre-migration leftovers:** the replay check (F13) is folded into P1 (P1.2, P1.3). The SQL strict-mode fix (T23) was folded in too, then dropped on 2026-10-30 (Jonathan's judgement, not a verified fact; `DECISIONS.md`, D9).
 - **D10 UX register:** `UX_CHANGES.md`, with the scheduling rule in §12. The migration is parity only; decided items are implemented in P8.
 - **D11 Rules-check record:** `RULES_CHECK.md`, in the format of §5.3, seeded with the answers to Q-R1–Q-R8.
 - **D12 Private-alpha tables:** no formal cut-over. Jonathan releases only when no table is running. After resubmission every release must keep running tables working (§2.4).

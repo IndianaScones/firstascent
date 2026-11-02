@@ -18,6 +18,8 @@ Moved from `MIGRATION_PLAN.md` §9.5 (decision D3, 2026-10-21). They come from t
 - **The debug menu fills in player ids.**
   - For a debug function's `int $playerId` parameter, Studio's popin lists the table's player names as links. Clicking one fills in that player's id, so there's no need to look the ids up first.
   - Seen on Studio in the P1.1b1 playtest (2026-10-28), not in claude-code-bga.
+- **Studio's debug menu lists the debug functions without the `debug_` prefix.** Seen on Studio in P1.2 (1c, 2026-11-01): all 14 present, none extra.
+- **After a refused debug call, Studio's own code may log a second console error,** `Uncaught (in promise) {message: '', args: null}`, at `triggerDebug` in `ly_studio.js`. Seen on Studio in P1.2 (3c).
 
 ## PHP and database
 - **`getCollectionFromDb` keys by the first column.** Duplicate values silently overwrite rows.
