@@ -12,10 +12,10 @@
   */
 
 
-require_once('modules/utils.php');
+namespace Bga\Games\FirstAscent;
 
 
-class FirstAscent extends Bga\GameFramework\Table
+class Game extends \Bga\GameFramework\Table
 {
     use UtilTrait;
 
@@ -28,6 +28,8 @@ class FirstAscent extends Bga\GameFramework\Table
         //  the corresponding ID in gameoptions.inc.php.
         // Note: afterwards, you can get/set the global variables with getGameStateValue/setGameStateInitialValue/setGameStateValue
         parent::__construct();
+        // not included automatically for this class: sets $this->pitches, $this->asset_cards, $this->climbing_cards, ... (material.inc.php, game root)
+        require dirname(__DIR__, 2) . '/material.inc.php';
         
         self::initGameStateLabels( array( 
                 // "variable" => 11,
@@ -344,15 +346,15 @@ class FirstAscent extends Bga\GameFramework\Table
         $this->cards_and_tokens->shuffle('asset_deck');
         $asset_deck = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
 
-        function sortGear($asset) { if ($asset['card_type_arg'] >= 22) {return true;} }
-        function sortFace($asset) { if ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21) {return true;} }
-        function sortCrack($asset) { if ($asset['card_type_arg'] <= 7) {return true;} }
-        function sortSlab($asset) { if ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14) {return true;} }
+        $sortGear = function($asset) { if ($asset['card_type_arg'] >= 22) {return true;} };
+        $sortFace = function($asset) { if ($asset['card_type_arg'] >= 15 && $asset['card_type_arg'] <= 21) {return true;} };
+        $sortCrack = function($asset) { if ($asset['card_type_arg'] <= 7) {return true;} };
+        $sortSlab = function($asset) { if ($asset['card_type_arg'] >= 8 && $asset['card_type_arg'] <= 14) {return true;} };
 
-        $gear_assets = array_filter($asset_deck, 'sortGear');
-        $face_assets = array_filter($asset_deck, 'sortFace');
-        $crack_assets = array_filter($asset_deck, 'sortCrack');
-        $slab_assets = array_filter($asset_deck, 'sortSlab');
+        $gear_assets = array_filter($asset_deck, $sortGear);
+        $face_assets = array_filter($asset_deck, $sortFace);
+        $crack_assets = array_filter($asset_deck, $sortCrack);
+        $slab_assets = array_filter($asset_deck, $sortSlab);
 
         shuffle($gear_assets);
         shuffle($face_assets);
@@ -6485,7 +6487,7 @@ class FirstAscent extends Bga\GameFramework\Table
             return;
         }
 
-        throw new feException( "Zombie mode not supported at this game state: ".$statename );
+        throw new \Bga\GameFramework\VisibleSystemException( "Zombie mode not supported at this game state: ".$statename );
     }
     
 ///////////////////////////////////////////////////////////////////////////////////:

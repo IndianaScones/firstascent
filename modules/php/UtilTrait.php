@@ -1,5 +1,7 @@
 <?php
 
+namespace Bga\Games\FirstAscent;
+
 // global constants
 
     // translated terms
@@ -916,14 +918,14 @@ trait UtilTrait {
    function isPlayerZombie($player_id) {
        $players = $this->loadPlayersBasicInfos();
        if (! isset($players[$player_id]))
-           throw new \BgaSystemException("Player $player_id is not playing here");
+           throw new \Bga\GameFramework\SystemException("Player $player_id is not playing here");
        
        return ($players[$player_id]['player_zombie'] == 1);
    }
 
     public function debug_goToState(int $state=98) {
         if ($this->getBgaEnvironment() !== 'studio') {
-            throw new \BgaSystemException('Studio only');
+            throw new \Bga\GameFramework\SystemException('Studio only');
         }
         $this->gamestate->jumpToState($state);
     }
