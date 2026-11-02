@@ -526,12 +526,84 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - **Unchanged:** `states.inc.php`, `action.php`, `view.php`, `.tpl`, root `material.inc.php`, the client.
 - **Files:** `firstascent.game.php` → `modules/php/Game.php`; `modules/Utils.php` → `modules/php/UtilTrait.php`.
 - **Done when:** a game plays end to end, and `debug_frameworkCheck` reports `Bga\Games\FirstAscent\Game`.
-- **Playtest:**
-  - S-smoke.
-  - The first steps of a 4-player game (forest board).
-  - A Lucky Chalkbag use (`dieLog`).
-  - A replay of a finished game that includes a rest, with no fallback warnings (F13, D9).
-  - Expected: identical behavior.
+- **Playtest:** written in the P1.2 code session (2026-10-31) for Jonathan's review. Steps are labeled by table and letter (1c, 3d).
+  - **Setup.**
+    - Deploy first (the upload and delete list is in the session report and in `progress.md`'s P1.2 entry). Every table is new and created after the deploy; tables from before it are not part of the playtest.
+    - Before the tables, check Studio's file list: `material.inc.php` is still at the root (166,601 bytes in git). It is not on the delete list, and `Game.php` now requires it from the constructor (`Game.php:32`). [C] from the deploy list and the repo. The first Studio attempt failed with `Undefined property … $asset_cards` [S], and a missing file would give the same warnings.
+    - One tab per player, plus a spectator tab on Table 1. Use "Express stop" on each table before creating the next (a stale open table silently blocks "Create", `BGA_PITFALLS.md`).
+    - If a table won't start or a request errors: change no code. Report the error text and the Gameserver error log. If the trait isn't found, stop and report (the fallback in the scope above is proposed then, not before).
+  - **Where each expected result comes from.**
+    - **[S]** confirmed on Studio before (the P1.1 and tool playtests).
+    - **[D]** from the docs under `misc/docs/bga/`.
+    - **[C]** from reading the code. A mismatch with [C] or [D] is recorded as a finding.
+    - The legacy form of the framework-check line, the 14-function menu without helpers, "Unexpected error" with no reload on a refusal, the reload of only the calling window, and the Lucky Chalkbag sequence (1h) are [S]. The new class name, the new path, the pile contents and every message text are [C].
+  - **Table 1:** 2 players plus a spectator tab, desert board. The steps run in this order.
+    - **1a. Game creation under the new class** [C]. The table starts with no error page and no blank page, for both players and the spectator. The unexpected-exceptions log has no entry for this table.
+      - Then press F5 in a player tab. `getAllDatas` reads all seven material properties and sends them to the client (`Game.php:763–772`) [C].
+      - The log has no `Undefined property` warning for `pitches`, `asset_cards`, `climbing_cards`, `summit_beta_tokens`, `shared_objectives`, `characters` or `personal_objectives`, and no "Maximum execution time" error. The warning was seen on Studio in the first attempt [S]; its absence is [C].
+    - **1b. `debug_frameworkCheck`, the first action on this table**, in `characterSelection`, from either player's tab. It reloads the calling window.
+      - Expected [C]: the log shows `Framework check: running class Bga\Games\FirstAscent\Game, parent class Bga\GameFramework\Table, declared in modules/php/Game.php`. The line's format, with its placeholders filled, is [S] (the legacy line was confirmed in the tool playtest); the class and the path are [C].
+      - How the tool builds the path: `getFileName()` of a `ReflectionClass` of `$this`, which is the absolute path of the file that declares the running class (not the trait's file). It then walks up from that file's folder to the first folder that holds `gameinfos.inc.php` (the game folder) and strips that prefix. On the legacy file it printed `firstascent.game.php` [S], so the walk works on Studio.
+      - Telling the forms apart: the right file ends in `modules/php/Game.php`. A longer path ending that way is the right file in absolute form (the walk found no `gameinfos.inc.php`): note it, it is not a failure. A path `firstascent.game.php`, the class `FirstAscent`, or any other file means the legacy file was loaded. In that case everything below stops (U1).
+    - **1c. The debug menu** [S for the legacy list, C for the new class]: 14 functions, all with the `debug_` prefix, and none without it (for example neither `findDebugAssets` nor `rollRiskDie`). The 14: `debug_goToState`, `debug_setAvailableCharacters`, `debug_stackClimbingDeck`, `debug_stackSummitBeta`, `debug_giveSummitBeta`, `debug_setSharedObjectives`, `debug_endGameSoon`, `debug_stackPersonalObjectives`, `debug_stackAssetDeck`, `debug_giveAssets`, `debug_discardSummitBeta`, `debug_forceDie`, `debug_redrawStartingSpread`, `debug_frameworkCheck`. The successful call that reloads is 1b (again in 1g); the refusal is in 1g.
+    - **1d. The board renders from `view.php`** (U3). Player tabs and the spectator tab show the desert board with the three shared objectives, the pitches, and the face-down Headwall pitches, the same as a table before the move. `view.php` reads `getGlobalVariable` and `loadPlayersBasicInfos` through `$this->game`, which is now the namespaced class.
+    - **1e. The Portaledge piles at setup: the output of the four closures**, before anything is drawn from the Portaledge (so before 1h).
+      - What setup does [C]: `setupNewGame` splits the shuffled asset deck by `card_type_arg` into Gear 22–37, Face 15–21, Crack 1–7 and Slab 8–14 (the skill of each id in `material.inc.php`: 16, 7, 7 and 7 ids; 40, 28, 28 and 28 copies). It shuffles each array and moves the first 7 cards of each to the piles `portaGear`, `portaFace`, `portaCrack` and `portaSlab` (positions 0–6). Then `drawStartingSpread()` runs from what is left.
+      - What a player can see [C]: `getAllDatas` sends only `empty_portaledge`, the piles with no card (none at setup). `firstascent.js` draws each pile as one card back. When the page loads in `selectPortaledge` or `resting`, the panel opens by itself and the piles listed there are hidden; otherwise the panel opens through "Show Portaledge". Card faces and counts never reach the client.
+      - So a wrong filter shows in the client in two ways only: a PHP error at setup (a pile with fewer than 7 cards leaves an undefined key), or a hidden pile after F5 in `resting` (a pile with no card). A card of the wrong skill, or a wrong count of 7 or more, shows only in the database or in a draw.
+      - Check, in "Go to game database" (the link below the game area, [D] Tools doc:34), with the table's SQL tab:
+        ```
+        SELECT card_location, COUNT(*) AS n, MIN(card_type_arg) AS lowest, MAX(card_type_arg) AS highest
+        FROM cards_and_tokens WHERE card_location LIKE 'porta%' GROUP BY card_location;
+        ```
+      - Expected: four rows, each with n = 7. The ranges are bounds: each pile's lowest and highest `card_type_arg` fall within its range, and need not equal its ends. The ranges are `portaCrack` 1–7, `portaFace` 15–21, `portaGear` 22–37 and `portaSlab` 8–14. A different n, a lowest or highest outside its range, or a fifth row is a finding.
+      - Second query: `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_type='asset';`
+      - Expected: n = 124 [C], the sum of `number_in_deck` in `material.inc.php` (Gear 40, Face 28, Crack 28, Slab 28). Without the material, setup creates no asset cards (`'nbr' => null`, inferred) and raises no error of its own: in the first attempt only the endless Spread loop showed it [S].
+    - **1f. S-smoke step 1.** Character selection (each player confirms), then the Rack Up draws. Expected: the same as before the move; the spectator's log follows; no new console error and no `[FA …]` warning.
+    - **1g. Lucky Chalkbag set-up, in round 1's `climbOrRest`, before the climber chooses a pitch.** Z is the player who will climb.
+      - `debug_giveSummitBeta(11, Z)`: succeeds, and Z's window reloads by itself [S]. After the reload Z holds Lucky Chalkbag.
+      - Run it again with the same arguments: the refusal. "Unexpected error" with `Summit Beta token 11 is already in the hand of player <Z's id>` [C]; the page does not reload and nothing changes [S].
+      - `debug_stackClimbingDeck("11")`: card 11 (`choss_pile`) is drawn next. Its option B is "Lose 1 Water and gain 1 Face Card", an automatic Portaledge draw [C, `material.inc.php`].
+      - `debug_forceDie(3)`: just before the roll, with no other roll in between.
+      - After any successful call, press F5 in the other tabs before acting there (only the calling window reloads [S]).
+    - **1h. S-smoke steps 2 and 3, with the Lucky Chalkbag use (`dieLog`).** The other player rests (the `resting` state).
+      - (added) The resting player's Portaledge draws: each card taken from a pile is of that pile's skill. From the design discussion, not the code; a mismatch is a finding.
+      - Z climbs a pitch that lacks exactly one required Asset and risks it, as in P1.1 (b2) scenario 7d, which is the tested sequence [S].
+      - The log shows `…forced to 3 (riskIt)`, and the title reads "may use a Summit Beta Token".
+      - From Z's tab run `debug_forceDie(1)`. After the reload the -1 Card -1 Psych face and the title are still shown.
+      - Z uses Lucky Chalkbag ("Reroll Risk Die?") and confirms. The log shows `…forced to 1 (confirmLuckyChalkbag)`, then `<Z> uses Lucky Chalkbag, rerolls a checkmark and successfully climbs the pitch`.
+      - That last line is built by the nested function `dieLog`, called directly under the namespace. **If it appears, `dieLog` resolved.** Word §1.3's correction from this result. If instead "Unexpected error" appears, record its text exactly. The exception cancels the change, so Z can decline Lucky Chalkbag and play on.
+      - Z then draws climbing card 11 and takes option B. Expected [C]: Water −1 and one Face Card added to Z's hand.
+        - Z's own log ends with `gaining` and the drawn card's name: one of Mantle, Undercling, Layback, Gaston, Heel Hook, Pinch or Flag, the Face cards (`card_type_arg` 15–21, `material.inc.php`). That log line is Z's private notification `confirmClimbingChoiceLog` (`Game.php:2762`).
+        - The number the server prints after the name is the drawn card's `card_type_arg`: `Game.php:2149` writes `[<name>(<number>)]` with `$portaledge_type_arg[0]`, which `Game.php:2147` sets from `$portaledge_draw['type_arg']`, and the Deck's `type_arg` is the `card_type_arg` column ([D] legacy Deck doc:67, :229). The client does not display it: `logInject` (`utils.js:1295`) replaces the bracketed text with a span that shows the name only (`getTooltipForLog`, `utils.js:996`). The number can be read in the notification text, which Studio's input/output section lists ([D] Tools doc:54).
+        - This draw shows the Face pile's skill in the log.
+    - **1i. S-smoke step 4.** Follow Phase, then Rerack. Expected: as before the move.
+    - **1j. S-smoke step 5.** In round 2, F5 in `climbOrRest` in each player's tab and in the spectator's. Then have one player rest and F5 in `resting`: the Portaledge panel opens by itself and all four piles are visible [C]. Expected: no new console error and no `[FA …]` warning.
+    - **U2's sample.** The actions Table 1 uses go through `firstascent.action.php` to the namespaced class: at least `confirmCharacter`, `confirmAssets`, `rest`, `confirmRequirements`, `riskIt`, `confirmLuckyChalkbag` and `confirmClimbingCardChoice` (7 of the 25). It is a sample, not a full list. The targeted checks for the sites the adaptation changed are 1b (class and path), 1e (the four closures), 1h (`dieLog`) and 1a (the trait loads by autoload).
+  - **Table 2:** 4 players, forest board, one tab per player, its own table.
+    - **2a.** The board renders from `view.php`: the forest board (more than 3 players) with its shared objectives, pitches and face-down Headwall pitches.
+    - **2b.** Character selection: the characters are offered and each player confirms in turn.
+    - **2c.** The first draws: each player's Rack Up draw, and the Spread refills. Expected: as before the move.
+    - **2d.** The same SQL as 1e, with the same expectations (n = 7, each pile's lowest and highest within its range): the piles do not depend on the player count.
+    - Then "Express stop".
+  - **Table 3 (F13):** 2 players, one tab each, created after the deploy, since replays use the files archived at game start (§2.4, [D] Replay doc:9–13). Run it last: the table really ends, and Studio saves can't be restored after the end.
+    - **3a.** Character selection and Rack Up as usual. Open the browser console on a tab that will stay open to the end.
+    - **3b.** Round 1, Climb Phase: A rests (the `resting` state), B climbs one pitch (a plain climb; the climbing card as drawn). Then the Follow Phase and Rerack.
+    - **3c. The refusal.** `debug_endGameSoon` for A, who hasn't climbed: "Unexpected error" with `Player <A's id> has not climbed a pitch` [C]; the page does not reload and nothing changes [S]. The debug popin lists the table's player names as links that fill in the id.
+    - **3d. The warning.** `debug_endGameSoon` for B, who has exactly one climbed pitch (§6.2): it succeeds, B's window reloads, and the log shows `Debug warning: player <B's id> has climbed one pitch: with no available pitch, the bail highlight looks up pitch_0_border and throws` [C text, S behavior from P1.1 (b1) scenario 8]. Run 3c and 3d between B's first and second climb.
+    - **3e. Round 2.** B has one Rope left and climbs again; an available pitch exists, so the bail highlight is not reached. The final-round banner ("This is the final round!") appears [C]: `notif_confirmRequirements` adds it when the climber's `pitch_tracker` reaches 9 entries (`utils.js:2292–2298`), and a page load adds it when any tracker has 9 entries (`firstascent.js:1451–1457`). A takes any action. The Climb Phase and Follow Phase complete; there is no Rerack (`RULES.md` p. 13).
+    - **3f. The end.** Final scoring runs; the end-of-game scores and statistics appear; the table ends.
+    - **3g. The replay of the finished game.** The docs under `misc/docs/bga/` don't say how to open a replay on Studio: the Game replay page says only that replays work on Studio since December 2020 and that there may be a delay, and the Game.js page mentions "replay from move #20" (Game.js doc:2124). I don't know the path.
+      - Expected (F13, §8.1): the replay runs from the start, through A's rest in round 1, to the end, with no `[FA animation fallback]` warning and no new console error. Not [S] for this build: this is the check.
+  - **Order, and the state windows.**
+    - Table 1: 1b, 1c and 1e need only a finished setup; 1e comes before 1h, the first Portaledge draw. 1g needs round 1's `climbOrRest` (Rack Up done) and ends before Z picks a pitch. `debug_forceDie(3)` comes last in 1g, and `debug_forceDie(1)` comes after the 3 has been rolled, in 1h.
+    - Table 3: 3c and 3d need B to have exactly one climbed pitch, so they fall between 3b and 3e. 3c needs A to have no climbed pitch, which holds until A climbs.
+    - No step hides another's check: the frameworkCheck line is in the log before the other debug calls, and the DB query runs before any draw changes the piles.
+  - **Sites reviewed in code only** (never fire on Studio):
+    - `feException` → `\Bga\GameFramework\VisibleSystemException` in `zombieTurn`: reached only for a zombie in an unsupported state. Reading the old defaults as "visible" is **[inferred]**.
+    - `\BgaSystemException` → `\Bga\GameFramework\SystemException` in `isPlayerZombie` (an id that isn't at the table) and in the guard of `debug_goToState` (production only, like the other guards).
+    - The class name `\Bga\GameFramework\SystemException` is checked against `_ide_helper.php` (line 2326) and the docs, not run. `VisibleSystemException` has run in the refusals [S].
+  - **What the checks settle** (recorded in `progress.md` when run): U1 is avoided by deleting the root file, and 1b shows which file loaded. U2 by Table 1. U3 by 1d and 2a. Expected: identical behavior.
 - **Repros:** T24 resolved; checks U1–U3.
 - **Carries (D9):** T23 and F13.
   - **T23:** the SQL strict-mode game-creation fix (the forum thread in `TODO.md`) is made here, as its own `fix:` commit after the move, or it falls out of P1.3's removal of `global_variables` if that is where the strict-mode failure lies. The cause isn't traced yet. Game creation is checked either way.
