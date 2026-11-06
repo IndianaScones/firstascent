@@ -2,44 +2,68 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
-## 2026-11-04 (the replay fix, F13: in progress)
+## 2026-11-05 (the replay fix, F13: in progress)
 
-An "in progress" entry, written at the rollover checkpoint of the replay fix. The fix is applied in the working tree and isn't committed. Jonathan's Studio deploy and playtest (playtest list v2) come next; he hadn't started them when this entry was committed. The `fix:` commit and the closing docs (§8 of the session prompt) aren't done. The final entry ("the replay fix: done") replaces this one. A new session can finish the fix from this entry; for anything not recorded here, the session transcript is listed under "Files outside git".
+An updated "in progress" entry for the replay fix. It replaces the entry of 2026-11-04 (committed as `c3cb6cd`) and keeps everything in it that is still true. Since that entry, Jonathan played playtest list v2 on Studio (trial 1, table 998675), and F13 didn't pass: one replay stopped at a new error. A second session investigated it (stop A2) and applied a second change (stop B2). Both changes are in the working tree, and neither is committed. Next is Jonathan's retest with playtest list v3; after it, a new session makes the `fix:` commit and the closing docs. This entry is session 2's in-progress `docs:` commit (its prompt's §8), separate from the closing `docs:` commit.
 
-The session started 2026-11-03 at 21:51 CST with the prompt "First Ascent: the replay fix (one-time exception; its own fix: commit, for F13)" (transcript `f45ad816-…`). It is the replay fix decided in P1.2's closing docs: its own `fix:` commit, after `46b6d81` and before P1.3. It isn't a step of `MIGRATION_PLAN.md`. Times are Jonathan's local time (CST), converted from the transcript's UTC timestamps. Line numbers in `firstascent.js` and `modules/utils.js` are as at HEAD (`46b6d81`, before the fix) unless marked "after the fix"; the playtest list uses the numbers after the fix.
+**The two sessions.** Times are Jonathan's local time (CST), converted from the transcripts' UTC timestamps.
+- **Session 1** started 2026-11-03 at 21:51 with the prompt "First Ascent: the replay fix (one-time exception; its own fix: commit, for F13)" (transcript `f45ad816-…`). It is the replay fix decided in P1.2's closing docs: its own `fix:` commit, after `46b6d81` and before P1.3. It isn't a step of `MIGRATION_PLAN.md`.
+- **Session 2** started 2026-11-05 at 15:16 with the prompt "First Ascent: the replay fix (F13), session 2" (transcript `0b71df26-…`). It continues the fix under the same exception, extended by its prompt's §2 (quoted under "Go-aheads").
 
-**Model:** Opus 5.5, at the Extra effort level (Jonathan's answer to my question: "Opus 5.5, Extra"). My own context names the model Opus 5.5 (`claude-opus-5-5`), which agrees.
+**Line numbers** in `firstascent.js` and `modules/utils.js` come in three states:
+- **HEAD:** `46b6d81` (`c3cb6cd` has the same code files). Session 1's sections use these unless marked otherwise.
+- **After the first change:** the state session 1 left (`replay-fix.diff`), marked "after the fix" in session 1's sections. Playtest list v2, trial 1's consoles and stop A2 use these.
+- **Now:** after both changes. Stop B2, playtest list v3 and the second change's section use these.
+
+"Complete line shifts" below converts HEAD to now. From "after the first change" to now: `firstascent.js` lines after old 10671 move +5, and `modules/utils.js` lines after old 1770 move +4. Other files' line numbers are unchanged.
+
+**Model:**
+- **Session 1:** Opus 5.5, at the Extra effort level (Jonathan's answer to my question: "Opus 5.5, Extra"). My own context names the model Opus 5.5 (`claude-opus-5-5`), which agrees.
+- **Session 2:** Opus 5.5, at the Extra effort level (Jonathan's answer to my question: "Opus 5.5, Extra effort"). My own context names the model Opus 5.5 (`claude-opus-5-5`), which agrees.
 
 **Phase-rule exception:** one-time exception granted for this task only (Jonathan's decision of 2026-11-03). As granted, it allowed:
 - after his go-ahead at stop A, editing `firstascent.js` and `modules/utils.js`, only for the changes in the revised proposal he approves;
-- editing `progress.md`, `TODO.md` and `MIGRATION_PLAN.md` as the session prompt describes (its §6 and §8);
+- editing `progress.md`, `TODO.md` and `MIGRATION_PLAN.md` as session 1's prompt describes (its §6 and §8);
 - writing diffs and scratch copies outside the repo, in `D:\Documents\BGA Studio\`;
 - one `fix:` commit (referencing F13) and one `docs:` commit, each after his approval; a normal push after his approval.
 
 Nothing else: no other code file, no new debug function, no deploy (Jonathan deploys to Studio). Nothing goes to the BGA Production site: production keeps the legacy build until P7.4, with no hotfix. Jonathan's reason, in his words: "Garrett and I do not tend to replay games". The session prompt's "we don't review alpha games by replay" said more than he did (his note, item 6 of his stop A reply).
 
-Jonathan extended it at stop A (item 5 of his reply): `misc/docs/DECISIONS.md`, for one entry recording decisions 2 and 3 of the prompt's §4, with their reasoning. I propose the wording at the docs stop. Decisions 1, 4, 5 and 6 go in `progress.md` only. This entry is committed under the prompt's rollover rule ("I commit it as a docs: commit"), apart from the closing `docs:` commit. The "Current phase" section of `PROCEDURES.md` is unchanged.
+Jonathan extended it at stop A (item 5 of his reply): `misc/docs/DECISIONS.md`, for one entry recording decisions 2 and 3 of the prompt's §4, with their reasoning. I propose the wording at the docs stop. Decisions 1, 4, 5 and 6 go in `progress.md` only.
 
-**State at the rollover**
-- **HEAD:** `46b6d81` ("docs: P1.2 done (closing docs)"), level with `origin/main`. After `git fetch origin` on 2026-11-04, `git rev-list --left-right --count origin/main...HEAD` gives `0 0`, and `git ls-remote origin main` gives `46b6d81…`. Nothing has been committed or pushed in this session.
+Session 2's prompt extended it (its §2, quoted under "Go-aheads"):
+- stop A2, a read-only investigation, then a revised proposal as a new diff;
+- after the design discussion's review and his "apply", editing `firstascent.js` and `modules/utils.js`, only for the changes in the proposal he approves;
+- one in-progress `docs:` commit of `progress.md` (this entry) after his "commit docs", and a normal push after his "push";
+- not in session 2: the `fix:` commit and the closing docs. They come after the retest, in a new session.
+
+Jonathan extended it again in his stop B2 reply: `misc/docs/UX_CHANGES.md`, for one entry in the closing docs (see "Closing docs: what's left").
+
+Everything else still holds: no other code file, no new debug function, no deploy (Jonathan deploys to Studio), nothing to the BGA Production site. The 2026-11-04 entry was committed under session 1's rollover rule as `c3cb6cd`, apart from the closing `docs:` commit. The "Current phase" section of `PROCEDURES.md` is unchanged.
+
+**State at this checkpoint**
+- **HEAD:** `c3cb6cd` ("docs: the replay fix (F13) in progress (fix applied, not committed; rollover checkpoint)"), on `46b6d81`, level with `origin/main`. After `git fetch origin` on 2026-11-05, `git rev-list --left-right --count origin/main...HEAD` gave `0 0`. Nothing was committed or pushed in session 2 before this entry.
 - **Staged:** nothing.
 - **Unstaged:**
-  - `firstascent.js` and `modules/utils.js`: the fix, as approved at stop A. Their working-tree diff is byte-identical to `replay-fix.diff` (`cmp`, 2026-11-04). They go in the `fix:` commit, after Jonathan's go-ahead and his "commit the fix", staged by explicit path.
-  - `misc/docs/progress.md`: this entry. Jonathan commits it as a `docs:` commit (the rollover rule), staging only this file: the two code files stay out of that commit. Once that commit exists, HEAD is that commit on top of `46b6d81`, and only the two code files show as modified. A new session runs `git status` and `git log --oneline -3` first.
-- **Byte counts** (PHP; working copies):
-  - `firstascent.js`: 743,782 bytes, CRLF 13,562 (742,886 and 13,555 before the fix).
-  - `modules/utils.js`: 228,622 bytes, CRLF 4,982 (226,854 and 4,954 before).
-  - Neither file has a bare LF or a bare CR, and neither ends with a newline (as before). `git ls-files --eol` shows `i/lf w/crlf` for both.
-- **Studio** (as far as I know; I can't see it): in his stop B reply (quoted under "Go-aheads"), Jonathan said he'll deploy `firstascent.js` and `modules/utils.js` to Studio and play steps 1a–1m from playtest list v2 while I answer his question. When this entry was committed, he hadn't deployed (his review of this entry, quoted under "Go-aheads").
+  - `firstascent.js` and `modules/utils.js`: both changes. Their working-tree diff is byte-identical to `replay-fix-2.diff` (`cmp`, 2026-11-06). They go in the `fix:` commit, after the retest and Jonathan's go-ahead, staged by explicit path (his decision C, session 2's §4).
+  - `misc/docs/progress.md`: this entry. It is committed as a `docs:` commit after his "commit docs", staging only this file; the two code files stay out of that commit. After that commit, HEAD is that commit on `c3cb6cd`, and only the two code files show as modified.
+- **Byte counts** (working copies; the first change's counts in brackets):
+  - `firstascent.js`: 744,236 bytes, CRLF 13,567 (743,782 and 13,562; 742,886 and 13,555 at HEAD).
+  - `modules/utils.js`: 229,085 bytes, CRLF 4,986 (228,622 and 4,982; 226,854 and 4,954 at HEAD).
+  - Neither file has a bare LF or a bare CR, and neither ends with a newline (as at HEAD). `git ls-files --eol` shows `i/lf w/crlf` for both.
+  - These match the design discussion's prediction (Jonathan's stop A2 reply).
+- **Studio** (as far as I know; I can't see it): trial 1 ran the first change (sizes on Studio 743,782 and 228,622 bytes [S]). In his stop B2 reply, Jonathan said he'll deploy both files and play from v3 with his corrections. No v3 result had been reported when this entry was written.
 
 **Status of each item**
+
+Session 1 (2026-11-03 and 2026-11-04):
 - **Start check (§1): done on 2026-11-03. Every result matched.**
   - `git fetch origin` brought nothing new. HEAD was `46b6d81`, the left-right count was `0 0`, and the tree was clean.
   - `git log --oneline bc4a9c9..HEAD -- firstascent.js modules/utils.js` printed nothing (`bc4a9c9` is `legacy-final`).
   - The working copies were 742,886 and 226,854 bytes, CRLF throughout (13,555 CR against 13,555 LF, and 4,954 against 4,954), with no final newline.
   - `replay-fix-proposal.diff` (v1): 63 lines, 3,762 bytes, no CR, `firstascent.js | 18` (9 insertions, 9 deletions). `git apply --check --cached` passed.
   - node isn't installed. PHP 8.4, Perl and Python (the `py` launcher, 3.13) are.
-- **Stop A (§5): delivered 2026-11-03 at 22:23 and reviewed** in Jonathan's reply of 23:07 (quoted in full under "Go-aheads"). The findings are under "Findings".
+- **Stop A (§5): delivered 2026-11-03 at 22:23 and reviewed** in Jonathan's reply of 23:07 (quoted in full under "Go-aheads"). The findings are under "Findings (stop A)".
 - **The revised proposal: approved with one comment change** (item 1 of his reply). `replay-fix-proposal-v2.diff` is 155 lines and 9,320 bytes, LF only. Its stat is `firstascent.js | 35` (21 insertions, 14 deletions) and `modules/utils.js | 28` (28 insertions). `git apply --check --cached` passed.
 - **The fix: applied 2026-11-03 at 23:09, not committed.**
   - **How it was applied:** by an exact-match script (`replay_fix_edits_approved.php`: v2's script with the approved comment), keeping each file's CRLF. Every edit matched exactly once: 2 in `modules/utils.js`, 10 in `firstascent.js`.
@@ -69,18 +93,8 @@ Jonathan extended it at stop A (item 5 of his reply): `misc/docs/DECISIONS.md`, 
     - `notif_bomberAnchorCleanup | no #bomber_anchor_counter | step skipped`;
     - `notif_confirmRerackPrivate | no #discard_box | cards placed without animation`;
     - `addTooltipsToLog | no .p<type> for <n>_item_tooltip_<type> (in <container>) | tooltip deferred`.
-  - **The line shifts the fix causes** (the docs' citations aren't refreshed):
-    - **`firstascent.js`:**
-      - lines 1–7586 are unchanged (7579 was replaced in place);
-      - old 7587–7603: +5;
-      - old 7604–7606: deleted;
-      - old 7607–8953: +2 (8451–8452 and 8572 were replaced in place);
-      - old 8956–10648: +3;
-      - old 10651–12770: +4;
-      - old 12771 (`if (this.utils.shouldAnimate()) {`): replaced by four lines, now 12775–12778: the F13 comment, the `#discard_box` warning, a blank line, and the changed test `if (this.utils.shouldAnimate() && discard_box) {` (12778);
-      - old 12772 to the end: +7 (12875 and 12985 were replaced in place, and are now 12882 and 12992).
-    - **`modules/utils.js`:** lines 1–1259 are unchanged; old 1260–1294: +15; old 1295 to the end: +28 (for example `matchBoardAssets` 3621 → 3649).
-- **The syntax check: not run in this session** (node isn't installed here). Recorded at Jonathan's level:
+  - **The line shifts of the first change** were recorded in the 2026-11-04 entry (`c3cb6cd`), with three ranges left out. "Complete line shifts" below replaces that list.
+- **The syntax check: not run in session 1** (node isn't installed here). Recorded at Jonathan's level:
   - At stop A: "The design discussion ran node --check (node v22) on its own copies of both files (my working copies, uploaded on 2026-11-03) with v2 applied: both parse."
   - At stop B: the design discussion applied `replay-fix.diff` to its copies of his working copies. The result gave the blob hashes in its index lines (984e873, c5b4077), and the patched files parse with node --check (node v22).
 
@@ -88,10 +102,21 @@ Jonathan extended it at stop A (item 5 of his reply): `misc/docs/DECISIONS.md`, 
 - **Stop B (§6): delivered 2026-11-03 at 23:10 and reviewed** in Jonathan's reply of 2026-11-04 at 00:22 (quoted in full under "Go-aheads"). Stop B gave the fix, the diff and playtest list v2. His reply raised two points on the list:
   - his question, answered below;
   - a correction, made in the list recorded here.
-- **Deploy and playtest: Jonathan's, not started when this entry was committed.** No result has been reported yet.
-- **The count query (1b): no result yet.** Expected 124.
-- **The `fix:` commit: not made.** Its message comes after Jonathan's go-ahead, which follows the playtest.
-- **The closing docs: not started.** See "Closing docs: what's left".
+
+Trial 1 (Jonathan's, between the sessions):
+- **Deploy and playtest v2: done on table 998675.** Jonathan's results are under "Trial 1". **F13 didn't pass:** IndianaScones0's replay stopped at a new error, and both replays showed `[FA animation fallback]` warnings.
+- **The count query (1b):** Jonathan's result, in his words: "1b - as expected" (expected n = 124).
+
+Session 2 (2026-11-05 and 2026-11-06):
+- **Start check (§5): done on 2026-11-05. Every result matched.** The details are under "Findings (stop A2)".
+- **Stop A2 (§6): delivered 2026-11-05 at 15:48 and reviewed** in Jonathan's reply of 2026-11-06 at 11:14 (quoted in full under "Go-aheads").
+- **The second proposal: approved as it is**, with his decisions 1–5, on one condition, which stop B2 answered before applying anything. `replay-fix-2-proposal.diff`: 31 lines, 1,844 bytes, LF only, `firstascent.js | 5` and `modules/utils.js | 4` (9 insertions).
+- **The second change: applied 2026-11-06 at 11:16, not committed.** See "The second change".
+- **Stop B2 (§7): delivered 2026-11-06 at 11:20 and reviewed** in his reply of 12:38 (quoted in full under "Go-aheads"). He accepted the condition's answers and playtest list v3, with three corrections, made in the list below.
+- **The syntax check: not run in session 2** (node isn't installed here). Recorded at Jonathan's level, from his stop A2 reply: "Both patched files parse with node --check (node v22)", on the design discussion's copy of `b\`. There was no browser parse.
+- **The retest (v3): Jonathan's.** No result had been reported when this entry was written.
+- **The `fix:` commit: not made.** One `fix:` commit for both changes, after the revised fix passes (his decision C), in a new session.
+- **The closing docs: not started.** A new session, after the retest. See "Closing docs: what's left".
 
 **His question at stop B, and my answer**
 - **His question:** "1n says 'Ask me before you start'. What should I ask you before the replays, and why?"
@@ -183,6 +208,260 @@ Jonathan extended it at stop A (item 5 of his reply): `misc/docs/DECISIONS.md`, 
   - **The `getSkillTokens` key bug** (display only, live play too): the hook passes the hex number (`utils.js:1268–1269`), but `pitch_asset_tokens` is keyed by pitch type (`Game.php:4156`; setup passes the type, js:1643). So the log tooltip shows the wrong pitch's tokens.
   - **Implicit globals,** for the item at `TODO.md:87`: `asset_board` (js:7545, 7554, 7566), `new_pitches` (js:12505), `token` (`utils.js:1071`).
 
+**Trial 1 (table 998675): Jonathan's results, at his level**
+
+Recorded as session 2's prompt gives them ("my results, to record at this level"), quoted in full from its §3:
+
+> Two players: IndianaScones0 (2369492) and IndianaScones1 (2369493). The table was created after the deploy.
+>
+> My report, quoted:
+> > Sizes:
+> > `firstascent.js` = 743,782 B
+> > `utils.js` = 228,622 B
+> >
+> > typeof gameui.utils.warnMissingElement run in both tabs returned 'function'
+> >
+> > 1a - completed
+> > 1b - as expected
+> > 1c - completed
+> > 1d - completed, players are IndianaScones0 and IndianaScones1. IndianaScones1 was first to select a character.
+> > 1e - completed - after the draw, 4 slab cards ended up in the Spread. The last one drawn was discarded and replaced as expected. No errors or warnings in the console.
+> > 1f - completed
+> > 1g - completed
+> > 1h - completed
+> > 1i - completed
+> > 1j - completed
+> > 1k - completed; climber was not forced to retreat
+> > 1l - completed; climber used `forceDie` set to 1 and risked climbing Headwall pitch.
+> > 1m - completed; as expected except nowhere in the results does it report that the game was shortened with `debug_endGameSoon`
+> > 1n - IndianaScones1's replay was viewed first. Each character and asset board appeared. Hand and personal objectives appeared, and current picker (first or otherwise) sees its own objectives dealt face up. The Headwall pitches' tooltips worked fine after the reveal. One note: Clicking "Next move" with the Portaledge open hides the Portaledge, whereas the replay buttons should be passed as exceptions for the `clickOutside` functionality. IndianaScones0's replay was viewed next. There was an error when placing a Gear Asset Token on a pitch as a result of the non-viewed seat resolving the climbing card "Chopped Bolts". Continuing to click "Next move" did nothing, and I quit this replay here.
+>
+> On 1m: the list's "The results will say the game was shortened" meant our written results, not the game's results screen. Record that the game was shortened with debug_endGameSoon.
+>
+> My answers to the design discussion's follow-up questions, each with its question:
+> - "Did either live tab show a [FA missing element] warning or an error during 1a–1m?"
+>   > No, but I'm quite confident it's because I was looking at top in the console rather than frame.html.
+>   The design discussion's note (UNVERIFIED): the typeof check returned 'function' with the console on top, so in live play the game's code ran in top; and as far as it knows, Chrome prints every frame's messages unless the console's "Selected context only" setting is on.
+> - "Whose climb drew [Chopped Bolts]?" This answer corrects 1n's "the non-viewed seat":
+>   > Chopped Bolts was drawn by IndianaScones0, 2369492. Oddly, it isn't mentioned in the log when I follow the "View game replay" button, before I've chosen which seat to view. There's a text list of log entries and it skips Chopped Bolts being drawn. I've included a picture of that portion of the log. It goes straight from climbing Dinkus Dog to adding the gear token from Chopped Bolts.
+> - "Rerun IndianaScones0's replay to the error and copy the full stack. Expand the error with the game's frame selected, and note the URL's player= value."
+>   > Having switched to frame.html, I am now seeing warnings crop up during the replay. I've expanded the error and copied/pasted the whole log. I don't see a player= value in the expanded error, but I do see this: @	frame.html?version=2…nts=2369492%3B:1995, which has IndianaScones0's player id after nts=.
+>   In the pasted text, the frame URL reads "…&player=2369492&comments=2369492". Seat 1's log reads "player=2369493&comments=2369492". So player= names the replay's seat, and comments= doesn't.
+> - "Who made each Risk it, and did 1l's retreat?"
+>   > Both Risk it attempts were made by IndianaScones0. No retreat.
+> - "1o: I assume it wasn't run."
+>   > I did run it, but that was when I unwittingly was set to top and not frame.html, so there were no warnings to confirm in the second open window.
+> - "When you saw the Portaledge open during the replay, had you opened it yourself, or did it open on its own?"
+>   > When the Portaledge opened during replay, it did so on it's own, as a result of a "Next move". I'm not sure what you mean by "had you opened it yourself", since aside from editing the elements tab in dev tools, I would have no way of opening it myself.
+>
+> The consoles, in D:\Documents\BGA Studio\replay-trial-1\. Check that they're there; if not, stop and ask.
+> - IndianaScones1.log: seat 1's replay, saved from the console (1,171 lines, 48,152 bytes as the design discussion received it).
+> - IndianaScones0.log: seat 0's replay, first run (132 lines, 7,802 bytes as received).
+> - IndianaScones0-rerun.log: seat 0's rerun with the game's frame selected and the error expanded, saved from my paste.
+>
+> The new error, from IndianaScones0-rerun.log (line numbers after the fix):
+> > utils.js:24 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'parentElement')
+> > beforeAnimation @ utils.js:24
+> > (anonymous) @ utils.js:230
+> > animationPromise @ utils.js:227
+> > (anonymous) @ utils.js:2935
+> > discardClimbingCard @ utils.js:2930
+> > notif_confirmAddTokenToPitch @ firstascent.js:10706
+> > await in notif_confirmAddTokenToPitch
+> > (then dojo and ly_studio frames, down to onArchiveNext)
+> It comes just after "[FA missing element] notif_confirmAddTokenToPitch | no .selected_pitch | step skipped" (queryOrWarn @ utils.js:1319, called from notif_confirmAddTokenToPitch @ firstascent.js:10652). After it, "Next move" did nothing.
+>
+> The design discussion's reading of the consoles. Check it against the files; don't take it as given.
+> - Seat 0's replay, before the error:
+>   - four tooltip deferrals (.p26 three times in replaylogs_move_36, .p27 once in replaylogs_move_37);
+>   - the placeholder skipped, and "#asset_board_2369492 | board created" at the second pick;
+>   - confirmYourRequirements twice, then bomberAnchorCleanup, then confirmAddTokenToPitch;
+>   - 6 [FA animation fallback] warnings.
+> - Seat 1's replay reached gameEnd:
+>   - three deferrals;
+>   - the placeholder skipped, and "#asset_board_2369493 | board created" at the first pick;
+>   - confirmYourRequirements three times;
+>   - confirmRerackPrivate;
+>   - 18 [FA animation fallback] warnings;
+>   - no error from the game's code. The other errors are browser messages (Permissions-Policy, a blocked browser-update.org script, the iframe sandbox note).
+> - All 24 fallback warnings are on #portaledge or cards inside it, titled "Drawing Asset/s from the Portaledge". They fire in resting and selectPortaledge, and in seat 0's replay also in climbOrRest during Bomber Anchor's draw. None hung.
+> - Card 2 (Chopped Bolts): in both consoles, the state goes from climbOrRest straight to addTokenToPitch, with no climbingCard state.
+> - The stack's 8956 (confirmYourRequirements) and 10652 (confirmAddTokenToPitch) match the shifts the first session reported for old 8954–8955 and 10649–10650.
+>
+> What the trial answered (my observations and that reading):
+> - Studio offered a replay from each seat; I viewed both.
+> - Each replay created only its own viewer's board, at that viewer's own pick. So the replay didn't treat the viewer as active at the other seat's pick.
+> - Private notifications: see my 1n observation. Also, the Rerack guard placed the cards in the holder's seat, and no unguarded hand or token read threw.
+> - Coverage: notif_riskShowAssets ran in no replay (both Risk its were IndianaScones0's, and its replay stopped first). notif_riskReturnAssets ran nowhere (no retreat).
+
+**Checked in session 2 against the console files: the design discussion's reading is confirmed.**
+- **The files** (in `D:\Documents\BGA Studio\replay-trial-1\`):
+  - `IndianaScones1.log`: 48,152 bytes, 1,171 lines.
+  - `IndianaScones0.log`: 7,802 bytes, 132 lines.
+  - `IndianaScones0-rerun.log`: 9,917 bytes, 191 lines. It has CRLF line endings; the other two use LF.
+- **Seat 0's deferrals** are items 128, 129 and 133 (`.p26`, `replaylogs_move_36`) and 134 (`.p27`, `replaylogs_move_37`). **Seat 1's** are 106 and 110 (`.p26`) and 111 (`.p27`).
+- **The fallback warnings** add up to 6 (seat 0) + 18 (seat 1) = 24.
+- **Card 2** goes from `climbOrRest` straight to `addTokenToPitch` in both consoles (seat 1, lines 343–346; seat 0's rerun).
+- **The rerun's stack** matches the code after the first change: utils:24, 227, 230, 2930 and 2935, and js:10706. Now they are utils:24, 227, 230, 2934 and 2939, and js:10711.
+
+**Findings (stop A2), with their classification**
+
+Line numbers in this section are as at stop A2, after the first change: add 5 to `firstascent.js` lines after old 10671, and 4 to `modules/utils.js` lines after old 1770, for today's.
+
+- **The start check (§5): done on 2026-11-05. Every result matched.**
+  - `git fetch origin` brought nothing new. HEAD was `c3cb6cd` on `46b6d81`, and the left-right count was `0 0`.
+  - Only `firstascent.js` and `modules/utils.js` were modified, both unstaged. Nothing was staged, and there were no untracked files.
+  - `git diff -- firstascent.js modules/utils.js` was byte-identical to `replay-fix.diff` (`cmp`).
+  - The working copies were 743,782 and 228,622 bytes, with 13,562 and 4,982 CRs, equal to their LF counts. A Perl check found no bare CR or LF, and neither file ended with a newline.
+  - The three console files were present (sizes under "Trial 1").
+- **1. The new throw.**
+  - **The null element** is `ele` in `beforeAnimation` (utils:24, `ele.parentElement`). `discardClimbingCard` (utils:2929–2943) takes `$('climbing_discard_straightened').firstElementChild` (2932) and animates it to `#climbing_discard_90` (2935): the climbing card in play.
+  - **What puts the card there in live play.** `notif_drawClimbingCard` places it in `#climbing_slot` on every client (js:9132, 9143). Then:
+    - on the adder's client, a click: `onConfirmAssetType` (js:4923–4968) awaits `retractClimbingCard()` at js:4928, which moves the card to `#climbing_discard_straightened` (utils:2898–2928). Only after that does it add the Confirm button that sends the action (js:4964 → `onConfirmAddTokenToPitch`, 4969–4986);
+    - on every other client, the notification's own branch: js:10675, `if (notif.args.player_id != this.player_id) { await this.utils.retractClimbingCard(); }`;
+    - state entry does nothing here: `onEnteringState('addTokenToPitch')` (js:2256–2266) doesn't retract.
+  - **Why the adder's replay lacked it.** In a replay, `this.player_id` is the seat being viewed (`player=2369492` in the frame URL). So js:10675 skipped the retract, the click never ran, and the card was still in `#climbing_slot`. In seat 1's replay (`player=2369493`), js:10675 did the retract.
+  - **Cards that share card 2's path:** 2, 6, 36, 41, 50, 54 and 63 (Chopped bolts, Sandbagged, Camera crew, Falcon nest, Pee off the ledge, Bring the wide gear, Rockfall!). They go to `addTokenToPitch` (`Game.php:1755–1757`; for the Cool-Headed Crimper, 5111–5113 and js:13263).
+  - **Cards with a `climbingCard` state avoid it.**
+    - The choice click doesn't retract (js:4418–4438).
+    - The handlers retract on every client whenever the slot holds the card (js:9316, 9335, 9360).
+    - The states that follow retract in state entry (js:2097, 2170, 2186, 2269, 2298, 2381). Other handlers retract the same way (js:10462, 10635, 10787, 11365, 11432, 11570).
+    - Every `discardClimbingCard` call and every read of `#climbing_discard_straightened` in the handlers (js:7947–13418) is guarded or follows one of those retracts. js:4928 is the only retract a click does.
+  - **Classification: the loud class** (an exception before the release), in its `new Promise(async …)` form (`FREEZE_INVESTIGATION.md` Background point 4, second bullet; §6).
+    - `animationPromise`'s executor throws at utils:230. The `await` at utils:2935 rejects inside `discardClimbingCard`'s async executor (utils:2930), which prints `Uncaught (in promise)`.
+    - The outer promise never settles, so the handler waits at js:10706 forever, and its release (js:10714) never runs. That fits "Next move did nothing" [inferred].
+    - The non-animated branch would throw too: `destination.append(null)`, then `climbing_div.classList` (js:10708–10709) [C].
+    - Live play has the same throw in a second window of the adder's own player, which didn't click either [C].
+- **2. The survey.**
+  - **How I looked.**
+    - I reran session 1's method lister and viewer-branch scan on the working copies: 146 methods in js, 100 in utils, and 40 viewer-dependent branches in handlers.
+    - New, aimed at what was missed before:
+      - every DOM move, removal and `style.display` change inside the click handlers (js:2908–7214), found by grep and read by hand;
+      - the 39 instance variables the click handlers set, checked for reads in handlers and in `utils.js`. The handlers only push to or clear handler arrays and delete `jesus_piece_requirements`; the `utils.js` reads are in click-path helpers;
+      - every climbing-card discard site, traced to where its retract comes from;
+      - dereferences of click-made classes in the private handlers and active branches the trial didn't reach.
+  - **The sites the first change guards, and whether anything later uses what each skips:**
+    - js:7579 `.character_placeholder`: removes the placeholder, which exists only from the click (js:3086). Nothing else reads it.
+    - js:7587–7591, the board: creates what `onSelectCharacter` (js:3053–3082) would have. Later steps use it, and it's there: both replays showed the boards.
+    - js:8453 `riskShowAssets`: clears and hides `#trifecta_selected_box`, which only `chooseTrifectaOption` fills (utils:1976, a click). In a replay the box is already empty, and js:8919–8926 clears it again on a Trifecta climb.
+    - js:8574 `riskReturnAssets`: removes `.selected_pitch`. Its other readers are click handlers or helpers only clicks reach (utils:3949 and 3968 run only from js:3334; utils:4353, 4482 and 4578 from no handler or state entry); js:2464 and utils:4123 are loops.
+    - js:8956–8958 `confirmYourRequirements`: removes the pitch's `cursor` and `.selected_pitch`. An unselected pitch keeps `.available_pitch`, so the loop at js:8951–8954 cleans it.
+    - js:10652–10654 `confirmAddTokenToPitch`: the same. Here the classes come only from the click (js:4941–4961), and the handler uses `selected_pitch_id` from the notification's args.
+    - js:12992 `#bomber_anchor_counter`: removes the counter, which exists only from the click.
+    - The Rerack guard, js:12775–12778: skips the animated branch. The other branch builds the same end state from the args, and the discard pile's top is fixed before it (js:12748–12773). Seen in seat 1's replay.
+    - The log hook, utils:1264–1273: leaves the item unprocessed. A later sweep adds the tooltip (Jonathan: "The Headwall pitches' tooltips worked fine after the reveal").
+  - **Beyond those sites:**
+    - **The new throw** (above). It is the only throw or hang the survey found.
+    - **Trade, in the trader's own replay** (display only; not in the trial). The click moves the three traded cards to the discard (js:3809–3825) and opens the Portaledge (js:3849–3851). `confirmTradePublic` is ignored on the trader's client (js:7254), and `confirmTradePrivate` (js:8742–8769) moves nothing out of the hand. So the cards stay in that replay's hand: `sanitizeHand` (utils:1409) runs only from a click path (utils:4417). Its draw would fall back with warnings, but nothing throws (`portaledge()` only loops over its controls, utils:3286–3288, 3369–3371, 3383–3385).
+    - **Bomber Anchor's Portaledge** in the holder's replay: see B below.
+    - **No problem:** `old_board_slot_num` (js:11237) is guarded and never used. The Crimper's handler takes its cards from the args (js:13243–13246).
+  - **What this method can miss:**
+    - helpers reached from clicks that I didn't read line by line. I read the ones that move elements; the other ~25 I checked only for calls from handlers and state entry;
+    - moves done through `innerHTML` rebuilds;
+    - counters read as "the last class in classList";
+    - timing: the un-awaited async blocks in state entry, against how fast someone steps through a replay;
+    - which framework callbacks run in a replay: taken from trial 1's logs, not from the docs.
+- **3. A missing-element case in `animationPromise`, against a guard at this site.** Recommendation: the guard at this site, no general fallback. Jonathan's decision 5 (stop A2 reply): no general fallback.
+  - It wouldn't fix this site on its own. The check would have to come before `func.before` (utils:230), and even then `discardClimbingCard` goes on to `card_ele.classList` at utils:2936 and hangs the same way.
+  - With a second guard there, the replay would keep a wrong board: the card would stay in `#climbing_slot`, the next card drawn would join it, and every later `$('climbing_slot').firstElementChild` would pick the stale one [inferred].
+  - In live play, there are about 200 call sites (146 direct calls and 57 `.bind`, by grep). Today a null element there is a bug that stops one client loudly; with the fallback it would become a warning and a board out of step, or the same throw one line later.
+  - The migration already plans the principled version: P4's wrapper logs `[FA notif error]` and re-renders from the model (`MIGRATION_PLAN.md` §4.3), and P5.7 removes `discardClimbingCard`'s async executor (§4.3.1).
+- **4. B: the Portaledge.**
+  - **What opens it:**
+    - live and replay: state entry opens it for every viewer in `resting` (js:2056–2059) and `selectPortaledge` (js:2233–2236), and installs the click-outside listener (js:2067–2074, 2244–2251);
+    - live only, a click: trade (js:3851) and Bomber Anchor (js:5716–5717);
+    - a handler: `portaledge()` when `auto` (utils:3277–3281), `portaledgeOpponent()` when `auto || bomber_anchor` (utils:3428–3431).
+  - **What closes it:** the draw helpers, and the click-outside hide branch.
+  - **The path when "Next move" is clicked.** The listener is on the game frame's window, in the capture phase (utils:1797–1807). "Next move" is in that frame: its handler runs from `frame.html…:1995` (the rerun's stack), and Jonathan saw the Portaledge hide. The target is outside `[#portaledge, #generalactions]` (utils:1791–1795), so `triggerOutsideClickClose` (1810–1818) runs, then `onShowHidePortaledge`'s hide branch (js:4374–4381): display `''`, `portaledge_open` removed, the red "Show Portaledge" button added, the listener removed.
+  - **What else that one listener can close.** There is one listener at a time; each new one replaces the last (utils:1789).
+    - In a replay: the climbing card (js:1985, through `#show_hide_card_button`), the Crimper's display (js:2411, 13339), and the ones setup installs (js:1225, 1253, 1448).
+    - In live play, also the click-opened ones: js:3031, 3115, 3371, 3861, 4282, 4341, 4372 and 5727, and utils:1866, 1905, 1950 and 2006.
+  - **The 24 warnings: 19 explained, 5 not.**
+    - **The 19:** every warning in `resting` and `selectPortaledge`, in both seats. State entry opened the Portaledge, the "Next move" click hid it, and that move's draw then ran inside the hidden Portaledge. The viewer's own draw warns on `flip_transform` and `asset_portaledge_to_display` for each card, plus `portaledge_close`. A watcher warns only on `portaledge_close`, because its card backs fly from the hand counter by the offset method (utils:3452–3453) [C].
+    - **The 5:** seat 0, `climbOrRest`, Bomber Anchor's draw (cards 139 and 96, plus the close). There only the click opens the Portaledge (js:5716–5717), and `portaledge()` doesn't open it for Bomber Anchor. `portaledgeOpponent` does (utils:3428–3431), which is why seat 1's view of that move has no warning. Nothing was proposed for these five (session 2's §4 B).
+- **5. The log line** (for the later `TODO.md` entry; read only).
+  - It is built at `Game.php:4162`: `'${player_name} adds a ${asset_type} token to ${pitch_for_log}'`. Its args carry no climbing card.
+  - Other cards add their name in `confirmClimbingCardChoice`: it builds `climbing_card_for_log` as a nested log, `'/${climbing_card_name}(${card_type})\'` (`Game.php:2240–2247`), and prefixes the line with it: `'${climbing_card_for_log}: ${player_name} chooses …'` (2250–2259). The client's `logInject` matches it with `climbing_regex` (utils:1326) and turns it into a climbing-card tooltip item.
+  - The draw itself logs nothing for any card (`drawClimbingCard`'s message is `''`, `Game.php:1747`). For the add-token cards, the token line is the only one. That is why the replay's log list goes from the climb straight to the token line.
+
+**The second proposal (stop A2) and its review**
+- **The files**, in `D:\Documents\BGA Studio\`:
+  - `replay-fix-2-work\a\`: the working copies after the first change, LF-normalized (`git hash-object` `984e873…` and `c5b4077…`, the post-image hashes of `replay-fix.diff`).
+  - `replay-fix-2-work\b\`: the same with the proposal applied (`aeaf737…` and `8a0a442…`).
+  - `replay-fix-2-proposal.diff`: 31 lines, 1,844 bytes, LF only. `--stat`: `firstascent.js | 5 +++++`, `modules/utils.js | 4 ++++`.
+- **How it was made:** PHP wrote the LF copies to `a\` and `b\`. `replay_fix_2_edits.php` edited `b\`, each edit required to match exactly once. The diff is two `git diff --no-index --no-prefix` runs from `replay-fix-2-work`, joined. Check: `git apply --check`, then `git apply`, on a scratch copy of `a\`; the result is `cmp`-equal to `b\`.
+- **The review:** Jonathan's stop A2 reply (quoted in full under "Go-aheads"). The design discussion checked the diff and `a\`/`b\` as uploaded, and ran `node --check` on `b\`. Jonathan checked the replay test on Studio and the "Next move" button's chain of ids. He approved the proposal as it is, with decisions 1–5, on one condition (answered under "The second change").
+
+**The second change: applied 2026-11-06 at 11:16, not committed**
+- **How it was applied:** by `replay_fix_2_edits.php` in its `crlf` mode, on the working copies. Each edit matched exactly once (one per file). No other edits.
+- **The same as the reviewed proposal:** the working copies, LF-normalized, are `cmp`-equal to `b\`.
+- **`replay-fix-2.diff`** (`git diff -- firstascent.js modules/utils.js`, written 2026-11-06): 178 lines, 10,922 bytes, LF only. `--stat`: `firstascent.js | 40`, `modules/utils.js | 32` (58 insertions, 14 deletions). Index lines: `5dc9ec8..aeaf737` and `a97e5e7..8a0a442`. The design discussion reversed it from its copy of `b\` and got the pre-images `5dc9ec8` and `a97e5e7` (Jonathan's stop B2 reply).
+- **Change 1: `notif_confirmAddTokenToPitch`** (js:10676–10680 now). After the opponents' retract (js:10675), an `else if ($('climbing_slot').firstElementChild)` branch on the adder's client warns and awaits `retractClimbingCard()` before the token animation, as an opponent's client does.
+  - **Warning:** `[FA missing element] notif_confirmAddTokenToPitch | no card in #climbing_discard_straightened | card retracted from #climbing_slot`.
+  - **Live play: opponents and spectators are unchanged** (the first branch is untouched).
+  - **Live play: the adder's single window is unchanged.** `onConfirmAssetType` awaits the retract (js:4928) before it adds the Confirm button that sends the action (js:4964, 4969–4986). An F5 puts the card back in the slot (js:1230–1242), but Confirm then goes through `onConfirmAssetType` again.
+  - **Live play: a second window of the adder's own player changes.** It retracts the card and warns, instead of stopping with the TypeError. Jonathan approved this change (decision 1 of his stop A2 reply).
+- **Change 2: the click-outside listener** (utils:1799–1802 now). In a replay, a click that is outside the popup and `#generalactions` and also outside the game's own area returns early, so the popup stays open.
+  - **The replay test:** `(typeof g_archive_mode !== 'undefined' && g_archive_mode) || typeof g_replayFrom !== 'undefined'`.
+  - **The game's own area:** `#FirstAscent_table_display` (tpl:14), the root of the game's template. A click inside it, on the popup itself or on `#generalactions` still closes the popup.
+  - **Warning: none.** It would fire on every "Next move".
+  - **Live play: none, by reading.** `g_archive_mode` is true only after the game ends (`Game.js` doc:2119–2120; live code uses it as a plain boolean, doc:226 and doc:1398). `g_replayFrom` is undefined outside a replay (doc:2116–2117; d.ts:22–24). Not yet checked in a live game; v3 checks it.
+  - **The broad version, as proposed:** in a replay, clicks on the log, the player panels and the top bar also leave a popup open (Jonathan's decision 2). It depends on `#FirstAscent_table_display` (tpl:14), which P6 may change when it builds the layout in JS and removes the `.tpl`.
+  - **An in-game "replay from this move"** sets `g_replayFrom`, so it gets the same exemption during a live game. Accepted (his decision 3); no step covers it.
+  - **Checked on Studio by Jonathan** (stop A2 reply), in table 998675's replay with frame.html selected: the replay test gave `true`; `#FirstAscent_table_display` exists; it doesn't contain the "Next move" button. The button's chain of ids: `IMG | archive_next < archivecontrol_editmode < archivecontrol < current_header_infos_wrap < topbar_content < topbar < overall-content < ebd-body`. My query for "Next move" gave an empty array: it looks only at elements without child elements whose whole text is "Next move".
+- **What it leaves:** Bomber Anchor's draw in the holder's own replay and trade in the trader's own replay still warn; the fallback settles them, with no hang. Both are display-only (Jonathan's decision 4).
+- **The condition (stop A2 reply), answered at stop B2 and accepted.** Numbers as now.
+  - **`#climbing_slot` exists for the whole game**, so change 1's new check can't throw on the adder's client:
+    - it comes from the template (tpl:24). Setup moves it into `#titlebar_extras_wrapper` (js:543–544), which setup creates inside `#page-title` (js:157–161);
+    - the only code that removes one is setup's cleanup of duplicates (js:534–541, "the extra climbing slot added when undoing a climbing card"). It runs only at setup and keeps the first slot;
+    - during a game it is only moved: into `#board` for a card's flight (utils:2834, from js:9140 and 9258) and back (utils:2867, from js:9144 and 9262);
+    - nothing rebuilds a parent of the slot. Every `innerHTML = ''` is on `#summit_pile`, `#gameaction_status`, `#pagemaintitletext`, the objective tracker or a discard pile (js:11789; utils:1758, 1761, 2235, 3639, 4741, 4760). Every `replaceChildren` is on `#summit_discard` or a discard pile (js:12273, 12721, 12893, 12942, 12981, 13021, 13072; utils:4206). No `.remove()` targets the slot or `#titlebar_extras_wrapper`, and the slot has no class for a removal by class to reach;
+    - so `$('climbing_slot')` is never null, and `.firstElementChild` returns null or the card. When it returns the card, `retractClimbingCard` finds it (utils:2907);
+    - what reading can't cover: the framework itself rebuilding `#page-title`. The docs don't describe it. The existing reads at js:4928, 9101 and 10635 would break the same way, and no game has shown it.
+    - The design discussion's note (stop B2 reply): change 1's check "is the same read as js:2298, 4928, 9316, 9335, 9360, 10462, 10503 and 10635, which already run in live play."
+  - **On the Crimper's path, the slot holds the chosen card on every client:**
+    - `notif_crimperDrawsClimbingCards` puts both cards in the Crimper's display, not in the slot (js:9245, 9297);
+    - `notif_confirmCrimperClimbingCard` runs on every client. It sends the unchosen card to `#climbing_discard_90` (js:13287 animated, 13351 not) and puts the chosen card in `#climbing_slot` (js:13294 animated, 13353 not);
+    - the server then goes to `addTokenToPitch` (`Game.php:5111–5113`). The Crimper's own client follows the same path as any adder: the token-type buttons (js:2685), then `onConfirmAssetType`, which retracts the card (js:4928);
+    - in live play the slot is empty when the notification arrives, so the new branch doesn't fire. In the Crimper's own replay, the slot holds the chosen card, so the branch retracts it and warns.
+- **What ran and what was only read** (stop B2):
+  - ran: the edit script, on `b\` and on the working copies; `git apply --check` and `git apply` on a scratch copy of `a\`, then `cmp` with `b\`; LF-normalizing the working copies, then `cmp` with `b\`; the byte, CR and LF counts (`wc`, `tr`, Perl); `git diff`, `--stat` and `ls-files --eol`;
+  - not run: no parse here (no node; the `node --check` result is the design discussion's); no browser run. Both answers to the condition, and every [C] expectation in v3, come from reading the code.
+
+**Complete line shifts against HEAD** (both changes; the docs' citations aren't refreshed). Every changed old line is in an entry, including the three ranges the first list left out (old `firstascent.js` 8954–8955, 10649–10650 and 12771). The design discussion recomputed these from the diff's hunks and found them equal, row by row (Jonathan's stop B2 reply).
+- **`firstascent.js`** (13,556 lines at HEAD, 13,568 now):
+  - old 1–7578: unchanged;
+  - old 7579: replaced in place;
+  - old 7580–7586: unchanged;
+  - 5 lines added after old 7586 (now 7587–7591): the board;
+  - old 7587–7603: +5;
+  - old 7604–7606: deleted;
+  - old 7607–8450: +2;
+  - old 8451–8452: replaced in place (now 8453–8454);
+  - old 8453–8571: +2;
+  - old 8572: replaced in place (now 8574);
+  - old 8573–8953: +2;
+  - old 8954–8955: replaced by three lines (now 8956–8958);
+  - old 8956–10648: +3;
+  - old 10649–10650: replaced by three lines (now 10652–10654);
+  - old 10651–10671: +4 (old 10671, the opponents' retract, is now 10675);
+  - 5 lines added after old 10671 (now 10676–10680): change 1;
+  - old 10672–12770: +9;
+  - old 12771 (`if (this.utils.shouldAnimate()) {`): replaced by four lines (now 12780–12783): the F13 comment, the `#discard_box` warning, a blank line, and the changed test;
+  - old 12772–12874: +12;
+  - old 12875: replaced in place (now 12887);
+  - old 12876–12984: +12;
+  - old 12985: replaced in place (now 12997);
+  - old 12986–13556: +12.
+- **`modules/utils.js`** (4,955 lines at HEAD, 4,987 now):
+  - old 1–1259: unchanged;
+  - 15 lines added after old 1259 (now 1260–1274): the log hook;
+  - old 1260–1294: +15;
+  - 13 lines added after old 1294 (now 1310–1322): `warnMissingElement` and `queryOrWarn`;
+  - old 1295–1770: +28;
+  - 4 lines added after old 1770 (now 1799–1802): change 2;
+  - old 1771–4955: +32 (for example `matchBoardAssets` 3621 → 3653).
+
 **Playtest list v2, as issued at stop B, with Jonathan's correction and my wording fix** (both marked "corrected 2026-11-04")
 
 v2 is v1 plus the steps marked "(added)".
@@ -261,36 +540,156 @@ v2 is v1 plus the steps marked "(added)".
 
 The final entry must not call those parts playtested.
 
-**Closing docs: what's left** (§8 of the prompt, and the go-aheads)
-- **`progress.md`:** the final entry replaces this one. It records the items in §8, plus:
+v2 is superseded by v3, below. Trial 1 played v2.
+
+**Playtest list v3, as issued at stop B2, with Jonathan's three corrections** (each marked "corrected 2026-11-06")
+
+v3 is v2 with its two 2026-11-04 corrections applied in place, plus the steps marked "(added)". v2's own "(added)" marks are dropped.
+- **Tags:** [S] seen on Studio, [D] docs, [C] code reading, "(seen on production)" seen on the BGA Production site. "Trial 1" is table 998675.
+- **Line numbers:** `firstascent.js` and `modules/utils.js` as after both changes (now); other files unchanged.
+
+**Table 1 (F13).** 2 players (the desert board, `Game.php:158`), one tab each, express start, a new table created after the deploy. It is played to its end, but shortened with `debug_endGameSoon` (1m).
+
+- **Before 1a.** Deploy `firstascent.js` and `modules/utils.js` to Studio, and check their sizes there against the working copies: 744,236 and 229,085 bytes (CRLF).
+  - If the upload converted line endings, they would be 730,669 and 224,099 bytes (LF). I computed those; they aren't observed.
+  - After the F5 in 1a, run `typeof gameui.utils.warnMissingElement` in each tab's console. Expected: `"function"` [C]. In trial 1, both live tabs gave it with the console set to top [S].
+  - If the console says `gameui` isn't defined, pick the game's frame in the console's context dropdown. A replay needs that (seen on production; [S] trial 1).
+  - **(added)** In each live tab's console, run the replay test: `(typeof g_archive_mode !== 'undefined' && g_archive_mode) || typeof g_replayFrom !== 'undefined'`. Expected: `false` [D: Game.js doc:2116–2120]. If it gives `true`, stop before playing and tell me.
+- **1a.** Press F5 in every open table tab, then create Table 1.
+  - Open the console in both tabs and keep both tabs open to the end. Express-start tables are abandoned when no client stays on the page [S].
+  - **(added)** In each tab, note the console's context dropdown (top or the game's frame) and whether "Selected context only" is on.
+  - Expected throughout the live game: no `[FA missing element]` warning and no new console error [C].
+- **1b.** Run the count query in "Go to game database" → SQL: `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_type='asset';`
+  - Expected: n = 124 [C: the sum of `number_in_deck` over the 37 asset types, `Game.php:324–332`].
+  - It runs early because whether a finished table's database stays reachable isn't known.
+- **1c.** In character selection, before any pick: `stackClimbingDeck` with "39,26,2", then `stackSummitBeta` with "9,1". The first item listed ends on top, and each call reloads the page [C].
+  - Both calls only reorder hidden piles. The cards and tokens then arrive through game notifications, which the replay replays [C].
+  - Don't use debug functions that change what's on screen without a notification: `giveAssets`, `giveSummitBeta`, `discardSummitBeta`, `setAvailableCharacters`, `setSharedObjectives`, `redrawStartingSpread`. The replay wouldn't see the change [C, inference].
+- **1d.** The character picks. Avoid Phil and the Cool-headed Crimper [C]:
+  - Phil draws two Summit Beta tokens when selection ends (`Game.php:5484–5506`) and would take the stacked ones.
+  - The Crimper draws two climbing cards per climb.
+
+  Record which seat picked first. Expected live: as usual, with no warning [C].
+- **1e.** Round 1: Rack Up as usual.
+- **1f.** Round 1, Climb Phase.
+  - The first climber climbs a plain pitch. Climbing card 39 comes up; choose option a (lose 1 Water, draw 1 Summit Beta token). That player gains Bomber Anchor [C: `Game.php:2173–2180`].
+  - The other player rests. That is F13's rest.
+- **1g.** The Follow Phase and the Rerack Phase as usual.
+  - **(added) Change 2 in live play.** During the rest's `resting` state, in the watcher's tab, click once on the status text in the page title bar, outside the game's area. *(Corrected 2026-11-06, Jonathan's correction 1: v3 as issued said "click once on the board, outside the Portaledge".)*
+    - Expected: the Portaledge hides and the red "Show Portaledge" button appears, as before the fix [C: js:4374–4381]. The new early return needs the replay test to be `true` (utils:1799–1802), so live play keeps today's behavior.
+    - Bring it back with "Show Portaledge" before the rester confirms. A draw into a hidden Portaledge gives `[FA animation fallback]` warnings, which the fallback settles.
+    - *Checked by reading, as Jonathan's correction asks:* the status text (`#pagemaintitletext`) is outside `#FirstAscent_table_display`. The game's template has no such element (its root is tpl:14), and the game never moves `#page-title` or `#pagemaintitletext`; it moves its own elements into `#page-title` (js:157–161, 543–544) [C; the framework's page structure isn't in the docs]. Not settled by reading: whether the status text is inside `#generalactions`, the listener's other target. The game treats them as separate elements (it inserts its own elements right after `#pagemaintitletext`, js:5681, 12000, 13140). If it were inside, the click wouldn't hide the Portaledge, and this step would show it. The step is unchanged.
+- **1h.** Round 2: on the holder's turn, use Bomber Anchor.
+  - Discard 2 hand cards, choose 2 from the Portaledge, then Confirm. It worked in Rack Up on 2026-10-15 [S]; it is an any-time token [C: `utils.js:3940–3945`].
+  - The 2 discards also stock the asset discard pile for 1j [C].
+  - **(added)** In the holder's replay, this draw is expected to warn (1n).
+- **1i.** Round 2, Climb Phase: both players climb [C: `Game.php:1755–1757`].
+  - The game's second climb draws card 26; option a gives Rerack.
+  - The third climb draws card 2; add a Gear token.
+  - **(added)** Record who adds the token. In that player's live tab, expect no `[FA missing element]` warning at this step [C]: the click retracts the card (js:4928) before the Confirm button exists (js:4964).
+- **1j.** The Rerack holder uses Rerack and takes 2 cards from the discard pile [C: js:5371–5383].
+- **1k.** After 1j, so that no one holds Rerack: a Risk it, after `forceDie` with 3.
+  - With Rerack, Energy Drink, Simul Climb or Lucky Chalkbag in hand, a bad roll goes to `riskSummitBeta` instead (`Game.php:1883, 1916`) [C].
+  - It retreats only if the risker has no available card, or not enough Psych beyond the pitch's requirement (`Game.php:1925, 1933–1939`). Otherwise it goes to `selectOpponent` [C].
+  - **(added)** Set it up to retreat, so that `notif_riskReturnAssets` runs in a replay:
+    - risk it on a pitch whose Psych requirement equals the risker's Psych. With face 3, the risker then lacks the 1 Psych beyond the requirement [C];
+    - available cards are the hand plus the Asset Board, less the risked cards (`Game.php:1833`);
+    - no debug function sets Psych; `forceDie` only sets the face;
+    - a retreat costs the risker that climb, so 1l's Headwall climbs may come a round later. *(Corrected 2026-11-06, Jonathan's correction 3: added.)*
+  - Record the risker and whether it retreated.
+- **1l.** The Headwall.
+  - A player climbs into the third row (desert hexes 16–21, `UtilTrait.php:696`). "The Headwall is revealed" appears in the log after that climb [C].
+  - Then that player climbs a Headwall pitch. That climb's log names a pitch that the replay's board doesn't hold at its start [C].
+  - At the earliest, that is the player's 3rd and 4th climbs, in rounds 3 and 4. `stackAssetDeck` can supply the cards they need [C].
+- **1m.** The end: `endGameSoon` for a player with at least 2 climbed pitches. With exactly one climbed pitch you get the warning seen in P1.2's 3d [S].
+  - That player's next climb ends the game: the Climb and Follow Phases complete, there's no Rerack, then final scoring, and the table ends [S P1.2].
+  - Your written results say the game was shortened with `debug_endGameSoon`. (That's our results, not the game's results screen.)
+  - The replay's Rope counter may differ until the next climb. Record it; it's display only [C].
+- **1n.** The replays. Step with "Next move" from the start to the end, from each seat Studio offers. Send me the console from its beginning. In trial 1, Studio offered both seats [S].
+  - If Studio doesn't offer a replay from each seat, record which seats it offers and replay from those.
+  - For console queries and saved consoles, pick the game's frame (frame.html) in the console's context dropdown; the top frame shows nothing (seen on production; [S] trial 1).
+  - **(added)** In each replay, with frame.html selected, the replay test gives `true` [S, table 998675].
+  - **Expected (F13):** the replay runs to the end, through the rest, with no new console error, and with fallback warnings only as below. This is the check, so it isn't [S] for this build.
+  - **(added)** No `[FA animation fallback]` warning in `resting` or `selectPortaledge` [C]. Bomber Anchor's draw warns in the holder's replay (five warnings in trial 1) [C].
+  - **(added)** Once, in a `resting` or `selectPortaledge` state, click once on the status text in the page title bar: the Portaledge stays open [C]. Then click once on an empty part of the board (not a pitch, card, token or button): it hides, as in live play [C]. Re-show it with the red button before the next "Next move". If the red button doesn't bring it back in a replay, the next draw's `[FA animation fallback]` warnings come from this test; record them as such. *(Corrected 2026-11-06, Jonathan's correction 2: v3 as issued said ""Next move" with the Portaledge open leaves it open [C: utils:1799–1802]. Once, in a `resting` or `selectPortaledge` state, click on the board instead: the Portaledge hides, as in live play [C]. Re-show it with the red button before the next "Next move".")*
+  - **Guard warnings** to record, not failures [C]:
+    - `[FA missing element] notif_confirmCharacter | no .character_placeholder | step skipped`, and `… | no #asset_board_<id> | board created`, at each pick where the replay treats the viewer as active. In P1.2's 3g, the same missing placeholder made the TypeError at 7579 (before the fix) [S]. In trial 1, both warnings came at the viewer's own pick, in each seat [S].
+    - The board warning names `#asset_board_<id>`. If the id is the other seat's player, the replay treated the viewer as active at the other seat's pick. Record whose id each such warning names.
+    - `notif_confirmYourRequirements | no .selected_pitch | step skipped`, at the viewer's climbs.
+    - `notif_confirmAddTokenToPitch | no .selected_pitch | step skipped`, in the seat that added the token.
+    - **(added)** At that add-token step, in the adder's replay: `[FA missing element] notif_confirmAddTokenToPitch | no card in #climbing_discard_straightened | card retracted from #climbing_slot`, and the replay goes on [C]. Trial 1 stopped at this step with the TypeError at utils.js:24 [S].
+    - `notif_bomberAnchorCleanup | no #bomber_anchor_counter | step skipped`, in the holder's seat.
+    - `notif_confirmRerackPrivate | no #discard_box | cards placed without animation`, in the holder's seat.
+    - `notif_riskShowAssets | no .selected_pitch | step skipped` on any Risk it, and `notif_riskReturnAssets | no .selected_pitch | step skipped` on a retreat, in the risker's seat. Neither has run in a replay yet.
+    - Near the start, once per log item that names a pitch not yet on the board: `addTooltipsToLog | no .p<type> for <n>_item_tooltip_<type> (in <container>) | tooltip deferred`. The production game had 7 such items (seen on production); trial 1 had 4 in seat 0 and 3 in seat 1 [S].
+  - **Observations:**
+    - whether each character and each asset board appears;
+    - which seat picked first, and whose perspective the replay shows;
+    - whether the viewer's hand and personal objectives appear, and whether the first picker sees its own objectives dealt face up. If so, its private notifications are in the archive (`Game.php:952`);
+    - after the reveal, whether hovering a Headwall pitch name in the log shows its tooltip [C];
+    - display divergences: used Summit Beta tokens staying in hand (`utils.js:4176–4219`), the reracked cards appearing without the flight, the Trifecta text, the Rope counter after 1m;
+    - **(added)** whether any popup stays open in the way during a replay, for example the climbing card or the Crimper's display. BGA's UX guidelines (F.1) ask for no blocking popups in replays (`bga_ux_guidelines.md:508–516`). Table 1 has no Crimper (1d), so the Crimper's display won't come up.
+- **1o** (optional, your call). During the live game, open a second visible window of one player, if Studio allows it (unknown).
+  - **(added)** Note when it was opened (at which step), what happened while it was open, and its console's context dropdown and "Selected context only" setting.
+  - Expected [C]: that window shows the 1n warnings for its own player's actions, and no TypeError.
+  - **(added)** If it's open at its player's add-token step (1i), expect the change-1 warning, and the window goes on [C]. That is the live change Jonathan approved.
+
+**Coverage (v3):**
+- No step runs the live-play case of the 7604–7606 deletion (a tab hidden between the click and the notification). Jonathan's decision: no step for it.
+- `notif_riskReturnAssets`'s guard runs only if 1k retreats.
+- **(added)** Change 1's live branch runs only in 1o's second window, and only if that window is open at the add-token step.
+- **(added)** The Crimper's path into the add-token handler (`Game.php:5111–5113`) has no step; its evidence is the reading under "The second change".
+- **(added)** An in-game "replay from this move" (`g_replayFrom`) has no step (Jonathan's decision 3).
+- **(added)** No step trades; the trader's own replay is display-only (Jonathan's decision 4).
+
+The final entry must not call those parts playtested.
+
+At stop B2 I also noted, for the popup observation: `bga_ux_guidelines.md:108` says a needed popup should go when "any click, touch, timed or on-screen action" happens. Jonathan's decision on it is in his stop B2 reply (quoted under "Go-aheads").
+
+**Closing docs: what's left** (session 1's prompt §8, session 2's §4 and §8, and the go-aheads). They come in a new session, after the retest.
+- **`progress.md`:** the final entry replaces this one. It records the items in session 1's §8, plus:
   - from item 10 of his stop A reply:
     - that 1m shortened the game with `debug_endGameSoon`; the results say so, not "end to end";
     - the Replay doc:10 correction;
-    - the line shifts;
+    - the line shifts: **the complete list** ("Complete line shifts", all ranges, both changes);
   - the correction line (decision 6);
   - the exception text as above;
-  - the playtest results and the count query result, at the level Jonathan reports them;
-  - this entry's go-ahead quotes, kept or condensed with a pointer to this entry's commit (as P1.2's final entry pointed to `0217be6`).
-- **`TODO.md`**, as proposed at stop A and approved (item 7):
+  - the playtest results (trial 1 and v3) and the count query results, at the level Jonathan reports them;
+  - the go-ahead quotes of both sessions, kept or condensed with a pointer to this entry's commit (as P1.2's final entry pointed to `0217be6`).
+- **`TODO.md`**, as proposed at stop A and approved (item 7), plus session 2's items:
   - Remove the replay entry (line 53) with the fix.
   - Add: used Summit Beta tokens stay in hand in a replay or a second window (`discardPlayedSummitBetaTokens` discards only `.selected_token`; also Jesus Piece).
-  - Extend line 40 (the Trifecta drawer) with its cause (`trifecta_selections` is filled only by the click, `utils.js:1935`) and the replay case.
+  - Extend line 40 (the Trifecta drawer) with its cause (`trifecta_selections` is filled only by the click, `utils.js:1935` at HEAD) and the replay case.
   - Add the `getSkillTokens` key bug.
   - Add `asset_board`, `new_pitches` and `token` to the implicit-globals item at line 87.
-- **`MIGRATION_PLAN.md`, F13's repeats.** Jonathan accepted the shape proposed at stop A (item 8). The final wording comes in the docs diff after the trial, because whether Studio offers a replay from each seat decides whether "from each seat" can stay. The shape proposed at stop A:
-  - **P1.3 Repros:** "F13 re-checked (D9): the replay of a new game created after the deploy, with a rest, from each seat, runs to the end with no `[FA animation fallback]` warning and no new console error. `[FA missing element]` warnings are expected in a replay (the replay fix, `<hash>`); record which fired."
-  - **P2.2 and P2.6:** "P2.2 and P2.6 replay F13 as in P1.3 (a new game with a rest, from each seat, to the end)."
-  - **P3.5:** Playtest: "A replay of a new game through at least a full round, from each seat (F13), as in P1.3." Also proposed: a line saying that the recreated log hook (U13) keeps the deferral of pitch tooltips.
-  - **P4.1:** its step text has no F13 line today (only §8.4 lists P4.1). Add to its Playtest: "F13: a replay of a new game with a rest, from each seat: no fallback warning, no new console error; `[FA missing element]` warnings recorded", and add F13 to its Repros.
-  - **P7.3:** "the replay check (F13, as in P1.3)".
+  - Add the log line, for sometime after the migration is completed (session 2's §4, in Jonathan's words): "Hmm, it appears that's a gap in the intended log effect. The log line "IndianaScones0 adds a Gear token to Irene's Arete" should be "Chopped Bolts: IndianaScones0 adds a Gear token to Irene's Arete", and "Chopped Bolts" should be injected in the same way as other climbing card names. This can be added as a step much later in the process. TODO.md for sometime after the migration is completed." Where it is built: "Findings (stop A2)", item 5.
+  - Add, one entry each (Jonathan's decision 4, stop A2 reply): Bomber Anchor's draw in the holder's own replay, and trade in the trader's own replay. Both are display-only: the Portaledge is opened only by the click, so the draw gives `[FA animation fallback]` warnings; in the trader's replay, the traded cards also stay in hand.
+- **`MIGRATION_PLAN.md`, F13's repeats** (P1.3, P2.2, P2.6, P3.5, P4.1, P7.3). Jonathan accepted the shape proposed at stop A (item 8); the final wording comes in the docs diff.
+  - **"From each seat" can stay:** Studio offered a replay from each seat in trial 1 [S] (item 8 of his stop A reply).
+  - **They name the expected `[FA animation fallback]` warnings** in that seat's own replay: Bomber Anchor's draw in the holder's, trade in the trader's (his decision 4).
+  - The shape proposed at stop A:
+    - **P1.3 Repros:** "F13 re-checked (D9): the replay of a new game created after the deploy, with a rest, from each seat, runs to the end with no `[FA animation fallback]` warning and no new console error. `[FA missing element]` warnings are expected in a replay (the replay fix, `<hash>`); record which fired."
+    - **P2.2 and P2.6:** "P2.2 and P2.6 replay F13 as in P1.3 (a new game with a rest, from each seat, to the end)."
+    - **P3.5:** Playtest: "A replay of a new game through at least a full round, from each seat (F13), as in P1.3." Also proposed: a line saying that the recreated log hook (U13) keeps the deferral of pitch tooltips.
+    - **P4.1:** its step text has no F13 line today (only §8.4 lists P4.1). Add to its Playtest: "F13: a replay of a new game with a rest, from each seat: no fallback warning, no new console error; `[FA missing element]` warnings recorded", and add F13 to its Repros.
+    - **P7.3:** "the replay check (F13, as in P1.3)".
   - **Optional, his call:** a pointer from P1.2's 3g result line to the fix commit, and §8.1's F13 row reworded the same way.
-- **`DECISIONS.md`:** one entry recording decisions 2 and 3 of §4 (the `[FA missing element]` console warning, and the deferred pitch tooltip in the log hook), with their reasoning, since later steps rebuild that code (P3.5, P4). I propose the wording at the docs stop.
+  - **Propose (only), at the docs stop:** whether P4's or P5's scope should point to the `UX_CHANGES.md` entry below.
+- **`DECISIONS.md`:** one entry recording decisions 2 and 3 of session 1's §4 (the `[FA missing element]` console warning, and the deferred pitch tooltip in the log hook), with their reasoning, since later steps rebuild that code (P3.5, P4). I propose the wording at the docs stop.
+- **`UX_CHANGES.md`** (the exception, extended in Jonathan's stop B2 reply): one entry, with the next free UX id, checked against the file. I propose the wording at the docs stop. It records:
+  - the rule, decided by Jonathan: in live play and in replays, only a click inside `#FirstAscent_table_display`, on the popup itself or on `#generalactions` closes a popup;
+  - that this fix implements it in replays only (change 2). Live play is unchanged for now: its half is a UX change (a `ux:` commit under §10 of the plan, not part of this `fix:` commit);
+  - where the live half can land: the plan puts UX changes in P8, and the P4/P5 rebuild of the click-outside listener can implement it instead.
+- **The `#FirstAscent_table_display` note** (Jonathan's decision 2, stop A2 reply; extended in his stop B2 reply): change 2, and now the UX rule too, depend on `#FirstAscent_table_display` (tpl:14), which P6 may change when it builds the layout in JS and removes the `.tpl`.
+- **The in-game replay** (Jonathan's decision 3): record that an in-game "replay from this move" gets the exemption during a live game, and that no step covers it.
 - **Proposed at the docs stop, not made:**
-  - For `BGA_PITFALLS.md`: Jonathan's two candidates (a replay's page holds the whole game's log from the start, so a document-wide query reaches future log entries; in a production replay the game ran in a frame other than the top one). Two of mine: "a replay never clicks"; "debug functions that change state without a notification make a replay diverge".
-  - For `FREEZE_INVESTIGATION.md` (the prompt's §6 example): the production replay as S6 evidence. A throw in `addTooltipsToLog`, inside the `addToLog` hook, most likely ended that dispatch before the handler ran: an inference from the character not appearing on the board (seen on production). "Next move" still advanced (seen on production). `FREEZE_INVESTIGATION.md:682` calls the effect on dispatch "unverified (S6)".
+  - For `BGA_PITFALLS.md`: Jonathan's two candidates (a replay's page holds the whole game's log from the start, so a document-wide query reaches future log entries; in a production replay the game ran in a frame other than the top one). Trial 1 saw the second on Studio too: the replay's console needed frame.html, while the live tabs answered on top [S]. Two of mine: "a replay never clicks"; "debug functions that change state without a notification make a replay diverge".
+  - For `FREEZE_INVESTIGATION.md` (session 1's prompt §6 example): the production replay as S6 evidence. A throw in `addTooltipsToLog`, inside the `addToLog` hook, most likely ended that dispatch before the handler ran: an inference from the character not appearing on the board (seen on production). "Next move" still advanced (seen on production). `FREEZE_INVESTIGATION.md:682` calls the effect on dispatch "unverified (S6)".
 - **Then:** `git diff > "D:\Documents\BGA Studio\replay-fix-docs.diff"`, with its line count and `--stat`. Jonathan reviews it. On "commit docs": one `docs:` commit, staged by explicit path. On "push": a normal push.
 
 **Go-aheads, quoted in full** (a record of a go-ahead isn't a grant)
+
+Session 1's go-aheads:
 
 From the session prompt (2026-11-03), the rollover rule:
 
@@ -417,51 +816,184 @@ His review of `replay-fix-wip-docs.diff` (2026-11-04 at 13:34):
 >
 > With the v2 report, show the docs: commit message as text. The one you proposed is fine: "docs: the replay fix (F13) in progress (fix applied, not committed; rollover checkpoint)". The commit stages misc/docs/progress.md alone, by explicit path; firstascent.js and modules/utils.js stay unstaged.
 
+From his reply to session 1's v2 docs diff (2026-11-04), item 1, as session 2's prompt quotes it:
+
+> 1. The two other line-shift gaps (old firstascent.js 8954–8955 and 10649–10650): don't add them now. The closing docs record all three ranges in the final entry.
+
+Session 2's go-aheads:
+
+Session 2's prompt, the rollover rule (§9):
+
+> - Rollover: if the session is auto-compacted (including while idle), roll over at the next checkpoint. Write the updated entry as in §8, from the transcript, not the summary, and stop; I commit it as a docs: commit.
+
+Session 2's prompt, §2 (the exception, restated). Its first paragraph, and the extension; its other paragraphs re-quote session 1's go-aheads, quoted in full above:
+
+> ## 2. Scope: the exception, restated
+> A record of a go-ahead isn't a grant; this section is the grant for this session.
+>
+> As amended by items 5 and 6 of my reply to stop A (quoted in full below): misc/docs/DECISIONS.md for one entry, and the reason in my words, "Garrett and I do not tend to replay games".
+>
+> Extended today (2026-11-05), my decision:
+> - Stop A2 (§6): a read-only investigation, then a revised proposal as a new diff, covering the new throw and whatever §4 sends to it.
+> - After the design discussion's review and my "apply": editing firstascent.js and modules/utils.js, only for the changes in the proposal I approve.
+> - At the end of this session: one in-progress docs: commit of misc/docs/progress.md (like c3cb6cd) after my "commit docs", and a normal push after my "push". It is separate from the closing docs: commit.
+> - Not in this session: the fix: commit and the closing docs (TODO.md, MIGRATION_PLAN.md, DECISIONS.md, the final progress.md entry). They come after the retest, in a new session.
+> - Everything else in the quote above still holds: no other code file, no new debug function, no deploy (I deploy to Studio), nothing to the BGA Production site.
+
+Session 2's prompt, §4:
+
+> ## 4. My decisions (2026-11-05)
+> A, C, D and the missing-element point accept the design discussion's recommendations, quoted.
+>
+> A. The new throw:
+> > The exception covers only the reviewed changes. I recommend extending it for the next session to cover three things: a read-only investigation stop; a revised proposal as a new diff; applying it after my review and your go-ahead. The survey should cover all nine guarded sites, not just this one: what each skipped step would have produced, and whether anything later uses it. riskShowAssets and riskReturnAssets never ran in any replay, so only reading covers them.
+>
+> The missing-element point (part of A's scope):
+> > The animation helper already turns a hidden element into a warning plus a fallback, but a missing element crashes it and hangs the replay. My recommendation: ask the stop to weigh a missing-element case in that existing fallback against a guard at this one site, and report the trade-off. A general fallback would stop this kind of hang anywhere, but it could also mask a live-play bug behind a console warning. No change would be made without a proposal and your go-ahead.
+>
+> B. The [FA animation fallback] warnings: stop A2 finds what opens and closes #portaledge in a replay, and whether a click on the replay controls reaches the click-outside handler (and what else that handler closes). If that explains the warnings, the revised proposal includes my suggestion: the replay controls are exempt from click-outside. I approve or reject it at stop A2. If it doesn't explain all of them, report which ones it leaves, and propose nothing for those.
+>
+> C. Commit timing:
+> > I recommend keeping the fix uncommitted until the revised fix passes, then making one fix: commit, as the exception says. replay-fix.diff stays the backup of the reviewed part.
+>
+> D. The retest:
+> > A revised fix needs a new table created after the deploy, so the list runs again as v3. I recommend the whole list, since the replay needs a whole game anyway, plus whatever the investigation targets. Claude Code's stop B can propose it.
+> Add these to v3 in the same style, marked "(added)":
+> - in 1a and 1o: note the console's context dropdown and its "Selected context only" setting;
+> - in 1o: when the second window was opened, and what happened while it was open;
+> - if a debug function can force a Risk it to retreat, a step that does, so notif_riskReturnAssets runs in a replay;
+> - a step reaching each code path the revised fix changes.
+>
+> For the closing docs (not this session), a TODO.md entry, in my words:
+> > Hmm, it appears that's a gap in the intended log effect. The log line "IndianaScones0 adds a Gear token to Irene's Arete" should be "Chopped Bolts: IndianaScones0 adds a Gear token to Irene's Arete", and "Chopped Bolts" should be injected in the same way as other climbing card names. This can be added as a step much later in the process. TODO.md for sometime after the migration is completed.
+
+His reply to stop A2 (2026-11-06 at 11:14):
+
+> Stop A2 reviewed. Record this message in the entry, quoted in full.
+>
+> The design discussion's checks:
+> - replay-fix-2-proposal.diff as uploaded: 31 lines, 1,844 bytes, LF only, the same --stat.
+> - replay-fix-2-work\ (zipped and uploaded): a\ hashes to 984e873 and c5b4077, the post-image of replay-fix.diff. The proposal passes git apply --check on a\, and the result is byte-identical to b\ (aeaf737, 8a0a442). Both patched files parse with node --check (node v22).
+> - From those, the working copies after "apply" should be 744,236 and 229,085 bytes, with 13,567 and 4,986 CRs.
+>
+> My checks on Studio, in table 998675's replay, with frame.html selected in the console's context dropdown:
+> - (typeof g_archive_mode !== 'undefined' && g_archive_mode) || typeof g_replayFrom !== 'undefined' gave true.
+> - !!document.getElementById('FirstAscent_table_display') gave true.
+> - Your query for "Next move" gave an empty array. It looks only at elements without child elements whose whole text is "Next move".
+> - After Inspect on the "Next move" button, document.getElementById('FirstAscent_table_display').contains($0) gave false. The button's chain of ids is: IMG | archive_next < archivecontrol_editmode < archivecontrol < current_header_infos_wrap < topbar_content < topbar < overall-content < ebd-body.
+> The live half of the replay test (false in a live game) isn't checked yet; v3 checks it (below).
+>
+> My decisions:
+> 1. Change 1 is approved, including its live-play change: a second window of the adder's own player retracts the card and warns, instead of stopping with the TypeError.
+> 2. Change 2: the broad version, as proposed. The closing docs record that it depends on #FirstAscent_table_display (tpl:14), which P6 may change when it builds the layout in JS and removes the .tpl.
+> 3. An in-game "replay from this move" sets g_replayFrom, so it gets the same exemption during a live game. Accepted; record that no step covers it.
+> 4. Bomber Anchor's draw in the holder's own replay, and trade in the trader's own replay, are display-only (decision 5 of the first session's §4). For the closing docs: a TODO.md entry for each, and F13's repeats name them as expected [FA animation fallback] warnings in that seat's own replay.
+> 5. No general missing-element fallback in animationPromise, as your §3 recommends.
+>
+> Go ahead: apply replay-fix-2-proposal.diff as it is, on one condition. Before applying, cite where #climbing_slot is created and show that nothing removes it during a game, so change 1's new check can't throw on the adder's client in live play. Also confirm what the slot holds when the Cool-Headed Crimper's path (Game.php:5111–5113) reaches the handler. If either isn't so, stop and report before applying anything. Include the citations in the stop B2 report.
+>
+> Then stop B2 as in the prompt's §7. Add these to list v3, in the same style, marked "(added)":
+> - before 1a, in each live tab's console: the replay test above gives false [D]. If it gives true, I stop before playing and tell you;
+> - in 1n, in each replay with frame.html selected: the same test gives true [S, table 998675];
+> - in 1n: no [FA animation fallback] warning in resting or selectPortaledge [C]; Bomber Anchor's draw warns in the holder's replay (five warnings in trial 1) [C]; at the add-token step in the adder's replay, "[FA missing element] notif_confirmAddTokenToPitch | no card in #climbing_discard_straightened | card retracted from #climbing_slot", and the replay goes on [C];
+> - in 1n: whether any popup stays open in the way during a replay, for example the climbing card or the Crimper's display. BGA's UX guidelines (F.1) ask for no blocking popups in replays.
+
+His reply to stop B2 (2026-11-06 at 12:38):
+
+> Stop B2 reviewed. Record this message in the entry, quoted in full.
+>
+> The design discussion's checks:
+> - replay-fix-2.diff as uploaded: 178 lines, 10,922 bytes, LF only, the same --stat. Reversed from its copy of b\, it gives 5dc9ec8 and a97e5e7, the pre-images in its index lines, so it takes HEAD to exactly b\.
+> - Your line-shift tables match the shifts it recomputed from the diff's hunks, row by row, including the three ranges, and the trial's stack lines under the new numbering (utils:2934 and 2939, js:10711).
+> - Your sizes and CR counts match its prediction (744,236 and 229,085 bytes; 13,567 and 4,986 CRs).
+> - In its copy of b\: change 1's check is the same read as js:2298, 4928, 9316, 9335, 9360, 10462, 10503 and 10635, which already run in live play. The click-outside listener (utils:1797–1810) and the hide branch (js:4374–4381) read as you describe.
+>
+> Your answers to my condition are accepted.
+>
+> The popup point (bga_ux_guidelines.md, A.4 and F.1) is decided. In my words:
+> > I'd like to exclude clicks in the log, player panels, and top bar from closing popups in both live play and replay.
+> Asked whether that means only those three regions or everything outside the game's area:
+> > I agree with scoping popup-closing clicks to `#FirstAscent_table_display`.
+> Asked where the live-play half goes, I accepted the design discussion's recommendation (keep change 2 replay-only, as reviewed, and record the live rule as a decided UX change in misc/docs/UX_CHANGES.md):
+> > Your recommendation for where the live-play half goes is fine.
+> Asked how to record it:
+> > Decided by me is fine.
+>
+> So the rule, in live play and in replays: only a click inside #FirstAscent_table_display, on the popup itself or on #generalactions closes a popup. Change 2 already implements it in replays, so the code stays as applied. Live play is unchanged for now: its half is a UX change (a ux: commit under §10 of the plan, not part of this fix: commit), so it is recorded, not made.
+> - I extend the exception to misc/docs/UX_CHANGES.md, for one entry in the closing docs. The entry records the rule as decided by me, and that this fix implements it in replays only. It also records where the live half can land: the plan puts UX changes in P8, and the P4/P5 rebuild of the click-outside listener can implement it instead. Use the next free UX id, checked against the file, and propose the wording at the docs stop.
+> - At the docs stop, also propose (only) whether P4's or P5's scope in MIGRATION_PLAN.md should point to that entry.
+> - The closing docs' note that change 2 depends on #FirstAscent_table_display (tpl:14), which P6 may change, now covers the UX rule too.
+> Add these three items to the entry's closing-docs checklist.
+>
+> Playtest list v3 is accepted with three corrections. Make them wherever the entry records the list; no need to reissue it:
+> 1. 1g's added step: "click once on the board, outside the Portaledge" becomes "click once on the status text in the page title bar, outside the game's area". The expected result is unchanged: the Portaledge hides and the red button appears, as before the fix. This is the live check that change 2 needs the replay test, so live play keeps today's behavior. Confirm by reading that the title bar's text is outside #FirstAscent_table_display, and adjust the step if it isn't.
+> 2. 1n's added click step becomes: once, in a resting or selectPortaledge state, click once on the status text in the page title bar: the Portaledge stays open [C]. Then click once on an empty part of the board (not a pitch, card, token or button): it hides, as in live play [C]. Re-show it with the red button before the next "Next move". If the red button doesn't bring it back in a replay, the next draw's [FA animation fallback] warnings come from this test; record them as such.
+> 3. In 1k's added retreat setup: a retreat costs the risker that climb, so 1l's Headwall climbs may come a round later.
+>
+> I'll deploy firstascent.js and modules/utils.js to Studio and play from v3 with these corrections. Go ahead with §8 of the prompt: the updated in-progress entry, then the docs diff, then stop.
+
 **Files outside git**
 - **In `D:\Documents\BGA Studio\`:**
   - `replay-fix-proposal.diff` (v1; 63 lines, 3,762 bytes): P1.2's proposal. Superseded by v2; not applied.
   - `replay-fix-proposal-v2.diff` (155 lines, 9,320 bytes, LF): the revised proposal, reviewed at stop A and approved with one comment change.
   - `replay-fix-v2-work\`: `a\` holds HEAD's two files as LF blobs; `b\` holds them with v2 applied, so it has v2's comment, not the approved one.
   - `replay-fix.diff` (155 lines, 9,320 bytes, LF): the applied fix. It equals the working-tree diff of the two files (`cmp`, 2026-11-04), and the design discussion checked it at stop B.
-  - `replay-fix-wip-docs.diff` (438 lines, 50,288 bytes, LF): this entry as first written, for review. Approved with six corrections (his review, quoted under "Go-aheads"). **Superseded by `replay-fix-wip-docs-v2.diff`.**
-  - `replay-fix-wip-docs-v2.diff`: this entry after those corrections, for review. Its line count, bytes and `--stat` are in my report to Jonathan, not here (they would change this file).
+  - `replay-fix-wip-docs.diff` (438 lines, 50,288 bytes, LF): the 2026-11-04 entry as first written, for review. Approved with six corrections (his review, quoted under "Go-aheads"). **Superseded by `replay-fix-wip-docs-v2.diff`.**
+  - `replay-fix-wip-docs-v2.diff`: the 2026-11-04 entry after those corrections, for review. Its line count, bytes and `--stat` are in my report to Jonathan, not here (they would change this file).
   - Unchanged from earlier sessions: the P1.2 and P1.1 diffs. `firstascent-overrides\` is untouched.
-- **This session's scratchpad,** `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\f45ad816-dbbf-4627-9a29-d25d34a8715d\scratchpad\`, outside the repo:
+  - `replay-trial-1\`: trial 1's consoles, from Jonathan (sizes under "Trial 1").
+  - `replay-fix-2-work\`: `a\` holds the working copies after the first change, as LF (`984e873`, `c5b4077`); `b\` holds them with the second proposal applied (`aeaf737`, `8a0a442`).
+  - `replay-fix-2-proposal.diff` (31 lines, 1,844 bytes, LF): the second proposal, reviewed at stop A2 and approved as it is.
+  - `replay-fix-2.diff` (178 lines, 10,922 bytes, LF): the whole fix against HEAD, both changes. It equals the working-tree diff of the two files (`cmp`, 2026-11-06), and the design discussion checked it at stop B2.
+  - `replay-fix-2-wip-docs.diff`: this entry, for review. Its line count, bytes and `--stat` are in my report to Jonathan, not here (they would change this file).
+- **Session 1's scratchpad,** `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\f45ad816-dbbf-4627-9a29-d25d34a8715d\scratchpad\`, outside the repo:
   - the survey: `methods.php`, `clickstate.php`, `js_methods.txt`, `utils_methods.txt`, `js_branches.txt`, `candidates.txt`, `candidates2.txt`, `candidates3.txt`, `reach.txt`, `click_creates.txt`;
   - the edits: `replay_fix_edits.php` (v2) and `replay_fix_edits_approved.php` (the one applied), plus `cur_fix.diff` (the working-tree diff used for the `cmp`);
-  - this entry: `entry_template.md` and `build_entry.php`, which inserts it and takes the quotes verbatim from the transcript dumps;
+  - the 2026-11-04 entry: `entry_template.md` and `build_entry.php`, which inserts it and takes the quotes verbatim from the transcript dumps;
   - the transcript readers: `tx_index.php` and `tx_dump.php`. Their output in `tx\` is `m3.md` (the session prompt and the production result), `m751.md` (stop A), `m755.md` (the stop A reply), `m831.md` (stop B) and `m835.md` (the stop B reply). `stopA_reply.md` is a copy of the stop A reply.
-- **The transcript,** outside the repo: `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\f45ad816-dbbf-4627-9a29-d25d34a8715d.jsonl`. The session prompt is its first message.
+- **Session 1's transcript,** outside the repo: `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\f45ad816-dbbf-4627-9a29-d25d34a8715d.jsonl`. The session prompt is its first message.
+- **Session 2's scratchpad,** `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\0b71df26-2e89-450a-8f9e-5b8655db587a\scratchpad\`, outside the repo:
+  - the survey: `js_methods.txt`, `utils_methods.txt`, `js_branches.txt` and `click_sets.txt` (made with session 1's `methods.php`), and `cards.php` (climbing card names from `material.inc.php`);
+  - the second change: `replay_fix_2_edits.php` (the edits; its `crlf` mode is the one applied to the working copies), `p1.diff` and `p2.diff` (the proposal's two halves), `applytest\` (the `git apply` check on a copy of `a\`), `lfcheck\` (the working copies, LF-normalized, for the `cmp` with `b\`);
+  - the `cmp`s with `replay-fix.diff` at session 2's start and at stop A2: `cur_fix.diff` and `cur_fix_end.diff`;
+  - this entry: `entry2_template.md` and `build_entry2.php`, which inserts it and takes the quotes verbatim from the transcript and the old entry; `tx\` holds session 2's prompt (`prompt.md`) and Jonathan's stop A2 and stop B2 replies.
+- **Session 2's transcript,** outside the repo: `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\0b71df26-2e89-450a-8f9e-5b8655db587a.jsonl`. The session prompt is its first message.
 
 **Compaction**
-- The session was auto-compacted once, at 2026-11-04 00:22:13, when Jonathan's stop B reply arrived. The transcript's `compact_boundary` record (line 841) says: `trigger: auto`, `precomputed: true`, 407,762 tokens before, 28,487 after. The summary was written while the session was idle.
-- Stop B had been delivered at 23:10, before the compaction. So the rollover checkpoint is my answer to his stop B questions, and this entry.
+- Session 1 was auto-compacted once, at 2026-11-04 00:22:13, when Jonathan's stop B reply arrived. The transcript's `compact_boundary` record (line 841) says: `trigger: auto`, `precomputed: true`, 407,762 tokens before, 28,487 after. The summary was written while the session was idle.
+- Stop B had been delivered at 23:10, before the compaction. So the rollover checkpoint is my answer to his stop B questions, and the 2026-11-04 entry.
 - The summary got one thing wrong: it said stop B's message hadn't been written yet. The transcript shows it was delivered.
+- Session 2 had not been compacted when this entry was written (its transcript has no `compact_boundary` record).
 
 **Pending decisions** (only what is still open)
-- **The playtest results** (Jonathan's), including:
-  - whether Studio offers a replay from each seat;
-  - whose id each board warning names;
-  - whether the first picker's own objectives appear face up (private notifications in the archive).
-- **The `fix:` commit:** the message is shown after his go-ahead; then "commit the fix".
-- **F13's final wording:** whether "from each seat" can stay (after the trial).
+- **The v3 results** (Jonathan's), including:
+  - the replay test in the live tabs (expected `false`) and in each replay (expected `true`);
+  - whether any popup stays open in the way during a replay (F.1);
+  - 1g's corrected step, which also shows whether the status text counts as outside `#generalactions`;
+  - whether 1k retreated, and 1o if run.
+- **The `fix:` commit:** one commit for both changes (his decision C). Its message is shown after his go-ahead, after the retest; then "commit the fix".
+- **F13's final wording:** in the docs diff ("from each seat" stays; the expected warnings of decision 4 are named).
 - **To propose at the docs stop:**
   - the `DECISIONS.md` wording;
+  - the `UX_CHANGES.md` entry (its id and wording);
+  - whether P4's or P5's scope in `MIGRATION_PLAN.md` should point to it;
   - the `BGA_PITFALLS.md` and `FREEZE_INVESTIGATION.md` proposals;
   - the optional `MIGRATION_PLAN.md` pointers.
+- **A question for Jonathan, raised here:** `PROCEDURES.md`'s "Decisions" section asks that decisions relayed from the design discussions go into `DECISIONS.md` in the same session. Session 2 received some (stop A2 reply: decisions 1–5; stop B2 reply: the popup rule), but the exception covers only one `DECISIONS.md` entry (decisions 2 and 3 of session 1's §4), and session 2's §2 puts `DECISIONS.md` in the closing docs. Whether that entry, or another, also records session 2's decisions (for example decision 5, no general missing-element fallback, which P4.1's design touches) is his call.
 - **Carried over from the P1.2 entry, still open:** the three items under its "Pending decisions": the fix step for the redraw loop, the fix step for the zombie path in `chooseSummitBetaToken`, and retiring `firstascent-overrides\`.
 
 **Next**
-1. Jonathan reviews `replay-fix-wip-docs-v2.diff` and commits this entry as a `docs:` commit, staging only `misc/docs/progress.md`.
-2. A new session continues the replay fix from this entry:
+1. Jonathan reviews `replay-fix-2-wip-docs.diff` and, on "commit docs", this entry is committed as a `docs:` commit, staging only `misc/docs/progress.md`; on "push", a normal push.
+2. Jonathan deploys both files to Studio and plays v3 on a new table.
+3. A new session continues the replay fix from this entry:
    - **The start check:**
-     - `git status` and `git log --oneline -3`: HEAD is that commit on `46b6d81`, and only `firstascent.js` and `modules/utils.js` are modified;
-     - `git diff -- firstascent.js modules/utils.js` is byte-identical to `replay-fix.diff`;
+     - `git status` and `git log --oneline -3`: HEAD is this entry's commit on `c3cb6cd`, and only `firstascent.js` and `modules/utils.js` are modified;
+     - `git diff -- firstascent.js modules/utils.js` is byte-identical to `replay-fix-2.diff`;
      - the byte counts above.
-   - Jonathan's playtest results (1a–1o and the count query), recorded at his level.
+   - Jonathan's v3 results, recorded at his level.
    - After his go-ahead, the `fix:` commit message as text. On "commit the fix": `firstascent.js` and `modules/utils.js`, staged by explicit path.
    - The closing docs (above). On "commit docs": one `docs:` commit. On "push": a normal push.
-3. Then P1.3.
+4. Then P1.3.
 
 ## 2026-11-02 (P1.2: done)
 
