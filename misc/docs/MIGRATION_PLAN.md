@@ -520,8 +520,8 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
     - **U1:** avoided as planned, not tested with both files present: the root file was deleted on Studio (Jonathan checked Studio's file list). **U2:** every action in the sample worked. **U3:** the board rendered (1d, 2a). §1.2, §1.3 and §1.7 have the results.
     - **1c:** Studio's debug menu lists the 14 functions without the `debug_` prefix (for example `stackClimbingDeck`); all 14 are present and none is extra. 1c's expected text below assumed the prefix. It is left as written, as the record of what was predicted.
     - **3c:** the refusal was as expected (no reload, nothing changed). After the expected console error, Studio logged a second one: `Uncaught (in promise) {message: '', args: null}` at `triggerDebug` in `ly_studio.js`. It comes from Studio's own code.
-    - **3g (F13): not passed.** The replay of the finished game stops at the first "Next move" with a `TypeError` in `notif_confirmCharacter` (`firstascent.js:7579`). A replay of a production game fails the same way, so the failure predates P1.2; P1.2 changed no client file. The fix is pending, as its own `fix:` commit in its own session, after P1.2's closing docs and before P1.3 (`TODO.md`).
-    - **Not run:** 1e's count query (the asset total, expected 124). It is unchecked and will run on the replay fix session's new game.
+    - **3g (F13): not passed.** The replay of the finished game stops at the first "Next move" with a `TypeError` in `notif_confirmCharacter` (`firstascent.js:7579`). A replay of a production game fails the same way, so the failure predates P1.2; P1.2 changed no client file. The fix was made as its own `fix:` commit, `4e82116` (the replay fix, F13), after Jonathan's second Studio trial passed (`progress.md`, 2026-11-09).
+    - **Not run:** 1e's count query (the asset total, expected 124). It ran later, as 1b of both replay-fix trials: "as expected" both times (expected n = 124; no number was reported).
     - **Not run as separate steps:** the Studio root check and 1a's F5 and log check. Setup and every page load read all seven material properties with no warning.
     - **Reviewed in code only:** the sites that never fire on Studio (see "Sites reviewed in code only" below).
 - **Scope:**
@@ -643,7 +643,8 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - a "all players gain from the Portaledge" climbing card (`portaledgeAll`);
   - risk it;
   - bail.
-- **Repros:** F13 re-checked (D9): a replay that includes a rest still shows no fallback warnings.
+- **Repros:** F13 re-checked (D9): the replay of a new game created after the deploy, with a rest, from each seat, runs to the end with no new console error and no `[FA animation fallback]` warning other than the expected ones (below). `[FA missing element]` warnings are expected in a replay (the replay fix, `4e82116`); record which fired.
+  - **Expected `[FA animation fallback]` warnings** (display-only; `TODO.md`): Bomber Anchor's draw in the holder's own replay (five in the fix's second Studio trial), and trade in the trader's own replay.
 - **Studio after:** playable; fresh table.
 
 **P1.4 Notification, statistics and score APIs** (L, mechanical)
@@ -727,7 +728,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 | P2.7 | Remove `states.inc.php`; remove `zombieTurn`; remove `Game.php`'s fallback `act*`/`arg*`/`st*` methods | Checks the fallback part of U6 | S |
 
 **Repros:**
-- P2.2 and P2.6 replay F13 (a replay that includes a rest).
+- P2.2 and P2.6 replay F13 as in P1.3 (a new game with a rest, from each seat, to the end).
 - `RULES_CHECK.md` is already seeded with Jonathan's answers to Q-R1–Q-R8 (D11). The P2 classes check their states against it: P2.2 confirms that R-2 (the Rerack skip after a bail) is fixed in the ported code, P2.3 that R-1 (bail) is unchanged, and P2.6 covers the Follow Phase items (R-3 New Rubber, R-7, R-8).
 
 #### Phase P3: client switch to `modules/js`
@@ -800,6 +801,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - `git mv modules/utils.js modules/js/Utils.js` → `export class Utils`.
   - Imports: `importEsmLib('bga-autofit', '1.x')` [BgaAutofit doc:22]. Counter needs no import [Counter doc:9].
   - The `dojo/aspect` hook and the log-formatting hook are recreated (U12, U13).
+  - The recreated log hook (U13) keeps the deferral of pitch tooltips whose pitch isn't on the page yet (the replay fix, `4e82116`; `DECISIONS.md`, "Handlers that find an element missing").
 - **Files:** `firstascent.js` → `modules/js/Game.js`; `modules/utils.js` → `modules/js/Utils.js`; one small module in a subfolder for the U12 check.
 - **Done when:**
   - the game plays end to end;
@@ -811,7 +813,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - S-smoke, as a 2-player and a 4-player game.
   - The log with card, pitch, token and objective names.
   - A refresh in each state group.
-  - A replay of a full round (F13).
+  - A replay of a new game through at least a full round, from each seat (F13), with P1.3's criteria.
 - **Repros:** F10 (log formatting), F13. Checks U10–U13.
 - **Studio after:** playable. Delete on Studio: `firstascent.js`, `modules/utils.js`.
 
@@ -824,8 +826,8 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - Harness `misc/tests/animations.html`: the 22 cases from 2026-10-14 plus the new ones (§4.2).
 - **Files:** `modules/js/core/Animations.js` (new), `modules/js/Utils.js`, `misc/tests/animations.html` (new).
 - **Done when:** the harness passes every case, and the playtest shows exactly one warning per forced fallback and none in normal play.
-- **Playtest:** F1, F2, F6, F7, F8 (each continues, with exactly one warning), a normal full round (no warnings), a card-49 refill (T20; warnings compared with the legacy counts).
-- **Repros:** F1, F2, F6, F7, F8; z-index leaks behind T5 and T12 (re-check).
+- **Playtest:** F1, F2, F6, F7, F8 (each continues, with exactly one warning), a normal full round (no warnings), a card-49 refill (T20; warnings compared with the legacy counts); F13: a replay of a new game with a rest, from each seat, as in P1.3 (no new console error, only the expected fallback warnings; `[FA missing element]` warnings recorded).
+- **Repros:** F1, F2, F6, F7, F8, F13; z-index leaks behind T5 and T12 (re-check).
 - **Studio after:** playable.
 
 **P4.2 Notifications module** (M) — design in §4.3
@@ -916,7 +918,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 
 | Slice | (a) Server | (b) Payloads | (c) Client | (d) Fixes | Playtest focus |
 |---|---|---|---|---|---|
-| **P5.1** Status bar and popups (cross-cutting) | The re-entry check (§4.1.1, U18), before any slice relies on re-entry | — | `StatusBar` (titles with an owner, `statusBar` buttons, counters and messages, `restore()`); `OutsideClick` (one manager per popup instead of the single slot set from 22 sites, `utils.js:setupOutsideClickListener ~1759`); JS state-class scaffolding (checks U14); the `.msg` observer (`js ~1751`) goes. The review's Action Bar point (round information) is UX-2 in the register, implemented in P8 | T6 (title-bar colors in dark mode) | Every state's title and buttons; no-transition flows; every popup still closes on an outside click as before; the re-entry check |
+| **P5.1** Status bar and popups (cross-cutting) | The re-entry check (§4.1.1, U18), before any slice relies on re-entry | — | `StatusBar` (titles with an owner, `statusBar` buttons, counters and messages, `restore()`); `OutsideClick` (one manager per popup instead of the single slot set from 22 sites, `utils.js:setupOutsideClickListener ~1759`); UX-6 (decided: a popup closes only on a click inside the game's area; the replay half is in `4e82116`, the live half isn't scheduled: P8, or here if Jonathan chooses); JS state-class scaffolding (checks U14); the `.msg` observer (`js ~1751`) goes. The review's Action Bar point (round information) is UX-2 in the register, implemented in P8 | T6 (title-bar colors in dark mode) | Every state's title and buttons; no-transition flows; every popup still closes on an outside click as before (UX-6's live half aside); the re-entry check |
 | **P5.2** Setup, characters, player panels | `Setup` service (setup body, `initSharedObjectives`); `Players` model; rules p.4–5; Q-R6 (setup path) | `getAllDatas` builder without side effects (B1); `player_order` computed (`php:stNextRound ~6506`) | `Characters`, `PlayerPanels`; JS `CharacterSelection` | T29, Q-R6 (the Spread card goes to the discard pile at setup) | 2–5 players, both boards; spectator; zombie during selection; F5 |
 | **P5.3** Drawing (hand, Spread, deck) | `Drawing` service (`confirmAssets ~1007`, Spread refill, 4 of a kind), `Cards` model, `nextDraw`/`nextRound` logic (`php:stNextDraw ~5604`); rules p.5, p.11; Q-R2 (fixed in P0.2; regression check); Q-R6 (during-play path) | `confirmOpponentAssets` + `confirmYourAssets` → one `notify->all` with `_private`; post-state: hand, counts, Spread, discard top | `Hand`, `Spread`/deck; JS `DrawAssets` | T5 if still open; Q-R6 check: the replaced Spread card lands on top of the discard pile unless a card was discarded more recently | Rack Up with 2–5 players; Rerack after a failed climb (draws 1), a rest and a bail; Simul Climb; deck reshuffle |
 | **P5.4** Portaledge (rest, trade, card draws, refills) | `Portaledge` service (`confirmPortaledge ~4008`, `drawFromPortaledge utils.php ~590`, `confirmTrade ~2029`, `rest ~2105`, `stPortaledgeAll ~5803`, `argResting ~5481`, `argSelectPortaledge ~5359`); rules p.7, 8, 11; Q-R5 (check whether the code reshuffles the Asset deck after the top-up; if it doesn't, it matters digitally only if a player can know the deck order) | `confirmPortaledge*`, `automaticPortaledge*`, `confirmTrade*` → `_private`; post-state: Portaledge counts and empty flags, Water/Psych, hand | `Portaledge` (popup, +/−, rest Water/Psych, refill and reshuffle animations, re-show before animating); JS `Resting`, `SelectPortaledge` | T19, T20, T21, T6 (resting numbers in dark mode) | F1, F2, F8: the Portaledge reappears and animates, no freeze, no warning; card 49; a refill from an empty stack |
@@ -928,7 +930,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 | **P5.10** Summit Beta II | `SummitBeta` service part 2 (`confirmBomberAnchor ~4805` with internal helpers split from the public sub-actions (B3); `confirmLuckyChalkbag ~4832`; `confirmRiskSummitBeta ~5066`; Jesus Piece; Spider Stick; New Rubber) | `bomberAnchorCleanup`; `riskSummitBeta` gets args carrying the die face, which re-entry needs (§4.1.1) | Bomber Anchor, Lucky Chalkbag, Jesus Piece, Borrowed Rack, Jumar, Extra Water, Guidebook flows (`js ~5639–6500`); JS `RiskSummitBeta` | T8, T11, T26 | F3, F5, F8; T26; each token in each state that allows it |
 | **P5.11** Follow Phase and Asset Boards | `FollowPhase` service (`stMatchingTechniques ~5841`, `stFlagPermanentAssets ~6206`, `confirmPermanentAssets ~4698`, `stGrantPermanentAssets ~6297`, `stFlipPlayedAssets ~6245`), `AssetBoards` model (`utils.php ~278–407, ~815–874`); rules p.10–11, p.15; Q-R3 (New Rubber's handling), Q-R7 and Q-R8 (traced and fixed in P0.2; regression check with `misc/tests/technique_matching.php`) | Board post-state in follow notifications | `AssetBoard`; JS `ChoosePermanentAssets` (multiactive: `onPlayerActivationChange`) | T3, T12 | Techniques with tokens and wilds (Sendy Jammer); New Rubber; Young Prodigy's 3/5 slots; several Permanent Asset tokens at once; mobile |
 | **P5.12** End game, objectives, scorecard | `EndGame`/`Scoring` service (`stPreGameEnd ~6529`, objective trackers); rules p.12–13 | `preGameEnd`; `getAllDatas` at game end | `Objectives` (trackers, opponents' objectives, scorecard) | T4 | Complete games with 2–5 players; each shared objective (`debug_setSharedObjectives`); a tie; F5 after the end; a replay (F13) |
-| **P5.13** Log and tooltips | `Log` helper (`formatLogTitles` and the other log helpers) | — | `Log` (`utils.js:logInject ~1295`, `addTooltipsToLog ~1256`, tooltip builders `~996–1179`) | F10 | Every log item type; player names containing `-`, and accents if Studio allows them (Q-T3; apostrophes can't occur in names); the replay log |
+| **P5.13** Log and tooltips | `Log` helper (`formatLogTitles` and the other log helpers) | — | `Log` (`utils.js:logInject ~1295`, `addTooltipsToLog ~1256`, tooltip builders `~996–1179`); the rebuilt log hook keeps the deferral of pitch tooltips whose pitch isn't on the page yet (`DECISIONS.md`, "Handlers that find an element missing") | F10 | Every log item type; player names containing `-`, and accents if Studio allows them (Q-T3; apostrophes can't occur in names); the replay log |
 
 **Sessions per slice (approx.):**
 
@@ -956,6 +958,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
   - The `.tpl` HTML (`tpl ~14–154`) and `view.php` logic move into `setup` via `this.bga.gameArea.getElement()` [Game.js doc:285–300].
   - `getAllDatas` provides shared-objective positions, tile coordinates, pitch order and the face-down Headwall.
   - Delete `.tpl` and `.view.php`.
+  - Keep an element with the id `#FirstAscent_table_display` (tpl:14), or point the replay fix's click-outside rule at its replacement: that rule (`utils.js:setupOutsideClickListener`, `4e82116`) and UX-6 name the game's area by that id (`UX_CHANGES.md`, UX-6).
 - **Files:** `modules/js/Game.js`, `modules/js/core/Templates.js`, `modules/php/View/StateView.php`, `firstascent_firstascent.tpl` and `firstascent.view.php` (both deleted).
 - **Done when:** visual parity on:
   - the desert and forest boards with 2–5 players;
@@ -980,7 +983,7 @@ Each P7 step leaves Studio playable. After P7.4, Studio holds the release candid
   - Studio's "Check project";
   - the zombie mode level (a pitfall in `BGA_PITFALLS.md`, to be confirmed against the BGA docs).
   - **Files:** `gameinfos.inc.php` → `gameinfos.jsonc`, `stats.json`. **Done when:** Studio reloads the configuration without errors, and "Check project" is clean.
-- **P7.3 Full regression:** R-full, Studio's minified-JS test (U15), the replay check, mobile, dark mode, zombies.
+- **P7.3 Full regression:** R-full, Studio's minified-JS test (U15), the replay check (F13, as in P1.3), mobile, dark mode, zombies.
   - **Files:** none, except fixes, which become their own `fix:` steps. **Done when:** R-full passes and every T and F item in §8.4 is closed or deferred by Jonathan.
 - **P7.4 Release preparation:**
   - Studio holds exactly the git file set: no stale legacy files, no local overrides file.
@@ -1629,7 +1632,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | F10 | S6: log formatting throws (names with `-` and, if Studio allows them, accents; unknown ids). Player names can't contain `'` (Q-T3) |
 | F11 | S7: concurrency (`onUndoSummitBeta` not awaited; card-49 double Portaledge; duplicate token chains; `retractClimbingCard`'s stale title) |
 | F12 | `shareEffect*` releases only for card 49 |
-| F13 | The replay check: a replay that includes a rest, with no fallback warnings |
+| F13 | The replay check: a replay of a new game with a rest, from each seat, to the end, with no new console error and no `[FA animation fallback]` warning other than the expected ones (P1.3). The replay fix is `4e82116` |
 
 ### 8.2 Tools
 - **Studio playtests** with one browser tab per player (the red arrow or `testuser` [Tools doc:21–24]) and a spectator tab.

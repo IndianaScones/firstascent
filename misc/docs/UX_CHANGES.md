@@ -75,6 +75,28 @@ UX-1 to UX-5 were moved here from `TODO.md` on 2026-10-21 (Q-P1). Moving them de
 - **Before and after:** to be written when decided.
 - **Playtest check:** to be written when decided.
 
+### UX-6 A popup closes only on a click inside the game's area
+- **Date:** 2026-11-09 (recorded); decided 2026-11-06.
+- **Source:** Jonathan, in the replay fix (F13): in a replay, the framework's "Next move" button hid the open Portaledge before the next move drew from it (19 of the 24 `[FA animation fallback]` warnings in trial 1). BGA's UX guidelines A.4 (`bga/current/bga_ux_guidelines.md:104–110`, popups) and F.1 (`:508–516`, "No blocking popups" in replays).
+- **Observation and proposal:** the click-outside listener (`utils.js:setupOutsideClickListener`) closes the open popup (the Portaledge, the climbing card, the Crimper's display and others) on any click anywhere on the page, except on the popup itself and on `#generalactions`. That includes the log, the player panels, the top bar, and in a replay the framework's replay controls.
+- **Decision:** Jonathan, 2026-11-06 (his stop B2 reply). In his words:
+  > I'd like to exclude clicks in the log, player panels, and top bar from closing popups in both live play and replay.
+
+  Asked whether that means only those three regions or everything outside the game's area:
+  > I agree with scoping popup-closing clicks to `#FirstAscent_table_display`.
+
+  Asked where the live-play half goes, he accepted the design discussion's recommendation (keep the fix's change replay-only, and record the live rule here): "Your recommendation for where the live-play half goes is fine." Asked how to record it: "Decided by me is fine."
+- **The rule, confirmed by Jonathan on 2026-11-09** (his review of the F13 docs diff; the wording is the design discussion's draft, which he confirmed):
+  > A click inside #FirstAscent_table_display closes an open popup, unless it's on the popup itself or on #generalactions. A click anywhere outside the game's area (the log, the player panels, the top bar, and in a replay its controls) leaves it open.
+
+  This is how the listener already reads (`utils.js:1798`, `1803–1805` now): a click on the popup or on `#generalactions` doesn't close the popup. **A slip, corrected on his confirmation:** the stop B2 reply's restatement of the rule ("only a click inside #FirstAscent_table_display, on the popup itself or on #generalactions closes a popup") had the popup and `#generalactions` the wrong way round. The slip was the design discussion's, in the reply it drafted, and session 2's `progress.md` entry copied it. Jonathan's own words, quoted under "Decision", don't have it.
+- **Status:** decided; the replay half is done, the live half is not scheduled.
+  - **Replay half: done** in the F13 fix, `4e82116` (`utils.js:1799–1802` now): in a replay (`(typeof g_archive_mode !== 'undefined' && g_archive_mode) || typeof g_replayFrom !== 'undefined'`), a click that is off the popup, off `#generalactions` and outside `#FirstAscent_table_display` returns early. It is broad: the log, the player panels and the top bar are outside the element. Trial 2 (table 995807): the click test was run, and was included in "As expected" (his answer to the follow-up question 1); no popup got in the way. An in-game "replay from this move" sets `g_replayFrom`, so it gets the same exemption during a live game; no step covers it (Jonathan's decision 3, stop A2 reply).
+  - **Live half: not made.** It is a UX change, a `ux:` commit under `MIGRATION_PLAN.md` §10, not part of the `fix:` commit. The plan puts UX changes in P8 (D10). It can land earlier, in the P4/P5 rebuild of the listener (P5.1's `OutsideClick`, "one manager per popup instead of the single slot"), if Jonathan so decides.
+- **Affected component or slice:** `OutsideClick` (P5.1; `utils.js:setupOutsideClickListener`) **[inferred]**. Both halves depend on `#FirstAscent_table_display` (tpl:14), the root of the game's template, which P6.2 may change when it builds the layout in JS and deletes the `.tpl` (Jonathan's decision 2, stop A2 reply; extended at stop B2): the id, or what replaces it, must name the game's area.
+- **Before and after:** before, any click outside the popup and `#generalactions` closes it, in live play and in replays. After: only a click inside `#FirstAscent_table_display` can close it. In a replay that is already so.
+- **Playtest check:** in live play, once the live half is made: with the Portaledge open in `resting`, a click on the log, a player panel or the top bar leaves it open, and a click on an empty part of the board hides it, with the red "Show Portaledge" button. In a replay: "Next move" at a `resting` state leaves the Portaledge open (seen at the four rests in trial 2; no `selectPortaledge` state came up). Related, from `TODO.md`: "when selecting a crimper card, hitting the confirm button hides the popup" (T7, `MIGRATION_PLAN.md` §8.1), another case of the same listener **[inferred]**.
+
 ## Source: the BGA review message
 
 The message that `TODO.md` quoted under "BGA review feedback", copied unchanged. Its closing list of Studio Guidelines names A.1 (layout arrangement), A.2, B.1, C.2, C.4 (sizing and responsiveness), E.1 (design for all) and F.2. Nothing in it has been turned into an entry beyond UX-1 to UX-4.

@@ -90,6 +90,29 @@ Principles for the migration:
 
 
 
+## Handlers that find an element missing (the replay fix, F13)
+
+Recorded 2026-11-09. Decided by Jonathan in the replay fix's design discussions: session 1's prompt of 2026-11-03 (§4, decisions 2 and 3) and his stop A2 reply of 2026-11-06 (decision 5). The code is in the legacy files, as the `fix:` commit `4e82116` (Studio only; nothing went to the Production site). Later steps rebuild this code (P3.5 and P4, and P5.13 for the log), so the reasoning is kept here. The full record is the 2026-11-09 entry in `progress.md`.
+
+The situation: a replay never clicks, and a second window of the same player doesn't click either. So a notification handler can find missing an element that only a click on that client creates (the asset board, `.selected_pitch`, `#discard_box`, the Bomber Anchor counter). A replay's page also holds the whole game's log from the start, so a log item can name a pitch that isn't on the board yet.
+
+- **A guard that fires writes a console warning with one fixed prefix, and players see nothing** (session 1's decision 2). The text is `[FA missing element] <where> | no <what> | <outcome>`, from `warnMissingElement` and `queryOrWarn` in `utils.js`. The caller then skips the step, or builds what the click would have built, and the handler goes on.
+  - Reason: a missing element in a replay is expected, and the player can't act on it, so it isn't a failure to show (D6's message is for handler failures) **[inferred]**. The prefix and the pipes follow `[FA animation fallback]` (`utils.js:287`), so a trial can record which guards fired and a search finds them.
+  - Where the element is only a click's leftover (the placeholder, `.selected_pitch`, `#bomber_anchor_counter`), the step is skipped; where a later step needs what the click built (the asset board, the climbing card in the discard), the handler builds or retracts it.
+- **A log item that names a pitch not yet on the page is deferred, not dropped** (session 1's decision 3). `addTooltipsToLog` skips the item without marking it `tt_processed`, so a later sweep completes its tooltip once the pitch exists. It warns once per item (the class `tt_deferred`), naming the item's id, the pitch type and its container (the nearest ancestor with an id).
+  - Reason: the hook marked an item processed before the lookup that threw, so each missing item threw once. In a production replay the throw most likely ended that notification's dispatch before its handler ran (the character didn't appear on the board; an inference, seen on production).
+  - What the trials showed: the deferral stopped the throw in both Studio trials, and a later sweep processed the deferred items (trial 2's query at move 30: the deferred items carry `tt_deferred` and `tt_processed`). Jonathan, in table 995807's replay: "when a player climbed a Headwall pitch, the tooltip in the log shows the correct pitch". That concerns the visible log lines, which are separate elements (`log_N` in the log panel, `dockedlog_N` in the docked log) that get their tooltips normally; the retry's evidence is the query.
+  - In live play the deferral never fires: every pitch item in a live log names a pitch the player chose on the board, and the Headwall is revealed before anyone can choose one (read in code, session 1's stop A).
+  - The recreated log hook keeps the deferral (P3.5, U13; P5.13's `Log`).
+- **No general missing-element fallback in `animationPromise`** (session 2's decision 5). A guard at the site instead. Jonathan: "No general missing-element fallback in animationPromise, as your §3 recommends."
+  - Reason: a check in `animationPromise` would have to come before `func.before`, and even then the new throw's site (`discardClimbingCard`) goes on to the card's `classList` and hangs the same way. The replay would also keep a wrong board: the card would stay in `#climbing_slot`, and the next card drawn would join it. In live play there are about 200 call sites, where a null element today is a bug that stops one client loudly; a fallback would turn it into a warning and a board out of step, or the same throw one line later.
+  - The migration plans the principled version: P4's wrapper logs `[FA notif error]` and re-renders from the model (`MIGRATION_PLAN.md` §4.3), and P5.7 removes `discardClimbingCard`'s async executor (§4.3.1).
+  - This entry holds all three because they are one subject, how the client handles missing elements. Jonathan on whether decision 5 belongs: "I don't know about decision 5. Your inclination is fine." Session 2's other decisions are scoped to this fix and stay in `progress.md`; the popup rule is UX-6 in `UX_CHANGES.md`.
+
+The fix's click-outside rule (in a replay, a click outside the game's own area leaves a popup open) depends on `#FirstAscent_table_display` (tpl:14), the root of the game's template. P6.2 may change it when it builds the layout in JS and deletes the `.tpl`; the rule would then need the id of whatever replaces it (Jonathan's decision 2, stop A2 reply; UX-6 for the rule itself).
+
+
+
 ## The legacy build gets one final fix batch, then it is frozen
 
 Decided by Jonathan on 2026-10-21. It replaces the earlier rule, which allowed only simple regressions from the Portaledge refactor. Outside playtesters use the legacy build until the migration ships, so the known server bugs and a few leftovers are fixed once, together:

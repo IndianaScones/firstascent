@@ -679,7 +679,7 @@ Ordered by how directly the state can gate notifications, state entry or the act
 - **Action-button callbacks**: the framework catches their errors and logs `During callback: onclick / <method>` with a stack (observed in playtest 3, ly_studio.js). Handlers assigned directly with `.onclick` print a plain `Uncaught TypeError` (playtest 3, js:4739).
 - **`.then` chains without `.catch`** that contain the release: js:8509–8513, 8598–8608, 8684–8700, 12655–12667, 12802–12838 (same effect).
 - **`animationPromise` throw** for an unknown type (utils:260), inside the executor: rejected promise. No caller passes another type.
-- **`dojo.connect` after `addToLog`** (js:1692–1694): an exception in `addTooltipsToLog` propagates into the framework's caller (inferred). The effect on dispatch is unverified (S6).
+- **`dojo.connect` after `addToLog`** (js:1692–1694): an exception in `addTooltipsToLog` propagates into the framework's caller (inferred). The effect on dispatch is unverified (S6). **Evidence from a production replay (the replay fix, F13; `progress.md`, 2026-11-09):** a throw in `addTooltipsToLog`, inside the `addToLog` hook, most likely ended that dispatch before the handler ran: an inference from the character not appearing on the board (seen on production). "Next move" still advanced (seen on production).
 
 ---
 
