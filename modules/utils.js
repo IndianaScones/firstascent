@@ -1257,6 +1257,21 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 	            const item_elements = dojo.query('.item_tooltip:not(.tt_processed)');
 	            Array.from(item_elements).forEach(ele => {
 	                const ele_id = ele.id;
+
+	                // F13 (replay fix): a log item can name a pitch that isn't on the board yet (a replay's page holds the
+	                // whole game's log from the start, Headwall pitches included). Leave the item unprocessed, so a later
+	                // sweep adds its tooltip once the pitch exists, and warn once per item.
+	                if (ele.classList.contains('pitch_tt')) {
+	                    const pitch_type = ele_id.slice(-2).replace(/^\D+/g, '');
+	                    if (!document.querySelector(`.p${pitch_type}`)) {
+	                        if (!ele.classList.contains('tt_deferred')) {
+	                            ele.classList.add('tt_deferred');
+	                            const container = ele.parentElement?.closest('[id]')?.id;
+	                            this.warnMissingElement('addTooltipsToLog', `.p${pitch_type} for ${ele_id} (in ${container})`, 'tooltip deferred');
+	                        }
+	                        return;
+	                    }
+	                }
 					ele.classList.add('tt_processed');
 
 	                if (ele.classList.contains('asset_tt')) {
@@ -1290,6 +1305,19 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 
 	        shouldAnimate: function() {
 	            return document.visibilityState !== 'hidden' && !gameui.instantaneousMode;
+	        },
+
+	        // F13 (replay fix): a console warning (players see nothing) when a handler finds an element missing that
+	        // only a click on this client creates. A replay, or a second window of the same player, never clicks.
+	        warnMissingElement: function(where, what, outcome) {
+	            console.warn(`[FA missing element] ${where} | no ${what} | ${outcome}`);
+	        },
+
+	        // F13: the first element matching selector, or null after a warning; the caller then skips that step
+	        queryOrWarn: function(selector, where) {
+	            const ele = document.querySelector(selector);
+	            if (!ele) { this.warnMissingElement(where, selector, 'step skipped'); }
+	            return ele;
 	        },
 
 	        logInject: function (log_entry) { // also includes names from titlebar
@@ -1768,6 +1796,10 @@ define([ "dojo", "dojo/_base/declare", "ebg/core/gamegui"],
 				game_instance.globalCloseCallback = closeCallback;
 				game_instance.globalOutsideClickListener = (evt) => {
 					const clicked_inside = targets.some(target => target && target.contains(evt.target));
+					// F13 (replay fix): in a replay, a click outside the game's area (the replay's "Next move" and the rest of the
+					// framework's page) leaves the popup open. Closing it there hid the Portaledge before the next move drew from it
+					const replay = (typeof g_archive_mode !== 'undefined' && g_archive_mode) || typeof g_replayFrom !== 'undefined';
+					if (!clicked_inside && replay && !$('FirstAscent_table_display')?.contains(evt.target)) { return; }
 					if (!clicked_inside) {
 						this.triggerOutsideClickClose();
 					}

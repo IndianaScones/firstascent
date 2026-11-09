@@ -7576,13 +7576,18 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (this.isCurrentPlayerActive()) {
                 character_div.classList.remove('cursor');
                 $('selection_dimmer').classList.remove('dim_bg');
-                document.querySelector('.character_placeholder').remove();
+                this.utils.queryOrWarn('.character_placeholder', 'notif_confirmCharacter')?.remove();
                 [...$('character_selection').children].forEach(ele => {
                     ele.classList.remove('popout');
                 });
                 if (this.handleOutsideClick) {
                     window.removeEventListener('click', this.handleOutsideClick);
                     this.handleOutsideClick = null;
+                }
+                // F13 (replay fix): the click (onSelectCharacter) made this player's asset board; a client that didn't click makes it here
+                if (!$(`asset_board_${player_id}`)) {
+                    this.utils.warnMissingElement('notif_confirmCharacter', `#asset_board_${player_id}`, 'board created');
+                    addAssetBoard();
                 }
             }
             else {
@@ -7601,9 +7606,6 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
                 animateCharacter();
             } else { 
-                if (this.isCurrentPlayerActive()) {
-                    addAssetBoard();
-                }
                 character_area.append(character_div);
 
                 this.utils.clicksOn();
@@ -8448,8 +8450,8 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             // Trifecta
             if (this.isCurrentPlayerActive()) {
-                const selected_pitch = document.querySelector('.selected_pitch').nextElementSibling;
-                if (selected_pitch.classList.contains('p36')) {
+                const selected_pitch = this.utils.queryOrWarn('.selected_pitch', 'notif_riskShowAssets')?.nextElementSibling;
+                if (selected_pitch?.classList.contains('p36')) {
                     const trifecta_selected_box = $('trifecta_selected_box');
                     Array.from(trifecta_selected_box.children).forEach(ele => {
                         if (ele.id !== 'trifecta_title_clone' && ele.id !== 'trifecta_undo_button') {
@@ -8569,7 +8571,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             if (player_id == this.player_id) {
 
                 document.querySelectorAll('.available_pitch').forEach(ele => { ele.classList.remove('available_pitch'); });
-                document.querySelector('.selected_pitch').classList.remove('selected_pitch');
+                this.utils.queryOrWarn('.selected_pitch', 'notif_riskReturnAssets')?.classList.remove('selected_pitch');
                 const asset_board = $(`asset_board_${player_id}`);
                 asset_board.querySelectorAll('.permanent_asset').forEach(ele => {
                     ele.classList.remove('selectable', 'cursor', 'selected_token', 'unnecessary_resource');
@@ -8951,8 +8953,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                 ele.classList.remove('available_pitch');
                 ele.nextElementSibling.nextElementSibling.classList.remove('cursor');
             });
-            dojo.query('.selected_pitch')[0].nextElementSibling.nextElementSibling.classList.remove('cursor');
-            dojo.query('.selected_pitch')[0].classList.remove('selected_pitch');
+            const selected_pitch_border = this.utils.queryOrWarn('.selected_pitch', 'notif_confirmYourRequirements');
+            selected_pitch_border?.nextElementSibling.nextElementSibling.classList.remove('cursor');
+            selected_pitch_border?.classList.remove('selected_pitch');
             dojo.query('.gear_token_border').forEach(ele => { ele.remove(); });
 
             const playAssets = async () => {
@@ -10646,8 +10649,9 @@ function (dojo, declare, aspect, BgaAutofit) {
                     ele.classList.remove('available_pitch');
                     ele.nextElementSibling.nextElementSibling.classList.remove('cursor');
                 });
-                dojo.query('.selected_pitch')[0].nextElementSibling.nextElementSibling.classList.remove('cursor');
-                dojo.query('.selected_pitch')[0].classList.remove('selected_pitch');
+                const selected_pitch_border = this.utils.queryOrWarn('.selected_pitch', 'notif_confirmAddTokenToPitch');
+                selected_pitch_border?.nextElementSibling.nextElementSibling.classList.remove('cursor');
+                selected_pitch_border?.classList.remove('selected_pitch');
             }
 
             const asset_type = notif.args.asset_type.toLowerCase();
@@ -10669,6 +10673,11 @@ function (dojo, declare, aspect, BgaAutofit) {
             }
 
             if (notif.args.player_id != this.player_id) { await this.utils.retractClimbingCard(); }
+            // F13 (replay fix): the click (onConfirmAssetType) retracted the climbing card on the adder's client; a client that didn't click retracts it here
+            else if ($('climbing_slot').firstElementChild) {
+                this.utils.warnMissingElement('notif_confirmAddTokenToPitch', 'card in #climbing_discard_straightened', 'card retracted from #climbing_slot');
+                await this.utils.retractClimbingCard();
+            }
 
             if (this.utils.shouldAnimate()) {
                 this.utils.updateTitlebar(_('Placing Asset Token on Pitch'));
@@ -12768,7 +12777,10 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
             }
 
-            if (this.utils.shouldAnimate()) {
+            // F13 (replay fix): the cards to animate are in #discard_box, which only the click (onConfirmSummitBetaRerack) builds
+            if (!discard_box) { this.utils.warnMissingElement('notif_confirmRerackPrivate', '#discard_box', 'cards placed without animation'); }
+
+            if (this.utils.shouldAnimate() && discard_box) {
 
                 this.removeActionButtons();
                 if ($('show_hide_card_button') && $('show_hide_card_button').classList.contains('shown')) { $('show_hide_card_button').click(); }
@@ -12872,7 +12884,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                     }), hand_slot);
                 }
 
-                $('discard_box').remove();
+                $('discard_box')?.remove();
                 const token_id = Object.keys(this.gamedatas.token_identifier).find(id => this.gamedatas.token_identifier[id] === '1');
                 const token_ele = $(`summit_beta_${token_id}`);
                 token_ele.classList.remove('selected_token', 'selectable_token');
@@ -12982,7 +12994,7 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             if (this.isCurrentPlayerActive()) {
 
-                $('bomber_anchor_counter').remove();
+                this.utils.queryOrWarn('#bomber_anchor_counter', 'notif_bomberAnchorCleanup')?.remove();
                 for (const ele of this.bomber_anchor_selection_handlers) { ele.onclick = null; }
                 this.bomber_anchor_selection_handlers = [];
                 portaledge.querySelectorAll('.porta_plus').forEach(ele => { ele.remove(); });
