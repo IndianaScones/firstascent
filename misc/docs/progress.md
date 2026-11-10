@@ -2,6 +2,252 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-10 (P1.3, Globals on bga->globals: in progress, session 1)
+
+P1.3 is half done. Session 1 ran the inventory, the U7 check on Studio, the tool commit and the implementation; the code change is in the working tree, uncommitted, and waits for Jonathan's Studio playtest. Session 2 (a new session) takes the playtest results, the `struct:` commit and the closing docs. Nothing is deployed from this change, nothing is pushed, and nothing went to the BGA Production site.
+
+**Line numbers in this entry.** `Game.php` is unchanged, so its line numbers hold for `331e4d0`, `9fa97f4` and the working copy. `UtilTrait.php` line numbers are the working copy's, which sit 2 lines further down than at `9fa97f4` from line 41 on, unless marked "at 331e4d0" (the old wrapper's lines 34–50, 39, 43, 45 and the line 256).
+
+**State at the end of the session**
+- **HEAD:** `9fa97f4` (`tool: debug_globalsShape, the U7 check for P1.3`), one commit ahead of `origin/main` (`331e4d0`). **Not pushed:** Jonathan's push needs his "push".
+- **Staged:** nothing.
+- **Unstaged (the `struct:` change, uncommitted):** `dbmodel.sql` (the `global_variables` CREATE TABLE and one blank line removed; 2,130 bytes, LF, 53 lines, no CR before or after) and `modules/php/UtilTrait.php` (79,664 bytes, CRLF, 1,594 lines). `git diff HEAD --stat`: 2 files, 29 insertions, 39 deletions. `Game.php` is unchanged: no change was needed.
+- **Line endings:** `dbmodel.sql` is LF in the working copy (`git ls-files --eol`: `i/lf w/lf`), not CRLF as the prompt's §10 said; Jonathan's instruction is to keep it LF. `git diff` warns that "LF will be replaced by CRLF the next time Git touches it": a checkout of that file would convert it, so don't check it out; staging and committing leave the working copy alone. The two PHP files are CRLF; `CLAUDE.md` is LF.
+- **Files outside git, in `D:\Documents\BGA Studio\`:**
+  - `p1-3-globals-inventory.md` (805 lines, 51,358 bytes);
+  - `p1-3-tool.diff` (195 lines, 10,993 bytes: the tool, against `331e4d0`);
+  - `p1-3.diff` (136 lines, 7,929 bytes: the implementation, against `9fa97f4`);
+  - `p1-3-coverage.md` (111 lines, 8,101 bytes: inventory keys against the playtest steps, with the v2 scope marked);
+  - `p1-3-harness\run.php` (204 lines, 12,299 bytes) and `p1-3-harness\u7-expected.txt` (66 lines, 7,635 bytes);
+  - the raw docs diff of this entry (its counts are in the session's report, not here).
+  - The 113 log lines of the U7 run are in the transcript (Jonathan's message of this session); they are not copied into a file.
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's answer: "this session runs on Sonnet 5.5 at High effort"). The `tool:` commit's co-author line reads Claude Sonnet 5.5.
+- **Compaction:** none that I know of; the context was not summarised.
+
+**Status of each item**
+- Start check (HEAD `331e4d0`, clean, level with `origin/main`, nothing staged): done.
+- §3's reading of the files: all points confirmed; corrections and additions below.
+- The inventory: done (`p1-3-globals-inventory.md`).
+- `debug_globalsShape` (the U7 check): written, committed as `9fa97f4`, run by Jonathan on Studio (a new 2-player table created after the deploy; Studio's `UtilTrait.php` was 79,744 bytes, as expected): all 37 cases, no `EXCEPTION` line, the end line. Jonathan didn't play on that table.
+- §7's comparison: done, all rows convert except the three by-design cases (table below).
+- Step B, the implementation: done in the working tree (uncommitted); the checks ran (below).
+- The playtest list: v2 below. Not run.
+- The `struct:` commit, the closing docs (P1.3's Status, U7's row and B2's row in `MIGRATION_PLAN.md`; `BGA_PITFALLS.md` for a U7 finding; `TODO.md`: only if B2 has an item there, and only with Jonathan's go-ahead in session 2): session 2.
+
+**What §3 got right, and what it missed.** All the points hold at `331e4d0` (`UtilTrait.php:34–50` at 331e4d0, `dbmodel.sql:40–44`; 404 gets and 328 sets in the two PHP files, 65 keys, the longest 27 characters; `player_names` read at `Game.php:2634` and never set; `finished_portaledge`, `jesus_party` and `max_water_psych` set and never read; `round` an int at `UtilTrait.php:256` (at 331e4d0); `draw_step === 11` at `Game.php:5633, 5707`). Additions: `firstascent.view.php:34, :64` call `getGlobalVariable` through `$this->game` (2 more gets, both without `true`); that goes through the wrapper, not the table. Nothing else in the repo names `global_variables` except `UtilTrait.php:39, :43` (at 331e4d0) and `dbmodel.sql:40`.
+
+**What the inventory found** (details in `p1-3-globals-inventory.md`)
+- No key holds a top-level int 0; `round` is the string "0". Top-level `false`, `null` and `[]` are stored by several keys; no write site stores an object (stdClass), so no `{}`.
+- Eight keys can be missing when read (never initialised; they must read null): `bomber_anchor`, `crimper_cards`, `face_rolled`, `finished_token_choice`, `forced_die_face`, `riskSummitBetaFace`, `scored_personal_objectives`, and `player_names` (never set).
+- 25 keys are read without `true`. Objects read that way (stdClass property access): `bailed_pitch`, `pitch_tracker`, `resource_tracker`, `water_psych_tracker`, and `shared_objectives_tracker` (getAllDatas).
+- Six keys show iteration order in the log, notifications or game state: `player_names_and_colors`, `board_assets`, `gained_permanent_assets`, `personal_objectives_tracker`, `shared_objectives_tracker`, `asset_discard`.
+- 49 of 65 keys reach the client (a one-hop heuristic, not a trace).
+- `available_permanent_assets` holds `floor()` results (PHP floats); `json_encode(2.0)` writes `2`.
+- `shared_objectives_tracker[...]['players_met']` can become a list with a gap (`Game.php:1358`).
+- Strict comparisons need real types: `draw_step === 11`, `x_cards === 1`, `headwall_revealed === false`.
+
+**U7: what Studio showed** (Jonathan's run; DB `8.4.4-4`, so MySQL 8.4; the log's start line says PHP 8.4.27)
+- `bga->globals->get` returns JSON objects as PHP arrays (also nested), lists as lists, and a missing key as null (`has=no`).
+- Object keys come back sorted by length, then bytewise, the same as the old `json` column returns them; so the key order callers see doesn't change.
+- A top-level stored 0 (also from a float 0.0, which `json_encode` writes as `0`) comes back as int 0; the old wrapper returned null.
+- A top-level empty stdClass comes back as a stdClass.
+- Whole-number floats are stored as ints (`2.0` reads `2`); a fractional float stays a float.
+- The old wrapper stored `é` as `u00e9` (case 30); it was skipped for the apostrophe and for `"`, `\` and a newline (cases 32, 33); the framework stored and returned all of them unchanged.
+- Overwrites (int to list, list to null, int to 0) behave like first writes.
+
+**The §7 comparison** (every case of the log; "converts" = the conversion inside `getGlobalVariable` turns F into the wrapper's result for both settings): cases 01, 11, 37 (int 0, float 0.0, overwrite to 0): wrapper null, framework 0, converts (`=== 0` → null). Cases 02–10, 12–14, 31, 34–36: scalars, null, bool, lists, `[]`, missing key: the same on both paths, convert. Case 15: wrapper stdClass without `true` and `[]` with, framework stdClass: converts by re-encoding. Cases 16–29 (gap lists, id-keyed arrays, unsorted keys, nested trackers, hand slots, rope order, bailed pitch, requirements, floats): wrapper stdClass at each object level without `true` and arrays with `true`, framework arrays in the same key order: converts by re-encoding and decoding with the caller's `$asArray`. Case 30 (`é`): wrapper `u00e9`, framework `é`: doesn't convert, by design (B2). Cases 32, 33: the wrapper was skipped; by design.
+
+**The conversion** (in `getGlobalVariable`; `setGlobalVariable` just calls `$this->bga->globals->set`): `if ($value === 0) return null;` scalars and null return unchanged; an array or object returns `json_decode(json_encode($value), $asArray)`. It reproduces every row above. No value that a write site can store is lost. No write site stores an object, so no nested `{}` can be stored: the only stdClass creators are the old `json_decode` (`UtilTrait.php:45` at 331e4d0) and the debug function's case list, and every value read without `true` stays in a local that only reaches notification args or a return value (`Game.php:1777, 1953, 5150, 5151, 769, 773`, and the `$player_resources`, `$player_water_psych` and `$opponent_*` locals, whose only other use is `=> $var` in notification args). **One shape no write site builds reads differently:** an object whose keys are exactly 0..n-1 in another order (for example `[1 => 'a', 0 => 'b']`): the old wrapper read it without `true` as a stdClass, the new one as a list. Object keys in the code are player ids, card ids, hex ids, objective ids, pitch ids and player_no (all at least 1), string names and slots 1–4; hand slots are re-keyed with `range(1, …)` (`UtilTrait.php:448`).
+
+**The checks**
+- `php -l`: `UtilTrait.php` and `Game.php` pass (PHP 8.4.25; parse only; `Game.php` shows the known `${var}` deprecation at line 2591).
+- `php misc/tests/technique_matching.php modules/php/Game.php`: 24,192 + 188,160 + 20,000 = 232,352 cases, 0 failures; 13 named cases; "All checks passed".
+- `grep -rIn "global_variables" --exclude-dir=.git --exclude-dir=docs .`: one line, the explanatory comment at `UtilTrait.php:41`. Nothing reads or writes the table.
+- The harness (`p1-3-harness\run.php`): it runs for real the old two methods from `331e4d0`, the new two from the working copy, and `debugShapeCases()` and `debugShapeText()` from the working copy, all extracted from source text and eval'd, under PHP 8.4. It stubs the old table (parses the statement the old methods build, unescapes the literals by MySQL's rules, validates the JSON, stores it key-sorted) and `bga->globals` (arrays; a top-level `{}` as stdClass; a null default). The stubs reproduce 66 of Jonathan's logged W and F lines (0 mismatches; cases 22–24 are too long to copy, and the W lines of 32 and 33 were skipped in U7). Old against new, both settings, type and key order: 34 of 37 cases identical; the other three are 30, 32, 33, as expected; no unexpected difference. 5,000 generated shapes: 5,000 identical. It shows the 0..n-1 gap above.
+
+**The debug function after the change.** `debug_globalsShape` no longer deletes from `global_variables`; both key sets (`zz_shape_w_NN`, `zz_shape_f_NN`) are deleted with `bga->globals->delete`, one key at a time with a log line on failure. The `'wrapper' => false` skip is removed from cases 32 and 33 and so is the skip branch: their W lines now run through the wrapper.
+
+**Struct commit message for session 2** (revised at Jonathan's stop B review; the co-author is the model that wrote the code)
+
+```
+struct: getGlobalVariable/setGlobalVariable on bga->globals (P1.3)
+
+setGlobalVariable and getGlobalVariable now use $this->bga->globals, and
+the custom global_variables table is dropped from dbmodel.sql. The
+framework's get returns JSON objects as arrays and a stored 0 as 0, so
+getGlobalVariable converts the result so that every caller gets what it
+got before (U7, debug_globalsShape on Studio, MySQL 8.4): an int 0 reads
+null; JSON objects read as stdClass unless $asArray is true; lists, null,
+false, "", "0", numbers and a missing key are unchanged.
+
+One shape no write site builds reads differently: an object whose keys
+are exactly 0..n-1 in another order now reads as a list without
+$asArray. Studio tables created before this change can't be played:
+dbmodel.sql applies only at table creation.
+
+debug_globalsShape no longer deletes from global_variables; it deletes
+both of its key sets with bga->globals->delete, and its apostrophe and
+escape cases now go through the wrapper too.
+
+Side effect (B2): setGlobalVariable no longer builds SQL from unescaped
+JSON. Values the old SQL corrupted or rejected now store correctly: an
+apostrophe, and the backslash escapes json_encode writes (non-ASCII
+characters, which were stored as u00e9 for é, double quotes, backslashes
+and control characters such as a newline). Q-T3 (whether BGA player names
+can contain such characters) stays open.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+**Jonathan's decision on the parity rule (item 3 of his stop A review):** the rule has one exception: values that the old SQL corrupts or rejects because `json_encode`'s output goes unescaped into a single-quoted SQL string (the apostrophe, and the backslash escapes). They count as part of B2's side effect; the `struct:` message and B2's row at the closing docs name them. Q-T3 stays open.
+
+**The Undo step (step 8), answers to item 1 of Jonathan's stop B review** (the step keeps its card; it writes globals before Undo, so it can tell old storage from new)
+- **States that offer `undoClimbingCard`** (`states.inc.php`, in `possibleactions`): `drawAssets` (:52), `climbingCard` (:92), `discardAssets` (:107), `selectOpponent` (:120), `selectPortaledge` (:131), `addTokenToPitch` (:160), `stealFromAssetBoard` (:171), `addAssetToAssetBoard` (:182), `chooseSummitBetaToken` (:193), `chooseTechniqueToken` (:204) and `crimperClimbingCards` (:289). The action is `undoClimbingCard` (`Game.php:4619–4624`): `undoRestorePoint()` and the `undoClimbingCleanup` notification.
+- **The savepoint** is raised when the card is drawn, at the end of `confirmRequirements` (`Game.php:1753`; the Crimper's branch at :1738), after `climbing_card_info` is set to the drawn card (:1746) and `risk_it_info` and `risked_requirements` are set to `[]` (:1751–1752).
+- **The option the step uses: card 1 (`heinous_rope_drag`), option B** "Lose 1 Gear Card and gain 1 Water": `cost` discard, `water` +1, `psych` 0, Gear −1 (`material.inc.php`, card 1 `b_args`). `confirmClimbingCardChoice` (`Game.php:2072`) has written these globals when it moves to `discardAssets` (`Game.php:2303`), the state where Undo is pressed:
+  - `resource_tracker` and `water_psych_tracker`, with Water +1: `updateResourceTracker` is called at `Game.php:2101` and sets them at `UtilTrait.php:575–576` (it also sets `max_water_psych` at :532, which nothing reads);
+  - `climbing_card_info` (`Game.php:2301`): the card row plus `choice`, `choice_args`, `water_psych_for_climbing`, `player_id` (:2103–2107) and `discard_type`, `discard_num`, `final_state` (:2292–2296);
+  - `climbing_card_private` (`Game.php:2302`): `[]`.
+  - Not yet written: the hand. The discard of the Gear card happens in `discardAssets`, and the option draws nothing from the Portaledge (`$discard` is true, so the draw loop at `Game.php:2138` doesn't run), so the hand and the asset board are unchanged when Undo is pressed. **The value that shows the storage is Water (+1).**
+- The expected result is unchanged: after Undo and F5, every value the option changed is back to its value before the choice. If Studio shows otherwise, Jonathan reports it in the next session; nothing is fixed in session 1.
+
+**Playtest list v2** (v1 was in the stop B report. v2 applies Jonathan's scope decision: required and optional steps, the Undo answers above, the deploy sizes, "don't open the U7 table again" and the corrected console line. The step numbers of v1 are kept, so the coverage file `p1-3-coverage.md` still maps; [S] = shown on Studio before, [C] = read in code or docs, [inferred] = reasoning.)
+
+**Scope (Jonathan's decision).**
+- **Required:** step 0 (the re-run), step 1 (the database check), steps 2–7 (the plan's playtest: S-smoke, `portaledgeAll`, risk it, bail), step 8 (Undo), step 14 (the end) and T3 (F13).
+- **Optional, run if time allows:** steps 9–13 and T2 (step 15). The record will say which of them Jonathan skipped, and that their paths and the two reshuffle flags (`deck_reshuffle` and `summit_beta_reshuffle` set to true by `deckAutoReshuffle` and `summitBetaReshuffle`) are then covered only by the harness and the U7 run.
+
+**Deploy.** Deploy `modules/php/UtilTrait.php` and `dbmodel.sql` from the working copy; `Game.php` is unchanged; nothing to delete on Studio.
+- Expected sizes on Studio after the deploy: `UtilTrait.php` **79,664 bytes** (CRLF; 1,594 lines) and `dbmodel.sql` **2,130 bytes** (LF; 53 lines). Both were confirmed from the working copy and agree with the design discussion's numbers computed from the diff applied to `331e4d0`'s files. (Studio's `UtilTrait.php` was 79,744 bytes after the tool deploy.)
+- `dbmodel.sql` applies only to tables created after the deploy, so every table created before it is unusable [inferred from the dbmodel doc, `Game_database_model__dbmodel_sql.md:9`]. **Don't open the U7 table again; it was created before this deploy.**
+
+**Table T1:** a new 2-player table with a spectator tab, created after the deploy. Z is the player who climbs first, W the other. Console in live tabs: leave the default context and record its name; in the replays (T3) select `frame.html` for queries.
+
+0. **Required. Re-run `globalsShape`** (state window: any state; the table has just started; Studio's menu lists it without the `debug_` prefix).
+   - Expected [C, from the diff]: 113 lines (start, 37 × 3, end), no `EXCEPTION`, `GS end: test keys deleted`.
+   - All 37 F lines equal the U7 run's F lines.
+   - W lines equal the U7 run's W lines for cases 01–29, 31 and 34–37. Case 30's W reads `type=string value='é' same=yes` in both settings.
+   - Cases 32 and 33 now have W lines (U7 skipped them); each W value text equals its F value text (`it\'s`; `say "hi" \\ end next`).
+1. **Required. "Go to game database"** (SQL tab, before play, the same table).
+   - `SHOW TABLES`: no `global_variables`; `bga_globals` present.
+   - `SHOW CREATE TABLE bga_globals;`: record the type of its `value` column [new].
+   - `SELECT * FROM bga_globals;`: expect the 53 game keys written at setup and the first page load (51 from `setupNewGame` and `initSharedObjectives`, plus `player_order` and `asset_discard` from `getAllDatas`) [C], none starting with `zz_shape_`. Record the column names and any other rows.
+2. **Required. S-smoke 1.** Character selection, then Rack Up. Expected [S for parity with P1.2]: as before; the spectator's log follows; no new console error or `[FA …]` warning.
+   - Only if you plan the optional steps 12 and 13: in `characterSelection` or `drawAssets` of round 0, `debug_setSharedObjectives(11, 12, 1)`, and `debug_setAvailableCharacters` to offer character 6 (Young Prodigy).
+3. **Required. S-smoke 2 and 3 plus `portaledgeAll`** (round 1, `climbOrRest`).
+   - Before Z climbs: `debug_stackClimbingDeck("15")`. Z climbs a pitch plainly; W rests (the `resting` state). Z takes climbing card 15 option B ("All other players gain 1 Gear Card from The Portaledge").
+   - Expected [C]: W draws a Gear card from the Portaledge, the Portaledge refills, and the log has the same wording as before. No console error or `[FA …]` warning.
+4. **Required. S-smoke 4.** The Follow Phase, then Rerack. Expected: as before.
+5. **Required. S-smoke 5.** In round 2, F5 in `climbOrRest` in each player's tab and in the spectator's. Then one player rests and F5 in `resting`: the Portaledge panel opens by itself and all four piles show [C]. Expected: no new console error and no `[FA …]` warning.
+6. **Required. Risk it** (round 2, `climbOrRest`, Z).
+   - a) `debug_giveSummitBeta(11, Z)`, then `debug_forceDie(3)`. Z risks a pitch lacking exactly one required Asset (P1.1 (b2) scenario 7d). Expected [S]: the log shows `…forced to 3 (riskIt)` and the title reads "may use a Summit Beta Token". Z uses Lucky Chalkbag after `debug_forceDie(1)`: `…forced to 1 (confirmLuckyChalkbag)`, then the "rerolls a checkmark and successfully climbs" line.
+   - b) A later risk with `debug_forceDie(2)`: Z discards 2 cards (`discardAssets`).
+   - c) A later risk with `debug_forceDie(3)` and no Summit Beta: Z discards a card and a Psych. Optional if time.
+7. **Required. Bail** (Z, `climbOrRest`). Bail, then F5 in Z's next `climbOrRest`: the available pitches are computed from the bailed pitch (`argClimbOrRest`, `Game.php:5151`). Expected: no console error; the bail shows as before.
+8. **Required. Undo of a climbing card** (state windows: the climbing card is drawn in `climbingCard`; Undo is pressed in `discardAssets`).
+   - Z's turn: `debug_stackClimbingDeck("1")`. Note Z's Water, Psych, hand, asset board and the card first. Z climbs, takes option B of card 1 (lose 1 Gear Card, gain 1 Water; a decision follows in `discardAssets`).
+   - Before Undo, the option has written `resource_tracker` and `water_psych_tracker` (Water +1), `climbing_card_info` and `climbing_card_private` (see the answers above), so Water is the value that tells the old storage from the new.
+   - Press Undo in `discardAssets`, then F5. Expected [inferred from the docs: "Save the whole game situation", `Game.php doc:1701`]: Water, Psych, hand, asset board and the card equal the values before the choice, and choosing option A (lose 1 Water, gain a Power token) works. Any stale value is a finding: record exactly what differs.
+9. **Optional. Opponent cards** (`debug_stackClimbingDeck`, one climb each).
+   - Card 25 A: give another player 2 cards and gain a Summit Beta (`selectOpponent`); once choosing the Jesus piece and once W, if offered.
+   - Card 9 B: Technique tokens for you and another (`techniqueOpponent`).
+   - Card 3 B: steal a card from another player's Asset Board (W needs cards on it).
+   - Optional: card 55 (sunny players).
+   - Expected: as before; names and trackers in the log are right.
+10. **Optional. Add a token to a pitch.** `debug_stackClimbingDeck("2")`: choose a pitch to add a Gear token. F5 shows the token. Expected [C]: the next climber of that pitch needs the extra Asset.
+11. **Optional. Summit Beta tokens and trade** (`climbOrRest`). `debug_giveSummitBeta(9, Z)`: Bomber Anchor in a draw state (the counter shows). Energy Drink (`debug_giveSummitBeta(4, Z)`): +1 Water, +1 Psych. The Rerack token. A trade (`confirmTrade`). Expected: as before.
+12. **Optional. Permanent Asset tokens** (about four rounds): with Young Prodigy as Z (step 2's option), three non-Gear cards of one skill on the board at a Rerack; otherwise four of one skill. Use `debug_giveAssets`.
+    - Expected: `choosePermanentAssets` offers tokens. Confirm in descending player-id order: the `grantPermanentAssets` log sentence lists the players in ascending id order (both columns sort alike), with the amounts [inferred]. Any other order is a finding.
+    - Also check the matching-techniques scoring.
+13. **Optional. Headwall, Trifecta, Elitist** (passively, while playing). A climb into row 3 reveals the Headwall ("The Headwall is revealed" in the log; the board shows it). With objective 11 from step 2, the first climb of a pitch 1–12 removes that climber from `players_met`; check the score and the objective marker. If it removes the first-listed player, that makes a gap list. Trifecta if drawn.
+14. **Required. End.** `debug_endGameSoon` for a player who has climbed. Expected: the table ends; final scoring and the statistics show; the personal objectives line lists "objective 1/2" in ascending objective id [inferred]. The pitch tracker edit makes the Rope totals stale in a replay, which is expected. Record the game as shortened.
+
+**Table T2 (optional):** a new 3-player table.
+15. **Optional.** `debug_setAvailableCharacters` to offer Cool-Headed Crimper (10) in `characterSelection`. The Crimper's turn offers its two climbing cards (`crimperClimbingCards`). Then zombify a player (Tools doc 63–65). Expected: the table continues; no console error.
+
+**Table T3 (required, F13):** a new 2-player table created after the deploy; run it last, because it ends. Follow P1.2's Table 3 (3a–3g, `MIGRATION_PLAN.md:610–618`): A rests in round 1, B climbs, then `debug_endGameSoon`. Replay from each seat.
+- Console: select `frame.html` in the context dropdown for queries; save each seat's console from its beginning.
+- Expected: it runs to the end with no new console error. The only `[FA animation fallback]` warnings are five at Bomber Anchor's draw in the holder's own replay and those at trade in the trader's own replay, if either is used (`TODO.md`).
+- Expected: `[FA missing element]` warnings fire as in the replay fix (display-only); record which fired.
+- Expected: Rope totals aren't updated after `debug_endGameSoon`.
+
+**Coverage and recommendation** (`p1-3-coverage.md`; the function-to-step mapping is my judgement, not run). Only the two reshuffle flags' `true` writes are reached by no step except a full game; their false values reach the client every turn. Steps that exercise the shapes where old and new code could differ: objects read without `true` (steps 2–3, 5, 6, 7, 9), empty containers (1, 3, 4, 9, 12), the gap list (13), key order (12, 14, 2, 3, 1), floats (12); a top-level int 0 and the missing-key reads are reached by `globalsShape` (cases 01, 11, 37) and steps 1, 3, 5. Recommendation: a game shortened with `debug_endGameSoon` plus the targeted steps, not a full game.
+
+**Pending decisions and notes for session 2**
+- Jonathan's Studio results for the playtest (which optional steps he skipped; the `SHOW CREATE TABLE bga_globals` result; step 8's result; T3's replays).
+- Whether the undo savepoint restores `bga_globals` is **not known**; step 8 settles it. If it doesn't, nothing is fixed in session 1; the finding goes to the next session.
+- His go-ahead for the `struct:` commit (after the playtest), for the docs commit of the closing docs, and for pushes (`9fa97f4` is unpushed).
+- The closing docs: `MIGRATION_PLAN.md` (P1.3's Status, U7's row, B2's row, which names the backslash escapes), `BGA_PITFALLS.md` for a U7 finding (the MySQL JSON column sorts object keys by length then bytes, and `bga->globals` does too; `json_encode` writes whole floats as ints; an old wrapper stored `é` as `u00e9`), and `TODO.md`: only if B2 has an item there, and only with Jonathan's go-ahead in session 2.
+- **A correction to the 2026-11-09 entry:** its "Next", item 1, names `replay-fix-docs.diff`, but `331e4d0` was committed from `replay-fix-docs-v3.diff`.
+- Q-T3 (whether BGA player names can contain apostrophes, accents or other such characters) stays open.
+
+**What is next**
+1. Jonathan deploys `UtilTrait.php` and `dbmodel.sql`, creates the new tables and plays the required steps (and the optional ones if time allows).
+2. Session 2: the results, the `struct:` commit (after his "commit the struct" or its equivalent), the closing docs.
+
+**Grant of this session, quoted from the prompt's §1**
+
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (misc/docs/PROCEDURES.md): code changes are made only as steps of misc/docs/MIGRATION_PLAN.md, one step per session.
+>
+> This session runs step P1.3, "Globals on bga->globals". It permits code changes in these files only (the step's Files list):
+> - modules/php/UtilTrait.php
+> - modules/php/Game.php
+> - dbmodel.sql
+>
+> Docs: only misc/docs/progress.md in this session. (For the record: the closing session will also edit MIGRATION_PLAN.md, namely P1.3's Status, U7's row and B2's row, and misc/docs/BGA_PITFALLS.md only for a U7 finding. Not this session.)
+> Files outside the repo: in "D:\Documents\BGA Studio\" (diffs, the inventory, the scratch harness).
+> Anything else needs my explicit go-ahead: another file, another doc, a commit, a push, an install. You don't deploy; I deploy to Studio. Nothing goes to the BGA Production site.
+>
+> This step spans two sessions by design. This session ends after stop B with an "in progress" progress.md entry, before my long playtest. A new session takes the playtest results, the struct: commit and the closing docs.
+
+**His review of stop A (2026-11-10), quoted in full** (the 113 log lines he pasted with it are in the transcript; they are not copied here)
+
+> Stop A reviewed. Record this message in the progress.md entry, quoted in full.
+>
+> 1. Model and effort: this session runs on Sonnet 5.5 at High effort. Record both.
+>
+> 2. The U7 run (my run, on Studio, a new 2-player table created after the deploy). UtilTrait.php on Studio was 79,744 bytes after the deploy, as expected. The 113 log lines follow this message, as I copied them from the game log (newest first). The run printed 113 lines (37 cases × 3, plus the start and end lines), not 114 as your stop A said; record the correct count. I didn't play on that table.
+>
+> 3. Backslash escapes (your finding 3): they count as part of B2's side effect. §4's parity rule has one exception: values that the current SQL corrupts or rejects because json_encode's output goes unescaped into a single-quoted SQL string. That covers the apostrophe, and the backslash escapes: non-ASCII characters (é was stored as u00e9 in the U7 run, case 30), ", \ and control characters such as a newline. The struct: commit message names this as part of the B2 side effect, and so will B2's row at the closing docs. This doesn't settle Q-T3 (whether BGA player names can contain such characters); it stays open.
+>
+> 4. Commit the tool. The function ran as designed on Studio: all 37 cases, no EXCEPTION line, and the end line. Stage modules/php/UtilTrait.php by explicit path, commit with the message you showed (the co-author line is correct), and show git show --stat. Don't push.
+>
+> 5. Then do §7's comparison from the log lines and report its table. The design discussion's reading, for you to check rather than take as given:
+>    - The database is MySQL 8.4 ("DB 8.4.4-4"). bga->globals->get returns JSON objects as PHP arrays, in the same key order as the current wrapper returns them. The exceptions: a top-level empty stdClass comes back as a stdClass (case 15), and a top-level int 0 (also from a stored 0.0) comes back as 0, where the wrapper returns null (cases 01, 11, 37).
+>    - The design discussion tested one candidate conversion against the W and F lines, by script: if the framework's value === 0, return null; otherwise return json_decode(json_encode($value), $asArray). It reproduced both wrapper reads on every case except 30 (the exception in point 3). Use it, or propose another conversion with the same check.
+>    - Not covered by U7: an empty object nested inside a value. The candidate conversion would return [] there, where the current wrapper's read without true returns a stdClass. Confirm from the code, with file:line, that no write site can store an object, and so no nested {}: for example, no value read without true is written back with setGlobalVariable. If one can, stop and report.
+>    If any row can't be converted, stop there. Otherwise continue with step B (§8) and stop at stop B.
+>
+> 6. Additions for step B:
+>    - The re-run of debug_globalsShape after the implementation deploy: in the playtest list, state the expected result. The W lines should equal this run's, except case 30, which then reads 'é'. If you remove the 'wrapper' => false skip from cases 32 and 33 (the new wrapper no longer builds SQL), say so; their W lines should then equal their F lines. Move the deletion of the zz_shape_w_ keys to bga->globals->delete.
+>    - In the "Go to game database" step, add SHOW CREATE TABLE bga_globals, to record the type of its value column.
+>    - dbmodel.sql is LF in the working copy, as you reported. Keep it LF, and record this in the entry.
+
+**His review of stop B (2026-11-10), quoted in full**
+
+> Stop B reviewed. Record this message in the progress.md entry, quoted in full. No change to the code: the implementation, the harness and the checks stand as reported.
+>
+> 1. Undo (step 8). Before the list is final, show with file:line:
+>    - which states offer the undoClimbingCard action;
+>    - for the option the step uses, which globals that option has already written when Undo is pressed in that state.
+>    If the option writes no global before Undo is available, the step can't tell the old storage from the new; pick a card option that does write one, and say which and why. Expected result, as now: after Undo and F5, every value the option changed (Water, Psych, hand, asset board, the card) is back to its value before the choice. If Studio shows otherwise, I'll report it in the next session; nothing is fixed in this one.
+>
+> 2. Playtest scope (my decision). v2 of the list:
+>    - Required: step 0 (the re-run), step 1 (the database check), steps 2–7 (the plan's playtest), step 8 (Undo), step 14 (the end), and T3 (F13).
+>    - Optional, run if time allows: steps 9–13 and T2 (step 15). Mark them optional in the list. The record will say which ones I skipped, and that their paths and the two reshuffle flags are then covered only by the harness and the U7 run.
+>    - Renumber only if that keeps the list clear. Keep each step's [S]/[C]/[inferred] tags.
+>
+> 3. The deploy step: add the expected Studio sizes. The design discussion computed UtilTrait.php at 79,664 bytes (CRLF) and dbmodel.sql at 2,130 bytes (LF), from the diff applied to 331e4d0's files. Confirm both from the working copy, and correct them if they differ. Also add: don't open the U7 table again; it was created before this deploy.
+>
+> 4. The live-tab console line says "gamelframe". Correct it to a context name you can source, or drop it and keep only "leave the default context and record its name".
+>
+> 5. The struct: commit message, for the next session's commit:
+>    - Change "The framework's get returns arrays and a plain 0" to "The framework's get returns JSON objects as arrays and a stored 0 as 0".
+>    - Add after the first paragraph: "One shape no write site builds reads differently: an object whose keys are exactly 0..n-1 in another order now reads as a list without $asArray. Studio tables created before this change can't be played: dbmodel.sql applies only at table creation."
+>    Show the revised message as text.
+>
+> 6. Then end this session as §9 says: the "in progress" entry, with the v2 playtest list in full and its version, the answers to item 1, and the expected sizes. Write the raw docs diff to "D:\Documents\BGA Studio\" and show its counts, plus the docs: commit message as text. Stop and wait. On my "commit docs", stage only misc/docs/progress.md by explicit path and commit. Push only on my "push".
+
 ## 2026-11-09 (the replay fix, F13: done)
 
 The replay fix is done. Jonathan's second Studio trial (trial 2, table 995807, playtest list v3) passed F13. The fix is committed as `4e82116` (a `fix:` commit on `1e0a552`), and the closing docs are in the `docs:` commit that holds this entry. It isn't a step of `MIGRATION_PLAN.md`: it ran under a one-time exception (below).
