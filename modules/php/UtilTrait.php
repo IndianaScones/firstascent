@@ -1326,6 +1326,190 @@ trait UtilTrait {
         ]);
     }
 
+    // U7 (MIGRATION_PLAN.md §1): what bga->globals returns for each shape of value, next to the current wrapper
+    // (P1.3). It writes only keys that start with zz_shape_, touches no game key and changes no game state.
+    // The log lines (log_only; "GS", the case number and a label, then a tag):
+    //   IN = the PHP value written;
+    //   W  = setGlobalVariable, then getGlobalVariable($key) [-] and getGlobalVariable($key, true) [true];
+    //   F  = bga->globals->set, then ->get($key); has = bga->globals->has($key).
+    // Each value shows its PHP type, then its var_export text (nested types and key order). "same=yes" means that
+    // text is identical to IN's: same types, same key order.
+    #[\Bga\GameFramework\Actions\Debug(reload: true)]
+    public function debug_globalsShape() {
+        if ($this->getBgaEnvironment() !== 'studio') {
+            throw new \Bga\GameFramework\SystemException('Studio only');
+        }
+
+        $cases = $this->debugShapeCases();
+        $wrapperKeys = [];
+        $frameworkKeys = [];
+        foreach (array_keys($cases) as $i) {
+            $wrapperKeys[] = 'zz_shape_w_' . sprintf('%02d', $i + 1);
+            $frameworkKeys[] = 'zz_shape_f_' . sprintf('%02d', $i + 1);
+        }
+
+        $this->debugShapeLog('GS start: PHP ' . PHP_VERSION . ', DB ' . $this->getUniqueValueFromDB('SELECT VERSION()') . ', ' . count($cases) . ' cases');
+        try {
+            // clear what an interrupted earlier run may have left
+            $this->debugShapeDelete($wrapperKeys, $frameworkKeys);
+
+            foreach ($cases as $i => $case) {
+                $n = sprintf('%02d', $i + 1);
+                $tag = "GS $n {$case['label']}";
+                $wKey = $wrapperKeys[$i];
+                $fKey = $frameworkKeys[$i];
+                $noSet = $case['noset'] ?? false;
+                $value = $case['value'] ?? null;
+                $inText = $noSet ? null : $this->debugShapeText($value);
+                $this->debugShapeLog("$tag IN : " . ($inText ?? '(nothing written: the key does not exist)'));
+
+                if (($case['wrapper'] ?? true) === false) {
+                    $this->debugShapeLog("$tag W  : skipped (the current SQL would break on this value)");
+                } else {
+                    try {
+                        if (!$noSet) {
+                            if (array_key_exists('pre', $case)) { $this->setGlobalVariable($wKey, $case['pre']); }
+                            $this->setGlobalVariable($wKey, $value);
+                        }
+                        $plain = $this->getGlobalVariable($wKey);
+                        $asArray = $this->getGlobalVariable($wKey, true);
+                        $this->debugShapeLog("$tag W  : [-] " . $this->debugShapeText($plain, $inText) . ' [true] ' . $this->debugShapeText($asArray, $inText));
+                    } catch (\Throwable $e) {
+                        $this->debugShapeLog("$tag W  : EXCEPTION " . get_class($e) . ': ' . $e->getMessage());
+                    }
+                }
+
+                try {
+                    if (!$noSet) {
+                        if (array_key_exists('pre', $case)) { $this->bga->globals->set($fKey, $case['pre']); }
+                        $this->bga->globals->set($fKey, $value);
+                    }
+                    $has = $this->bga->globals->has($fKey) ? 'yes' : 'no';
+                    $got = $this->bga->globals->get($fKey);
+                    $this->debugShapeLog("$tag F  : " . $this->debugShapeText($got, $inText) . " has=$has");
+                } catch (\Throwable $e) {
+                    $this->debugShapeLog("$tag F  : EXCEPTION " . get_class($e) . ': ' . $e->getMessage());
+                }
+            }
+        } finally {
+            $this->debugShapeDelete($wrapperKeys, $frameworkKeys);
+            $this->debugShapeLog('GS end: test keys deleted');
+        }
+    }
+
+    // The values for debug_globalsShape: the shapes the inventory found (p1-3-globals-inventory.md), and the
+    // edges of the current wrapper. 'wrapper' => false skips the current wrapper (its SQL would break);
+    // 'noset' reads a key that was never written; 'pre' writes an earlier value to the same key first.
+    function debugShapeCases(): array {
+        $skills = ['gear' => 0, 'face' => 0, 'crack' => 0, 'slab' => 0];
+        $techniques = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0, 'wild' => 0];
+        $resourceTracker = [];
+        $boardAssets = [];
+        foreach ([2369493, 2369492] as $pid) {
+            $resourceTracker[$pid] = [
+                'skills' => $skills,
+                'permanent_skills' => $skills,
+                'techniques' => $techniques,
+                'asset_board' => ['skills' => $skills, 'techniques' => $techniques],
+                'symbol_tokens' => $skills + $techniques,
+                'water' => 0,
+                'psych' => 0,
+            ];
+            foreach (['gear', 'face', 'crack', 'slab'] as $type) {
+                $boardAssets[$pid][$type] = [
+                    'count' => 0, '1' => [], '2' => [], '3' => [], '4' => [],
+                    'flipped' => ['1' => null, '2' => null, '3' => null, '4' => null],
+                    'tucked' => [], 'permanent' => 0,
+                ];
+            }
+        }
+        $boardAssets[2369493]['gear']['1'] = [37 => '22'];
+        $boardAssets[2369493]['gear']['tucked'] = [12 => '5'];
+        $boardAssets[2369493]['gear']['count'] = 1;
+
+        $gapMid = [10, 20, 30];
+        unset($gapMid[1]);
+        $gapFirst = [10, 20, 30];
+        unset($gapFirst[0]);
+        $gapLast = [10, 20, 30];
+        unset($gapLast[2]);
+        $playersMet = [2369493, 2369492];
+        unset($playersMet[0]);
+        // objective ids inserted unsorted and of different lengths, as chosen at setup
+        $sharedObjectives = [
+            12 => ['pitches' => ['1', '2'], 'score' => 4, 'players_met' => $playersMet],
+            3 => ['pitches' => ['3'], 'score' => 5, 'players_met' => [], 'player_counts' => [2369493 => 0, 2369492 => 0]],
+            10 => ['pitches' => ['5', '6'], 'score' => 4, 'players_met' => [2369493]],
+        ];
+
+        return [
+            ['label' => 'int_0', 'value' => 0],
+            ['label' => 'int_11', 'value' => 11],
+            ['label' => 'int_1', 'value' => 1],
+            ['label' => 'str_0', 'value' => '0'],
+            ['label' => 'str_empty', 'value' => ''],
+            ['label' => 'str_11', 'value' => '11'],
+            ['label' => 'false', 'value' => false],
+            ['label' => 'true', 'value' => true],
+            ['label' => 'null', 'value' => null],
+            ['label' => 'float_2_0', 'value' => 2.0],
+            ['label' => 'float_0_0', 'value' => 0.0],
+            ['label' => 'float_0_5', 'value' => 0.5],
+            ['label' => 'list_3_1_2', 'value' => [3, 1, 2]],
+            ['label' => 'empty_array', 'value' => []],
+            ['label' => 'empty_stdClass', 'value' => new \stdClass()],
+            ['label' => 'list_gap_mid', 'value' => $gapMid],
+            ['label' => 'list_gap_first', 'value' => $gapFirst],
+            ['label' => 'list_gap_last', 'value' => $gapLast],
+            ['label' => 'pid_keys_desc', 'value' => [2369493 => 'b', 2369492 => 'a']],
+            ['label' => 'str_keys_unsorted', 'value' => ['zeta' => 1, 'b' => 2, 'aa' => 3]],
+            ['label' => 'num_keys_unsorted', 'value' => [10 => 'a', 9 => 'b', 1 => 'c']],
+            ['label' => 'nested_resource_tracker', 'value' => $resourceTracker],
+            ['label' => 'nested_board_assets', 'value' => $boardAssets],
+            ['label' => 'nested_shared_objectives', 'value' => $sharedObjectives],
+            ['label' => 'hand_slot_keys', 'value' => [2369493 => [1 => 41, 2 => 52], 2369492 => []]],
+            ['label' => 'rope_order_keys_from_1', 'value' => [1 => [], 2 => [2369493], 3 => []]],
+            ['label' => 'bailed_pitch', 'value' => [2369493 => null, 2369492 => '0']],
+            ['label' => 'risked_requirements', 'value' => [['gear' => 1, 'face' => 0, 'crack' => 0, 'slab' => 0, 'any_skill' => 0, 'water' => 0, 'psych' => 0], [12, 15], [], [], '9', '14', [''], 0]],
+            ['label' => 'permanent_floats', 'value' => [2369493 => ['gear' => floor(7 / 3), 'face' => floor(1 / 2)], 2369492 => []]],
+            ['label' => 'str_non_ascii', 'value' => 'é'],
+            ['label' => 'str_slash', 'value' => 'a/b'],
+            ['label' => 'str_apostrophe', 'value' => "it's", 'wrapper' => false],
+            ['label' => 'str_dquote_backslash_newline', 'value' => "say \"hi\" \\ end\nnext", 'wrapper' => false],
+            ['label' => 'missing_key', 'noset' => true],
+            ['label' => 'overwrite_int_then_list', 'pre' => 11, 'value' => [3, 1, 2]],
+            ['label' => 'overwrite_list_then_null', 'pre' => [3, 1, 2], 'value' => null],
+            ['label' => 'overwrite_int_then_0', 'pre' => 11, 'value' => 0],
+        ];
+    }
+
+    // The type, then the var_export text on one line (nested types and key order show in it).
+    // With $inText, "same=yes" when this text is identical to the written value's.
+    function debugShapeText(mixed $value, ?string $inText = null): string {
+        $type = gettype($value);
+        if (is_object($value)) { $type .= '(' . get_class($value) . ')'; }
+        $text = 'type=' . $type . ' value=' . preg_replace('/\s*\n\s*/', ' ', var_export($value, true));
+        return $inText === null ? $text : $text . ' same=' . ($text === $inText ? 'yes' : 'no');
+    }
+
+    function debugShapeLog(string $line): void {
+        $this->bga->notify->all('log_only', '${line}', ['line' => $line]);
+    }
+
+    // framework keys through bga->globals; wrapper keys (the current global_variables table) through one DELETE
+    // limited to the zz_shape_ prefix. The only SQL on global_variables that the tool commit adds.
+    // $wrapperKeys is unused here; the later commit that moves the wrapper onto bga->globals deletes them there.
+    function debugShapeDelete(array $wrapperKeys, array $frameworkKeys): void {
+        foreach ($frameworkKeys as $key) {
+            try {
+                $this->bga->globals->delete($key);
+            } catch (\Throwable $e) {
+                $this->debugShapeLog("GS delete of $key failed: " . get_class($e) . ': ' . $e->getMessage());
+            }
+        }
+        $this->DbQuery("DELETE FROM `global_variables` WHERE LEFT(`name`, 9) = 'zz_shape_'");
+    }
+
     // Helpers for the debug functions. No debug_ prefix, so they stay out of Studio's debug menu.
 
     // $repeats keeps a repeated id: Asset type_args have several copies
