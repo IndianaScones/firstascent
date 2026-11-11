@@ -35,18 +35,20 @@ trait UtilTrait {
         /*if ($obj == null) {
             throw new \Error('Global Variable null');
         }*/
-        $jsonObj = json_encode($obj);
-        $this->DbQuery("INSERT INTO `global_variables`(`name`, `value`)  VALUES ('$name', '$jsonObj') ON DUPLICATE KEY UPDATE `value` = '$jsonObj'");
+        $this->bga->globals->set($name, $obj);
     }
 
+    // Returns what the earlier version returned, which read the `value` column of the custom global_variables table
+    // as JSON text (the U7 check, MIGRATION_PLAN.md §1: bga->globals->get returns arrays, so this converts):
+    // - null for an int 0: the old text "0" was falsy. A float 0.0 is written by json_encode as 0, so it is covered too.
+    // - JSON objects as stdClass unless $asArray is true, and lists as arrays: json_decode of the re-encoded value.
+    //   Arrays whose keys are not 0..n-1 in order encode as objects, as they did before.
+    // - a missing key, null, false, "", "0", numbers and [] come back unchanged.
     function getGlobalVariable(string $name, $asArray = null) {
-        $json_obj = $this->getUniqueValueFromDB("SELECT `value` FROM `global_variables` where `name` = '$name'");
-        if ($json_obj) {
-            $object = json_decode($json_obj, $asArray);
-            return $object;
-        } else {
-            return null;
-        }
+        $value = $this->bga->globals->get($name);
+        if ($value === 0) { return null; }
+        if (!is_array($value) && !is_object($value)) { return $value; }
+        return json_decode(json_encode($value), $asArray);
     }
 
     function getTileCoords($player_count) {
@@ -1326,8 +1328,9 @@ trait UtilTrait {
         ]);
     }
 
-    // U7 (MIGRATION_PLAN.md §1): what bga->globals returns for each shape of value, next to the current wrapper
-    // (P1.3). It writes only keys that start with zz_shape_, touches no game key and changes no game state.
+    // U7 (MIGRATION_PLAN.md §1): what bga->globals returns for each shape of value, next to the wrapper
+    // (P1.3; the wrapper now sits on bga->globals, so a W line differs from its F line only by the conversion in
+    // getGlobalVariable). It writes only keys that start with zz_shape_, touches no game key and changes no game state.
     // The log lines (log_only; "GS", the case number and a label, then a tag):
     //   IN = the PHP value written;
     //   W  = setGlobalVariable, then getGlobalVariable($key) [-] and getGlobalVariable($key, true) [true];
@@ -1363,20 +1366,16 @@ trait UtilTrait {
                 $inText = $noSet ? null : $this->debugShapeText($value);
                 $this->debugShapeLog("$tag IN : " . ($inText ?? '(nothing written: the key does not exist)'));
 
-                if (($case['wrapper'] ?? true) === false) {
-                    $this->debugShapeLog("$tag W  : skipped (the current SQL would break on this value)");
-                } else {
-                    try {
-                        if (!$noSet) {
-                            if (array_key_exists('pre', $case)) { $this->setGlobalVariable($wKey, $case['pre']); }
-                            $this->setGlobalVariable($wKey, $value);
-                        }
-                        $plain = $this->getGlobalVariable($wKey);
-                        $asArray = $this->getGlobalVariable($wKey, true);
-                        $this->debugShapeLog("$tag W  : [-] " . $this->debugShapeText($plain, $inText) . ' [true] ' . $this->debugShapeText($asArray, $inText));
-                    } catch (\Throwable $e) {
-                        $this->debugShapeLog("$tag W  : EXCEPTION " . get_class($e) . ': ' . $e->getMessage());
+                try {
+                    if (!$noSet) {
+                        if (array_key_exists('pre', $case)) { $this->setGlobalVariable($wKey, $case['pre']); }
+                        $this->setGlobalVariable($wKey, $value);
                     }
+                    $plain = $this->getGlobalVariable($wKey);
+                    $asArray = $this->getGlobalVariable($wKey, true);
+                    $this->debugShapeLog("$tag W  : [-] " . $this->debugShapeText($plain, $inText) . ' [true] ' . $this->debugShapeText($asArray, $inText));
+                } catch (\Throwable $e) {
+                    $this->debugShapeLog("$tag W  : EXCEPTION " . get_class($e) . ': ' . $e->getMessage());
                 }
 
                 try {
@@ -1398,8 +1397,8 @@ trait UtilTrait {
     }
 
     // The values for debug_globalsShape: the shapes the inventory found (p1-3-globals-inventory.md), and the
-    // edges of the current wrapper. 'wrapper' => false skips the current wrapper (its SQL would break);
-    // 'noset' reads a key that was never written; 'pre' writes an earlier value to the same key first.
+    // edges of the earlier wrapper. 'noset' reads a key that was never written; 'pre' writes an earlier value to
+    // the same key first.
     function debugShapeCases(): array {
         $skills = ['gear' => 0, 'face' => 0, 'crack' => 0, 'slab' => 0];
         $techniques = ['precision' => 0, 'balance' => 0, 'pain_tolerance' => 0, 'power' => 0, 'wild' => 0];
@@ -1474,8 +1473,8 @@ trait UtilTrait {
             ['label' => 'permanent_floats', 'value' => [2369493 => ['gear' => floor(7 / 3), 'face' => floor(1 / 2)], 2369492 => []]],
             ['label' => 'str_non_ascii', 'value' => 'é'],
             ['label' => 'str_slash', 'value' => 'a/b'],
-            ['label' => 'str_apostrophe', 'value' => "it's", 'wrapper' => false],
-            ['label' => 'str_dquote_backslash_newline', 'value' => "say \"hi\" \\ end\nnext", 'wrapper' => false],
+            ['label' => 'str_apostrophe', 'value' => "it's"],
+            ['label' => 'str_dquote_backslash_newline', 'value' => "say \"hi\" \\ end\nnext"],
             ['label' => 'missing_key', 'noset' => true],
             ['label' => 'overwrite_int_then_list', 'pre' => 11, 'value' => [3, 1, 2]],
             ['label' => 'overwrite_list_then_null', 'pre' => [3, 1, 2], 'value' => null],
@@ -1496,18 +1495,15 @@ trait UtilTrait {
         $this->bga->notify->all('log_only', '${line}', ['line' => $line]);
     }
 
-    // framework keys through bga->globals; wrapper keys (the current global_variables table) through one DELETE
-    // limited to the zz_shape_ prefix. The only SQL on global_variables that the tool commit adds.
-    // $wrapperKeys is unused here; the later commit that moves the wrapper onto bga->globals deletes them there.
+    // Both key sets (the wrapper's and the framework's) now live in bga_globals, so both go through bga->globals.
     function debugShapeDelete(array $wrapperKeys, array $frameworkKeys): void {
-        foreach ($frameworkKeys as $key) {
+        foreach (array_merge($wrapperKeys, $frameworkKeys) as $key) {
             try {
                 $this->bga->globals->delete($key);
             } catch (\Throwable $e) {
                 $this->debugShapeLog("GS delete of $key failed: " . get_class($e) . ': ' . $e->getMessage());
             }
         }
-        $this->DbQuery("DELETE FROM `global_variables` WHERE LEFT(`name`, 9) = 'zz_shape_'");
     }
 
     // Helpers for the debug functions. No debug_ prefix, so they stay out of Studio's debug menu.
