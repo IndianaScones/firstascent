@@ -2,6 +2,206 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-11 (P1.3, Globals on bga->globals: done)
+
+P1.3 is done. Session 2 made the `struct:` commit (`5caa754`), took Jonathan's Studio results for playtest list v3, and wrote these closing docs. The code change is the one session 1 left in the working tree, unchanged. Nothing was deployed by this session and nothing went to the BGA Production site. The `struct:` commit and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push".
+
+**Line numbers in this entry.** `Game.php`, `firstascent.js` and `modules/utils.js` are unchanged since `331e4d0`, so their line numbers hold for `331e4d0` and for `5caa754`. `UtilTrait.php` line numbers are for `5caa754`, unless marked "at 331e4d0".
+
+**State at the end of the session**
+- **Commits of P1.3:**
+  - `9fa97f4` `tool: debug_globalsShape, the U7 check for P1.3` (session 1; on `origin/main` by the start of this session);
+  - `68c6db9` `docs: P1.3 in progress, session 1 (U7 run, wrapper on bga->globals, playtest v2)` (session 1; on `origin/main` by the start of this session);
+  - `5caa754` `struct: getGlobalVariable/setGlobalVariable on bga->globals (P1.3)` (this session; not pushed);
+  - the `docs:` commit that holds this entry (not pushed).
+- **Start check (all as the prompt said, with one exception):** HEAD `68c6db9`, level with `origin/main` after `git fetch origin` (both `68c6db9305ced59066c5e1eecb6f3351cf8c7f44`); only `dbmodel.sql` and `modules/php/UtilTrait.php` modified, unstaged; nothing staged. The files in `D:\Documents\BGA Studio\` had the stated sizes, except `p1-3-playtest-v3.md`, which was **0 bytes** on the first look. Jonathan said "Ok sorry, please check again"; the second look found it at 8,053 bytes, 134 lines (LF count), and the session went on from there. The line counts below are LF counts.
+- **The `struct:` commit.** `git diff -- modules/php/UtilTrait.php dbmodel.sql` was written (by `git diff > file`, not a PowerShell redirect, which would change the bytes) to `p1-3-final.diff`: 136 lines, 7,929 bytes, `cmp` equal to `p1-3.diff`, SHA-256 `2ef94b061d8ad703008cfb23a6791e161f83b9fb43a7000dfe0f2cc03195de5e` for both. The two files were staged by explicit path and committed with session 1's revised message, unchanged (lines 73–99 of the previous entry, copied by `sed` to `p1-3-struct-msg.txt`, 27 lines, CR removed). `git show --stat`: 2 files changed, 29 insertions, 39 deletions (`dbmodel.sql` 6 deletions; `UtilTrait.php` 62 changed lines). The working tree was clean afterwards.
+- **Files outside git, in `D:\Documents\BGA Studio\`** (new in this session):
+  - `p1-3-final.diff` and `p1-3-struct-msg.txt` (above);
+  - `p1-3-docs.diff`, the raw diff of the closing docs (its counts are in the session's report, not here);
+  - Jonathan's files: `p1-3-playtest-v3.md` (8,053 bytes, 134 lines), `p1-3-playtest-results.txt` (38,106 bytes, 293 lines), `p1-3-replay-trial-1\IndianaScones0.log` (11,216 bytes, 211 lines) and `IndianaScones1.log` (12,431 bytes, 241 lines). These are the first T3's consoles (table 1002510); they are not the replay fix's `replay-trial-1\`.
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's answer: "high"). The `struct:` commit's co-author line reads Claude Sonnet 5.5.
+- **Transcript** (outside the repo): `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\e4c38bac-be26-4172-baba-296d03d4aec1.jsonl`; the session prompt is its first message. Scratchpad: `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\e4c38bac-be26-4172-baba-296d03d4aec1\scratchpad\`.
+
+**Status of each item**
+- The `struct:` commit: done (`5caa754`).
+- The playtest (list v3): run by Jonathan; recorded below.
+- F13: passed on the rerun table; the first T3's freeze is a finding about a refused debug call in a replay (below).
+- The closing docs: `MIGRATION_PLAN.md` (P1.3's Status, U7's row, B2's row, and on his go-ahead the F13 rows of §8.1 and §8.4), `BGA_PITFALLS.md` (the U7 findings, the undo savepoint, the refused debug call in a replay) and `TODO.md` (the findings below): this commit.
+- Nothing was found that P1.3 broke. Every finding below was found in play and none has a cause in `getGlobalVariable`/`setGlobalVariable` as far as I can tell from the code; none was run down to a cause on Studio.
+
+**Grant of this session, quoted from the prompt's §1**
+
+> What this session may do:
+> - Commit the code change that is already in the working tree (modules/php/UtilTrait.php and dbmodel.sql), under the condition in §3. No other code change.
+> - Docs, after my review (§5):
+>   - misc/docs/progress.md (the final P1.3 entry);
+>   - misc/docs/MIGRATION_PLAN.md (P1.3's Status, U7's row in §1, B2's row in §5.4);
+>   - misc/docs/BGA_PITFALLS.md (the U7 findings and the replay finding in §4.3);
+>   - misc/docs/TODO.md (the new findings in §4.4).
+> - Files outside the repo: in "D:\Documents\BGA Studio\".
+> Anything else needs my explicit go-ahead: another file, another doc, an install. You don't deploy. Nothing goes to the BGA Production site. Push only on my "push".
+
+**His go-aheads in the prompt, quoted**
+
+> §3: If they're identical: stage modules/php/UtilTrait.php and dbmodel.sql by explicit path and commit with the struct: message recorded in session 1's entry (the revised one, with the residual-gap paragraph), unchanged. Then show git show --stat. That is my go-ahead for this commit; it doesn't extend to anything else.
+>
+> §4.3: A refused debug function call in a game appears to freeze that game's replay at that point (§4.2), so a table meant for a replay check shouldn't include one. This is my go-ahead for this line, outside the U7 scope.
+>
+> §4.4: New findings, none caused by P1.3 as far as the design discussion can tell. Each is to be recorded as found, with the table, the step and the console text from my file. Check TODO.md and FREEZE_INVESTIGATION.md first, and if a finding is already there, add to that entry instead of making a new one. [§4.4 is headed "For TODO.md (my go-ahead)".]
+>
+> §5: Write the raw docs diff to "D:\Documents\BGA Studio\p1-3-docs.diff" and give its line count, bytes and --stat. Show the docs: commit message as text. Then stop and wait. On my "commit docs": stage only the docs files above, by explicit path, and commit. On my "push": push the struct: commit and the docs commit, and report git log -3 --oneline and git status.
+>
+> §6: Line endings: the working copy is CRLF and the index LF (core.autocrlf on), except CLAUDE.md and dbmodel.sql, which are LF. Edit docs by script with exact-match checks, keep each file's endings, and check CRs. Stage by explicit path, never git add -A. Never amend a pushed commit. My approvals name their action ("commit docs", "push"). If a message of mine is ambiguous while several actions are pending, ask.
+
+**His message about the start check, quoted:** "Ok sorry, please check again." (After the first report that `p1-3-playtest-v3.md` was empty.) His answer to the effort question: "high".
+
+**His review of the docs diff (2026-11-11), quoted in full**
+
+> Docs diff reviewed. Make these changes; nothing else changes. Record this message in the entry, quoted in full.
+>
+> 1. Table 1002510's game had ended before I opened the replays. In BGA_PITFALLS.md, drop the clause saying whether the game had ended is not recorded, and keep "why the replay stops there is not known". In the entry, item 4 under "What this session checked" is answered by this message; take it out of "Pending".
+>
+> 2. Card 15 B and T4 6b: the "again" is wrong. In 6b I wrote that Climbing Card log entries were still appearing for the spectator. Remove "again in T4 step 6b" from the TODO.md entry and "again T4 6b" from the entry's findings. Where 6b is mentioned, say that other Climbing Card lines reached the spectator there.
+>
+> 3. Step 0: the design discussion compared all 37 cases' F and W lines, 22–24 included, by script, against its own copy of the U7 lines I pasted in session 1. Say so in the entry's item 1 and in the U7 bullet of P1.3's Status: this session's own check covers the 66 lines on disk, and the design discussion's covers all 37 cases.
+>
+> 4. The plan's other F13 mentions (my go-ahead for these two edits in MIGRATION_PLAN.md): in §8.1's F13 row (line 1635) and §8.4's F13 row (line 1686), mark P1.3's repeat as passed, with "(5caa754; progress.md, 2026-11-11)". Leave line 631 (P1.2's text) and D9 (lines 111 and 1918) as they are: they record what was planned. In the entry, list all five places and what was done with each.
+>
+> 5. Pending: drop "whether step 14's wording should change in the lists". The list is a record, and the entry already says the line was unclear to me.
+>
+> 6. zombie_players: no BGA_PITFALLS.md line. The deviation recorded in the entry is enough.
+>
+> Write "D:\Documents\BGA Studio\p1-3-docs-v2.diff" (don't overwrite the first), give its line count, bytes and --stat, show the lines that changed from p1-3-docs.diff, and show the docs: commit message again, updated if needed. Then stop and wait for my "commit docs".
+**The playtest record, quoted from the prompt's §4** (the design discussion's readings of the results, which this session was told to check against the files; the checks are under "What this session checked" below)
+
+> The playtest ran on list v3, my change to v2, written in the design discussion during the playtest. My message asking for it, quoted in full:
+>
+> > I'm through step 5 of T1, but T1 is too complicated for a single table. Step 6 with 3 different rounds risking as well as a bail which can be difficult to force. Let's go ahead and fold in all of the optional steps but make one or two new tables for steps 6 - 14 of T1 and consider the most streamlined way of separating the steps into the two tables. Thank you.
+>
+> The list is p1-3-playtest-v3.md, and my results are p1-3-playtest-results.txt. Record both as they are, by path and counts, in the final entry; summarise each step's result from my file, and quote my wording where a summary would lose something. Below are the design discussion's readings of the results, to check against the files rather than take as given.
+>
+> ### 4.1 What passed
+> - Step 0, the re-run of globalsShape. The design discussion compared it with the U7 run line by line, by script:
+>   - 113 lines;
+>   - every F line identical;
+>   - every W line identical except case 30, which now reads 'é' in both settings;
+>   - cases 32 and 33 have W lines equal to their F lines.
+>   Check this against the GS lines in my results file and the U7 lines quoted in session 1's entry.
+> - Step 1: no global_variables table, bga_globals present, and exactly the 53 expected rows. The value column's type was not recorded: phpMyAdmin cut off SHOW CREATE TABLE's output after the name column, and SHOW COLUMNS showed no result in that SQL tab. Record it as not checked, and say why it no longer matters: the U7 run and the re-run already show the key order unchanged.
+> - Steps 2–7 (the plan's own playtest), 8 (Undo), 9–12, 13a, 14 and 15 went as expected, with the exceptions and deviations my file reports. 13b ran in a table I added, T6: players_met lost the correct id, not the first-listed one, so the gap-list path wasn't reached in play (U7 case 24 and the harness cover it).
+> - Undo restored every value, including Water after option B of card 1. Studio evidence that the undo savepoint covers bga_globals: phpMyAdmin's table tree for a post-deploy table (ebd_firstascent_1005120) lists a table whose name begins zz_savepoint_bga_glob (cut off in the tree), next to the other zz_savepoint_ copies. The design discussion reads it as zz_savepoint_bga_globals.
+> - My two restores, the "Load Previous State" in 11a and the save loaded in T5 step 10, went without incident: light evidence that Studio saves cover bga_globals too.
+> - Step 12: permanent assets confirmed in descending id order and logged in ascending order.
+> - Step 14's objectives line ("objective 1/2 in ascending objective id"): not checked. It refers to the end-of-game line per player that names their two personal objectives in the stored key order (Game.php:6348–6352 at 331e4d0). Record it as not checked; the key order is covered by U7.
+>
+> ### 4.2 F13
+> - The first T3 (table 1002510): both replays froze at the same point, round 3's second climbOrRest. That's where I tried debug_endGameSoon on the player who hadn't climbed, and it was refused. Both consoles end with ly_studio.js's "Try to lock interface while it is already locked !" in ntf_archivewaitingdelay, with no error from the game's code.
+> - Seat 1's three [FA missing element] warnings are the display-only kinds trial 2 of the replay fix showed: the character placeholder, the board created, confirmYourRequirements. Seat 0 shows the first two. Check this against the two logs.
+> - To get the refusal in, I rested player B in round 2, since turn order changes between rounds.
+> - The rerun, a new T3-shaped table without the refusal: A rested in round 1 and B climbed; B climbed again; debug_endGameSoon for B; B's next climb ended the game. My report, quoted in full: "Without the refusal, both replays reached the end successfully." I didn't save those consoles.
+> - So F13 passes for P1.3 on the rerun. The first T3's freeze is a finding about a refused debug call in a replay (§4.3), not about P1.3 [the design discussion's inference: a refusal sends no notification and changes no state].
+> - Check the record: did either trial of the replay fix (in progress.md) include a refused debug call before the end? Answer with citations. If one did and that replay reached the end, the inference above weakens: stop and report before the docs.
+>
+> ### 4.3 For BGA_PITFALLS.md
+> Propose the lines; I'll review them in the docs diff.
+> - The U7 findings: bga->globals->get returns JSON objects as PHP arrays, in the same key order as the legacy json column on MySQL 8.4 (shorter keys first, then bytes), a top-level empty object as stdClass, and a stored 0 as 0; the old wrapper's top-level-0-reads-null came from its own truthiness test.
+> - The undo savepoint covers bga_globals (step 8; the zz_savepoint_ table).
+> - A refused debug function call in a game appears to freeze that game's replay at that point (§4.2), so a table meant for a replay check shouldn't include one. This is my go-ahead for this line, outside the U7 scope.
+>
+> ### 4.4 For TODO.md (my go-ahead)
+> New findings, none caused by P1.3 as far as the design discussion can tell. Each is to be recorded as found, with the table, the step and the console text from my file. Check TODO.md and FREEZE_INVESTIGATION.md first, and if a finding is already there, add to that entry instead of making a new one.
+> 1. The spectator's log misses card 15 B's choice line ("Too Much Gear: … Offload some gear onto your partner …"). The server sends it with notifyAllPlayers (Game.php:2402 at 331e4d0), and its text comes from the card's data, so a client-side cause is likelier [inference]. The spectator didn't hang, and card 5's line ("Rope Sheath is Cut") reached it.
+> 2. Card 9 B goes to the discard after the first player's Technique token, before the second player's.
+> 3. Two spectator hangs, each fixed by F5:
+>    - notif_matchingTechniques: TypeError reading 'symbol_tokens' of undefined at firstascent.js:11926;
+>    - notif_confirmCrimperClimbingCard: TypeError reading 'water' of undefined in getCurrentPlayerResources (utils.js:1469, via checkClimbingChoices, utils.js:2991).
+>    The design discussion's guess, from the function names: the spectator's client looks up its own id among the players. Read the code and say whether that holds.
+> 4. Bionic Woman (T5 step 10): the action bar offers a plain climb, without the "You may risk it" message, on a pitch where her ability can't cover the missing third Gear. This is a rules-logic item: record it in TODO.md as found, for me to classify (it may become a RULES_CHECK.md item); don't decide it.
+> 5. T5 step 14: W's last act was choosing a Permanent Asset token. The discard animation moved the first of four cards and hung; the title stayed "Taking Permanent Asset token(s)"; the console was clean; the other player and the spectator saw the game end; F5 fixed it. Say which FREEZE_INVESTIGATION.md class it fits, if any.
+> 6. Noticed in passing, by reading: the end-of-game objectives log registers 'objectives_2_for_log' in i18n where the argument is 'objective_2_for_log' (Game.php ~6375 at 331e4d0). Confirm by reading before recording.
+>
+> ### 4.5 Errors in the lists, and my deviations
+> Record these as they are:
+> - The list's errors:
+>   - v1's step 3 expected a Portaledge refill after one card, which there's no reason for.
+>   - v1's "Trifecta, if drawn" treats Trifecta as a card; it's a pitch.
+>   - v3's 9a, written in the design discussion, said Z "chooses the Jesus piece if offered", but the Summit Beta is drawn from the pile.
+> - My deviations:
+>   - debug_giveAssets assists in 6b, step 10 (W) and 9d;
+>   - the restores in §4.1;
+>   - zombie_players edited directly in the database in T2, which didn't make the player a zombie, so I used "Play one move (using zombie code)";
+>   - W reached the Headwall instead of Z;
+>   - the bail came after round 3;
+>   - T6 added for 13b;
+>   - the rest for B in the first T3's round 2.
+> - The live-tab default console context was "top" (T1).
+
+**List v3** (`D:\Documents\BGA Studio\p1-3-playtest-v3.md`, 8,053 bytes, 134 lines; Jonathan's change to v2, written in the design discussion during the playtest). Every step required; steps 0–5 on T1, then "Express stop". **T4** (2 players, about 3 rounds): round 1: 6a risk it with Lucky Chalkbag (Z), 6b risk it, die 2 (W), 11a Bomber Anchor; round 2: 11b Energy Drink, 8 Undo (Z), 6c risk it, die 3, no Summit Beta (W); round 3: 9a card 25 A, 11c Rerack token and trade. **T5** (2 players, about 5–6 rounds; setup with `debug_setSharedObjectives(11, 12, 1)` and Young Prodigy for Z): W's climbs carry 9b card 25 A (choosing Z), 9c card 9 B, 10 card 2 (add a token to a pitch), 9d card 3 B, 9e card 55; Z's route covers 12 (Permanent Asset tokens), 13a–13c (Headwall, shared objective 11, Trifecta), 7 (bail) and 14 (end, `debug_endGameSoon` for W). **T2** (3 players): step 15 (Cool-Headed Crimper, then a zombie). **T3** (2 players, last): F13 as in P1.2's Table 3. The step numbers of v1 are kept (`p1-3-coverage.md` still maps). Tables Jonathan actually ran: T1, T4, T5, T6 (added for 13b), T2, the first T3 (table 1002510), and a rerun T3-shaped table.
+
+**Jonathan's results, by step** (`D:\Documents\BGA Studio\p1-3-playtest-results.txt`, 38,106 bytes, 293 lines; summarised here, his wording quoted where a summary would lose something; "[prompt]" marks what the prompt says and the results file does not)
+- **T1 console:** "Default console context is "Top"."
+- **0. `globalsShape`:** the 113 lines are in the file (the end line first, the start line last: "GS start: PHP 8.4.27, DB 8.4.4-4, 37 cases"; no `EXCEPTION` line). Checked below.
+- **1. Database:** "No `global_variables`, `bga_globals` is present. Value of the column from `SHOW CREATE TABLE bga_globals;` is CREATE TABLE `bga_globals` ( `name` varchar(50) ..." and "the expected 53 rows are present and no others". The value column's type was not recorded [prompt: phpMyAdmin cut the output off after the name column, and `SHOW COLUMNS` showed no result in that SQL tab]: **not checked**. It no longer matters, because the U7 run and the re-run already show the key order unchanged.
+- **2. S-smoke 1:** "`debug_setSharedObjectives(11, 12, 1)` correctly warns for two sides of the same Shared Objective token. Log is as expected, spectator's included. No console errors or `[FA...]` warnings."
+- **3. S-smoke 2 and 3 plus `portaledgeAll`:** two issues. (a) List error: "there's no reason for the Portaledge to refill after only one card has been drawn from a deck on it." (b) Finding: "the spectator log is missing the Climbing Card entry ("Too Much Gear: IndianaScones1 chooses Offload some gear onto your partner: All other players gain 1 Gear Card from The Portaledge"). I wasn't watching that tab when the climbing card was drawn or resolved, but when I went to it afterwards it wasn't hung up or frozen." No console errors or warnings; later log entries present. Recorded in `TODO.md`.
+- **4. S-smoke 4:** "As expected."
+- **5. S-smoke 5:** "the "Rope Sheath is Cut" Climbing Card showed up in the spectator log as expected, which possibly suggests an issue combining spectatorship with the "Too Much Gear" Climbing Card option B. Both F5 situations cleared by all tabs, worked as expected with no errors or warnings." That ends T1 (steps 0–5).
+- **T4, round 1.** **6a:** as expected, no errors or warnings including the spectator. **6b:** he used `debug_giveAssets` to give W two more Gear cards, "otherwise a -2 cards die roll would force them to retreat from the pitch"; "Climbing Card log entries are still appearing for the spectator. Still seems isolated to the aforementioned combination" (other Climbing Card lines reached the spectator here); W's risk with the die forced to 2 as expected. **11a:** he ran `debug_giveSummitBeta(9, Z)` at the beginning of the Rerack phase, "not before. I couldn't remember for certain that the counter showed, so I clicked the "Load Previous State" button. The second use of Bomber Anchor allowed me to confirm that it does show." (restore 1)
+- **T4, round 2.** **6c:** as expected. **11b:** as expected. **8 (Undo):** "As expected, all values remained correct after the undo. No errors or warnings." [prompt: Water after option B of card 1 included; the file says "all values", without naming Water.]
+- **T4, round 3.** **9a:** list error (below); "this step went as expected with no errors or warnings. Jumar was the token drawn." **11c:** "I used `debug_giveSummitBeta` to give Rerack to W. W both traded and used Rerack and both went as expected with no errors or warnings."
+- **T5 setup:** "Z is IndianaScones0, W is IndianaScones1. One note that to facilitate the bail, W will be reaching the Headwall instead of Z. Also the bail will be after round 3, before W has finished climbing all of their necessary pitches to see the required Climbing Cards resolved."
+- **T5, 9b:** as expected. **9c:** "One issue unrelated to the playtest. The Climbing Card went from the display to the discard pile (essentially was discarded) after the first player chose their technique token but before the second player chose theirs, when instead it should discard after both players have received their tokens." Also: "Spectator hung during "Checking for matching Technique Symbols"" with `firstascent.js:11926 Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'symbol_tokens')`; "A refresh fixed it and brought it to the current state with no issues."
+- **T5, 10:** "As expected, no errors or warnings, including seeing the token on pitch (and in the pitch tooltip) after a page refresh." He then loaded a save made just before Z's third climb, because he had forgotten a necessary asset (restore 2): "The earlier state loaded without incident." The pitch with the token required the additional Gear asset. A problem unrelated to the testing: W (Bionic Woman) chose a pitch where she is missing one Gear; "the action bar does not have the "You may risk it message" and assumes W can climb the pitch without risk, even though their ability cannot remove or alter the 3rd Gear requirement (which is the missing asset)." He used `debug_giveAssets` to give W another Gear card; the climb then went as expected.
+- **T5, 13a:** as expected. **13b:** "I failed to notice this while testing, so I will create a new table (T6) to test it after completing T5." **13c:** "Trifecta, if drawn" makes no sense. Trifecta is a pitch, not a Climbing Card." (list error). **12:** "Permanent Asset tokens were confirmed in descending player id order and reported in the log in ascending order, as expected. Matching Technique symbols confirmed to grant 2-point token as expected." **7:** "Bail went as expected, no errors or warnings. Page refresh during Z's next Climbing phase also as expected, though I should note that due to debug functions, Z had already refreshed the page between bailing and their next Climbing phase." **9d:** `debug_giveAssets` let W climb a Headwall pitch without risk; card 3 option B "resolved as expected, no errors or warnings." **9e:** as expected.
+- **T5, 14:** "Problem with W, whose final act was choosing a Permanent Asset token to gain. During the animation of discarding the four cards to earn the token, the first card animated to the discard but then it hung and the other 3 cards never animated. The game ended successfully for the other player and the spectator, but the page had to be refreshed for W to see the game ending. During the hang up, it says "Taking Permanent Asset token(s)" in the action bar and there are no errors or warnings in the console. This seems like another freeze from the earlier bug investigation that took place before code migration began." And: "I did not check the id order of the personal objectives. In fact I'm not sure to what the instructions are referring by, "the personal objectives line lists "objective 1/2" in ascending objective id [inferred]." Does this mean in the log entry telling what personal objectives each player held? At any rate I didn't check the ids." **Not checked.** The line the list means is the end-of-game line per player that names their two personal objectives (`Game.php:6348–6352`: `array_keys($personal_objectives_tracker[$player_id])`; the first key is "objective 1"). Yes: it is the log entry that says which objectives each player held. The key order is covered by U7.
+- **T6, 13b:** "Score and Shared Objectives tracker both reflected player `2369493` climbing a 1 point pitch. `players_met` lost the correct id and not the first-listed id." So the gap-list path wasn't reached in play; U7 case 24 and the harness cover it [prompt].
+- **T2, 15:** "Crimper's turn offered two Climbing cards as expected." He added a different player's id to the `zombie_players` global with the cards still waiting; "adding the player's id to `zombie_players` didn't actually turn them into a zombie, so when it became that player's climb I used the "Play one move (using zombie code)" a few times to progress the game a bit and there were no issues, errors, or warnings except for the spectator, who was hung in resolving the Climbing card ("Mountain goat blocks the route" option B)" with `Uncaught (in promise) TypeError: Cannot read properties of undefined (reading 'water')` at `getCurrentPlayerResources` (`utils.js:1469`), via `checkClimbingChoices` (`utils.js:2991`) and `notif_confirmCrimperClimbingCard` (`firstascent.js:13369`). The file doesn't say how the spectator recovered; the prompt says each of the two spectator hangs was fixed by F5.
+- **T3 (the first one, table 1002510):** "Because turn order changes between rounds, I had to rest with Player B in the 2nd round so that I could test `debug_endGameSoon` with Player A (who hadn't climbed a pitch) first. IndianaScones1's (2369493) replay had some unexpected warnings and also froze when `debug_endGameSoon` was attempted to be used on the player who hadn't climbed a pitch yet. IndianaScones0's (2369492) replay froze in the same way. The logs have been zipped and pasted." The consoles are `p1-3-replay-trial-1\IndianaScones0.log` and `IndianaScones1.log`.
+- **The rerun** (not in the results file; from the prompt): a new T3-shaped table without the refusal: A rested in round 1 and B climbed; B climbed again; `debug_endGameSoon` for B; B's next climb ended the game. His report: "Without the refusal, both replays reached the end successfully." The consoles were not saved.
+
+**Errors in the lists, and Jonathan's deviations** (as he reported them; from the prompt's §4.5 and the results file)
+- **List errors:** v1's step 3 expected a Portaledge refill after one card (there is no reason for one); v1's "Trifecta, if drawn" treats Trifecta as a card, but it is a pitch (the same line was carried into v3 as 13c); v3's 9a, written in the design discussion, said Z "chooses the Jesus piece if offered", but the Summit Beta token is drawn from the pile ("There is no opportunity to "choose the Jesus piece if offered.""). Also: step 14's wording about "the personal objectives line" was unclear to him (above).
+- **Deviations:** `debug_giveAssets` helped in 6b, step 10 (W) and 9d; two restores (11a's "Load Previous State" and T5 step 10's save); `zombie_players` edited directly in the database in T2, which did not make the player a zombie, so he used "Play one move (using zombie code)"; W reached the Headwall instead of Z; the bail came after round 3; T6 was added for 13b; the rest for B in the first T3's round 2; the live-tab default console context was "top" (T1).
+- **Not run or not checked, as the file reports:** step 1's column type; 13b on T5 (run on T6 instead); step 14's objective order; and 13c (he called "Trifecta, if drawn" meaningless and reported no Trifecta result).
+
+**What this session checked** (against the files; each reading was the design discussion's)
+
+1. **Step 0, the re-run of `debug_globalsShape`: holds, with one limit.** The results file has 113 `GS` lines (37 cases × 3, the start line and the end line), no `EXCEPTION`, and "GS end: test keys deleted". The U7 lines available on disk are `p1-3-harness\u7-expected.txt` (66 lines: the W and F lines of cases 01–21, 25–31 and 34–37, and the F lines of cases 32 and 33). Sorted and compared with the 74 F and W lines of the new run: **65 of the 66 are identical**; the one that differs is case 30's W line (`u00e9` in the U7 run, `'é'` now, both settings), as expected. The new run's W lines for cases 32 and 33 read `'it\'s'` and `'say "hi" \\ end next'` in both settings, equal to their F values. **Not compared:** the F and W lines of cases 22–24 (too long to be saved in `u7-expected.txt`; the U7 run's lines for them are in session 1's transcript only) and the IN lines. So this session's own check covers the 66 lines on disk: "every F line identical" for 34 of the 37 cases, and "every W line identical except case 30" for 32 of the 35 W lines that U7 produced. Jonathan's review (quoted above) adds that the design discussion compared all 37 cases' F and W lines, cases 22–24 included, by script, against its own copy of the U7 lines he pasted in session 1; that check covers all 37 cases, and I could not redo it.
+2. **The two replay consoles (§4.2): hold.** `[FA missing element]` warnings: seat 1 (`IndianaScones1.log`, `player=2369493`) has three: `notif_confirmCharacter` "no .character_placeholder | step skipped" (line 32), `notif_confirmCharacter` "no #asset_board_2369493 | board created" (55) and `notif_confirmYourRequirements` "no .selected_pitch | step skipped" (107). Seat 0 (`IndianaScones0.log`, `player=2369492`) has the first two (lines 38 and 61). Both logs end with `ly_studio.js:1 Try to lock interface while it is already locked !` from `lockInterface` ← `ntf_archivewaitingdelay` (seat 0, line 191; seat 1, line 221), right after "Entering state: climbOrRest" for the second `climbOrRest` after the second `nextRound`, that is round 3's second `climbOrRest` (seat 0: `nextRound` at lines 141 and 180, the stop at 189–191; seat 1: `nextRound` at 171 and 210, the stop at 219–221). Neither log has an `Uncaught` line, a `TypeError` or a `[FA animation fallback]` line; the `Error` lines are the browser's Permissions-Policy messages and the blocked browser-update.org script.
+3. **The record check (§4.2's last bullet): neither trial of the replay fix included a refused debug call, so the inference stands.** The 2026-11-09 entry (the replay fix) records both trials' results, not the lists' text. The debug calls its results name are `forceDie` (trial 1, 1l: "climber used `forceDie` set to 1 and risked climbing Headwall pitch") and `debug_endGameSoon` (1m), which succeeded in both trials (trial 1: "1m - completed", the game was shortened; trial 2: "1m. ... Then game ended after `debug_endGameSoon` as expected."). No result there reports a refused call, and the word "refus" does not occur in that entry. The one earlier refused call in a game whose replay was checked is P1.2's Table 3, step 3c (the 2026-11-02 entry, "Table 3" results: "3c: refused as expected, no reload, nothing changed"); that game's replay failed on the first "Next move", at `notif_confirmCharacter` (3g), a different and earlier failure that the replay fix removed. So no replay that got past a refusal reached the end before this playtest, and none that reached the end had one. The limit of the check: it is from the entry's results; a refusal would have been in Jonathan's reports, and none is.
+4. **Answered by Jonathan's review (quoted above): table 1002510's game had ended before he opened the replays.** The files didn't say, and the question was whether a replay of an unfinished game stops at its last archived move with the same `ntf_archivewaitingdelay` message [inferred, not shown]. It was not an unfinished game, so that reading is out. The wording in `BGA_PITFALLS.md` states the observation and the rerun, and says that why the replay stops there is not known.
+5. **The `getGlobalVariable` wrapper and the old truthiness test** (for `BGA_PITFALLS.md`): the old `getGlobalVariable` returned null whenever the JSON text was falsy, `if ($json_obj)` (`UtilTrait.php:44` at 331e4d0); the text "0" is falsy in PHP, which is why a stored top-level 0 read null. The column was not involved.
+6. **Undo.** "As expected, all values remained correct after the undo" (the prompt adds Water). The savepoint evidence for `bga_globals` is the prompt's: a `zz_savepoint_bga_glob…` table in phpMyAdmin's tree for table `ebd_firstascent_1005120` (the name is cut off in the tree, so `zz_savepoint_bga_globals` is a reading). Both restores (11a, T5 step 10) went without incident.
+
+**The findings, and where they are** (all recorded in `TODO.md`; read in code only, nothing run down on Studio; line numbers at `331e4d0`)
+- **Spectator misses card 15 B's choice line** (T1 steps 3 and 5; in T4 6b other Climbing Card lines reached the spectator). The server sends it with `notifyAllPlayers("log_only", '${climbing_log_all}', …)` (`Game.php:2402`, the `$portaledge_choose` case), the text comes from the card's data (`Game.php:2251–2260`), and the client has no `log_only` handler (no match in `firstascent.js` or `modules/utils.js`), so the framework writes the line. A client-side cause is likelier [inference]; not traced.
+- **Card 9 B discards early** (T5 step 9c): already in `TODO.md` ("[?] benighted - shared technique token climbing card discarded after current player choose a token but before next player chooses one"); the entry names no card. A sub-bullet was added with this instance.
+- **Two spectator hangs, each fixed by F5** (T5 step 9c; T2 step 15). Read: the guess "the spectator's client looks up its own id among the players" is close but not what the code does. `getAllDatas` sets `resource_tracker` only `if ($current_player_id)` (`Game.php:786–791`), so a spectator's `gamedatas.resource_tracker` is undefined. `notif_matchingTechniques` decrements `this.gamedatas.resource_tracker['symbol_tokens'][type]` for every played token, whoever played it (`firstascent.js:11926`, after the player's own/other branch), and `notif_confirmCrimperClimbingCard` calls `checkClimbingChoices` unless the card is an add-token card (13334 and 13369), which reads `gameui.gamedatas.resource_tracker['water']` (`utils.js:1469`). No code looks up an id; the data is absent for a spectator. Both are the "loud" class of `FREEZE_INVESTIGATION.md` §1 (an exception before the release; `Uncaught (in promise) TypeError`). Not caused by P1.3: they read `gamedatas`, which `getGlobalVariable` fills with the same shapes as before (U7).
+- **Bionic Woman's plain climb** (T5 step 10): recorded as found, for Jonathan to classify (it may become a `RULES_CHECK.md` item). I did not read the rules logic and did not decide anything.
+- **Permanent Asset token discard hang** (T5 step 14): by symptom it fits the "silent" class of `FREEZE_INVESTIGATION.md` §1 (one client, clean console, the bar stuck on its title, a refresh fixes it, the server fine); by mechanism it fits none of S1–S4 as far as reported: no container the user hid is involved, and the handler, `notif_grantPermanentAssets` (`firstascent.js:12181`), awaits only 50 ms and 600 ms timers inside the discard loop (12246–12280), starting the card animations without awaiting them (12257, 12263, 12269). A throw in that loop would print `Uncaught (in promise)` (as in the two spectator hangs), and the console was clean. Not diagnosed; it needs a repro.
+- **`objectives_2_for_log`** (found by reading): confirmed at `Game.php:6376`: in the branch that logs `held ${objective_2_for_log}` after objective 1 was scored, the argument is `objective_2_for_log` (6375) but the i18n entry is `objectives_2_for_log`; the other branches use `objective_1_for_log` (6361, 6366) and `objective_2_for_log` (6371, 6381) correctly. Effect [inferred]: that objective name isn't marked for translation. Not run.
+- **`TODO.md` has no B2 item**, so there was nothing to remove for B2 (the plan's §10 line says "its `TODO.md` item is removed in a docs commit" in general, and session 1's entry made it conditional).
+
+**What the docs say, by file**
+- `MIGRATION_PLAN.md`: P1.3's Status (done, with `5caa754`, the playtest and a pointer here); U7's row (checked in P1.3); B2's row (removed in P1.3, with the backslash escapes); and, on his go-ahead, the F13 rows of §8.1 and §8.4 (P1.3's repeat marked passed).
+- `BGA_PITFALLS.md`: three bullets (the U7 findings; the undo savepoint; a refused debug call in a replay).
+- `TODO.md`: the findings above.
+- **The five other places where the plan names P1.3 as a repeat of F13** (line numbers as at `68c6db9`, before these docs; Jonathan's review, item 4):
+  - **Line 631** (P1.2's text, "P1.3 repeats it"): left as it is; it records what was planned.
+  - **Line 1635** (§8.1's F13 row, "(P1.3)"): now "(P1.3, passed (`5caa754`; `progress.md`, 2026-11-11))".
+  - **Line 1686** (§8.4's F13 row, "P1.2, P1.3 (D9), P2.2, …"): now "P1.3 (D9; passed (`5caa754`; `progress.md`, 2026-11-11))".
+  - **Line 111** (D9 in the plan's decision list): left as it is; it records what was planned.
+  - **Line 1918** (D9 in §13): left as it is; it records what was planned.
+
+**Pending**
+- Jonathan's review of the docs diff; then "commit docs" and "push".
+- Q-T3 (whether BGA player names can contain apostrophes, accents or other such characters) stays open.
+
+**What is next**
+1. Jonathan reviews the docs diff and says "commit docs"; the commit goes in; then "push" for the `struct:` commit and the `docs:` commit.
+2. The next step in plan order is P1.4 (notification, statistics and score APIs; `MIGRATION_PLAN.md`), one step per session.
+
 ## 2026-11-10 (P1.3, Globals on bga->globals: in progress, session 1)
 
 P1.3 is half done. Session 1 ran the inventory, the U7 check on Studio, the tool commit and the implementation; the code change is in the working tree, uncommitted, and waits for Jonathan's Studio playtest. Session 2 (a new session) takes the playtest results, the `struct:` commit and the closing docs. Nothing is deployed from this change, nothing is pushed, and nothing went to the BGA Production site.

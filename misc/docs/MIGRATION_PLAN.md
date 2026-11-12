@@ -246,7 +246,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 | U4 | Transitions and `nextState` names across array states and State classes | P2.1 |
 | U5 | `zombieTurn` vs `zombie()` during the mix | P2.1 |
 | U6 | `#[PossibleAction]` methods provided through a PHP trait; a `Game.php` `act*` method called in a class state that doesn't declare it | P2.2, P2.7 |
-| U7 | `bga->globals->get` returns arrays or `stdClass` for JSON objects ([Game.php doc:286] shows `stdClass` for a stored class) | P1.3 |
+| U7 | `bga->globals->get` returns arrays or `stdClass` for JSON objects ([Game.php doc:286] shows `stdClass` for a stored class) | P1.3 (checked on Studio with `debug_globalsShape`: JSON objects come back as arrays, in the old column's key order; a top-level empty object as `stdClass`; a stored 0 as int 0. `getGlobalVariable` converts these back to the old shapes; `progress.md`, 2026-11-10 and 2026-11-11) |
 | U8 | Whether PHP can read a file under `misc/` at runtime on Studio (for the setup-overrides file, §6.3). Checked only if P1.1 finds that §6.3 is needed (D4) | P1.1, conditional |
 | U9 | A rejected promise under `setupPromiseNotifications` | P4.2 |
 | U10 | Which client entry wins when both exist (avoided by deleting) | P3.5 |
@@ -632,6 +632,12 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** playable. Delete on Studio: `firstascent.game.php`, `modules/utils.php`. Fresh table.
 
 **P1.3 Globals on `bga->globals`** (S)
+- **Status:** done. Committed: `9fa97f4` (`tool:`, `debug_globalsShape`) and `5caa754` (`struct:`: `getGlobalVariable`/`setGlobalVariable` on `bga->globals`, `global_variables` dropped from `dbmodel.sql`, the B2 side effect). Playtested on Studio by Jonathan (reported 2026-11-11) on list v3: shortened games on T1, T4, T5, T6 and T2, then T3 and a rerun of it. Details in `progress.md` (2026-11-11).
+  - **Done when:** met. Nothing reads or writes `global_variables`: the only mention left is the explanatory comment at `UtilTrait.php:41` (at `5caa754`). On Studio the table is gone and `bga_globals` holds the 53 expected rows (step 1).
+  - **U7:** checked (§1). The re-run of `debug_globalsShape` after the deploy matches the U7 run: 65 of the 66 lines kept from the U7 run are identical, and case 30's W line now reads `é`; cases 32 and 33's W lines equal their F lines. This session's own check covers the 66 U7 lines kept on disk; the design discussion's covers all 37 cases' F and W lines, cases 22–24 included, against its own copy of the U7 lines Jonathan pasted in session 1.
+  - **Results:** steps 0–15 as expected apart from the findings below. Undo (step 8) restored every value; a `zz_savepoint_bga_glob…` table is on Studio, and both Studio-save restores went without incident. Not checked: the type of `bga_globals`' `value` column (it no longer matters: the U7 run and the re-run show the key order unchanged), step 14's personal-objectives order (U7 covers the key order), and 13b's gap-list path in play (T6's `players_met` lost the correct id, not the first-listed one; U7 case 24 and the harness cover the gap list).
+  - **F13: passed** on a rerun table (a new T3-shaped table without a refused debug call): both replays reached the end. The first T3 (table 1002510) froze in both replays at round 3's second `climbOrRest`, where a refused `debug_endGameSoon` had been tried. That is a finding about a refused debug call in a replay (`BGA_PITFALLS.md`), not about P1.3. The rerun's consoles weren't saved; the first T3's are in `D:\Documents\BGA Studio\p1-3-replay-trial-1\`.
+  - **Findings, none caused by P1.3 as far as can be told** (`TODO.md`): the spectator's log misses card 15 B's choice line; card 9 B discards early (already listed); two spectator hangs (`resource_tracker` is undefined for a spectator); a Bionic Woman plain climb without the risk message (for Jonathan to classify); a hang in the Permanent Asset discard animation; `objectives_2_for_log` in `Game.php:6376`.
 - **Scope:**
   - Run the U7 check first (a Studio-only `debug_globalsShape()`).
   - Reimplement `getGlobalVariable`/`setGlobalVariable` (`utils.php ~32–48`) on `$this->bga->globals` [Game.php doc:247–347], keeping both return shapes that the `$asArray` flag selects today.
@@ -1335,7 +1341,7 @@ Read in code, not run. They were the first open questions. Jonathan answered Q-R
 | ID | Finding | Code | Proposed handling |
 |---|---|---|---|
 | B1 | `getAllDatas` writes globals, and game logic depends on one of those writes | `php:getAllDatas ~796` (`player_order`), `~830` (`asset_discard`); `php:stNextRound ~6506` reads `player_order` | Removed by `StateView` in P5.2(b) |
-| B2 | `setGlobalVariable` builds SQL with unescaped JSON. A value containing `'` would break the query. Player names can't contain `'` (Q-T3), so that case can't arise through names; whether any other stored value can isn't checked | `utils.php ~36–37` | Removed structurally in P1.3 (side effect) |
+| B2 | `setGlobalVariable` builds SQL with unescaped JSON. A value containing `'` would break the query. Player names can't contain `'` (Q-T3), so that case can't arise through names; whether any other stored value can isn't checked | `utils.php ~36–37` | Removed in P1.3 (`5caa754`): `setGlobalVariable` calls `bga->globals->set`, so no SQL is built from JSON. That includes the backslash escapes `json_encode` writes (non-ASCII characters, `"`, `\`, control characters), which the old SQL corrupted or rejected: é was stored as `u00e9` (U7 case 30). On Studio, é, the apostrophe and the escapes now round-trip (the re-run's cases 30, 32, 33). Q-T3 stays open |
 | B3 | Thin server-side validation of client input: | | Client-sent player ids: P1.6–P1.9. Every other `act*` input is validated against `$args` in the slice that owns it, in separate `fix:` commits (D7) |
 | | • `confirmAssets` trusts the deck count and the Spread card ids | `php ~1007–1050` | |
 | | • `rest`, `passClimbingCard` and `confirmPermanentAssets` trust a client-sent player id | `action.php ~306, ~321, ~337` | |
@@ -1632,7 +1638,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | F10 | S6: log formatting throws (names with `-` and, if Studio allows them, accents; unknown ids). Player names can't contain `'` (Q-T3) |
 | F11 | S7: concurrency (`onUndoSummitBeta` not awaited; card-49 double Portaledge; duplicate token chains; `retractClimbingCard`'s stale title) |
 | F12 | `shareEffect*` releases only for card 49 |
-| F13 | The replay check: a replay of a new game with a rest, from each seat, to the end, with no new console error and no `[FA animation fallback]` warning other than the expected ones (P1.3). The replay fix is `4e82116` |
+| F13 | The replay check: a replay of a new game with a rest, from each seat, to the end, with no new console error and no `[FA animation fallback]` warning other than the expected ones (P1.3, passed (`5caa754`; `progress.md`, 2026-11-11)). The replay fix is `4e82116` |
 
 ### 8.2 Tools
 - **Studio playtests** with one browser tab per player (the red arrow or `testuser` [Tools doc:21–24]) and a spectator tab.
@@ -1683,7 +1689,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | F4 | P4.2, P5.9, P5.10 | F10 | P3.5, P5.13 |
 | F5 | P5.10 | F11 | P5.4, P5.7, P5.9, P5.10 (hygiene deferred from P4, §4.3.1) |
 | F6, F7 | P4.1, P5.7 | F12 | P4.5 (bounded by the backstop), P5.4 (fixed) |
-| | | F13 | P1.2, P1.3 (D9), P2.2, P2.6, P3.5, P4.1, P7.3 |
+| | | F13 | P1.2, P1.3 (D9; passed (`5caa754`; `progress.md`, 2026-11-11)), P2.2, P2.6, P3.5, P4.1, P7.3 |
 
 **Server findings, rules items and UX items** (ids in §5.4, `TODO.md`, `RULES_CHECK.md` and `UX_CHANGES.md`):
 
