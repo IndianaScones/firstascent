@@ -2,6 +2,226 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-12 (P1.4, Notification, statistics and score APIs: in progress, session 1)
+
+P1.4 is half done. Session 1 recounted the call sites, made the change in the working tree (uncommitted), built and checked three stacked diffs, ran a tokenizer harness with a mutation test, and wrote the playtest list and its coverage map. The change waits for Jonathan's long Studio playtest. Session 2 (a new session) takes the playtest results, the three `struct:` commits and the closing docs. Nothing is deployed, nothing is committed, nothing is pushed, and nothing went to the BGA Production site.
+
+**Line numbers in this entry.** The change rewrites calls in place and adds or removes no line: `Game.php` is 6,534 lines and `UtilTrait.php` 1,594 lines both at `6a7a44f` and in the working copy, so line numbers hold for both, and a call changed on line N is still on line N.
+
+**State at the end of the session**
+- **HEAD:** `6a7a44f` (`docs: P1.3 done (struct: commit, playtest v3 results, closing docs)`), level with `origin/main` after `git fetch origin` at the start (both `6a7a44f0bc546b193cb2a09dd0416dc7e32e0a6b`).
+- **Staged:** nothing. Diffs 1 to 3 were built by staging the two files temporarily; at the end `git reset -q -- modules/php/Game.php modules/php/UtilTrait.php` left the working tree as it was.
+- **Unstaged (the whole P1.4 change, uncommitted):** `modules/php/Game.php` (351,608 bytes, CRLF, 6,534 lines, blob `66512c5b68ca976a6f0b09e311d6370716197795`) and `modules/php/UtilTrait.php` (79,694 bytes, CRLF, 1,594 lines, blob `6f704c7ab26c7575acbde08a56c65eb93b0c5f2d`). `git diff --stat`: 2 files, 235 insertions, 235 deletions (`Game.php` 460 changed lines, `UtilTrait.php` 10).
+- **Expected Studio sizes after the deploy** (CRLF, uploaded as in the working copy): `Game.php` **351,608 bytes, 6,534 lines**; `UtilTrait.php` **79,694 bytes, 1,594 lines**. The design discussion's own check agrees.
+- **Files outside git, in `D:\Documents\BGA Studio\`** (new in this session; lines are LF counts):
+  - the diffs: `p1-4-notify.diff` (1,151 lines, 77,241 bytes), `p1-4-stats.diff` (503 lines, 33,738 bytes), `p1-4-score.diff` (76 lines, 5,623 bytes), `p1-4-all.diff` (1,631 lines, 110,673 bytes); hashes below;
+  - `p1-4-scratch\`, a clone of the repo at `6a7a44f` with the three diffs applied (the check below; it can be deleted);
+  - `p1-4-harness\`: `lib.php` (91 lines, 5,326 bytes), `rewrite.php` (82, 5,456; the rewrite script), `harness.php` (176, 13,154), `mutants.php` (33, 3,396), `inventory.php` (22, 1,250), `argrisk.php` (37, 2,340), `comments.php` (12, 908), `sitemap.php` (19, 1,258); results `harness-result.txt` (76, 5,116), `mutants-result.txt` (17, 2,032), `argrisk-result.txt` (53, 4,029), `comments-result.txt` (4, 518), `tm-old.txt` and `tm-new.txt` (21, 2,041 each), `rewrite-stats-Game.txt` (193, 12,687), `rewrite-stats-UtilTrait.txt` (5, 295), `rewrite-score-Game.txt` (17, 1,419); `mutants\` (the ten mutant copies of `Game.php` and two altered `stats.json` files);
+  - the playtest list **`p1-4-playtest-v2.md`** (109 lines, 27,180 bytes; v2 is the version for the playtest; `p1-4-playtest-v1.md`, 109 lines, 23,458 bytes, is kept and superseded) and the coverage map **`p1-4-coverage-v2.md`** (126 lines, 17,264 bytes; `p1-4-coverage.md`, 123 lines, 14,967 bytes, is v1, kept and superseded);
+  - the raw docs diff of this entry and its commit message (`p1-4-docs.diff`, `p1-4-docs-msg.txt`; their counts are in the session's report, not here).
+  - Not from this session: `p1-4-files\` and `p1-4-files.zip` (the design discussion's upload: `Game.php` 350,578 bytes, `UtilTrait.php` 79,664 bytes and `stats.json` 9,009 bytes, the 6a7a44f versions). Not touched.
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's stop A review, item 1). The `struct:` commits' co-author line reads Claude Sonnet 5.5.
+- **Compaction:** none that I know of; the context was not summarised.
+
+**Status of each item**
+- Start check: done (below). Nothing differed.
+- The recount, the rewrite, the three diffs, the scratch-clone check and the checks: done (below).
+- The harness and its mutation test: done; the playtest list and coverage map: written, v2 final (Jonathan's two stop reviews led to v2 and one in-place fix of step 1.1, below). Not run.
+- The three `struct:` commits, the closing docs (below): session 2.
+
+**Grant of this session, quoted from the prompt's §1**
+
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (misc/docs/PROCEDURES.md): code changes are made only as steps of misc/docs/MIGRATION_PLAN.md, one step per session.
+>
+> This session runs step P1.4, "Notification, statistics and score APIs". It permits code changes in these files only (the step's Files list):
+> - modules/php/Game.php
+> - modules/php/UtilTrait.php
+>
+> Docs: only misc/docs/progress.md in this session. (For the record: the closing session will also edit MIGRATION_PLAN.md, namely P1.4's Status, P1.4's notify count (126 → 129), P1.5's self:: count (310 → 181), and the F13 rows of §8.1 and §8.4 for P1.4's replay check; misc/docs/BGA_PITFALLS.md for framework findings; and misc/docs/TODO.md for new findings. Not this session.)
+> Files outside the repo: in "D:\Documents\BGA Studio\" (the inventory, the diffs, the harness, the scratch clone, the playtest list).
+> Git: you may stage modules/php/Game.php and modules/php/UtilTrait.php temporarily to build the stacked diffs (§4.4). At the end of the session nothing is staged, and the working tree holds the whole change, uncommitted.
+> Anything else needs my explicit go-ahead: another file, another doc, a commit, a push, an install. You don't deploy; I deploy to Studio. Nothing goes to the BGA Production site.
+>
+> This step spans two sessions by design. This session ends after stop B with an "in progress" progress.md entry, before my long playtest. A new session takes the playtest results, the three struct: commits and the closing docs.
+>
+> Record in the entry the model and effort this session runs on (ask me if your context doesn't say).
+
+(The prompt's §1 line "P1.5's self:: count (310 → 181)" is corrected by Jonathan's stop A review, item 3, below: it is 310 → 180.)
+
+**Start check** (all as the prompt said): `git fetch origin`; HEAD `6a7a44f`, level with `origin/main`; working tree clean; nothing staged. `Game.php` 350,578 bytes, 6,534 lines, CRLF; `UtilTrait.php` 79,664 bytes, 1,594 lines, CRLF. A repo-wide search of `*.php` for the six legacy names and `player_score` found them only in the two files, plus comments in `gameinfos.inc.php` (lines 64–65, naming `player_score_aux`) and `_ide_helper.php` (stubs); nothing to stop for.
+
+**The change: counts** (a PHP tokenizer count, live calls only, comments excluded; `p1-4-harness\inventory.php`)
+
+| | Before (6a7a44f) | After (working copy) |
+|---|---|---|
+| notify | `Game.php` 89 `self::notifyAllPlayers`, 37 `self::notifyPlayer`; `UtilTrait.php` 3 `self::notifyAllPlayers` (708, 743, 802): 129 | `bga->notify->all` 96 (`Game.php` 89, `UtilTrait.php` 7: 3 new + 4 existing), `bga->notify->player` 37 |
+| stats | `Game.php` 34 `initStat` (1 `'table'`, 33 `'player'`), 59 `incStat`, 3 `setStat`; `UtilTrait.php` 2 `incStat` (256 without a player id): 98 | `bga->playerStats` 98 (`Game.php` 95, `UtilTrait.php` 3: 1 new + 2 existing), `bga->tableStats` 2 (`init` at `Game.php:123`, `inc` at `UtilTrait.php:256`) |
+| score | 8 `DbQuery("UPDATE player SET player_score…")` writes at 633, 1617, 1709, 5900, 6207, 6225, 6337 (`player_score`) and 4664 (`player_score_aux`); the read at 742 stays | `bga->playerScore` 8 (7 new + the existing Elitist revert, `UtilTrait.php:1091`), `bga->playerScoreAux` 1 |
+| legacy names | | none live; no SQL writing `player_score` or `player_score_aux` |
+| `self::` tokens | `Game.php` 294, `UtilTrait.php` 15 | 168 and 12: **180** |
+
+The plan's 126 notify sites is the `Game.php` count; with `UtilTrait.php`'s 3 it is 129 (the closing session's plan edit). Raw text search at `6a7a44f`: `Game.php` has 296 `self::` strings, 2 of them in comments or strings.
+
+**P1.5's new count (Jonathan's stop A review, item 3):** 180 live `self::` tokens, not the 181 of the prompt. The design discussion's 181 came from a line count (`grep -c`), and the plan's 310 for P1.5 looks like one too. I checked: `grep -c 'self::'` gives 295 lines in `Game.php` and 15 in `UtilTrait.php` at `6a7a44f` (310, the plan's number) and 169 and 12 in the working copy (181, the prompt's number). Live tokens are 294 + 15 = 309 at HEAD and 168 + 12 = **180** after. The line count includes 2 commented-out lines (`Game.php:6520, 6527`) and counts a line with two occurrences once. **The closing session's plan edit is "310 → 180"**, with a note on what 310 counted (`grep -c` lines, not live `self::` tokens). I did not edit the plan.
+
+**The mapping** (§4.2 of the prompt; arguments keep their exact text, only the order changes)
+- `self::notifyAllPlayers(type, msg, args)` → `$this->bga->notify->all(type, msg, args)`; `self::notifyPlayer(pid, type, msg, args)` → `$this->bga->notify->player(pid, type, msg, args)`.
+- `$this->initStat('table', name, v)` → `$this->bga->tableStats->init(name, v)`; `initStat('player', name, v)` → `playerStats->init(name, v)` (no player id; it inits for every player); `incStat(d, name, pid)` → `playerStats->inc(name, d, pid)`; the 2-argument `incStat(d, "rounds")` → `tableStats->inc("rounds", d)`; `setStat(v, name, pid)` → `playerStats->set(name, v, pid)`.
+- The 8 score SQL writes → `$this->bga->playerScore->inc($P, X, null)` and `$this->bga->playerScoreAux->inc($player_id, $gained_num, null)` (`null`: no notification, like the SQL; the client adds the points itself, `scoreCtrl[…].incValue`, so there is no double count).
+- Not changed, as asked: the comments that name the old APIs (`Game.php:6327` and `6338`, the commented-out `setStat` lines; `UtilTrait.php:1099`, "so initStat creates them again"), the `${var}` string in `confirmClimbingCardChoice` (P1.5), and the `objectives_2_for_log` key at `Game.php:6376` (TODO.md; that call got its API rewrite only). The `Game.php:742` SELECT is a read and stays.
+- Line endings kept (CRLF in both files). The rewrite was done by `p1-4-harness\rewrite.php` (three stages: `notify`, `stats`, `score`), with an exact-match check at each site and a count check per file (126 + 3, 96 + 2, 8 + 0); it stops before writing if a site doesn't fit.
+
+**Typing of the legacy methods** (Jonathan's stop A review, item 5; read in `_ide_helper.php`): `incStat(int $inc, string $name, ?int $playerId = null, bool $bDoNotLoop = false)` at line 1834; `initStat(string $tableOrPlayer, string $name, int $value, ?int $playerId = null)` at 1856; `notifyAllPlayers(string $notificationType, string $notificationLog, array $notificationArgs)` at 1932; `notifyPlayer(int $playerId, string $notificationType, string $notificationLog, array $notificationArgs)` at 1942; `setStat(int $value, string $name, ?int $player_id = null, bool $bDoNotLoop = false)` at 2045. The current ones: `notify->player(int $playerIdOrNo, string $notifName, string | NotificationMessage $message = '', array $args = [])` at 350 and `notify->all(...)` at 361; `tableStats` `init`/`set`/`inc` at 600, 609, 618 (`int|float|bool` for `init`/`set`, `int|float $delta` for `inc`); `playerStats` `init`/`set`/`inc` at 641, 651, 671 (`int $player_id` for `set` and `inc`); `playerScore`/`playerScoreAux` `set` at 2808 and `inc` at 2824 (`int $playerIdOrNo`, `int $inc`, `?NotificationMessage $message`). So the typed parameters are no stricter than the old ones: a null or non-numeric argument failed the old call too, and the new stat types are wider (`int|float|bool`).
+
+**Risky arguments (reported, none changed)**
+- The score increments `$new_points` (`Game.php:1617, 5900, 6337`) and `$gained_num` (4664) are ints by construction (sums of ints); the old SQL accepted anything numeric, `playerScore->inc(int $inc)` throws on null. No null path found.
+- `Game.php:633` runs `playerScore->inc` in `setupNewGame` (The Elitist): works only if the framework's `playerScore` is usable at setup [inferred: it writes the `player` table the framework creates]. The playtest list covers the action context (`debug_setSharedObjectives`) for certain and the setup context only if setup draws The Elitist (3/16 per table).
+- `Game.php:141`: `init('climbed_summit', false)` passes a bool where the old `int $value` coerced it; `Game.php:144`: `"0"` for `personal_objective_scored` (a numeric string, coerced to int 0 without `strict_types`). The panel should show No and "None" [inferred].
+- `water_spent`/`psych_spent` (`Game.php:1530, 1531, 1550, 1551`) are guarded by `if ($water)` and `if ($psych)`.
+- `playerStats->inc("shared_objectives_points", $shared_objective_points, …)` runs on every climb at `Game.php:1377`, also with delta 0.
+
+**Findings made while reading (read, not run; none caused by P1.4; for session 2's `TODO.md` decision)**
+- The 12 personal-objective statistics in `stats.json` (ids 62–73) are never written: their `setStat` lines are commented out (`Game.php:6327, 6338`).
+- `$pitch_value_num` (`Game.php:1424–1430`) is undefined if the pitch value is outside 1–5 (the stat name would read `climbed__star`); pitch values are 1–5 in the material, so it doesn't arise.
+- A stat name is built from client input: the Trifecta type `$trifecta_arr[1]` becomes `$pitch_type` and then `climbed_<type>` (`Game.php:1196, 1414–1415`); an unexpected value would name an unknown stat. A B3-style input check, not P1.4's.
+- `nextRound()` (`UtilTrait.php:251`) runs `tableStats->inc("rounds", 1)` after the opening Rack Up as well as at each later Rerack, so `rounds` is 1 after Rack Up.
+- `debug_endGameSoon`'s filler entries (`'0'`) don't change end-of-game scoring or statistics (read; list step 2.10a): they affect the progress bar, the end check, the bail's `bailed_pitch` and, if objective 9 were in play and hexes 1–3 were climbed after the call, a PHP warning in Grand Traverse.
+
+**The three diffs** (stacked; each against the state the previous one leaves; the future `struct:` commits, in this order)
+
+| Diff | Changes | Lines, bytes | SHA-256 |
+|---|---|---|---|
+| `p1-4-notify.diff` (against `6a7a44f`) | 129 notify sites (`Game.php` 126, `UtilTrait.php` 3); 129 insertions, 129 deletions | 1,151 lines, 77,241 bytes | `3d18f5d6eb248c3b36fea6404210f84763e001ef3cf72c07eb07d957de43e251` |
+| `p1-4-stats.diff` (on top of 1) | 98 stat sites (`Game.php` 96, `UtilTrait.php` 2); 98 and 98 | 503 lines, 33,738 bytes | `1d1419415428108dfe73d9a635a179ce521ba4a12cac27d52db8d406e0abf331` |
+| `p1-4-score.diff` (on top of 2) | 8 score sites, `Game.php` only; 8 and 8 | 76 lines, 5,623 bytes | `01ca3398d814134ac64ba01da1f802beef6c9e481a1998cc63a9e9f8d853722d` |
+| `p1-4-all.diff` (`git diff HEAD`) | everything; 235 and 235 | 1,631 lines, 110,673 bytes | `afb12c32e2a697b573c46d3d67dd341130403c457657662225e86a2e8f29b6be` |
+
+All four were written with `git diff --output=<file>`. **Scratch clone** (`p1-4-scratch\`, a clone at `6a7a44f`): `git apply --check` and `git apply` of diffs 1, 2 and 3 in order each applied cleanly to the previous state; the two resulting files have the same blob hashes as the working tree (`66512c5b…` and `6f704c7a…`) and are `cmp`-identical to it; `git diff HEAD` in the clone is byte-identical to `p1-4-all.diff`.
+
+**The checks**
+- `php -l` on both files: no new message (only the known `${var}` deprecation in `confirmClimbingCardChoice`, `Game.php:2591`, the same at `6a7a44f`).
+- `php misc/tests/technique_matching.php modules/php/Game.php`: 24,192 + 188,160 + 20,000 = 232,352 cases, 0 failures, 13 named cases, "All checks passed"; the output is identical to the one for the `6a7a44f` file.
+- The tokenizer recount: the table above, before and after.
+- The harness (`p1-4-harness\harness.php`, parses each old call at `6a7a44f` and each new call with PHP's tokenizer): **PASS on 242 sites** (92 `notify->all` and 37 `notify->player` sites, which are 129 notify sites, 98 stat sites, 8 score sites and 7 existing current-API calls left alone; 92 + 37 + 98 + 8 + 7 = 242). It checks that the method maps, that the arguments are the old ones token for token in the mapped order (score sites: the SQL's player id and increment, then `null`), that the text outside the call sites is byte-identical (so each diff hunk changes only call sites; and every changed line of `p1-4-all.diff` lies inside a site), that CRLF is intact, and that every stat name is in `stats.json` under `table` or `player` as its new receiver says. Computed names (`$name`, `$pitch_type_stat`, `$asset_type_stat`, `$pitch_value_stat`, `$permanent_token_stat`) are expanded from `material.inc.php` and all resolve. 12 `stats.json` player names are never touched by any call (the personal-objective ones above).
+- The mutation test (`mutants.php`): 10 of 10 mutants fail the harness: swapped stat arguments, `playerStats`→`tableStats` at one site and back at the table init, a score without `null`, score player id and increment swapped, aux on the wrong counter, `notify->player` for `->all`, a wrong stat name, an edit outside the call sites, a legacy call left in place; and two altered `stats.json` copies (one without `times_rested`, one with `rounds` under `player`) fail the name check.
+- **The design discussion's check** (Jonathan's stop A review, item 2, quoted below): the four diffs match this report's counts, bytes and SHA-256 prefixes (LF only); the index lines chain (`Game.php` 6777cd5 → 7f2af51 → 2070d7b → 66512c5; `UtilTrait.php` 5f25373 → 7e238c9 → 6f704c7); its own tokenizer check paired all 235 old calls with their new ones, mapping right at every site, with the 7 existing current-API calls untouched; a word diff shows only call heads changed; the expected Studio sizes agree.
+
+**Draft `struct:` commit messages for session 2** (one per diff, committed in this order; each diff is staged by explicit path, `modules/php/Game.php` and `modules/php/UtilTrait.php`; the co-author line names the model that wrote the code)
+
+Commit 1, `p1-4-notify.diff`:
+
+```
+struct: notify calls on bga->notify (P1.4)
+
+Every self::notifyAllPlayers becomes $this->bga->notify->all and every
+self::notifyPlayer becomes $this->bga->notify->player: 129 sites (89 and
+37 in Game.php, 3 in UtilTrait.php). The arguments are unchanged, token
+for token, in the same order. No notification type, message or argument
+changes, so the log and the client handlers see what they saw before.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+Commit 2, `p1-4-stats.diff`:
+
+```
+struct: statistics on bga->playerStats and bga->tableStats (P1.4)
+
+initStat, incStat and setStat become bga->playerStats and
+bga->tableStats: 98 sites (96 in Game.php, 2 in UtilTrait.php).
+initStat('table', ...) and the one incStat without a player id (the
+rounds statistic) go to tableStats; the others go to playerStats.
+playerStats->init takes no player id: it initialises the statistic for
+every player, as initStat('player', ...) did. The value and name
+arguments swap places for inc and set (name first); their text is
+unchanged. climbed_summit is now initialised with a bool and
+personal_objective_scored with the string "0"; the framework coerces
+the string, and the old call coerced the bool.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+Commit 3, `p1-4-score.diff`:
+
+```
+struct: score writes on bga->playerScore and playerScoreAux (P1.4)
+
+The 8 raw UPDATEs of player_score (7) and player_score_aux (1) become
+$this->bga->playerScore->inc and ->playerScoreAux->inc with a null
+message, so no extra notification is sent and the score display is
+unchanged (the client adds the points itself, as before). The sites:
+The Elitist's start bonus (initSharedObjectives, also run in
+setupNewGame), the climb, Spider Stick, matching techniques, Stonemaster,
+Off-width Aficionado, personal objectives at the end, and the permanent
+asset count that breaks ties (player_score_aux). The SELECT in
+getAllDatas is a read and stays.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+**Playtest list** (`p1-4-playtest-v2.md`, v2; coverage map `p1-4-coverage-v2.md`). Summary: tables in the order T4 (risks, tokens, Undo; 3 rounds, never ends), T1 (short game, Young Prodigy; 4 rounds), T3 (Off-width Aficionado; 5 rounds), T2 (long game to the summit, Stonemaster, The Elitist in an action, the opponent cards, and the replay check from each seat; 6 rounds); T6 (replay fallback) only if a debug call on T2 was refused. Every table is new, created after the deploy. G steps: deploy and size check (`Game.php` 351,608 bytes, `UtilTrait.php` 79,694 bytes), `debug_frameworkCheck`, the phpMyAdmin queries and the `stats.json` ids (the statistics panel shows only at the end of a game, so earlier statistics checks read the `stats` table, whose `stats_type` holds the id; the column names are to be checked against the header once), the tally TL and the parity check PC. The coverage map maps the 8 score sites, every statistic name, the notification functions and the setup contexts to steps. **Not on Studio at all:** `addZombie`, `crimperDrawsClimbingCards`, `confirmCrimperClimbingCard` and the ten shared-objective statistic names (`ridgeline_challenge_south` 43, `stay_in_the_sun` 45, `jolly_jammer` 46, `smear_campaign` 47, `star_stemmer` 48, `exposure_junkie` 49, `grand_traverse` 50, `all-arounding` 51, `flake_freak` 54, `pull-up_champion` 55): the evidence is the harness's per-site check. **May not be reached:** `Game.php:633` in setup (3/16 per table, about 56 % over T4, T1, T3 and T2; the action context in 2.1 is certain), 6337 (needs a player to climb 3 pitches of a personal objective's list on a random board), `permanent_gear_assets`, `confirmBail`, `passedClimbingCard`, five of the six Jesus Piece sites, and the 12 personal-objective statistics that nothing writes. **Existing tables:** no Studio table exists from before the deploy, so "existing tables still work" isn't checked on Studio in this step; the code shows that the old and new calls write the same framework rows (the `stats` table; `player_score` and `player_score_aux` in the `player` table), so a game started under the old code would carry on under the new one [inferred from the docs; coverage map, section 6]. The replay expectations are those of P1.3's Repros (F13): no new console error, no `[FA animation fallback]` (none expected on T2), `[FA missing element]` warnings recorded, stale Rope totals after `debug_endGameSoon`.
+
+Step 1.1 of v2 was fixed in place at Jonathan's request after his v2 review (no v3; the list hasn't been run): the statistics rows are read in `characterSelection`, before Rack Up, because `nextRound()` (`UtilTrait.php:251`) runs `tableStats->inc("rounds", 1)` after the opening Rack Up, so `rounds` (90) is 1 after Rack Up [read, not run]; in `characterSelection` the expected values stand (`rounds` 0 and 35 rows per player, all 0 except in the Elitist case: `shared_objectives_met` 1, `shared_objectives_points` 4, `the_elitist` 4). Step 4.7 and the coverage map's `rounds` row were reworded to match.
+
+**What session 2 does**
+- Takes Jonathan's Studio results for list v2, by step.
+- Commits the three `struct:` commits in order, staging `modules/php/Game.php` and `modules/php/UtilTrait.php` by explicit path for each, from the three diffs (the working tree holds the sum; one way to commit them one at a time: copy the two working files aside, `git restore` them, then `git apply` diff 1, commit, `git apply` diff 2, commit, `git apply` diff 3, commit; the stacked diffs apply in order, as `p1-4-scratch` showed, and the final blobs must be `66512c5b…` and `6f704c7a…`).
+- Writes the closing docs: `MIGRATION_PLAN.md` (P1.4's Status; P1.4's notify count 126 → 129; P1.5's `self::` count 310 → 180 with the note on what 310 counted; the F13 rows of §8.1 and §8.4 for P1.4's replay check, with Jonathan's go-ahead), `BGA_PITFALLS.md` (framework findings, e.g. `playerStats->init` takes no player id and the `stats` table's `stats_type` holds the `stats.json` id; the `rounds` timing) and `TODO.md` (the findings above), each with Jonathan's go-ahead.
+
+**Jonathan's review messages, quoted in full**
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the progress.md entry, quoted in full.
+>
+> 1. Model and effort: this session runs on Sonnet 5.5 at High effort. Record both.
+>
+> 2. The design discussion's check, as uploaded. All four diffs match your report: line counts, bytes, sha256 prefixes, and LF only. In a scratch repo built from the 6a7a44f files, the index lines chain correctly (Game.php 6777cd5 → 7f2af51 → 2070d7b → 66512c5; UtilTrait.php 5f25373 → 7e238c9 → 6f704c7). The three diffs applied cleanly in order, and the result's git diff HEAD is byte-identical to p1-4-all.diff. Its own tokenizer check paired all 235 old calls with their new ones and found the mapping right at every site, with the 7 existing current-API calls untouched. A word diff shows only call heads changed. The expected Studio sizes (351,608 and 79,694 bytes, CRLF) agree. Record this in the entry.
+>
+> 3. The self:: count: 180 is right. The design discussion's 181 came from a line count (grep -c), and the plan's 310 for P1.5 looks like one too: 294 + 15 live self:: tokens at HEAD, and 180 after this change. Record in the entry that P1.5's new count is 180 live self:: tokens, and that the closing session's plan edit will be "310 → 180", with a note on what 310 counted. Don't edit the plan now.
+>
+> 4. The harness tally in your report: "126 + 37 notify" should read "92 + 37" (notify->all and notify->player); the 242 adds up only that way. Write it correctly in the entry.
+>
+> 5. The typing of the legacy methods: in the entry, cite the lines of _ide_helper.php you read for incStat, setStat, initStat and the notify methods.
+>
+> 6. Go ahead with step B, as §6 of the session prompt says. Two additions to the list:
+>    - climbed_summit: init now passes false as a bool, where the old call coerced it [inferred]. Include a check of the end-of-game panel for a player who reached the summit and for one who didn't.
+>    - The Elitist at Game.php:633: as §6 says, covered in setup only if setup draws it, and in an action through debug_setSharedObjectives with 11. Say in the coverage map which one the list relies on.
+>    Then stop at stop B.
+
+Stop B review:
+
+> Stop B reviewed. Record this message in the progress.md entry, quoted in full. Don't go on to step C yet: write v2 of the list and the map, then stop again.
+>
+> 1. Mid-game statistics. The statistics panel shows only at the end of a game, so every statistics check made before a game ends is read in phpMyAdmin. There, stats_type holds the id from stats.json, not the name (risky_climbs 88, times_rested 87, played_summit_beta_tokens 85, and so on). In the list, give the stats.json id beside every statistic a step checks before the end of a game. Give the query too: SELECT * FROM stats WHERE stats_type IN (…) ORDER BY stats_player_id, stats_type; — note that it needs the column names checked against the table's header once. T4 never ends, so all of its statistics checks use this.
+>
+> 2. Step 1.1: the setup inits give 35 rows per player, not 36: the 32 player inits in setupNewGame (Game.php:124–155) plus one for each of the 3 shared objectives in play (line 695). Correct the count. Also correct "all 0": if The Elitist is in play, shared_objectives_met starts at 1, and shared_objectives_points and the_elitist start at 4 (Game.php:633–637 and 698).
+>
+> 3. The replay check moves to T2, the richest table for notification types. Replay it from each seat after 2.12, with the F13 expectations of 6.5. It needs no refused debug call on T2, so the list says to record every refusal on T2 as it happens and to save each tab's console from T2's start. T6 becomes the fallback: play it only if a debug call on T2 was refused. Keep 6.6 (the filler-entry reading), moved into T2 beside 2.10. Update the order: T4, T1, T3, T2, then T6 only if needed.
+>
+> 4. Drop T5 and T7. In the coverage map, mark the sites only they reached as not run on Studio, with the harness's per-site check as their evidence: addZombie, crimperDrawsClimbingCards, confirmCrimperClimbingCard, and the ten shared-objective statistic names.
+>
+> 5. Small fixes:
+>    - The console bullet says the expected [FA animation fallback]s are listed in 6.4; they're in 6.5 (in v2, wherever the replay expectations end up).
+>    - In 2.2, remove "or below". The Elitist gives +4 at the start and a climb loses at most 4, so the score stays at 0 or above [inferred].
+>
+> Write the result as "D:\Documents\BGA Studio\p1-4-playtest-v2.md" and "D:\Documents\BGA Studio\p1-4-coverage-v2.md", and keep v1 of each. Report each file's lines and bytes and a short list of what changed, then stop.
+
+v2 review:
+
+> v2 reviewed. Record this message in the progress.md entry, quoted in full, along with my stop B review.
+>
+> 1. One fix to p1-4-playtest-v2.md, in place (it hasn't been run, so no v3):
+>    - Step 1.1: read the statistics rows in characterSelection, before Rack Up. nextRound() (UtilTrait.php:251) runs tableStats->inc("rounds", 1) after the opening Rack Up as well as at each later Rerack, so after Rack Up rounds (90) is already 1 [read, not run]. In characterSelection, the expected values stand: rounds = 0, and 35 rows per player, all 0 except the Elitist case.
+>    - If the coverage map's rounds row or 4.7 needs a matching word, fix it in p1-4-coverage-v2.md the same way.
+>    - Report both files' new lines and bytes.
+>
+> 2. The design discussion checked v2: all 46 name–id pairs in G3 match stats.json, and every name (id) in the steps is right; the not-run lines 1734, 5094 and 6434 are the Crimper notifications and addZombie; the 56 % figure is right. Record that in the entry.
+>
+> 3. Then go ahead with step C, as §7 of the session prompt says. The playtest list for the entry is p1-4-playtest-v2.md, with coverage map p1-4-coverage-v2.md; v1 of both is kept and superseded. Stop after showing the raw docs diff and the docs: commit message.
+
+**The design discussion's check of v2** (Jonathan's v2 review, item 2): all 46 name–id pairs in G3 match `stats.json`, every name (id) in the steps is right, the not-run lines `Game.php:1734`, `5094` and `6434` are the Crimper notifications and `addZombie`, and the 56 % figure is right.
+
 ## 2026-11-11 (P1.3, Globals on bga->globals: done)
 
 P1.3 is done. Session 2 made the `struct:` commit (`5caa754`), took Jonathan's Studio results for playtest list v3, and wrote these closing docs. The code change is the one session 1 left in the working tree, unchanged. Nothing was deployed by this session and nothing went to the BGA Production site. The `struct:` commit and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push".
