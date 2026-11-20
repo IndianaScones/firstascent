@@ -2,6 +2,264 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-20 (P1.4, Notification, statistics and score APIs: done)
+
+P1.4 is done. Session 2 checked session 1's change, made the three `struct:` commits, took Jonathan's Studio results for playtest list v3, and wrote these closing docs. The code is exactly session 1's reviewed change; no code file was edited in this session. Nothing was deployed by this session and nothing went to the BGA Production site. The three `struct:` commits and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push". (Session 1's `docs:` commit `e2cdad4` was level with `origin/main` at the start.)
+
+**Line numbers in this entry.** P1.4 changes no line counts: `Game.php` (6,534 lines) and `UtilTrait.php` (1,594 lines) have the same line numbers at `6a7a44f`, in the working copy before the commits, and at `9e1784f`. They are cited "at `6a7a44f`". `firstascent.js` and `modules/utils.js` are unchanged by P1.4; their line numbers are those of the working copy at the start of this session (`e2cdad4`).
+
+**State at the end of the session**
+- **Commits of P1.4:**
+  - `e2cdad4` `docs: P1.4 in progress, session 1 (change in the working tree, playtest list v2)` (session 1; on `origin/main`);
+  - `89b8c32` `struct: notify calls on bga->notify (P1.4)` (this session; `git show --stat`: 2 files, 129 insertions, 129 deletions: `Game.php` 252 changed lines, `UtilTrait.php` 6);
+  - `c88c985` `struct: statistics on bga->playerStats and bga->tableStats (P1.4)` (this session; 2 files, 98 and 98: `Game.php` 192, `UtilTrait.php` 4);
+  - `9e1784f` `struct: score writes on bga->playerScore and playerScoreAux (P1.4)` (this session; 1 file, 8 and 8: `Game.php` 16);
+  - the `docs:` commit that holds this entry (made only on Jonathan's "commit docs", after stop B).
+- **Working tree after the third commit:** clean (`git status --short` printed nothing). `git rev-parse HEAD:modules/php/Game.php` is `66512c5b68ca976a6f0b09e311d6370716197795` and `HEAD:modules/php/UtilTrait.php` is `6f704c7ab26c7575acbde08a56c65eb93b0c5f2d`: the final blob hashes of session 1's entry. `Game.php` is 351,608 bytes, 6,534 lines, and `UtilTrait.php` 79,694 bytes, 1,594 lines (the expected Studio sizes).
+- **The tokenizer count at `9e1784f`** (`p1-4-harness\inventory.php`, live calls only): `Game.php` has `bga->notify->all` 89, `bga->notify->player` 37, `bga->playerStats` 95 (`inc` 59, `init` 33, `set` 3), `bga->tableStats->init` 1, `bga->playerScore->inc` 7, `bga->playerScoreAux->inc` 1; `UtilTrait.php` has `bga->notify->all` 7, `bga->playerStats->inc` 3, `bga->tableStats->inc` 1, `bga->playerScore->inc` 1, and the `bga->globals` calls of P1.3. No `self::notifyAllPlayers`, `self::notifyPlayer`, `initStat`, `incStat` or `setStat` call and no SQL writing `player_score` or `player_score_aux` is left. Live `self::` tokens: 168 in `Game.php` and 12 in `UtilTrait.php`: 180, the number of P1.5's scope.
+- **Files outside git, in `D:\Documents\BGA Studio\`** (new in this session; lines are LF counts):
+  - `p1-4-final.diff` (1,631 lines, 110,673 bytes; `git diff HEAD` of the two files at the start, `cmp` equal to `p1-4-all.diff`);
+  - `p1-4-staged-notify.diff` (1,151 lines, 77,241 bytes), `p1-4-staged-stats.diff` (503, 33,738) and `p1-4-staged-score.diff` (76, 5,623): each `git diff --cached` after its `git apply --cached`, `cmp` equal to the diff it came from;
+  - `p1-4-struct-msg-1.txt` (9 lines, 461 bytes), `p1-4-struct-msg-2.txt` (15, 860) and `p1-4-struct-msg-3.txt` (13, 703): the three commit messages, LF, used with `git commit -F`;
+  - `p1-4-docs-final.diff`, the raw diff of the closing docs (its counts are in the session's report, not here).
+  - Jonathan's files, recorded below: `p1-4-playtest-v3.md`, `p1-4-playtest-results.txt`, `p1-4-T2-playtest-logs\`, `T6-replay-logs\`. Not touched: `p1-4-playtest-v1.md`, `-v2.md`, `p1-4-coverage.md`, `p1-4-coverage-v2.md` (see "Not run" for what the coverage map's section 7 gets wrong), `p1-4-harness\`, `p1-4-scratch\`, `p1-4-files\`, the zips.
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's stop A review, item 1). The `struct:` commits' co-author line reads Claude Sonnet 5.5.
+- **Transcript** (outside the repo): `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\f51df7f8-5a9a-4a24-bcf1-a4a709d85cff.jsonl`; the session prompt is its first message. Scratchpad: `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\f51df7f8-5a9a-4a24-bcf1-a4a709d85cff\scratchpad\`.
+- **Compaction:** none that I know of; the context was not summarised.
+
+**Status of each item**
+- Start check: done (below). Nothing differed.
+- The three `struct:` commits: done, each from its reviewed diff, with its staged diff `cmp` equal to the diff.
+- The playtest (list v3): run by Jonathan; recorded below.
+- F13: passed on T6; the T2 replay failed because of a debug call, not P1.4 (below).
+- The closing docs: `MIGRATION_PLAN.md` (P1.4's Status, the notify count 126 → 129, P1.5's `self::` count 310 → 180, the F13 rows of §8.1 and §8.4), `BGA_PITFALLS.md` (one bullet, Replays), `TODO.md` (six findings): this commit.
+- Nothing was found that P1.4 broke. Every finding below was found in play, in the console or by reading, and none has a cause in the rewritten calls as far as can be told.
+
+**Start check** (as the prompt asked, read-only)
+- `git fetch origin`; HEAD `e2cdad489dd3039cb1700fafe624f1820b4c5a41` is session 1's `docs:` commit, parent `6a7a44f`, and level with `origin/main` (both the same hash).
+- Only `modules/php/Game.php` and `modules/php/UtilTrait.php` modified, unstaged; nothing staged.
+- `git diff HEAD -- modules/php/Game.php modules/php/UtilTrait.php --output=…\p1-4-final.diff`: 1,631 lines, 110,673 bytes, `fc /b` equal to `p1-4-all.diff`. (My first attempt put `--output` after the `--`, where git reads it as a path; it wrote no file. The second, with the option before the `--`, worked.)
+- The four diffs have the SHA-256 hashes of session 1's entry: `p1-4-notify.diff` `3d18f5d6…` (1,151 lines, 77,241 bytes), `p1-4-stats.diff` `1d141941…` (503, 33,738), `p1-4-score.diff` `01ca3398…` (76, 5,623), `p1-4-all.diff` and `p1-4-final.diff` `afb12c32…` (1,631, 110,673).
+- The files of the playtest record, as found:
+
+| File | Lines | Bytes |
+|---|---|---|
+| `p1-4-playtest-v3.md` | 109 | 30,789 |
+| `p1-4-playtest-results.txt` | 54 | 6,071 |
+| `p1-4-T2-playtest-logs\gameplay\IndianaScones0.log` | 1,151 | 75,680 |
+| `p1-4-T2-playtest-logs\gameplay\IndianaScones1.log` | 681 | 46,414 |
+| `p1-4-T2-playtest-logs\gameplay\spectator.log` | 797 | 59,467 |
+| `p1-4-T2-playtest-logs\replay\IndianaScones0.log` | 181 | 9,271 |
+| `p1-4-T2-playtest-logs\replay\IndianaScones1.log` | 148 | 6,053 |
+| `T6-replay-logs\indianascones0.log` | 310 | 15,038 |
+| `T6-replay-logs\indianascones1.log` | 526 | 21,706 |
+
+**The `struct:` commits.** For each diff in order: `git apply --cached --check`, `git apply --cached`, `git diff --cached --output=p1-4-staged-<name>.diff` (`cmp` equal to the diff), `git commit -F p1-4-struct-msg-<n>.txt`. The messages are session 1's drafts as Jonathan approved them at stop A (item 6), with the one revision of the prompt's §5 in the second message: "The values passed are unchanged: climbed_summit's init still passes false, and personal_objective_scored's still passes "0". The new init's int|float|bool parameter keeps false as a bool, where the old int parameter coerced it to 0; "0" is coerced to 0 under both." (session 1's draft said the values were now initialised with a bool and a string, which suggested the arguments had changed). Hashes and stats are in "State at the end".
+
+**The playtest record.** List v3 (`p1-4-playtest-v3.md`), played 2026-11-18 to 2026-11-20. v3 is session 1's v2 with three parts replaced by the design discussion during the playtest, after Jonathan found rules errors: steps 3.2 and 3.3 (Off-Width Aficionado needs 2 Permanent Crack and 2 Permanent Gear, `RULES.md` p. 12); all of T2 (v2's 2.2 put two climbers on one pitch, `RULES.md` p. 9, and Stonemaster needs 2 Face and 2 Slab); and T6, rewritten after T2's replay check failed. Everything else is v2 unchanged. v1 and v2 are kept. Results: `p1-4-playtest-results.txt`; T2's consoles: `p1-4-T2-playtest-logs\`; T6's: `T6-replay-logs\`. Jonathan's side note at the top of the results file: "The Round by round instructions are set up so that if Z is the first climber in the first round, they are the first climber in every round. This is wrong because turn order changes between rounds. If the first round is Z then W, the second round will be W then Z. Please make a note of that for future playtesting instructions. In this playtest I will be reordering out of order instructions."
+
+By table (Jonathan's file; his wording where a summary would lose something):
+- **G.** G1: "Complete. File sizes as expected." G2: the result of `debug_frameworkCheck` was "Framework check: running class Bga\Games\FirstAscent\Game, parent class Bga\GameFramework\Table, declared in modules/php/Game.php". G3, TL and PC: "Noted."
+- **T4** (IndianaScones0 is W, IndianaScones1 is Z). Steps run in his order 4.1, 4.2, 4.3, 4.5, 4.4, 4.10, 4.8, 4.7, 4.9, all as expected (statistics and PC), with these deviations. 4.3: "The instructions here were confusingly written so I ended up clicking the "LOAD PREVIOUS STATE" button and then giving Bomber Anchor to W instead of Z. W used it after Z drew cards during Rerack." 4.5: `debug_giveAssets` with W "to facilitate risking it". 4.8: "Loaded a save from a few moves prior. Used Climbing Card 4 Option A and `debug_forceDie` 1 to facilitate a plain climb." 4.7: "Used Rerack and Simul Climb during draw phase of Rerack, and traded during the following Climb phase. All stats and PC as expected." 4.6 (the retreat) was "written in a strange place in the instructions so I didn't get to it at T4", and he ran it on T1.
+- **T1** (IndianaScones0 is W, IndianaScones1 is Z). 1.1: "All is as expected. The Shared Objectives are 9, 6, and 15." 1.2: "There is available pitch that can support three of the same skill type, so Z is climbing Leap Year Flake, spending Chalk Bag, Undercling, and Mantle", stats, TL and PC as expected. 4.6 on T1: "Stat and PC as expected" (so `times_retreated` was reached). 1.3: stats and TL as expected, PC "as I would expect, though instructions mention "the private token tracker line goes to Z only." If that's referring to the log, there's no private log line that should be/is present." (the list's error; `updatePlayerTokenTracker` sends an empty message, `Game.php:1721, 4751, 5960`). 1.5 as expected. 1.4: "Because of the issue raised in 1.2, this had to wait until round 2." 1.7: "Continued through round 4 to facilitate Z fulfilling a personal objective. `debug_endGameSoon` resolved as expected." 1.6: the personal-objective finding (TODO.md, finding 2 below). 1.8: "Game ends as expected, no Rerack, but no personal objectives were scored." The held log lines were as expected, and he marked the tooltip overlap (finding 3). 1.9: "Scores, stats, and score_tracker agree and `climbed_summit` correctly shows no for both players."
+- **T3** ("I forgot to record which profile is which player"). 3.1: the original shared objectives were All-Arounding, Ridgeline Challenge North and Off-Width Aficionado; `debug_setSharedObjectives(16,12,3)` was run anyway; log and stats as expected. 3.2: "I was able to gain 2 gear and 2 crack tokens in 4 rounds. Throughout the 4 rounds, all gameplay, TL, PC, and stats as expected." 3.3: "Gameplay (including panel scores after page refresh), stats, TL, and PC all as expected." (the list's expectation was +8 on the spot at site 6225, which he calls as expected). 3.4: "Everything as expected." `permanent_gear_assets` (81) was reached here.
+- **T2** (IndianaScones0 is Z, IndianaScones1 is W; table 1004734). 2.1: "Original Shared Objectives are Ridgeline Challenge South, Smear Campaign, and The Elitist. Both debug calls, all stats and TL as expected." So `Game.php:633` ran in `setupNewGame` on Studio, and the existing revert (`UtilTrait.php:1091`) ran in the debug call; the final 4 for both players after the revert and reapply means setup's +4 had landed [inferred from the TL: his file records "TL as expected", not the numbers]. 2.2: "All as expected. Both players climbed one point pitches (Z climbed Dinkus Dog and W climbed Rebuffat's Arete)." 2.3 to 2.6 as expected. 2.7 and 2.8 skipped (below). 2.9: Z lacked the Psych for hex 27, so both players rested two rounds and the step ran in round 7; as expected apart from the unstyled name (finding 4). 2.10: as expected apart from the spectator (finding 5). 2.10a: "I'm not sure what's being asked of me here. `debug_endGameSoon` does indeed not change the end-of-game scoring." There was nothing to do: 2.10a was a code reading, not a step (the list's error). 2.11 and 2.12: "As expected." So **2.1 to 2.6 and 2.9 to 2.12 are as expected for P1.4**; 2.9's name color and 2.10's spectator behavior are recorded as findings 4 and 5. 2.13: "An error in the replays of both seats when the second character is chosen/confirmed."
+- **T6** (table 1006175). Jonathan's message of 2026-11-20, in full: "Nobody scored a personal objective at any of the tables. The T6 replay went as expected, no problems reaching the end."
+
+**The T2 replay (2.13) and why it isn't P1.4's.** Both replays of T2 (table 1004734, Studio build `261118-1643`) threw at the second character confirm, and the design discussion's reading checks out against the logs and the code:
+- **Seat 0** (Z's replay; `replay\IndianaScones0.log`): `TypeError: Cannot read properties of undefined (reading 'classList')` at `notif_confirmCharacter` (`firstascent.js:7577`, `character_div.classList`, in the `isCurrentPlayerActive()` branch: Z's own confirm). W's confirm, the first, ran silently through the other branch (`addAssetBoard()`, 7594) with no warning.
+- **Seat 1** (W's replay; `replay\IndianaScones1.log`): `TypeError: Cannot read properties of null (reading 'ownerDocument')` at `addAssetBoard` (`firstascent.js:7554`) via `notif_confirmCharacter` (7594): the other player's confirm, Z's. Line 7554 is the `young_prodigy` branch, whose `dojo.place` targets `character_<num>` (here `character_6`). W's own confirm, the first, gave two display-only warnings (`no .character_placeholder`, `no #asset_board_2369493 | board created`) and went through.
+- **Cause:** in 2.1, `debug_setAvailableCharacters("6")` (`UtilTrait.php:938`) rewrote the `available_characters` global (`setGlobalVariable`, `UtilTrait.php:966`) and sent no notification, so the replay's character display still showed the original set. Z's Young Prodigy (character 6) was never on it. **That character 6 was absent from the replay's display is inferred from the errors and the code, not seen in a log.** The second confirm being Z's Young Prodigy: seat 1's trace shows the `young_prodigy` branch; both seats' confirm order is W then Z.
+- **Warnings in the T2 replays:** seat 0: 6 `[FA missing element]`, all `addTooltipsToLog` "tooltip deferred" (log containers `replaylogs_move_38`, `_52`, `_63`); seat 1: 5 (three of those and the two confirm warnings above). No `[FA animation fallback]` in either. Neither replay reached `gameEnd`.
+- P1.4 changed no client code. Recorded in `BGA_PITFALLS.md` (Replays). T2's gameplay consoles: `gameplay\IndianaScones1.log` and `gameplay\spectator.log` have no error or warning; `gameplay\IndianaScones0.log` has the one in finding 6.
+- **T6 (the fallback table, rewritten after T2's replay failed) passed F13:** both replays (table 1006175, Studio build `261120-1213`) reached `gameEnd` (`Entering state: gameEnd`, seat 0 line 310, seat 1 line 526), with no `Uncaught`, `TypeError`, "During notification" or `[FA animation fallback]` line (the only `Error` lines are the browser's `Permissions-Policy` header notices, in every log). `[FA missing element]` warnings, **corrected counts** (§4.1 of the prompt had them wrong; Jonathan's stop A review, item 2, confirms these): **seat 0, 5**: `notif_confirmCharacter` no `.character_placeholder` (step skipped); `notif_confirmCharacter` no `#asset_board_2369492` (board created); `notif_confirmYourRequirements` no `.selected_pitch` (step skipped) ×3. **Seat 1, 8**: the same two `notif_confirmCharacter` kinds (for `#asset_board_2369493`); `confirmYourRequirements` ×2; `notif_confirmAddTokenToPitch` ×4 (two `no .selected_pitch | step skipped`, two `no card in #climbing_discard_straightened | card retracted from #climbing_slot`), the add-token kind of the replay fix's trial 2. All display-only, as P1.3's recipe expects.
+
+**Findings** (none caused by P1.4 as far as can be told; each in `TODO.md`, finding 1 found while writing the list, findings 2 to 5 in play, finding 6 in the console; lines at `6a7a44f`)
+1. **Objectives 15 and 16 score the sum, not 2 + 2** (pre-existing; found while writing the list). `Game.php:6202–6205` (`face + slab >= 4`) and `6220–6223` (`crack + gear >= 4`) against `RULES.md` p. 12. The design discussion's reading is that it is live on Production; this session didn't check that. Read, not run: the playtest avoided those cases.
+2. **Personal objective "Call it like you see it" counts one pitch per route type** (T1, 1.6; a rules item, Jonathan's rule recorded as he stated it). It is objective 3 (`call_it_like_you_see_it`); `Game.php:1388–1395` folds the 14 listed pitches into five groups; Bulldog Arete (31) and Irene's Arete (16) are both in the Arete group (with Rebuffat's Arete), so they count once. Because of this T1 scored no personal objective (1.8). `RULES.md` has no text for this card.
+3. **Personal-objective tooltips in the log: the text overlaps the image** (T1, 1.8; UI, for later).
+4. **The sunny-pitch log line doesn't color the player's name** (T2, 2.9; card 55 A): `UtilTrait.php:778–780`.
+5. **Spectator, card 15 B (T2, 2.10):** added to the existing `TODO.md` entry ("the spectator's log doesn't show the choice line of Climbing Card 15 option B"): the `climbing_dimmer` stays on, the discard animation looks wrong when the tab is in focus, no log line even after F5, play continues, no console warning or error.
+6. **A click-time error in `onUndoSummitBetaPassive`** (T2, from the console, not reported by Jonathan): `firstascent.js:6336` from `onSelectPitch` (3331), `IndianaScones0.log` lines 1079–1093, after one of the "Load previous state" reloads; the next reload cleared it and Z's summit climb went through.
+
+**Not run on Studio, and not confirmed** (Jonathan's stop A review, items 2 and 3, set the wording; the same words are in P1.4's Status)
+- **Not run:**
+  - Site 6207 (Stonemaster), steps 2.7–2.8: skipped by Jonathan's decision: "I'm skipping this. I've already tested Off-Width Aficionado, and because this instruction came AFTER the instructions for rounds 1-5, I didn't notice it in time to avoid non-face or slab tokens. If I need to observe something in rounds 1-5, please ensure that the playtest lists it before round 1." The call is identical in shape to 6225, which passed on T3; the evidence is the harness's per-site check.
+  - Site 6337 (personal objectives at the end): no player scored a personal objective at any table ("Nobody scored a personal objective at any of the tables"); on T1 because of finding 2.
+  - `addZombie`, `crimperDrawsClimbingCards` and `confirmCrimperClimbingCard` (no table in the list plays them; the evidence is the harness's per-site check), and the 12 personal-objective statistics (no code writes them).
+- **Taken off the coverage map's not-run list** (reached on Studio): `permanent_gear_assets` (T3, 3.2) and `times_retreated` (T1, Jonathan's 4.6). `p1-4-coverage-v2.md` section 7 still lists both; the file is not edited.
+- **Not confirmed by the results file** (not the same as not run): whether the Jesus Piece was used at 4.8 or 2.9 (his 4.8 describes card 4 option A and `debug_forceDie(1)` for a plain climb, not the list's step); `passedClimbingCard`; `confirmBail`; card 24; the Phil-start lines; `water_spent` and `psych_spent` at `Game.php:1550`/`1551`; the ten shared-objective statistic names (`ridgeline_challenge_south` 43, `stay_in_the_sun` 45, `jolly_jammer` 46, `smear_campaign` 47, `star_stemmer` 48, `exposure_junkie` 49, `grand_traverse` 50, `all-arounding` 51, `flake_freak` 54, `pull-up_champion` 55).
+- **"Studio after: existing tables still work":** not checked on Studio, because no table existed from before the deploy. The coverage map's section 6 has the code reading.
+
+**Errors in the list, and Jonathan's deviations** (recorded as they are; the list isn't edited)
+- The list's errors:
+  - v2's per-round steps assumed the same first climber every round; turn order alternates between rounds (his side note, quoted above).
+  - v2's 2.2 put two climbers on hex 1.
+  - v2's 3.2–3.3 and 2.7–2.8 followed the code's sum-of-4 objectives (finding 1).
+  - v3's 2.7 came after the round-by-round steps it applies to, so he saw it too late.
+  - 4.3 was confusingly worded.
+  - 4.6 (the retreat) was placed where he couldn't reach it on T4; he ran it on T1.
+  - 1.3 expected a private log line; `updatePlayerTokenTracker` sends an empty message (`Game.php:1721, 4751, 5960`), so there is none.
+  - 2.10a was a code reading, not a step.
+  - 2.13 put the replay check on a table that used `debug_setAvailableCharacters`.
+- His deviations, from the results file: 4.3 (Load Previous State; Bomber Anchor given to W); 4.5 (`debug_giveAssets`); 4.8 (a save restored; card 4 A and `debug_forceDie(1)`); 4.6 on T1; 1.2 (Z climbed Leap Year Flake, spending Chalk Bag, Undercling and Mantle; his note is quoted above); 1.4 in round 2; 1.7 through round 4; T3's seats not recorded; 2.9 (both players rested two rounds, so it ran in round 7); 2.10 ("Load previous state" several times); 2.7–2.8 skipped.
+
+**The design discussion's readings, checked** (prompt §4; the stop A report has each check)
+- Agreed: G1 and G2; T4, T1 and T3 as expected; T3's 2 + 2 and 6225; T2's 2.1 setup (633); the T2 replay reading (§4.2, with the additions above); findings 1, 2, 4, 5 and 6 and the code lines cited; the list's errors; the T6 result.
+- Corrected by the stop A review: the T6 seat 1 warning counts (above), and the not-run list (`permanent_gear_assets` and `times_retreated` were reached; the rest "not confirmed"). §4.1's "T2: 2.9 to 2.12 as expected" gets the two exceptions as findings 4 and 5.
+- Not checkable from the files: that character 6 was absent from the replay's display (inferred), and that finding 1 is live on Production.
+
+**What the docs commit changed, by file**
+- `misc/docs/progress.md`: this entry (session 1's entry stays as it is).
+- `misc/docs/MIGRATION_PLAN.md`: P1.4's Status (first bullet, as in P1.3); P1.4's notify count 126 → 129, with the note that 126 was `Game.php`'s count and `UtilTrait.php` has 3 more; P1.5's `self::` count 310 → 180, with the note that 180 is the live tokens after P1.4 and 310 was a `grep -c` line count at `6a7a44f` (2 commented-out lines included; a line with two occurrences counted once); the F13 rows of §8.1 and §8.4 (P1.4's replay check, passed on T6, added by Jonathan's decision, not one of the plan's planned repeats).
+- `misc/docs/BGA_PITFALLS.md`: one bullet in "Replays" (a debug function that changes setup state without a notification can make a replay throw).
+- `misc/docs/TODO.md`: the six findings (finding 5 extends the card 15 B entry; findings 3 and 6 are under Client bugs; findings 1, 2 and 4 under Server bugs).
+- Not edited (outside the grant): `p1-4-coverage-v2.md`, `RULES_CHECK.md` (finding 2 may want an item there: Jonathan's call), and the "310 such calls" at `MIGRATION_PLAN.md` line 1780 (checked). That line is not in a risk table and is not P1.5's count: it is in §9.4's table (item 6, "Framework claims that contradict this repo's current docs") of a third-party skill's claims, and it records an argument made when that table was written. It is left as it is, by Jonathan's decision (docs diff review, item 2).
+
+**Jonathan's messages of this session, quoted in full**
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the progress.md entry, quoted in full.
+>
+> 1. Model and effort: this session runs on Sonnet 5.5 at High effort. Record both.
+>
+> 2. Your corrections stand, and the design discussion confirmed the first by its own count:
+>    - T6, seat 1: 8 warnings: the character placeholder, board created, confirmYourRequirements ×2, and confirmAddTokenToPitch ×4 (two ".selected_pitch" skipped, two "card retracted from #climbing_slot"). Seat 0: 5, as stated. Record these counts; §4.1's were wrong.
+>    - permanent_gear_assets (T3, 3.2) and times_retreated (T1, my 4.6) were reached on Studio. Take them off the not-run list.
+>
+> 3. The not-run list, otherwise:
+>    - Sites 6207 and 6337 are not run, as §4.4 says.
+>    - Record as "not confirmed by the results file", not as "not run": whether the Jesus Piece was used at 4.8 or 2.9; passedClimbingCard; confirmBail; card 24; the Phil-start lines; water_spent and psych_spent at 1550/1551; and the ten shared-objective statistic names.
+>    - "Existing tables still work": not checked on Studio, as §4.4 says.
+>    Use the same wording in P1.4's Status in MIGRATION_PLAN.md.
+>
+> 4. T2's 2.9 to 2.12: record them as as expected for P1.4, with 2.9's name color and 2.10's spectator behavior recorded as findings 4 and 5. For 2.10a, record my note and that there was nothing to do: it was a code reading.
+>
+> 5. Your additions to §4.2 (which seat's confirm threw where, the 7554 young_prodigy branch, the T2 replay's warnings, and the two Studio builds): record them. Keep the point that character 6's absence from the replay's display is inferred from the errors and the code, not seen in a log.
+>
+> 6. The three struct: commit messages are approved as you showed them.
+>
+> Commit the struct commits: go ahead with §5's commit steps, in order, then the closing docs of §6. Stop at stop B.
+
+Docs diff review:
+
+> Docs diff reviewed. The design discussion checked it as uploaded: 341 lines, 60,647 bytes, LF only, SHA-256 6faef171…21cf, 4 files. Make these three changes by script with exact-match checks, keeping each file's endings; nothing else changes. Record this message in the entry, quoted in full.
+>
+> 1. TODO.md, the objectives 15 and 16 item: replace "Young Prodigy and Bionic Woman can only hold 4 Permanent Assets (`RULES.md` p. 12), so for them any 4 of the two types scores." with "`RULES.md` p. 12 adds that Young Prodigy and Bionic Woman, who can only gain 4 Permanent Assets, must gain them selectively to achieve these objectives." The code's sum test is wrong for every character, not only those two.
+>
+> 2. progress.md, "What the docs commit changed", the "Not edited" bullet: the "310 such calls" line isn't in a risk table and isn't P1.5's count. It is in §9.4's table of a third-party skill's claims, and it records an argument made when that table was written. Reword the bullet to say so, with the line number checked, and that it is left as it is by my decision.
+>
+> 3. progress.md, my deviations: replace "1.2 (Leap Year Flake with three cards of one skill)" with "1.2 (Z climbed Leap Year Flake, spending Chalk Bag, Undercling and Mantle; my note is quoted above)".
+>
+> Everything else is approved as written: the BGA_PITFALLS.md bullet, the MIGRATION_PLAN.md edits, the other TODO.md items and the card 15 B extension. The docs: commit message you showed is fine; keep it.
+>
+> Write "D:\Documents\BGA Studio\p1-4-docs-final-v2.diff" (don't overwrite the first), report its lines, bytes and --stat, and show the lines that changed from p1-4-docs-final.diff. Then stop and wait for my "commit docs".
+
+Docs diff review, second round:
+
+> v2 reviewed. One word to fix, my wording's slip: in progress.md, my deviations, "my note is quoted above" becomes "his note is quoted above" (in the entry, "I" is this session). Make it by exact match, keeping the file's endings. Record this message in the entry, quoted in full, with the other two.
+>
+> Then write "D:\Documents\BGA Studio\p1-4-docs-final-v3.diff" and check it against v2: the only differences may be that word, this message's quote, and the index lines and hunk header those change. If so: commit docs, staging only the four docs by explicit path, with the approved message, and report the commit hash and git show --stat. If anything else differs, stop and report instead. Push only on my "push".
+
+**This prompt's §4, quoted in full** (the session prompt is the first message of the transcript; its other sections are the grant, the context, the start check, stop A and the closing docs, all carried out above)
+
+> ## 4. The playtest record
+>
+> The playtest ran on list v3 (p1-4-playtest-v3.md), from 2026-11-18 to 2026-11-20.
+> - v3 is session 1's v2, with three parts replaced by the design discussion during the playtest, after I found rules errors:
+>   - steps 3.2 and 3.3: Off-width Aficionado needs 2 Permanent Crack and 2 Permanent Gear (RULES.md p. 12);
+>   - all of Table T2: v2's 2.2 put two climbers on one pitch (RULES.md p. 9), and Stonemaster needs 2 Face and 2 Slab;
+>   - Table T6, rewritten after T2's replay check failed.
+> - Everything else is v2 unchanged. v1 and v2 are kept.
+> - My messages that asked for the changes, quoted in full:
+>   > On to Table T3. There seems to be a misunderstanding about the Shared Objective Off-Width Aficionado. The testing has the player gain 4 Crack tokens to score the Objective, but the Objective specifically calls for 2 Crack tokens and 2 Gear tokens. It doesn't care that "crack + gear tokens reach 4".
+>   > In Table T2, there is another rules error almost immediately. 2.2 states, "Round 1. Z climbs hex 1. W also climbs hex 1 (the same pitch, second)". That is impossible. Two players can't exist on the same pitch at the same time except for on the summit. Please update all of table T2, checking for other rules problems along the way.
+> - My results are in p1-4-playtest-results.txt, and the T2 consoles are in p1-4-T2-playtest-logs\.
+> - T6's result, from my message of 2026-11-20, quoted in full: "Nobody scored a personal objective at any of the tables. The T6 replay went as expected, no problems reaching the end." Its consoles are in T6-replay-logs\.
+> - Record the list, the results file and the logs by path and counts in the entry. Summarise each step's result from my file, and quote my wording where a summary would lose something.
+>
+> Below are the design discussion's readings. Check each against the files, rather than take it as given; say where a check agrees and where it doesn't.
+>
+> ### 4.1 What passed
+> - G1 and G2: sizes as expected. `debug_frameworkCheck` names modules/php/Game.php.
+> - T4, T1 and T3 as expected, apart from the findings in §4.3 and the deviations in my file.
+>   - T3 reached 2 Crack and 2 Gear tokens in 4 rounds, and site 6225 scored (3.3).
+> - T2: 2.1 to 2.6 and 2.9 to 2.12 as expected.
+>   - T2's setup drew The Elitist (my 2.1: "Original Shared Objectives are Ridgeline Challenge South, Smear Campaign, and The Elitist"). So site 633 (Game.php) ran in setupNewGame on Studio, and the existing revert (UtilTrait.php:1091) ran in the debug call.
+>   - The final 4 for both players after the revert-and-reapply means setup's +4 had landed [inferred from the TL].
+> - T6 (table 1006175): both replays reached gameEnd, with no Uncaught or TypeError line, no "During notification" line and no [FA animation fallback].
+>   - Seat 0 has 5 [FA missing element] warnings: character placeholder, board created, confirmYourRequirements ×3.
+>   - Seat 1 has 8: the same kinds, plus confirmAddTokenToPitch ×2 (`.selected_pitch` skipped; card retracted from #climbing_slot), the add-token kind of the replay fix's trial 2.
+>   - F13 passed for P1.4.
+>
+> ### 4.2 The T2 replay (2.13) and why it isn't P1.4's
+> Both T2 replays (table 1004734) threw at the second character confirm:
+> - seat 0: TypeError reading 'classList' at notif_confirmCharacter (firstascent.js:7577);
+> - seat 1: TypeError reading 'ownerDocument', at addAssetBoard (firstascent.js:7554) via notif_confirmCharacter (7594).
+> The design discussion's reading:
+> - In 2.1, debug_setAvailableCharacters("6") (UtilTrait.php:938) rewrote the available_characters global and sent no notification. So the replay's character display still showed the original set.
+> - The second confirm was Z's Young Prodigy, a character that was never on that display.
+> - The first confirm (W's) went through the same rewritten notification with only the expected display-only warnings.
+> - P1.4 changed no client code.
+> Check the reading against the two replay logs and the code.
+>
+> ### 4.3 Findings, none caused by P1.4 as far as can be told
+> Record each in TODO.md (§6.4), as found. Check TODO.md and FREEZE_INVESTIGATION.md first; if a finding is already there, add to that entry instead.
+> 1. **Objectives 15 and 16 score the sum, not 2 + 2** (pre-existing; found while writing the list).
+>    - RULES.md p. 12: Stonemaster is "Earn 2 Permanent Face Skills + 2 Permanent Slab Skills", and Off-Width Aficionado is "Earn 2 Permanent Crack Skills + 2 Permanent Gear".
+>    - stGrantPermanentAssets scores when face + slab >= 4 (case '15', Game.php:6202–6205) and when crack + gear >= 4 (case '16', 6220–6223). So 4 + 0 or 3 + 1 scores.
+>    - This is live on Production. Read, not run: the playtest avoided those cases.
+> 2. **Personal objective "Call it like you see it" counts 2 of 3** (T1, 1.6). My words, quoted in full: "Rules issue - personal objective "Call it like you see it" is only counting 2/3 completed, even though I've climbed 3 pitches that should count, "Leap Year Flake", "Bulldog Arete", and "Irene's Arete". I suspect that it's only counting "Bulldog Arete" and "Irene's Arete" once because they're the same type, but if so that is incorrect as no such restriction exists in the rules."
+>    - The design discussion's reading: for objective 3 only, the climb tracking folds the 14 listed pitches into five groups and records one index per group (Game.php:1388–1395), so two pitches in one group count once.
+>    - Check in material.inc.php that "Call it like you see it" is objective 3, and which pitch ids fall in each group. Say whether Bulldog Arete and Irene's Arete share one.
+>    - Because of this, T1 scored no personal objective (1.8).
+> 3. **Personal objective tooltips in the log: the text overlaps the image** (T1, 1.8). UI, for later; my words are in the file.
+> 4. **The sunny-pitch log line doesn't color the player's name** (T2, 2.9; card 55 A).
+>    - The name is pasted into the log text (UtilTrait.php:778–780), not passed as ${player_name}, the argument the client colors. Pre-existing.
+>    - My note: names are supposed to be colored in every log line that names a player.
+> 5. **Spectator, card 15 B ("Too much gear"; T2, 2.10).** Add to the existing TODO.md entry ("the spectator's log misses card 15 B's choice line"), from my file:
+>    - the climbing_dimmer stays on;
+>    - the discard animation looks wrong when the tab is in focus;
+>    - there's still no log line after F5, which clears the dimmer;
+>    - play continued;
+>    - no console warning or error.
+> 6. **Click-time error in onUndoSummitBetaPassive** (T2; from the console, not reported by me).
+>    - In p1-4-T2-playtest-logs\gameplay\IndianaScones0.log (Z's tab), lines 1079–1093: "Uncaught TypeError: Cannot read properties of null (reading 'classList')" at onUndoSummitBetaPassive (firstascent.js:6336), from onSelectPitch (3331).
+>    - It came in climbOrRest, after one of the "Load previous state" reloads I used to retest 2.10. The next reload cleared it, and Z's summit climb went through.
+>    - I didn't notice a symptom. Record it as found in the console; client code, untouched by P1.4.
+>
+> ### 4.4 Not run on Studio
+> Record each, with its evidence:
+> - Site 6207 (Stonemaster), steps 2.7–2.8. Skipped by my decision; my words are in the file. The call is identical in shape to 6225, which passed on T3. The evidence is the harness's per-site check.
+> - Site 6337 (personal objectives at the end). No player scored a personal objective at any table; on T1 because of finding 2.
+> - The sites session 1's coverage map lists as not run on Studio (p1-4-coverage-v2.md §7). Check each against the results.
+> - "Studio after: existing tables still work": not checked on Studio, because no table existed from before the deploy. The coverage map's §6 has the code reading.
+>
+> ### 4.5 Errors in the list, and my deviations
+> Record these as they are; the list is a record and isn't edited.
+> - The list's errors:
+>   - v2's per-round steps assumed the same first climber every round. Turn order alternates between rounds (my side note at the top of the results file).
+>   - v2's 2.2 put two climbers on hex 1.
+>   - v2's 3.2–3.3 and 2.7–2.8 followed the code's sum-of-4 objectives.
+>   - v3's 2.7 came after the round-by-round steps it applies to, so I saw it too late.
+>   - 4.3 was confusingly worded.
+>   - 4.6 (the retreat) was placed where I couldn't reach it on T4; I ran it on T1.
+>   - 1.3 expected a private log line. updatePlayerTokenTracker sends an empty message (Game.php:1721, 4751, 5960), so there is none.
+>   - 2.10a was a code reading, not a step.
+>   - 2.13 put the replay check on a table that used debug_setAvailableCharacters (§4.2).
+> - My deviations, from the results file. These include:
+>   - 4.3 (Load Previous State; Bomber Anchor given to W);
+>   - 4.5 (debug_giveAssets);
+>   - 4.8 (a save restored; card 4 A and debug_forceDie(1));
+>   - 4.6 on T1;
+>   - 1.4 in round 2;
+>   - 1.7 through round 4;
+>   - T3's seats not recorded;
+>   - 2.9 (both players rested two rounds, so it ran in round 7);
+>   - 2.10 (Load Previous State, several times);
+>   - 2.7–2.8 skipped.
+
 ## 2026-11-12 (P1.4, Notification, statistics and score APIs: in progress, session 1)
 
 P1.4 is half done. Session 1 recounted the call sites, made the change in the working tree (uncommitted), built and checked three stacked diffs, ran a tokenizer harness with a mutation test, and wrote the playtest list and its coverage map. The change waits for Jonathan's long Studio playtest. Session 2 (a new session) takes the playtest results, the three `struct:` commits and the closing docs. Nothing is deployed, nothing is committed, nothing is pushed, and nothing went to the BGA Production site.

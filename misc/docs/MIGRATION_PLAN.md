@@ -654,8 +654,17 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** playable; fresh table.
 
 **P1.4 Notification, statistics and score APIs** (L, mechanical)
+- **Status:** done. Committed: `89b8c32` (`struct:` notify calls on `bga->notify`, 129 sites), `c88c985` (`struct:` statistics on `bga->playerStats`/`bga->tableStats`, 98 sites) and `9e1784f` (`struct:` score writes on `bga->playerScore`/`playerScoreAux`, 8 sites), after session 1's `docs:` commit `e2cdad4`. Playtested on Studio by Jonathan (2026-11-18 to 2026-11-20) on list v3: tables T4, T1, T3, T2 and T6. Details in `progress.md` (2026-11-20).
+  - **Done when:** met, by the tokenizer count at `9e1784f`: no live `self::notifyAllPlayers`, `self::notifyPlayer`, `initStat`, `incStat` or `setStat` call and no SQL write of `player_score` or `player_score_aux` is left in `Game.php` or `UtilTrait.php`.
+  - **Results:** list v3's steps as expected, apart from the findings below and Jonathan's deviations (`progress.md`).
+  - **F13: passed on T6** (table 1006175), added to P1.4 by Jonathan's decision; it is not one of the plan's planned repeats. Both replays reached `gameEnd` with no `Uncaught`, `TypeError`, "During notification" or `[FA animation fallback]` line; `[FA missing element]` warnings (display-only): 5 in seat 0, 8 in seat 1. The T2 replay (table 1004734) threw in both seats at the second character confirm, because `debug_setAvailableCharacters` had changed the available characters without a notification (`BGA_PITFALLS.md`, Replays), not because of P1.4 (which changed no client code).
+  - **The setup context of site 633 ran** (T2: The Elitist was drawn in `setupNewGame`).
+  - **Not run:** site 6207 (Stonemaster; T2's steps 2.7–2.8 skipped by Jonathan's decision); site 6337 (no player scored a personal objective at any table; on T1 because of the finding below); `addZombie`, `crimperDrawsClimbingCards` and `confirmCrimperClimbingCard` (no table plays them; the evidence is the harness's per-site check); the 12 personal-objective statistics (no code writes them).
+  - **Not confirmed by the results file** (not the same as not run): whether the Jesus Piece was used at 4.8 or 2.9; `passedClimbingCard`; `confirmBail`; card 24; the Phil-start lines; `water_spent` and `psych_spent` at `Game.php:1550`/`1551`; the ten shared-objective statistic names.
+  - **Findings, none caused by P1.4 as far as can be told** (`TODO.md`): objectives 15 and 16 score the sum of the two types, not 2 + 2 (live on Production); the personal objective "Call it like you see it" counts one pitch per route type; the personal-objective tooltips in the log overlap their image; the sunny-pitch log line doesn't color the player's name; more on the spectator's missing card 15 B line; a click-time error in `onUndoSummitBetaPassive`.
+  - **Studio after:** playable. Existing tables: not checked on Studio (no table from before the deploy existed); the code reading is in `p1-4-coverage-v2.md`, section 6.
 - **Scope:**
-  - `notifyAllPlayers` → `$this->bga->notify->all`; `notifyPlayer` → `->player` (126 sites).
+  - `notifyAllPlayers` → `$this->bga->notify->all`; `notifyPlayer` → `->player` (129 sites: 126 in `Game.php`, the plan's earlier count, and 3 in `UtilTrait.php`).
   - `initStat`/`incStat`/`setStat` → `bga->tableStats`/`bga->playerStats` (98 sites). `playerStats->init` takes no player id [Game.php doc:1376–1389].
   - Raw `player_score` and `player_score_aux` SQL (8 sites) → `bga->playerScore`/`playerScoreAux` with a `null` message. That sends no extra notification [PlayerCounter and TableCounter doc:60], so the score display is unchanged.
 - **Files:** `modules/php/Game.php`, `modules/php/UtilTrait.php`.
@@ -665,7 +674,7 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 
 **P1.5 PHP modernization sweep** (L, mechanical)
 - **Scope:**
-  - `self::` → `$this->` on instance methods (310 sites).
+  - `self::` → `$this->` on instance methods (180 sites: the live `self::` tokens after P1.4, 168 in `Game.php` and 12 in `UtilTrait.php`; the earlier 310 was a line count (`grep -c`) at `6a7a44f`, which included 2 commented-out lines and counted a line with two occurrences once).
   - Deck through `$this->bga->deckFactory->createDeck('cards_and_tokens')` (`getNew` is deprecated in `_ide_helper.php ~2274`).
   - Check for fixed-length player id assumptions (T29). None found so far.
   - The `${var}` log string in `php:confirmClimbingCardChoice` (cards 15 and 24), in its own `fix:` commit, since the corrected string changes the log (`TODO.md`).
@@ -1638,7 +1647,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | F10 | S6: log formatting throws (names with `-` and, if Studio allows them, accents; unknown ids). Player names can't contain `'` (Q-T3) |
 | F11 | S7: concurrency (`onUndoSummitBeta` not awaited; card-49 double Portaledge; duplicate token chains; `retractClimbingCard`'s stale title) |
 | F12 | `shareEffect*` releases only for card 49 |
-| F13 | The replay check: a replay of a new game with a rest, from each seat, to the end, with no new console error and no `[FA animation fallback]` warning other than the expected ones (P1.3, passed (`5caa754`; `progress.md`, 2026-11-11)). The replay fix is `4e82116` |
+| F13 | The replay check: a replay of a new game with a rest, from each seat, to the end, with no new console error and no `[FA animation fallback]` warning other than the expected ones (P1.3, passed (`5caa754`; `progress.md`, 2026-11-11); P1.4, passed (T6, table 1006175; `progress.md`, 2026-11-20), added to P1.4 by Jonathan's decision, not one of the plan's planned repeats). The replay fix is `4e82116` |
 
 ### 8.2 Tools
 - **Studio playtests** with one browser tab per player (the red arrow or `testuser` [Tools doc:21–24]) and a spectator tab.
@@ -1689,7 +1698,7 @@ The migration keeps the current appearance and behavior by default. **Decided (D
 | F4 | P4.2, P5.9, P5.10 | F10 | P3.5, P5.13 |
 | F5 | P5.10 | F11 | P5.4, P5.7, P5.9, P5.10 (hygiene deferred from P4, §4.3.1) |
 | F6, F7 | P4.1, P5.7 | F12 | P4.5 (bounded by the backstop), P5.4 (fixed) |
-| | | F13 | P1.2, P1.3 (D9; passed (`5caa754`; `progress.md`, 2026-11-11)), P2.2, P2.6, P3.5, P4.1, P7.3 |
+| | | F13 | P1.2, P1.3 (D9; passed (`5caa754`; `progress.md`, 2026-11-11)), P1.4 (added by Jonathan's decision, not a planned repeat; passed (T6, table 1006175; `progress.md`, 2026-11-20)), P2.2, P2.6, P3.5, P4.1, P7.3 |
 
 **Server findings, rules items and UX items** (ids in §5.4, `TODO.md`, `RULES_CHECK.md` and `UX_CHANGES.md`):
 
