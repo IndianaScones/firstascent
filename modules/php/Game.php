@@ -630,7 +630,7 @@ class Game extends \Bga\GameFramework\Table
                     $score_tracker = $this->getGlobalVariable('score_tracker', true);
                     foreach ($players as $player_id => $player) {
                         $shared_objective['players_met'][] = $player_id;
-                        $this->DbQuery("UPDATE player SET player_score=player_score+4 WHERE player_id='$player_id'");
+                        $this->bga->playerScore->inc($player_id, 4, null);
                         $score_tracker[$player_id]['objectives'] += 4;
                         $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
                         $this->bga->playerStats->inc("shared_objectives_points", 4, $player_id);
@@ -1614,7 +1614,7 @@ class Game extends \Bga\GameFramework\Table
         if ($already_climbed > 0) { $this->bga->playerStats->inc("previously_climbed_pitches", 1, $player_id); }
         if ($pitch_points < 0) { $pitch_points = 0; }
         $new_points = $pitch_points + $shared_objective_points + $summit_points;
-        $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$player_id'");
+        $this->bga->playerScore->inc($player_id, $new_points, null);
         $score_tracker = $this->getGlobalVariable('score_tracker', true);
         $score_tracker[$player_id]['pitches'] += $pitch_points;
         $score_tracker[$player_id]['objectives'] += $shared_objective_points;
@@ -1706,7 +1706,7 @@ class Game extends \Bga\GameFramework\Table
             $asset_board_token_tracker[$player_id]['points_tokens'] += 1;
             $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
 
-            $this->DbQuery("UPDATE player SET player_score=player_score+2 WHERE player_id='$player_id'");
+            $this->bga->playerScore->inc($player_id, 2, null);
             $score_tracker = $this->getGlobalVariable('score_tracker', true);
             $score_tracker[$player_id]['tokens'] += 2;
             $this->setGlobalVariable('score_tracker', $score_tracker);
@@ -4661,7 +4661,7 @@ class Game extends \Bga\GameFramework\Table
             if ($gained_assets[$i] > 0) { $gained_permanent_assets[$player_id][$type] = $gained_assets[$i]; }
         }
         $gained_num = array_sum($gained_assets);
-        $this->DbQuery( "UPDATE player SET player_score_aux=player_score_aux + $gained_num WHERE player_id='$player_id'" );
+        $this->bga->playerScoreAux->inc($player_id, $gained_num, null);
         $this->setGlobalVariable('gained_permanent_assets', $gained_permanent_assets);
 
         $this->gamestate->setPlayerNonMultiactive($player_id, 'grantPermanentAssets');
@@ -5897,7 +5897,7 @@ class Game extends \Bga\GameFramework\Table
                     }
                 }
                 
-                $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$id'");
+                $this->bga->playerScore->inc($id, $new_points, null);
                 $score_tracker = $this->getGlobalVariable('score_tracker', true);
                 $score_tracker[$id]['tokens'] += $new_points;
                 $this->setGlobalVariable('score_tracker', $score_tracker);
@@ -6204,7 +6204,7 @@ class Game extends \Bga\GameFramework\Table
                         $face_and_slab = $tracker['face'] + $tracker['slab'];
                         if ($face_and_slab >= 4 && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
-                            $this->DbQuery("UPDATE player SET player_score=player_score+8 WHERE player_id='$player_id'");
+                            $this->bga->playerScore->inc($player_id, 8, null);
                             $shared_objective_points[$player_id] = 8;
                             $shared_objectives_tracker[$id] = $info;
                             $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
@@ -6222,7 +6222,7 @@ class Game extends \Bga\GameFramework\Table
                         $crack_and_gear = $tracker['crack'] + $tracker['gear'];
                         if ($crack_and_gear >= 4 && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
-                            $this->DbQuery("UPDATE player SET player_score=player_score+8 WHERE player_id='$player_id'");
+                            $this->bga->playerScore->inc($player_id, 8, null);
                             $shared_objective_points[$player_id] = 8;
                             $shared_objectives_tracker[$id] = $info;
                             $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
@@ -6334,7 +6334,7 @@ class Game extends \Bga\GameFramework\Table
                     $this->bga->playerStats->set("personal_objective_scored", $scored_objective_id, $player_id);
                     $this->bga->playerStats->set("personal_objective_points", $personal_objective['score'], $player_id);
                     $new_points = $personal_objective['score'];
-                    $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$player_id'");
+                    $this->bga->playerScore->inc($player_id, $new_points, null);
                     // $this->setStat($personal_objective['score'], $personal_objective['name'], $player_id);
                 }
 
