@@ -937,7 +937,7 @@ class Game extends \Bga\GameFramework\Table
             $this->setGlobalVariable('board_assets', $board_assets);
         }        
 
-        self::notifyAllPlayers("confirmCharacter", clienttranslate('${player_name} chooses ${character}'), array(
+        $this->bga->notify->all("confirmCharacter", clienttranslate('${player_name} chooses ${character}'), array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'character' => $this->characters[$character]['description'],
@@ -946,10 +946,10 @@ class Game extends \Bga\GameFramework\Table
             'player_names_and_colors' => $player_names_and_colors,
             'i18n' => ['character'],
         ));
-        self::notifyAllPlayers("dealOpponentObjectives", "", array(
+        $this->bga->notify->all("dealOpponentObjectives", "", array(
             'player_id' => $player_id,
         ));
-        self::notifyPlayer($player_id, "dealPersonalObjectives", "", array(
+        $this->bga->notify->player($player_id, "dealPersonalObjectives", "", array(
             'current_personal_objectives' => $current_personal_objectives
         ));
 
@@ -1098,7 +1098,7 @@ class Game extends \Bga\GameFramework\Table
             $this->incStat(1, "played_summit_beta_tokens", $player_id);
         }
 
-        self::notifyAllPlayers("confirmOpponentAssets", '${opponent_log_msg}', array(
+        $this->bga->notify->all("confirmOpponentAssets", '${opponent_log_msg}', array(
                 'opponent_log_msg' => $opponent_log_msg,
                 'player_name' => $player_name,
                 'spread_assets' => $spread_card_types,
@@ -1119,7 +1119,7 @@ class Game extends \Bga\GameFramework\Table
                 'i18n' => ['opponent_log_msg'],
         ));
 
-        self::notifyPlayer($player_id, "confirmYourAssets", '${player_log_msg}', array(
+        $this->bga->notify->player($player_id, "confirmYourAssets", '${player_log_msg}', array(
                 'player_log_msg' => $player_log_msg,
                 'player_name' => $player_name,
                 'spread_assets' => $spread_card_types,
@@ -1626,7 +1626,7 @@ class Game extends \Bga\GameFramework\Table
         $bailed_pitch[$player_id] = null;
         $this->setGlobalVariable('bailed_pitch', $bailed_pitch);
 
-        self::notifyAllPlayers("confirmOpponentRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
+        $this->bga->notify->all("confirmOpponentRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
                 'player_name' => self::getActivePlayerName(),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
@@ -1649,7 +1649,7 @@ class Game extends \Bga\GameFramework\Table
                 'i18n' => $i18n_for_notif,
         ));
 
-        self::notifyPlayer($player_id, "confirmYourRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
+        $this->bga->notify->player($player_id, "confirmYourRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
                 'player_name' => self::getActivePlayerName(),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
@@ -1684,7 +1684,7 @@ class Game extends \Bga\GameFramework\Table
                     'i18n' => ['exposure', 'type']
                 ]
             ];
-            self::notifyAllPlayers('log_only', '${trifecta_log_message}', [
+            $this->bga->notify->all('log_only', '${trifecta_log_message}', [
                 'trifecta_log_message' => $trifecta_log_message,
                 'i18n' => ['trifecta_log_message']
             ]);
@@ -1712,13 +1712,13 @@ class Game extends \Bga\GameFramework\Table
             $this->setGlobalVariable('score_tracker', $score_tracker);
             $new_points_tokens = $this->getGlobalVariable('asset_board_token_tracker', true)[$player_id]['points_tokens'];
 
-            self::notifyAllPlayers("useSpiderStick", clienttranslate('${player_name} uses +Spider Stick(12)+ while climbing a 1 or 2 point Pitch and gains a 2-Point Token'), [
+            $this->bga->notify->all("useSpiderStick", clienttranslate('${player_name} uses +Spider Stick(12)+ while climbing a 1 or 2 point Pitch and gains a 2-Point Token'), [
                 'player_name' => self::getActivePlayerName(),
                 'player_id' => $player_id,
                 'token_id' => array_search('12', $this->getGlobalVariable('token_identifier', true)),
                 'new_points_tokens' => $new_points_tokens,
             ]);
-            self::notifyPlayer($player_id, "updatePlayerTokenTracker", '', [
+            $this->bga->notify->player($player_id, "updatePlayerTokenTracker", '', [
                 'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
             ]);
         }
@@ -1731,7 +1731,7 @@ class Game extends \Bga\GameFramework\Table
             $climbing_card_info_1 = $this->cards_and_tokens->pickCardForLocation('climbing_deck', 'in_play');
             $climbing_card_info_2 = $this->cards_and_tokens->pickCardForLocation('climbing_deck', 'in_play');
             $this->setGlobalVariable('crimper_cards', [$climbing_card_info_1, $climbing_card_info_2]);
-            self::notifyAllPlayers("crimperDrawsClimbingCards", '', [
+            $this->bga->notify->all("crimperDrawsClimbingCards", '', [
                     'climbing_card_info_1' => $climbing_card_info_1,
                     'climbing_card_info_2' => $climbing_card_info_2,
             ]);
@@ -1744,7 +1744,7 @@ class Game extends \Bga\GameFramework\Table
 
             $climbing_card_info = $this->cards_and_tokens->pickCardForLocation('climbing_deck', 'in_play');
             $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
-            self::notifyAllPlayers("drawClimbingCard", '', array(
+            $this->bga->notify->all("drawClimbingCard", '', array(
                     'climbing_card_info' => $climbing_card_info,
             ));
             $climbing_card_type_arg = $climbing_card_info['type_arg'];
@@ -1794,7 +1794,7 @@ class Game extends \Bga\GameFramework\Table
             ]
         ];
 
-        self::notifyAllPlayers("riskShowAssets", '${risk_log}', array(
+        $this->bga->notify->all("riskShowAssets", '${risk_log}', array(
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'selected_resources' => $selected_resources,
@@ -1860,14 +1860,14 @@ class Game extends \Bga\GameFramework\Table
         $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
         $risk_summit_beta = !empty(array_intersect(['1', '4', '7', '11'], $hand_sb_tokens)) ? true : false;
 
-        self::notifyAllPlayers("rollDie", '', array(
+        $this->bga->notify->all("rollDie", '', array(
             'face_rolled' => $face_rolled,
             'climbing_card_info' => [],
             'risky_climb' => true,
             'risk_summit_beta' => $risk_summit_beta,
         ));
 
-        self::notifyAllPlayers("log_only", $die_log, array(
+        $this->bga->notify->all("log_only", $die_log, array(
             'player_name' => self::getActivePlayerName(),
             'die_log' => $die_log,
         ));
@@ -1903,7 +1903,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
                 $this->incStat(1, "times_retreated", $player_id);
-                self::notifyAllPlayers('riskReturnAssets', '', []);
+                $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risked_assets', []);
                 $this->setGlobalVariable('risk_it_info', []);
 
@@ -1936,7 +1936,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
                 $this->incStat(1, "times_retreated", $player_id);
-                self::notifyAllPlayers('riskReturnAssets', '', []);
+                $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risked_assets', []);
                 $this->setGlobalVariable('risk_it_info', []);
 
@@ -1968,7 +1968,7 @@ class Game extends \Bga\GameFramework\Table
         $pitch_sets[$player_id] = $player_sets;
         $this->setGlobalVariable('pitch_sets', $pitch_sets);
 
-        self::notifyAllPlayers('confirmBail', clienttranslate('${player_name} bails out. He loses 1 Water and 1 Psych and will not take any Assets during the next Rerack Phase'), [
+        $this->bga->notify->all('confirmBail', clienttranslate('${player_name} bails out. He loses 1 Water and 1 Psych and will not take any Assets during the next Rerack Phase'), [
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'bailed_pitch' => $bailed_pitch[$player_id],
@@ -2020,7 +2020,7 @@ class Game extends \Bga\GameFramework\Table
             ]
         ];
 
-        self::notifyAllPlayers('confirmTradePublic', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws 1 ${drawn_for_log} Asset from the Portaledge'), [
+        $this->bga->notify->all('confirmTradePublic', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws 1 ${drawn_for_log} Asset from the Portaledge'), [
             'player_name' => self::getActivePlayerName(),
             'discard_for_log' => $discard_for_log,
             'drawn_for_log' => $drawn_for_log,
@@ -2036,7 +2036,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['discard_for_log', 'drawn_for_log'],
         ]);
 
-        self::notifyPlayer($player_id, 'confirmTradePrivate', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws ${drawn_private} from the Portaledge'), [
+        $this->bga->notify->player($player_id, 'confirmTradePrivate', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws ${drawn_private} from the Portaledge'), [
             'player_name' => self::getActivePlayerName(),
             'discard_for_log' => $discard_for_log,
             'drawn_private' => $drawn_private,
@@ -2062,7 +2062,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('rested', $rested);
         $this->incStat(1, 'times_rested', $player_id);
 
-        self::notifyAllPlayers('log_only', clienttranslate('${player_name} rested'), array(
+        $this->bga->notify->all('log_only', clienttranslate('${player_name} rested'), array(
             'player_name' => self::getActivePlayerName(),
         ));
 
@@ -2294,7 +2294,7 @@ class Game extends \Bga\GameFramework\Table
                     'discard_num' => $discard_num,
                     'final_state' => 'discardAssets',
                 ));
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
@@ -2305,7 +2305,7 @@ class Game extends \Bga\GameFramework\Table
 
             case $select_opponent:
 
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
@@ -2321,7 +2321,7 @@ class Game extends \Bga\GameFramework\Table
                     $climbing_card_private = ['portaledge_type_arg' => $portaledge_type_arg];
                     $climbing_card_info['portaledge_id'] = $portaledge_draw['id'];
                 }
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
@@ -2341,7 +2341,7 @@ class Game extends \Bga\GameFramework\Table
                 }
 
                 $climbing_card_info['discard_num'] = $discard_num;
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
@@ -2352,13 +2352,13 @@ class Game extends \Bga\GameFramework\Table
 
             case $steal_asset:
 
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
 
                 if ($jesus_piece) {
-                    self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                    $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                         'player_name' => $player_name,
                         'player_id' => $player_id,
                     ));
@@ -2374,7 +2374,7 @@ class Game extends \Bga\GameFramework\Table
                 }
 
                 if ($choice_args['cost'] == 'updateWaterPsych') {
-                    self::notifyAllPlayers('updateWaterPsych', '', array(
+                    $this->bga->notify->all('updateWaterPsych', '', array(
                             'player_id' => self::getActivePlayerId(),
                             'water_psych_for_climbing' => $water_psych_for_climbing,
                     ));
@@ -2388,7 +2388,7 @@ class Game extends \Bga\GameFramework\Table
             case $portaledge_choose:
 
                 if ($choice_args['cost'] == 'updateWaterPsych') {
-                    self::notifyAllPlayers('updateWaterPsych', '', array(
+                    $this->bga->notify->all('updateWaterPsych', '', array(
                             'player_id' => self::getActivePlayerId(),
                             'water_psych_for_climbing' => $water_psych_for_climbing,
                     ));
@@ -2399,14 +2399,14 @@ class Game extends \Bga\GameFramework\Table
                     'portaledge_num' => $portaledge_num,
                     'final_state' => 'selectPortaledge',
                 ));
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
                 $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
 
                 if ($jesus_piece) {
-                    self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                    $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                         'player_name' => $player_name,
                         'player_id' => $player_id,
                     ));
@@ -2435,7 +2435,7 @@ class Game extends \Bga\GameFramework\Table
                 $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                 $lucky_chalkbag = array_search('11', $hand_sb_tokens) ? true : false;
 
-                self::notifyAllPlayers("rollDie", '', array(
+                $this->bga->notify->all("rollDie", '', array(
                     'face_rolled' => $face_rolled,
                     'climbing_card_info' => $climbing_card_info,
                     'risky_climb' => false,
@@ -2443,7 +2443,7 @@ class Game extends \Bga\GameFramework\Table
                 $climbing_card_info['face_rolled'] = $face_rolled;
                 $available_assets = count($this->getHandAssets($player_id)) + count($this->getBoardAssets($player_id));
 
-                self::notifyAllPlayers("log_only", '${climbing_log_all}', array(
+                $this->bga->notify->all("log_only", '${climbing_log_all}', array(
                     'climbing_log_all' => $climbing_log_all,
                     'i18n' => ['climbing_log_all'],
                 ));
@@ -2452,7 +2452,7 @@ class Game extends \Bga\GameFramework\Table
 
                     $climbing_card_info['portaledge_num'] = 3;
                     $climbing_card_info['final_state'] = 'selectPortaledge';
-                    self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls a checkmark and will draw 3 cards from the Portaledge'), array(
+                    $this->bga->notify->all("log_only", clienttranslate('${player_name} rolls a checkmark and will draw 3 cards from the Portaledge'), array(
                         'player_name' => $player_name,
                     ));
                     $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
@@ -2466,7 +2466,7 @@ class Game extends \Bga\GameFramework\Table
 
                     $hand_sb_tokens = $this->getHandSummitBetaTokens($player_id);
                     if (array_search('11', $hand_sb_tokens)) {
-                        self::notifyAllPlayers("log_only", $die_log, array(
+                        $this->bga->notify->all("log_only", $die_log, array(
                             'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
@@ -2480,7 +2480,7 @@ class Game extends \Bga\GameFramework\Table
                         $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 2 of his Asset Cards');
                         $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 2 of your Asset Cards');
                         $climbing_card_info['give_opponent'] = true;
-                        self::notifyAllPlayers("log_only", $die_log, array(
+                        $this->bga->notify->all("log_only", $die_log, array(
                             'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
@@ -2491,7 +2491,7 @@ class Game extends \Bga\GameFramework\Table
                         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
                         $rerack_1[] = $player_id;
                         $this->setGlobalVariable('rerack_1', $rerack_1);
-                        self::notifyAllPlayers("log_only", $die_log, array(
+                        $this->bga->notify->all("log_only", $die_log, array(
                                 'player_name' => $player_name,
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
@@ -2516,7 +2516,7 @@ class Game extends \Bga\GameFramework\Table
                         $climbing_card_info['titlebar_message_opponent'] = clienttranslate('must select an opponent to get 1 of his Asset Cards and 1 of his Psych');
                         $climbing_card_info['titlebar_message'] = clienttranslate('must select an opponent to get 1 of your Asset Cards and 1 of your Psych');
                         $climbing_card_info['give_opponent'] = true;
-                        self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych'), array(
+                        $this->bga->notify->all("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych and will choose an opponent and give them 1 Asset Card and 1 Psych'), array(
                                 'player_name' => $player_name,
                         ));
                         $this->setGlobalVariable('climbing_card_info', $climbing_card_info);
@@ -2527,7 +2527,7 @@ class Game extends \Bga\GameFramework\Table
                         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
                         $rerack_1[] = $player_id;
                         $this->setGlobalVariable('rerack_1', $rerack_1);
-                        self::notifyAllPlayers("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych but he does not have the required resources. He will draw only 1 card during the next Rerack Phase'), array(
+                        $this->bga->notify->all("log_only", clienttranslate('${player_name} rolls -1 Card and -1 Psych but he does not have the required resources. He will draw only 1 card during the next Rerack Phase'), array(
                                 'player_name' => $player_name,
                         ));
                         $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
@@ -2540,7 +2540,7 @@ class Game extends \Bga\GameFramework\Table
             case $bespoke:
 
                 foreach(array_keys($names_and_colors) as $id) {
-                    self::notifyPlayer($id, "log_only", '${climbing_log_all}', array(
+                    $this->bga->notify->player($id, "log_only", '${climbing_log_all}', array(
                         'climbing_log_all' => $climbing_log_all,
                         'i18n' => ['climbing_log_all'],
                     ));
@@ -2557,7 +2557,7 @@ class Game extends \Bga\GameFramework\Table
                         $summit_beta_tokens = $this->cards_and_tokens->getCardsOnTop(2, 'summit_beta_supply');
                         $climbing_card_info['summit_beta_tokens'] = $summit_beta_tokens;
 
-                        self::notifyAllPlayers('summitBetaChoices', '', [
+                        $this->bga->notify->all('summitBetaChoices', '', [
                             'summit_beta_tokens' => $summit_beta_tokens,
                         ]);
 
@@ -2603,7 +2603,7 @@ class Game extends \Bga\GameFramework\Table
                         if ($climbing_card_info['type_arg'] == 24) {
                             foreach(array_keys($names_and_colors) as $id) {
                                 if ($id != $player_id) {
-                                    self::notifyPlayer($id, "confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+                                    $this->bga->notify->player($id, "confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                                         'player_name' => self::getActivePlayerName(),
                                         'symbol_for_log' => $symbol_for_log,
                                         'player_id' => $player_id,
@@ -2615,7 +2615,7 @@ class Game extends \Bga\GameFramework\Table
                                 }
                             }
 
-                            self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} token and all opponents draw a Gear card from the Portaledge'), array(
+                            $this->bga->notify->player($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} token and all opponents draw a Gear card from the Portaledge'), array(
                                     'player_name' => self::getActivePlayerName(),
                                     'symbol_for_log' => $symbol_for_log,
                                     'symbol_type' => $symbol_type,
@@ -2627,7 +2627,7 @@ class Game extends \Bga\GameFramework\Table
                             ));
                         }
 
-                        self::notifyPlayer($player_id, "climbingCards15And24Public", "", array(
+                        $this->bga->notify->player($player_id, "climbingCards15And24Public", "", array(
                             'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                         ));
 
@@ -2665,7 +2665,7 @@ class Game extends \Bga\GameFramework\Table
                                     $log_message['args']['i18n'][] = 'other_opponents';
                                 }
 
-                                self::notifyPlayer($id, "climbingCards15And24Private", '${log_message}', array(
+                                $this->bga->notify->player($id, "climbingCards15And24Private", '${log_message}', array(
                                     'player_name' => $player_name,
                                     'log_message' => $log_message,
                                     'other_opponents' => $other_opponents,
@@ -2703,7 +2703,7 @@ class Game extends \Bga\GameFramework\Table
             default:
 
                 if ($jesus_piece && $card_type === '65' && $choice === 'a') {
-                    self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                    $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                         'player_name' => self::getActivePlayerName(),
                         'player_id' => $player_id,
                     ));
@@ -2718,7 +2718,7 @@ class Game extends \Bga\GameFramework\Table
                     $this->incStat(1, "played_summit_beta_tokens", $player_id);
                 }
 
-                self::notifyAllPlayers("confirmClimbingChoiceOpponent", '${climbing_log_all}', array(
+                $this->bga->notify->all("confirmClimbingChoiceOpponent", '${climbing_log_all}', array(
                     'player_name' => self::getActivePlayerName(),
                     'climbing_card_for_log' => $climbing_card_for_log,
                     'choice_flavor' => $choice_flavor_for_log,
@@ -2741,7 +2741,7 @@ class Game extends \Bga\GameFramework\Table
                     'preserve' => ['player_id'],
                     'i18n' => ['climbing_log_all'],
                 ));
-                self::notifyPlayer($player_id, "confirmClimbingChoice", '', array(
+                $this->bga->notify->player($player_id, "confirmClimbingChoice", '', array(
                     'player_id' => $player_id,
                     'choice_args' => $choice_args,
                     'cost' => $cost,
@@ -2759,7 +2759,7 @@ class Game extends \Bga\GameFramework\Table
                     'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                     'asset_discard_top_card' => $this->cards_and_tokens->getCardOnTop('discard'),
                 ));
-                self::notifyPlayer($player_id, "confirmClimbingChoiceLog", '${climbing_log}', array(
+                $this->bga->notify->player($player_id, "confirmClimbingChoiceLog", '${climbing_log}', array(
                     'player_name' => self::getActivePlayerName(),
                     'climbing_card_for_log' => $climbing_card_for_log,
                     'climbing_log' => $climbing_log,
@@ -2772,7 +2772,7 @@ class Game extends \Bga\GameFramework\Table
                 ));
 
                 if ($jesus_piece && !($card_type === '65' && $choice === 'a')) {
-                    self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                    $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                         'player_name' => self::getActivePlayerName(),
                         'player_id' => $player_id,
                     ));
@@ -2820,7 +2820,7 @@ class Game extends \Bga\GameFramework\Table
 
                             case '25':
                             case '45':
-                                self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                                $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                                         'player_name' => self::getActivePlayerName(),
                                         'player_id' => $player_id,
                                         'opponent_id' => false,
@@ -2829,7 +2829,7 @@ class Game extends \Bga\GameFramework\Table
                                         'preserve' => ['player_id', 'opponent_id'],
                                 ));
             
-                                self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                                $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                                         'player_name' => self::getActivePlayerName(),
                                         'player_id' => $player_id,
                                         'opponent_id' => false,
@@ -2856,7 +2856,7 @@ class Game extends \Bga\GameFramework\Table
                 }
 
                 if ($gain_summit_beta_token) {
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                    $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -2865,7 +2865,7 @@ class Game extends \Bga\GameFramework\Table
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
-                    self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                    $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -2883,7 +2883,7 @@ class Game extends \Bga\GameFramework\Table
                     $this->updateResourceTracker($player_id, 'add', null, null, [], $symbol_type);
                     $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
 
-                    self::notifyAllPlayers("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+                    $this->bga->notify->all("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'symbol_for_log' => $symbol_for_log,
                             'player_id' => $player_id,
@@ -2893,7 +2893,7 @@ class Game extends \Bga\GameFramework\Table
                             'i18n' => ['symbol_for_log'],
                     ));
 
-                    self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+                    $this->bga->notify->player($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'symbol_for_log' => $symbol_for_log,
                             'symbol_type' => $symbol_type,
@@ -3145,7 +3145,7 @@ class Game extends \Bga\GameFramework\Table
 
         $board_assets = $this->getGlobalVariable('board_assets', true);
 
-        self::notifyAllPlayers("confirmAssetsForDiscardPublic", '${player_name} ${log_message_opponents}', array(
+        $this->bga->notify->all("confirmAssetsForDiscardPublic", '${player_name} ${log_message_opponents}', array(
             'player_name' => self::getActivePlayerName(),
             'log_message_opponents' => $log_message_opponents,
             'hand_card_ids_for_public' => $hand_card_ids_for_public,
@@ -3171,7 +3171,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['log_message_opponents'],
         ));
 
-        self::notifyPlayer($player_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
+        $this->bga->notify->player($player_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
             'player_name' => self::getActivePlayerName(),
             'log_message_private' => $log_message_private,
             'hand_card_ids' => $hand_card_arr,
@@ -3198,7 +3198,7 @@ class Game extends \Bga\GameFramework\Table
         ));
 
         if (($climbing_card_info && $climbing_card_info['give_opponent']) || $risk_it_info) {
-            self::notifyPlayer($opponent_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
+            $this->bga->notify->player($opponent_id, "confirmAssetsForDiscardPrivate", '${player_name} ${log_message_private}', array(
                 'player_name' => self::getActivePlayerName(),
                 'log_message_private' => $log_message_private,
                 'hand_card_ids' => $hand_card_arr,
@@ -3241,7 +3241,7 @@ class Game extends \Bga\GameFramework\Table
                         $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
                         $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
                         $last_token = $pile_remaining ? false : true;
-                        self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                        $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'opponent_id' => false,
@@ -3250,7 +3250,7 @@ class Game extends \Bga\GameFramework\Table
                                 'preserve' => ['player_id', 'opponent_id'],
                         ));
 
-                        self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                        $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'opponent_id' => false,
@@ -3296,7 +3296,7 @@ class Game extends \Bga\GameFramework\Table
                     $this->updateResourceTracker($player_id, 'add', null, null, [], $symbol_type);
                     $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
 
-                    self::notifyAllPlayers("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+                    $this->bga->notify->all("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'symbol_for_log' => $symbol_for_log,
                             'player_id' => $player_id,
@@ -3306,7 +3306,7 @@ class Game extends \Bga\GameFramework\Table
                             'i18n' => ['symbol_for_log'],
                     ));
 
-                    self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+                    $this->bga->notify->player($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'symbol_for_log' => $symbol_for_log,
                             'symbol_type' => $symbol_type,
@@ -3328,7 +3328,7 @@ class Game extends \Bga\GameFramework\Table
                     $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
                     $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
                     $last_token = $pile_remaining ? false : true;
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                    $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -3337,7 +3337,7 @@ class Game extends \Bga\GameFramework\Table
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
-                    self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                    $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -3399,7 +3399,7 @@ class Game extends \Bga\GameFramework\Table
                         $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
                         $hand_count = count($this->getHandAssets($player_id));
 
-                        self::notifyAllPlayers("automaticPortaledgeOpponent", clienttranslate('${player_name} draws a ${portaledge_type_for_log} card from the Portaledge'), array(
+                        $this->bga->notify->all("automaticPortaledgeOpponent", clienttranslate('${player_name} draws a ${portaledge_type_for_log} card from the Portaledge'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'portaledge_type_for_log' => $portaledge_type_for_log,
@@ -3412,7 +3412,7 @@ class Game extends \Bga\GameFramework\Table
                                 'preserve' => ['player_id'],
                                 'i18n' => ['portaledge_type_for_log'],
                         ));
-                        self::notifyPlayer($player_id, "automaticPortaledge", clienttranslate('${player_name} draws ${portaledge_draw_for_log} from the Portaledge'), array(
+                        $this->bga->notify->player($player_id, "automaticPortaledge", clienttranslate('${player_name} draws ${portaledge_draw_for_log} from the Portaledge'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'portaledge_draw' => $portaledge_draw,
@@ -3469,7 +3469,7 @@ class Game extends \Bga\GameFramework\Table
                         $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
                         $hand_count = count($this->getHandAssets($player_id));
 
-                        self::notifyAllPlayers("automaticPortaledgeOpponent", clienttranslate('${player_name} draws a Gear card from the Portaledge'), array(
+                        $this->bga->notify->all("automaticPortaledgeOpponent", clienttranslate('${player_name} draws a Gear card from the Portaledge'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'portaledge_type' => $portaledge_type,
@@ -3479,7 +3479,7 @@ class Game extends \Bga\GameFramework\Table
                                 'asset_discard' => $this->getGlobalVariable('asset_discard', true),
                                 'preserve' => ['player_id'],
                         ));
-                        self::notifyPlayer($player_id, "automaticPortaledge", clienttranslate('${player_name} draws ${portaledge_draw_for_log} from the Portaledge'), array(
+                        $this->bga->notify->player($player_id, "automaticPortaledge", clienttranslate('${player_name} draws ${portaledge_draw_for_log} from the Portaledge'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                                 'portaledge_draw' => $portaledge_draw,
@@ -3562,7 +3562,7 @@ class Game extends \Bga\GameFramework\Table
             $this->cards_and_tokens->insertCardOnExtremePosition($climbing_card_info['id'], 'climbing_discard', true);
             $this->setGlobalVariable('climbing_card_info', array());
 
-            self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+            $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                 'player_name' => $player_name,
                 'player_id' => $player_id,
             ));
@@ -3583,7 +3583,7 @@ class Game extends \Bga\GameFramework\Table
                     $climbing_card_private = $this->getGlobalVariable('climbing_card_private', true);
                     $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
                     $last_token = $pile_remaining ? false : true;
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
+                    $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -3592,7 +3592,7 @@ class Game extends \Bga\GameFramework\Table
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
-                    self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                    $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -3618,7 +3618,7 @@ class Game extends \Bga\GameFramework\Table
                     break;
 
                 case 65:
-                    self::notifyAllPlayers("updateWaterPsych", '', array(
+                    $this->bga->notify->all("updateWaterPsych", '', array(
                         'player_id' => $player_id,
                         'water_psych_for_climbing' => $climbing_card_info['water_psych_for_climbing'],
                     ));
@@ -3743,7 +3743,7 @@ class Game extends \Bga\GameFramework\Table
                     ];
 
                     if ($jesus_party) {
-                        self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                        $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                         ));
@@ -3786,7 +3786,7 @@ class Game extends \Bga\GameFramework\Table
                     $player_resources = $this->getGlobalVariable('resource_tracker', true)[$player_id];
                     $opponent_resources = $this->getGlobalVariable('resource_tracker', true)[$opponent_id];
 
-                    self::notifyAllPlayers("shareEffectPublic", '${party_log_private}', array(
+                    $this->bga->notify->all("shareEffectPublic", '${party_log_private}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
                             'party_log_private' => $party_log_private,
@@ -3805,7 +3805,7 @@ class Game extends \Bga\GameFramework\Table
                             'i18n' => ['party_log_private'],
                     ));
 
-                    self::notifyPlayer($player_id, "shareEffectPrivate", '${party_log_me}', array(
+                    $this->bga->notify->player($player_id, "shareEffectPrivate", '${party_log_me}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
                             'card_for_log_player' => $card_for_log_player,
@@ -3828,7 +3828,7 @@ class Game extends \Bga\GameFramework\Table
                             'i18n' => ['party_log_me'],
                     ));
 
-                    self::notifyPlayer($opponent_id, "shareEffectPrivate", '${party_log_opponent}', array(
+                    $this->bga->notify->player($opponent_id, "shareEffectPrivate", '${party_log_opponent}', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $climbing_card_info['opponent_name'],
                             'card_for_log_opponent' => $card_for_log_opponent,
@@ -3918,7 +3918,7 @@ class Game extends \Bga\GameFramework\Table
                     $pile_remaining = $this->cards_and_tokens->getCardsInLocation('summit_beta_supply');
                     $last_token = $pile_remaining ? false : true;
 
-                    self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} chooses ${player_name1} to gain a Summit Beta Token'), array(
+                    $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} chooses ${player_name1} to gain a Summit Beta Token'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $opponent_name,
                             'player_id' => $player_id,
@@ -3928,7 +3928,7 @@ class Game extends \Bga\GameFramework\Table
                             'preserve' => ['player_id', 'opponent_id'],
                     ));
 
-                    self::notifyPlayer($opponent_id, "confirmSummitBeta", clienttranslate('${player_name} chooses ${player_name1} to gain ${summit_beta_for_log}'), array(
+                    $this->bga->notify->player($opponent_id, "confirmSummitBeta", clienttranslate('${player_name} chooses ${player_name1} to gain ${summit_beta_for_log}'), array(
                             'player_name' => self::getActivePlayerName(),
                             'player_name1' => $opponent_name,
                             'player_id' => $player_id,
@@ -4065,7 +4065,7 @@ class Game extends \Bga\GameFramework\Table
         $hand_count = count($this->getHandAssets($player_id));
         $refill_portaledge = $this->getGlobalVariable('refill_portaledge', true);
 
-        self::notifyAllPlayers("confirmPortaledgeOpponent", clienttranslate('${player_name} ${operation} ${cards_for_log_public}${resting_water_psych}'), array(
+        $this->bga->notify->all("confirmPortaledgeOpponent", clienttranslate('${player_name} ${operation} ${cards_for_log_public}${resting_water_psych}'), array(
             'player_name' => self::getActivePlayerName(),
             'operation' => $operation,
             'cards_for_log_public' => $cards_for_log_public,
@@ -4086,7 +4086,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['operation', 'cards_for_log_public', 'resting_water_psych'],
         ));
 
-        self::notifyPlayer($player_id, "confirmPortaledge", clienttranslate('${player_name} ${operation} ${cards_for_log_private}${resting_water_psych}'), array(
+        $this->bga->notify->player($player_id, "confirmPortaledge", clienttranslate('${player_name} ${operation} ${cards_for_log_private}${resting_water_psych}'), array(
             'player_name' => self::getActivePlayerName(),
             'operation' => $operation,
             'cards_for_log_private' => $cards_for_log_private,
@@ -4159,7 +4159,7 @@ class Game extends \Bga\GameFramework\Table
 
         $climbing_card_info = $this->getGlobalVariable('climbing_card_info', true);
 
-        self::notifyAllPlayers("confirmAddTokenToPitch", clienttranslate('${player_name} adds a ${asset_type} token to ${pitch_for_log}'), array(
+        $this->bga->notify->all("confirmAddTokenToPitch", clienttranslate('${player_name} adds a ${asset_type} token to ${pitch_for_log}'), array(
             'player_id' => self::getActivePlayerId(),
             'player_name' => self::getActivePlayerName(),
             'asset_type' => $asset_type,
@@ -4210,7 +4210,7 @@ class Game extends \Bga\GameFramework\Table
         $formatted_asset_title = ['[' . $asset_title . '(' . $asset_type_arg . ')]'];
         $resource_for_log = $this->formatLogTitles($formatted_asset_title);
 
-        self::notifyAllPlayers("confirmAssetToAssetBoardOpponent", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
+        $this->bga->notify->all("confirmAssetToAssetBoardOpponent", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
             'player_name' => self::getActivePlayerName(),
             'board_assets' => $this->getGlobalVariable('board_assets', true),
             'resource_for_log' => $resource_for_log,
@@ -4223,7 +4223,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['resource_for_log'],
         ));
 
-        self::notifyPlayer($player_id, "confirmAssetToAssetBoard", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
+        $this->bga->notify->player($player_id, "confirmAssetToAssetBoard", clienttranslate('${player_name} places ${resource_for_log} from his hand onto his Asset Board'), array(
             'player_name' => self::getActivePlayerName(),
             'board_assets' => $this->getGlobalVariable('board_assets', true),
             'resource_for_log' => $resource_for_log,
@@ -4450,7 +4450,7 @@ class Game extends \Bga\GameFramework\Table
 
         $to_board_for_log = $to_board ? ' ' . clienttranslate('and adds it to his Asset Board') : '';
 
-        self::notifyAllPlayers('confirmStealFromAssetBoardOpponent', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
+        $this->bga->notify->all('confirmStealFromAssetBoardOpponent', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
             'player_name' => self::getActivePlayerName(),
             'asset_for_log' => $asset_for_log,
             'to_board_for_log' => $to_board_for_log,
@@ -4467,7 +4467,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['asset_for_log', 'to_board_for_log'],
         ));
 
-        self::notifyPlayer($player_id, 'confirmStealFromAssetBoard', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
+        $this->bga->notify->player($player_id, 'confirmStealFromAssetBoard', clienttranslate('${player_name} steals ${asset_for_log} from ${player_name1}\'s Asset Board${to_board_for_log}'), array(
             'player_name' => self::getActivePlayerName(),
             'asset_for_log' => $asset_for_log,
             'to_board_for_log' => $to_board_for_log,
@@ -4518,7 +4518,7 @@ class Game extends \Bga\GameFramework\Table
 
         $player_id = self::getActivePlayerId();
         $player_name = self::getActivePlayerName();
-        self::notifyPlayer($player_id, "confirmChooseSummitBetaTokenPlayer", clienttranslate('${player_name} kept ${player_token_for_log} and gave ${opponent_token_for_log} to ${player_name1}'), array(
+        $this->bga->notify->player($player_id, "confirmChooseSummitBetaTokenPlayer", clienttranslate('${player_name} kept ${player_token_for_log} and gave ${opponent_token_for_log} to ${player_name1}'), array(
             'player_name' => $player_name,
             'player_name1' => $player_name1,
             'player_token_for_log' => $player_token_for_log,
@@ -4533,7 +4533,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['player_token_for_log', 'opponent_token_for_log'],
         ));
 
-        self::notifyPlayer($opponent_id, "confirmChooseSummitBetaTokenOpponent", clienttranslate('${player_name} kept a Summit Beta token and gave ${opponent_token_for_log} to ${player_name1}'), array(
+        $this->bga->notify->player($opponent_id, "confirmChooseSummitBetaTokenOpponent", clienttranslate('${player_name} kept a Summit Beta token and gave ${opponent_token_for_log} to ${player_name1}'), array(
             'player_name' => $player_name,
             'player_name1' => $player_name1,
             'player_token_for_log' => null,
@@ -4548,7 +4548,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['opponent_token_for_log'],
         ));
 
-        self::notifyAllPlayers("confirmChooseSummitBetaTokenPublic", clienttranslate('${player_name} kept a Summit Beta token and gave a Summit Beta token to ${player_name1}'), array(
+        $this->bga->notify->all("confirmChooseSummitBetaTokenPublic", clienttranslate('${player_name} kept a Summit Beta token and gave a Summit Beta token to ${player_name1}'), array(
             'player_name' => $player_name,
             'player_name1' => $player_name1,
             'player_token_for_log' => null,
@@ -4584,7 +4584,7 @@ class Game extends \Bga\GameFramework\Table
         $this->updateResourceTracker($player_id, 'add', null, null, [], $technique_token_type);
         $player_resources = $this->getGlobalVariable('resource_tracker')->$player_id;
 
-        self::notifyAllPlayers("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+        $this->bga->notify->all("confirmSymbolTokenOpponent", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                 'player_name' => self::getActivePlayerName(),
                 'symbol_for_log' => $symbol_for_log,
                 'player_id' => $player_id,
@@ -4594,7 +4594,7 @@ class Game extends \Bga\GameFramework\Table
                 'i18n' => ['symbol_for_log'],
         ));
 
-        self::notifyPlayer($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
+        $this->bga->notify->player($player_id, "confirmSymbolToken", clienttranslate('${player_name} gains a ${symbol_for_log} Token'), array(
                 'player_name' => self::getActivePlayerName(),
                 'symbol_for_log' => $symbol_for_log,
                 'symbol_type' => $technique_token_type,
@@ -4620,7 +4620,7 @@ class Game extends \Bga\GameFramework\Table
         self::checkAction('undoClimbingCard');
 
         $this->undoRestorePoint();
-        self::notifyAllPlayers("undoClimbingCleanup", '', []);
+        $this->bga->notify->all("undoClimbingCleanup", '', []);
     }
 
     function passClimbingCard($player_id) {
@@ -4636,7 +4636,7 @@ class Game extends \Bga\GameFramework\Table
         $formatted_climbing_card_name = ['/' . $climbing_card_name . '(' . $climbing_card_type_arg . ')\\'];
         $climbing_card_for_log = $this->formatLogTitles($formatted_climbing_card_name);
 
-        self::notifyAllPlayers('passedClimbingCard', clienttranslate('${player_name} could not choose either option and passed on ${climbing_card_for_log}. He will only draw 1 card during the Rerack phase'), [
+        $this->bga->notify->all('passedClimbingCard', clienttranslate('${player_name} could not choose either option and passed on ${climbing_card_for_log}. He will only draw 1 card during the Rerack phase'), [
                 'player_name' => self::getActivePlayerName(),
                 'climbing_card_for_log' => $climbing_card_for_log,
                 'i18n' => ['climbing_card_for_log'],
@@ -4701,7 +4701,7 @@ class Game extends \Bga\GameFramework\Table
 
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-        self::notifyAllPlayers('confirmRerackPublic', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
+        $this->bga->notify->all('confirmRerackPublic', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
             'name_1' => $asset_name_1,
@@ -4715,7 +4715,7 @@ class Game extends \Bga\GameFramework\Table
             'i18n' => ['assets_for_log'],
         ]);
 
-        self::notifyPlayer($player_id, 'confirmRerackPrivate', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
+        $this->bga->notify->player($player_id, 'confirmRerackPrivate', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
             'player_name' => self::getActivePlayerName(),
             'name_1' => $asset_name_1,
             'type_arg_1' => $type_arg_1,
@@ -4744,11 +4744,11 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-        self::notifyAllPlayers('confirmEnergyDrink', clienttranslate('${player_name} uses +Energy Drink(4)+ and gains 1 Water and 1 Psych'), [
+        $this->bga->notify->all('confirmEnergyDrink', clienttranslate('${player_name} uses +Energy Drink(4)+ and gains 1 Water and 1 Psych'), [
             'player_name' => self::getActivePlayerName(),
             'player_id' => $player_id,
         ]);
-        self::notifyPlayer($player_id, 'updatePlayerTokenTracker', '', [
+        $this->bga->notify->player($player_id, 'updatePlayerTokenTracker', '', [
             'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$player_id],
         ]);
     }
@@ -4767,7 +4767,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-        self::notifyAllPlayers('log_only', clienttranslate('${player_name} uses +Bomber Anchor(9)+'), [
+        $this->bga->notify->all('log_only', clienttranslate('${player_name} uses +Bomber Anchor(9)+'), [
             'player_name' => self::getActivePlayerName(),
         ]);
 
@@ -4777,7 +4777,7 @@ class Game extends \Bga\GameFramework\Table
         $this->confirmPortaledge($portaledge_to_draw);
 
         $this->setGlobalVariable('bomber_anchor', false);
-        self::notifyAllPlayers('bomberAnchorCleanup', '', []);
+        $this->bga->notify->all('bomberAnchorCleanup', '', []);
     }
 
     function confirmLuckyChalkbag($current_face) {
@@ -4882,12 +4882,12 @@ class Game extends \Bga\GameFramework\Table
 
         $this->incStat(1, "played_summit_beta_tokens", $player_id);
 
-        self::notifyAllPlayers('retractRiskDie', '', [
+        $this->bga->notify->all('retractRiskDie', '', [
             'use' => true,
             'token_id' => $token_id,
         ]);
         
-        self::notifyAllPlayers("rollDie", '', array(
+        $this->bga->notify->all("rollDie", '', array(
             'face_rolled' => $face_rolled,
             'climbing_card_info' => [],
             'risky_climb' => true,
@@ -4895,7 +4895,7 @@ class Game extends \Bga\GameFramework\Table
         ));
 
         $die_log = dieLog($face_rolled, $available_cards, $resource_tracker['psych'], $use_case, $player_name);
-        self::notifyAllPlayers("log_only", '${die_log}', array(
+        $this->bga->notify->all("log_only", '${die_log}', array(
             'die_log' => $die_log,
             'i18n' => ['die_log'],
         ));
@@ -4922,7 +4922,7 @@ class Game extends \Bga\GameFramework\Table
                     $rerack_1[] = $player_id;
                     $this->setGlobalVariable('rerack_1', $rerack_1);
 
-                    self::notifyAllPlayers('riskReturnAssets', '', []);
+                    $this->bga->notify->all('riskReturnAssets', '', []);
                     $this->setGlobalVariable('risk_it_info', []);
 
                     $this->gamestate->nextState('nextClimb');
@@ -4943,7 +4943,7 @@ class Game extends \Bga\GameFramework\Table
                     $rerack_1[] = $player_id;
                     $this->setGlobalVariable('rerack_1', $rerack_1);
 
-                    self::notifyAllPlayers('riskReturnAssets', '', []);
+                    $this->bga->notify->all('riskReturnAssets', '', []);
                     $this->setGlobalVariable('risk_it_info', []);
 
                     $this->gamestate->nextState('nextClimb');
@@ -5024,7 +5024,7 @@ class Game extends \Bga\GameFramework\Table
         $available_cards = $hand_cards + $board_cards;
         $face_rolled = $this->getGlobalVariable('face_rolled');
 
-        self::notifyAllPlayers('retractRiskDie', '', []);
+        $this->bga->notify->all('retractRiskDie', '', []);
         $this->setGlobalVariable('riskSummitBetaFace', null);
 
         if ($face_rolled === 2) {
@@ -5042,7 +5042,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
 
-                self::notifyAllPlayers('riskReturnAssets', '', []);
+                $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risk_it_info', []);
 
                 $this->setGlobalVariable('face_rolled', null);
@@ -5065,7 +5065,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
 
-                self::notifyAllPlayers('riskReturnAssets', '', []);
+                $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risk_it_info', []);
 
                 $this->setGlobalVariable('face_rolled', null);
@@ -5091,7 +5091,7 @@ class Game extends \Bga\GameFramework\Table
         $discard_for_log = $this->formatLogTitles($formatted_discard_title);
         $formatted_chosen_title = ['/' . $chosen_title . '(' . $chosen_type_arg . ')\\'];
         $chosen_for_log = $this->formatLogTitles($formatted_chosen_title);
-        self::notifyAllPlayers("confirmCrimperClimbingCard", clienttranslate('${player_name} chooses ${chosen_for_log} and discards ${discard_for_log}'), [
+        $this->bga->notify->all("confirmCrimperClimbingCard", clienttranslate('${player_name} chooses ${chosen_for_log} and discards ${discard_for_log}'), [
             'player_name' => self::getActivePlayerName(),
             'chosen_for_log' => $chosen_for_log,
             'discard_for_log' => $discard_for_log,
@@ -5503,7 +5503,7 @@ class Game extends \Bga\GameFramework\Table
                         $summit_beta_for_log = $this->formatLogTitles([$formatted_sb_1_name, $formatted_sb_2_name]);
                         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
-                        self::notifyAllPlayers("confirmSummitBetaOpponent", clienttranslate('${player_name} gains 2 Summit Beta Tokens'), array(
+                        $this->bga->notify->all("confirmSummitBetaOpponent", clienttranslate('${player_name} gains 2 Summit Beta Tokens'), array(
                             'player_name' => $info['name'],
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -5511,7 +5511,7 @@ class Game extends \Bga\GameFramework\Table
                             'summit_beta_reshuffle' => false,
                             'preserve' => ['player_id', 'opponent_id'],
                         ));
-                        self::notifyAllPlayers("confirmSummitBetaOpponent", '', array(
+                        $this->bga->notify->all("confirmSummitBetaOpponent", '', array(
                             'player_id' => $player_id,
                             'opponent_id' => false,
                             'last_token' => false,
@@ -5519,7 +5519,7 @@ class Game extends \Bga\GameFramework\Table
                             'preserve' => ['player_id', 'opponent_id'],
                         ));
                         
-                        self::notifyPlayer($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
+                        $this->bga->notify->player($player_id, "confirmSummitBeta", clienttranslate('${player_name} gains ${summit_beta_for_log}'), array(
                             'player_name' => $info['name'],
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -5530,7 +5530,7 @@ class Game extends \Bga\GameFramework\Table
                             'summit_beta_reshuffle' => false,
                             'i18n' => ['summit_beta_for_log'],
                         ));
-                        self::notifyPlayer($player_id, "confirmSummitBeta", '', array(
+                        $this->bga->notify->player($player_id, "confirmSummitBeta", '', array(
                             'player_name' => self::getActivePlayerName(),
                             'player_id' => $player_id,
                             'opponent_id' => false,
@@ -5543,7 +5543,7 @@ class Game extends \Bga\GameFramework\Table
                 }
             }
             $player_names_and_colors = $this->getGlobalVariable('player_names_and_colors', true);
-            self::notifyAllPlayers('updatePlayerNamesAndColors', '', ['player_names_and_colors' => $player_names_and_colors]);
+            $this->bga->notify->all('updatePlayerNamesAndColors', '', ['player_names_and_colors' => $player_names_and_colors]);
             $active_player_id = $this->getActivePlayerId();
             self::giveExtraTime($active_player_id);
             $this->setGlobalVariable('phase', clienttranslate('Rack Up!'));
@@ -5583,7 +5583,7 @@ class Game extends \Bga\GameFramework\Table
             $this->gamestate->nextState('resting');
 
         } else if ($bailed_pitch[$player_id] !== null && !in_array($player_id, $finished_drawing)) {
-            self::notifyAllPlayers('log_only', clienttranslate('${player_name} bailed out and does not gain any Assets during Rerack'), [
+            $this->bga->notify->all('log_only', clienttranslate('${player_name} bailed out and does not gain any Assets during Rerack'), [
                 'player_name' => self::getActivePlayerName(),
             ]);
             switch ($draw_step) {
@@ -5716,7 +5716,7 @@ class Game extends \Bga\GameFramework\Table
         $current_climbing_card = $this->getUniqueValueFromDB("SELECT card_id FROM cards_and_tokens WHERE card_location='in_play'");
         if ($current_climbing_card) { $this->cards_and_tokens->insertCardOnExtremePosition($current_climbing_card, 'climbing_discard', true); }
 
-        self::notifyAllPlayers('cleanUpClimbOrRest', '', []);
+        $this->bga->notify->all('cleanUpClimbOrRest', '', []);
 
         $finished_climbing = $this->getGlobalVariable('finished_climbing', true);
         $current_player = self::getActivePlayerId();
@@ -5946,7 +5946,7 @@ class Game extends \Bga\GameFramework\Table
 
                 $this->incStat($new_points, "technique_token_points", $id);
 
-                self::notifyAllPlayers("matchingTechniques", '${log_message}', array(
+                $this->bga->notify->all("matchingTechniques", '${log_message}', array(
                     'player_id' => $id,
                     'player_name' => $names_and_colors[$id]['name'],
                     'player_color' => $names_and_colors[$id]['color'],
@@ -5957,7 +5957,7 @@ class Game extends \Bga\GameFramework\Table
                     'log_message' => $log_message,
                     'i18n' => ['log_message'],
                 ));
-                self::notifyPlayer($id, "updatePlayerTokenTracker", '', [
+                $this->bga->notify->player($id, "updatePlayerTokenTracker", '', [
                     'player_token_tracker' => $this->getGlobalVariable('hand_token_tracker', true)[$id],
                 ]);
             }
@@ -5965,7 +5965,7 @@ class Game extends \Bga\GameFramework\Table
             $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
         }
 
-        if (!$tokens_awarded) { self::notifyAllPlayers('noMatchingTechniques', clienttranslate('No 2-Point Tokens are awarded for matching Techniques'), []); }
+        if (!$tokens_awarded) { $this->bga->notify->all('noMatchingTechniques', clienttranslate('No 2-Point Tokens are awarded for matching Techniques'), []); }
 
         $this->setGlobalVariable('asset_board_token_tracker', $asset_board_token_tracker);
         $this->gamestate->nextState('flagPermanentAssets');
@@ -6004,7 +6004,7 @@ class Game extends \Bga\GameFramework\Table
 
         $this->setGlobalVariable('available_permanent_assets', $available_tokens);
 
-        if ($active_players === []) { self::notifyAllPlayers('noPermanentAssets', clienttranslate('No players are eligible for Permanent Asset Tokens'), []); }
+        if ($active_players === []) { $this->bga->notify->all('noPermanentAssets', clienttranslate('No players are eligible for Permanent Asset Tokens'), []); }
 
         $this->gamestate->setPlayersMultiactive($active_players, "flipPlayedAssets", true);
         if ($active_players != []) { $this->gamestate->nextState('choosePermanentAssets'); }
@@ -6046,7 +6046,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('board_assets', $board_assets);
         $this->setGlobalVariable('resource_tracker', $resource_tracker);
 
-        self::notifyAllPlayers('flipPlayedAssets', '', array(
+        $this->bga->notify->all('flipPlayedAssets', '', array(
             'ids_to_flip' => $ids_to_flip,
         ));
 
@@ -6242,7 +6242,7 @@ class Game extends \Bga\GameFramework\Table
         }
         $log_message['log'] .= $gained_permanent_assets ? ' ' . clienttranslate('Permanent Asset Token/s') : '';
 
-        self::notifyAllPlayers('grantPermanentAssets', '${log_message}', array(
+        $this->bga->notify->all('grantPermanentAssets', '${log_message}', array(
                 'player_name1' => $player_name1,
                 'player_name2' => $player_name2,
                 'player_name3' => $player_name3,
@@ -6281,7 +6281,7 @@ class Game extends \Bga\GameFramework\Table
 
         $this->gamestate->changeActivePlayer($new_starting_player);
 
-        self::notifyAllPlayers('passStartingPlayer', clienttranslate('${player_name} is the new starting player'), array(
+        $this->bga->notify->all('passStartingPlayer', clienttranslate('${player_name} is the new starting player'), array(
             'player_name' => $player_names_and_colors[$new_starting_player]['name'],
             'new_starting_player' => $new_starting_player,
         ));
@@ -6308,7 +6308,7 @@ class Game extends \Bga\GameFramework\Table
                 $final_personal_objectives_tracker[$id] = $val;
             }
         }
-        self::notifyAllPlayers('updateFinalPersonalObjectivesTracker', '', [
+        $this->bga->notify->all('updateFinalPersonalObjectivesTracker', '', [
             'final_personal_objectives_tracker' => $final_personal_objectives_tracker,
         ]);
 
@@ -6381,7 +6381,7 @@ class Game extends \Bga\GameFramework\Table
                     $objectives_msg['args']['i18n'][] = 'objective_2_for_log';
                 }
 
-                self::notifyAllPlayers('log_only', '${objectives_msg}', [
+                $this->bga->notify->all('log_only', '${objectives_msg}', [
                     'player_name' => self::getActivePlayerName(),
                     'objective_1_name' => $objective_1_name,
                     'objective_2_name' => $objective_2_name,
@@ -6396,7 +6396,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('scored_personal_objectives', $scored_personal_objectives);
         $this->setGlobalVariable('score_tracker', $score_tracker);
 
-        self::notifyAllPlayers('preGameEnd', '', [
+        $this->bga->notify->all('preGameEnd', '', [
             'score_tracker' => $score_tracker,
             'scored_personal_objectives' => $scored_personal_objectives,
             'personal_objectives_tracker' => $personal_objectives_tracker,
@@ -6431,7 +6431,7 @@ class Game extends \Bga\GameFramework\Table
         $zombie_players = $this->getGlobalVariable('zombie_players', true);
         if (!in_array(strval($active_player), $zombie_players)) {
             $zombie_players[] = strval($active_player);
-            self::notifyAllPlayers('addZombie', '', ['zombies' => $zombie_players]);
+            $this->bga->notify->all('addZombie', '', ['zombies' => $zombie_players]);
         }
         $this->setGlobalVariable('zombie_players', $zombie_players);
     	$statename = $state['name'];

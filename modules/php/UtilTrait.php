@@ -705,7 +705,7 @@ trait UtilTrait {
             if ($third_row) {
 
                 $board = self::getCollectionFromDb("SELECT pitch_location location, pitch_id id FROM board", true);
-                self::notifyAllPlayers('revealHeadwall', clienttranslate('The Headwall is revealed'), array(
+                $this->bga->notify->all('revealHeadwall', clienttranslate('The Headwall is revealed'), array(
                     'board' => $board,
                     'tile_coords' => $tile_coords,
                 ));
@@ -740,7 +740,7 @@ trait UtilTrait {
                     foreach ($sunny_players as $player_id) {
 
                         if ($jesus_piece && $player_id == self::getActivePlayerId()) {
-                            self::notifyAllPlayers("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
+                            $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
                                 'player_name' => self::getActivePlayerName(),
                                 'player_id' => $player_id,
                             ));
@@ -799,7 +799,7 @@ trait UtilTrait {
                 }
                 
                 if (count($sunny_players) === 0) { $log_message['log'] = clienttranslate('No players are on a sunny Pitch'); }
-                self::notifyAllPlayers("sunnyPitch", '${log_message}', array(
+                $this->bga->notify->all("sunnyPitch", '${log_message}', array(
                     'log_message' => $log_message,
                     'sunny_players' => $sunny_players,
                     'sunny_players_resources' => $sunny_players_resources,
