@@ -120,39 +120,39 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('starting_player', $starting_player);
 
         // Init stats
-        $this->initStat('table', 'rounds', 0);
-        $this->initStat('player', 'climbed_arete', 0);
-        $this->initStat('player', 'climbed_corner', 0);
-        $this->initStat('player', 'climbed_crack', 0);
-        $this->initStat('player', 'climbed_flake', 0);
-        $this->initStat('player', 'climbed_roof', 0);
-        $this->initStat('player', 'climbed_slab', 0);
-        $this->initStat('player', 'played_gear', 0);
-        $this->initStat('player', 'played_face', 0);
-        $this->initStat('player', 'played_crack', 0);
-        $this->initStat('player', 'played_slab', 0);
-        $this->initStat('player', 'water_spent', 0);
-        $this->initStat('player', 'psych_spent', 0);
-        $this->initStat('player', 'climbed_one_star', 0);
-        $this->initStat('player', 'climbed_two_star', 0);
-        $this->initStat('player', 'climbed_three_star', 0);
-        $this->initStat('player', 'climbed_four_star', 0);
-        $this->initStat('player', 'climbed_five_star', 0);
-        $this->initStat('player', 'climbed_summit', false);
-        $this->initStat('player', 'shared_objectives_met', 0);
-        $this->initStat('player', 'shared_objectives_points', 0);
-        $this->initStat('player', 'personal_objective_scored', "0");
-        $this->initStat('player', 'personal_objective_points', 0);
-        $this->initStat('player', 'technique_token_points', 0);
-        $this->initStat('player', 'permanent_gear_assets', 0);
-        $this->initStat('player', 'permanent_face_assets', 0);
-        $this->initStat('player', 'permanent_crack_assets', 0);
-        $this->initStat('player', 'permanent_slab_assets', 0);
-        $this->initStat('player', 'played_summit_beta_tokens', 0);
-        $this->initStat('player', 'previously_climbed_pitches', 0);
-        $this->initStat('player', 'times_rested', 0);
-        $this->initStat('player', 'risky_climbs', 0);
-        $this->initStat('player', 'times_retreated', 0);
+        $this->bga->tableStats->init('rounds', 0);
+        $this->bga->playerStats->init('climbed_arete', 0);
+        $this->bga->playerStats->init('climbed_corner', 0);
+        $this->bga->playerStats->init('climbed_crack', 0);
+        $this->bga->playerStats->init('climbed_flake', 0);
+        $this->bga->playerStats->init('climbed_roof', 0);
+        $this->bga->playerStats->init('climbed_slab', 0);
+        $this->bga->playerStats->init('played_gear', 0);
+        $this->bga->playerStats->init('played_face', 0);
+        $this->bga->playerStats->init('played_crack', 0);
+        $this->bga->playerStats->init('played_slab', 0);
+        $this->bga->playerStats->init('water_spent', 0);
+        $this->bga->playerStats->init('psych_spent', 0);
+        $this->bga->playerStats->init('climbed_one_star', 0);
+        $this->bga->playerStats->init('climbed_two_star', 0);
+        $this->bga->playerStats->init('climbed_three_star', 0);
+        $this->bga->playerStats->init('climbed_four_star', 0);
+        $this->bga->playerStats->init('climbed_five_star', 0);
+        $this->bga->playerStats->init('climbed_summit', false);
+        $this->bga->playerStats->init('shared_objectives_met', 0);
+        $this->bga->playerStats->init('shared_objectives_points', 0);
+        $this->bga->playerStats->init('personal_objective_scored', "0");
+        $this->bga->playerStats->init('personal_objective_points', 0);
+        $this->bga->playerStats->init('technique_token_points', 0);
+        $this->bga->playerStats->init('permanent_gear_assets', 0);
+        $this->bga->playerStats->init('permanent_face_assets', 0);
+        $this->bga->playerStats->init('permanent_crack_assets', 0);
+        $this->bga->playerStats->init('permanent_slab_assets', 0);
+        $this->bga->playerStats->init('played_summit_beta_tokens', 0);
+        $this->bga->playerStats->init('previously_climbed_pitches', 0);
+        $this->bga->playerStats->init('times_rested', 0);
+        $this->bga->playerStats->init('risky_climbs', 0);
+        $this->bga->playerStats->init('times_retreated', 0);
 
         // Select board for player count
         if ($this->getPlayersNumber() <= 3) { $board = 'desert'; }
@@ -632,8 +632,8 @@ class Game extends \Bga\GameFramework\Table
                         $shared_objective['players_met'][] = $player_id;
                         $this->DbQuery("UPDATE player SET player_score=player_score+4 WHERE player_id='$player_id'");
                         $score_tracker[$player_id]['objectives'] += 4;
-                        $this->incStat(1, "shared_objectives_met", $player_id);
-                        $this->incStat(4, "shared_objectives_points", $player_id);
+                        $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
+                        $this->bga->playerStats->inc("shared_objectives_points", 4, $player_id);
                     }
                     $this->setGlobalVariable('score_tracker', $score_tracker);
                     break;
@@ -692,10 +692,10 @@ class Game extends \Bga\GameFramework\Table
         }
         foreach ($shared_objectives_tracker as $id => $info) {
             $name = $this->shared_objectives[(string)$id]['name'];
-            $this->initStat('player', $name, 0);
+            $this->bga->playerStats->init($name, 0);
             if ($name === "the_elitist") {
                 foreach ($players as $elitist_id => $player) {
-                    $this->incStat(4, "the_elitist", $elitist_id);
+                    $this->bga->playerStats->inc("the_elitist", 4, $elitist_id);
                 }
             }
         }
@@ -1095,7 +1095,7 @@ class Game extends \Bga\GameFramework\Table
             $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $simul_climb_id);
             $hand_token_tracker[$player_id] = $updated_player_token_tracker;
             $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+            $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
         }
 
         $this->bga->notify->all("confirmOpponentAssets", '${opponent_log_msg}', array(
@@ -1212,10 +1212,10 @@ class Game extends \Bga\GameFramework\Table
                         if ($info['player_counts'][$player_id] === 4) {
                             $info['players_met'][] = $player_id;
                             $shared_objective_points += 5;
-                            $this->incStat(1, "shared_objectives_met", $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
                             switch ($id) {
-                                case '1': $this->incStat(5, "ridgeline_challenge_north", $player_id); break;
-                                case '2': $this->incStat(5, "ridgeline_challenge_south", $player_id); break;
+                                case '1': $this->bga->playerStats->inc("ridgeline_challenge_north", 5, $player_id); break;
+                                case '2': $this->bga->playerStats->inc("ridgeline_challenge_south", 5, $player_id); break;
                             }
                         }
                         $shared_objectives_tracker[$id] = $info;
@@ -1230,10 +1230,10 @@ class Game extends \Bga\GameFramework\Table
                             $info['player_counts'][$player_id]++;
                             $shared_objective_points += 1;
                             $shared_objectives_tracker[$id] = $info;
-                            if ($info['player_counts'][$player_id] === 1) { $this->incStat(1, "shared_objectives_met", $player_id); }
+                            if ($info['player_counts'][$player_id] === 1) { $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id); }
                             switch ($id) {
-                                case '3': $this->incStat(1, "stay_in_the_shade", $player_id); break;
-                                case '4': $this->incStat(1, "stay_in_the_sun", $player_id); break;
+                                case '3': $this->bga->playerStats->inc("stay_in_the_shade", 1, $player_id); break;
+                                case '4': $this->bga->playerStats->inc("stay_in_the_sun", 1, $player_id); break;
                             }
                     }
                     break;
@@ -1255,14 +1255,14 @@ class Game extends \Bga\GameFramework\Table
                             if ($info['player_counts'][$player_id] === 3) {
                                 $info['players_met'][] = $player_id;
                                 $shared_objective_points += 4;
-                                $this->incStat(1, "shared_objectives_met", $player_id);
+                                $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
                                 switch ($id) {
-                                    case '5': $this->incStat(4, "jolly_jammer", $player_id); break;
-                                    case '6': $this->incStat(4, "smear_campaign", $player_id); break;
-                                    case '7': $this->incStat(4, "star_stemmer", $player_id); break;
-                                    case '8': $this->incStat(4, "exposure_junkie", $player_id); break;
-                                    case '13': $this->incStat(4, "flake_freak", $player_id); break;
-                                    case '14': $this->incStat(4, "pull-up_champion", $player_id); break;
+                                    case '5': $this->bga->playerStats->inc("jolly_jammer", 4, $player_id); break;
+                                    case '6': $this->bga->playerStats->inc("smear_campaign", 4, $player_id); break;
+                                    case '7': $this->bga->playerStats->inc("star_stemmer", 4, $player_id); break;
+                                    case '8': $this->bga->playerStats->inc("exposure_junkie", 4, $player_id); break;
+                                    case '13': $this->bga->playerStats->inc("flake_freak", 4, $player_id); break;
+                                    case '14': $this->bga->playerStats->inc("pull-up_champion", 4, $player_id); break;
                                 }
                             }
                             $shared_objectives_tracker[$id] = $info;
@@ -1331,8 +1331,8 @@ class Game extends \Bga\GameFramework\Table
                         $info['players_met'][] = $player_id;
                         $shared_objective_points += 4;
                         $shared_objectives_tracker[$id] = $info;
-                        $this->incStat(1, "shared_objectives_met", $player_id);
-                        $this->incStat(6, "grand_traverse", $player_id);
+                        $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
+                        $this->bga->playerStats->inc("grand_traverse", 6, $player_id);
                     }
                     break;
 
@@ -1345,8 +1345,8 @@ class Game extends \Bga\GameFramework\Table
                         if (count(array_filter($types, fn($v) => $v === true)) === 6) { // if all types are true (or 5 types and The Trifecta)
                             $info['players_met'][] = $player_id;
                             $shared_objective_points += 6;
-                            $this->incStat(1, "shared_objectives_met", $player_id);
-                            $this->incStat(6, "all-arounding", $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
+                            $this->bga->playerStats->inc("all-arounding", 6, $player_id);
                         }
                         $shared_objectives_tracker[$id] = $info;
                     }
@@ -1358,8 +1358,8 @@ class Game extends \Bga\GameFramework\Table
                         unset($info['players_met'][$player_idx]);
                         $shared_objective_points += -4;
                         $shared_objectives_tracker[$id] = $info;
-                        $this->incStat(-1, "shared_objectives_met", $player_id);
-                        $this->incStat(-4, "the_elitist", $player_id);
+                        $this->bga->playerStats->inc("shared_objectives_met", -1, $player_id);
+                        $this->bga->playerStats->inc("the_elitist", -4, $player_id);
                     }
                     break;
 
@@ -1368,13 +1368,13 @@ class Game extends \Bga\GameFramework\Table
                         $info['player_counts'][$player_id]++;
                         $shared_objective_points += 1;
                         $shared_objectives_tracker[$id] = $info;
-                        if ($info['player_counts'][$player_id] === 1) { $this->incStat(1, "shared_objectives_met", $player_id); }
-                        $this->incStat(1, "a_day_in_the_alpine", $player_id);
+                        if ($info['player_counts'][$player_id] === 1) { $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id); }
+                        $this->bga->playerStats->inc("a_day_in_the_alpine", 1, $player_id);
                     }
                     break;
             }
         }
-        $this->incStat($shared_objective_points, "shared_objectives_points", $player_id);
+        $this->bga->playerStats->inc("shared_objectives_points", $shared_objective_points, $player_id);
         $this->setGlobalVariable('shared_objectives_tracker', $shared_objectives_tracker);
 
         // track personal objectives
@@ -1406,19 +1406,19 @@ class Game extends \Bga\GameFramework\Table
         $summit_hexes = $board === 'desert' ? ['31', '32'] : ['41', '42', '43'];
         if (in_array($selected_hex, $summit_hexes)) {
             $summit_points = 1;
-            $this->setStat(true, "climbed_summit", $player_id);
+            $this->bga->playerStats->set("climbed_summit", true, $player_id);
         }
 
         // track stats
         if ($pitch_type !== 'any') {
             $pitch_type_stat = 'climbed_' . $pitch_type; // pitch type
-            $this->incStat(1, $pitch_type_stat, $player_id);
+            $this->bga->playerStats->inc($pitch_type_stat, 1, $player_id);
         }
         foreach ($selected_resources as $id) { // played asset cards
             $type_arg = $this->getGlobalVariable('asset_identifier', true)[$id];
             $asset_type = $this->getAssetType($type_arg);
             $asset_type_stat = 'played_' . $asset_type;
-            $this->incStat(1, $asset_type_stat, $player_id);
+            $this->bga->playerStats->inc($asset_type_stat, 1, $player_id);
         }
         switch ($pitch_value) { // pitch values
             case 1: $pitch_value_num = 'one'; break;
@@ -1428,7 +1428,7 @@ class Game extends \Bga\GameFramework\Table
             case 5: $pitch_value_num = 'five'; break;
         }
         $pitch_value_stat = 'climbed_' . $pitch_value_num . '_star';
-        $this->incStat(1, $pitch_value_stat, $player_id);
+        $this->bga->playerStats->inc($pitch_value_stat, 1, $player_id);
 
         $ledge = $this->getGlobalVariable('ledge', true);
         $cutoff_arr = $board === 'desert' ? ['21', '22'] : ['27', '28'];
@@ -1527,8 +1527,8 @@ class Game extends \Bga\GameFramework\Table
             $psych = ($requirements['psych'] != 0) ? $requirements['psych'] : null;
             $this->updateResourceTracker($player_id, 'subtract', $water, $psych, $selected_resource_types, null, false, true);
             $this->setGlobalVariable('board_assets', $board_assets);
-            if ($water) { $this->incStat($water, "water_spent", $player_id); }
-            if ($psych) { $this->incStat($psych, "psych_spent", $player_id); }
+            if ($water) { $this->bga->playerStats->inc("water_spent", $water, $player_id); }
+            if ($psych) { $this->bga->playerStats->inc("psych_spent", $psych, $player_id); }
 
         } else { 
 
@@ -1547,8 +1547,8 @@ class Game extends \Bga\GameFramework\Table
                 $water = ($requirements['water'] != 0 && !$extra_water) ? $requirements['water'] : null;
                 $psych = ($requirements['psych'] != 0) ? $requirements['psych'] : null;
                 $this->updateResourceTracker($player_id, 'subtract', $water, $psych, [], null, false, true);
-                if ($water) { $this->incStat($water, "water_spent", $player_id); }
-                if ($psych) { $this->incStat($psych, "psych_spent", $player_id); }
+                if ($water) { $this->bga->playerStats->inc("water_spent", $water, $player_id); }
+                if ($psych) { $this->bga->playerStats->inc("psych_spent", $psych, $player_id); }
             }
 
             else { $requirement_titles_for_log = clienttranslate('nothing'); }
@@ -1566,7 +1566,7 @@ class Game extends \Bga\GameFramework\Table
                 $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $token_id);
                 $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                 $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
                 $token = $this->summit_beta_tokens[$type_arg];
                 $token_name = $token['description'];
@@ -1611,7 +1611,7 @@ class Game extends \Bga\GameFramework\Table
             if ($id != $player_id && in_array($selected_hex, $pitch_tracker[$id])) { $already_climbed++; }
         }
         $pitch_points = $pitch_value - $already_climbed;
-        if ($already_climbed > 0) { $this->incStat(1, "previously_climbed_pitches", $player_id); }
+        if ($already_climbed > 0) { $this->bga->playerStats->inc("previously_climbed_pitches", 1, $player_id); }
         if ($pitch_points < 0) { $pitch_points = 0; }
         $new_points = $pitch_points + $shared_objective_points + $summit_points;
         $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$player_id'");
@@ -1700,7 +1700,7 @@ class Game extends \Bga\GameFramework\Table
             $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $spider_stick_id);
             $hand_token_tracker[$player_id] = $updated_player_token_tracker;
             $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+            $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
             $asset_board_token_tracker = $this->getGlobalVariable('asset_board_token_tracker', true);
             $asset_board_token_tracker[$player_id]['points_tokens'] += 1;
@@ -1779,7 +1779,7 @@ class Game extends \Bga\GameFramework\Table
         $board = $this->getGlobalVariable('board');
         $risk_pitches = [$selected_hex, ...$this->getAvailablePitches($current_pitch, $board)];
         $this->setGlobalVariable('risk_pitches', $risk_pitches);
-        $this->incStat(1, "risky_climbs", $player_id);
+        $this->bga->playerStats->inc("risky_climbs", 1, $player_id);
 
         $player_name = self::getActivePlayerName();
         $pitch = $this->pitches[$selected_pitch]['description'];
@@ -1902,7 +1902,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1 = $this->getGlobalVariable('rerack_1', true);
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
-                $this->incStat(1, "times_retreated", $player_id);
+                $this->bga->playerStats->inc("times_retreated", 1, $player_id);
                 $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risked_assets', []);
                 $this->setGlobalVariable('risk_it_info', []);
@@ -1935,7 +1935,7 @@ class Game extends \Bga\GameFramework\Table
                 $rerack_1 = $this->getGlobalVariable('rerack_1', true);
                 $rerack_1[] = $player_id;
                 $this->setGlobalVariable('rerack_1', $rerack_1);
-                $this->incStat(1, "times_retreated", $player_id);
+                $this->bga->playerStats->inc("times_retreated", 1, $player_id);
                 $this->bga->notify->all('riskReturnAssets', '', []);
                 $this->setGlobalVariable('risked_assets', []);
                 $this->setGlobalVariable('risk_it_info', []);
@@ -2060,7 +2060,7 @@ class Game extends \Bga\GameFramework\Table
         $rested = $this->getGlobalVariable('rested', true);
         $rested[] = $player_id;
         $this->setGlobalVariable('rested', $rested);
-        $this->incStat(1, 'times_rested', $player_id);
+        $this->bga->playerStats->inc('times_rested', 1, $player_id);
 
         $this->bga->notify->all('log_only', clienttranslate('${player_name} rested'), array(
             'player_name' => self::getActivePlayerName(),
@@ -2370,7 +2370,7 @@ class Game extends \Bga\GameFramework\Table
                     $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                     $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                     $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                    $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                    $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
                 }
 
                 if ($choice_args['cost'] == 'updateWaterPsych') {
@@ -2418,7 +2418,7 @@ class Game extends \Bga\GameFramework\Table
                     $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                     $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                     $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                    $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                    $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
                 }
                 
                 if (array_key_exists('portaledge_all', $climbing_card_info) || array_key_exists('opponents_only', $climbing_card_info)) {
@@ -2715,7 +2715,7 @@ class Game extends \Bga\GameFramework\Table
                     $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                     $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                     $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                    $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                    $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
                 }
 
                 $this->bga->notify->all("confirmClimbingChoiceOpponent", '${climbing_log_all}', array(
@@ -2784,7 +2784,7 @@ class Game extends \Bga\GameFramework\Table
                     $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                     $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                     $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                    $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                    $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
                 }
                 if ($jesus_piece && $card_type === '12' && $choice === 'a') { // Tricky Boulder Problem
                     $this->gamestate->nextState('chooseTechniqueToken');
@@ -3574,7 +3574,7 @@ class Game extends \Bga\GameFramework\Table
             $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
             $hand_token_tracker[$player_id] = $updated_player_token_tracker;
             $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+            $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
             switch ($climbing_card_info['type_arg']) {
 
@@ -3755,7 +3755,7 @@ class Game extends \Bga\GameFramework\Table
                         $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                         $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                        $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                        $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
                         $party_log_private = [
                             'log' => clienttranslate('${player_name1} loses a Psych and he and ${player_name} gain a Gear Card'),
@@ -4699,7 +4699,7 @@ class Game extends \Bga\GameFramework\Table
         $hand_token_tracker[$player_id] = $updated_player_token_tracker;
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
-        $this->incStat(1, "played_summit_beta_tokens", $player_id);
+        $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
         $this->bga->notify->all('confirmRerackPublic', clienttranslate('${player_name} uses +Rerack(1)+ and gains ${assets_for_log} from the discard pile'), [
             'player_name' => self::getActivePlayerName(),
@@ -4742,7 +4742,7 @@ class Game extends \Bga\GameFramework\Table
         $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $energy_drink_id);
         $hand_token_tracker[$player_id] = $updated_player_token_tracker;
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-        $this->incStat(1, "played_summit_beta_tokens", $player_id);
+        $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
         $this->bga->notify->all('confirmEnergyDrink', clienttranslate('${player_name} uses +Energy Drink(4)+ and gains 1 Water and 1 Psych'), [
             'player_name' => self::getActivePlayerName(),
@@ -4765,7 +4765,7 @@ class Game extends \Bga\GameFramework\Table
         $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $bomber_anchor_id);
         $hand_token_tracker[$player_id] = $updated_player_token_tracker;
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-        $this->incStat(1, "played_summit_beta_tokens", $player_id);
+        $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
         $this->bga->notify->all('log_only', clienttranslate('${player_name} uses +Bomber Anchor(9)+'), [
             'player_name' => self::getActivePlayerName(),
@@ -4880,7 +4880,7 @@ class Game extends \Bga\GameFramework\Table
         $hand_token_tracker[$player_id] = $updated_player_token_tracker;
         $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
 
-        $this->incStat(1, "played_summit_beta_tokens", $player_id);
+        $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
 
         $this->bga->notify->all('retractRiskDie', '', [
             'use' => true,
@@ -5931,7 +5931,7 @@ class Game extends \Bga\GameFramework\Table
                     $updated_player_token_tracker = $this->removeHandSummitBeta($this->getGlobalVariable('hand_token_tracker', true)[$id], $new_rubber_id);
                     $hand_token_tracker[$id] = $updated_player_token_tracker;
                     $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                    $this->incStat(1, "played_summit_beta_tokens", $id);
+                    $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $id);
                 }
 
                 $numbermap = [
@@ -5944,7 +5944,7 @@ class Game extends \Bga\GameFramework\Table
                 $log_message['args']['spelled_out_num'] = $spelled_out_num;
                 $log_message['i18n'][] = 'spelled_out_num';
 
-                $this->incStat($new_points, "technique_token_points", $id);
+                $this->bga->playerStats->inc("technique_token_points", $new_points, $id);
 
                 $this->bga->notify->all("matchingTechniques", '${log_message}', array(
                     'player_id' => $id,
@@ -6112,7 +6112,7 @@ class Game extends \Bga\GameFramework\Table
                 $asset_board_token_tracker[$player_id]['permanent_tokens'][$type] += $num;
                 for ($i=1; $i<=$num; $i++) { $permanent_asset_tracker[$player_id][] = $type; }
                 $permanent_token_stat = 'permanent_' . $type . '_assets';
-                $this->incStat($num, $permanent_token_stat, $player_id);
+                $this->bga->playerStats->inc($permanent_token_stat, $num, $player_id);
 
                 // update trackers for assets discarded from asset board
                 if ($character_id === '6') { // Young Prodigy
@@ -6211,9 +6211,9 @@ class Game extends \Bga\GameFramework\Table
                             $score_tracker = $this->getGlobalVariable('score_tracker', true);
                             $score_tracker[$player_id]['objectives'] += 8;
                             $this->setGlobalVariable('score_tracker', $score_tracker);
-                            $this->incStat(1, "shared_objectives_met", $player_id);
-                            $this->incStat(8, "stonemaster", $player_id);
-                            $this->incStat(8, "shared_objectives_points", $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
+                            $this->bga->playerStats->inc("stonemaster", 8, $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_points", 8, $player_id);
                         }
                         break;
 
@@ -6229,9 +6229,9 @@ class Game extends \Bga\GameFramework\Table
                             $score_tracker = $this->getGlobalVariable('score_tracker', true);
                             $score_tracker[$player_id]['objectives'] += 8;
                             $this->setGlobalVariable('score_tracker', $score_tracker);
-                            $this->incStat(1, "shared_objectives_met", $player_id);
-                            $this->incStat(8, "off-width_aficionado", $player_id);
-                            $this->incStat(8, "shared_objectives_points", $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_met", 1, $player_id);
+                            $this->bga->playerStats->inc("off-width_aficionado", 8, $player_id);
+                            $this->bga->playerStats->inc("shared_objectives_points", 8, $player_id);
                         }
                         break;
                 }
@@ -6331,8 +6331,8 @@ class Game extends \Bga\GameFramework\Table
                 if ($scored_objective_id) {
 
                     $personal_objective = $this->personal_objectives[$scored_objective_id];
-                    $this->setStat($scored_objective_id, "personal_objective_scored", $player_id);
-                    $this->setStat($personal_objective['score'], "personal_objective_points", $player_id);
+                    $this->bga->playerStats->set("personal_objective_scored", $scored_objective_id, $player_id);
+                    $this->bga->playerStats->set("personal_objective_points", $personal_objective['score'], $player_id);
                     $new_points = $personal_objective['score'];
                     $this->DbQuery("UPDATE player SET player_score=player_score+'$new_points' WHERE player_id='$player_id'");
                     // $this->setStat($personal_objective['score'], $personal_objective['name'], $player_id);

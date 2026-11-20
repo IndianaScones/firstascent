@@ -253,7 +253,7 @@ trait UtilTrait {
         $this->setGlobalVariable('draw_step', 10);
         $this->setGlobalVariable('x_cards', 3);
         $this->setGlobalVariable('finished_drawing', []);
-        $this->incStat(1, "rounds");
+        $this->bga->tableStats->inc("rounds", 1);
         if ($draw_step < 10) {
             $this->setGlobalVariable('round', 1);
             $this->setGlobalVariable('phase', clienttranslate('Climb'));
@@ -755,7 +755,7 @@ trait UtilTrait {
                             $updated_player_token_tracker = $this->removeHandSummitBeta($hand_token_tracker[$player_id], $jesus_piece_id);
                             $hand_token_tracker[$player_id] = $updated_player_token_tracker;
                             $this->setGlobalVariable('hand_token_tracker', $hand_token_tracker);
-                            $this->incStat(1, "played_summit_beta_tokens", $player_id);
+                            $this->bga->playerStats->inc("played_summit_beta_tokens", 1, $player_id);
                         }
 
                         else { $this->updateResourceTracker($player_id, 'add', -1, null); }
