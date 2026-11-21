@@ -2,6 +2,485 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-20 (P1.5, PHP modernization sweep: in progress, session 1)
+
+P1.5 is half done. Session 1 recounted the `self::` sites, made the four changes in the working tree (uncommitted), built and checked four stacked diffs, ran a tokenizer harness with a mutation test, and wrote the playtest list and its coverage map. The change waits for Jonathan's Studio playtest. Session 2 (a new session) takes the playtest results, makes the four commits (two `struct:`, two `fix:`) and writes the closing docs. Nothing is deployed, no code is committed, and nothing went to the BGA Production site. The `docs:` commit that holds this entry is made only on Jonathan's "commit docs" and pushed only on his "push".
+
+**Line numbers in this entry.** Lines of `Game.php` are cited **at `9e1784f`** (the same file as at `0bdad52`) unless marked "now". Commit 2 removes one line, so in the working copy every `Game.php` line after 40 is one lower (6,533 lines, not 6,534). `UtilTrait.php` has the same line numbers in both (1,594 lines).
+
+**State at the end of the session**
+- **HEAD:** `0bdad52` (`docs: P1.4 done (struct: commits, playtest v3 results, closing docs)`), level with `origin/main` after `git fetch origin` at the start (both `0bdad528504f19a787aa5978e8c343af2f669f73`).
+- **Staged:** nothing. The diffs were built by staging the two files temporarily; at the end `git reset -q -- modules/php/Game.php modules/php/UtilTrait.php` left the working tree as it was.
+- **Unstaged (the whole P1.5 change, uncommitted):** `modules/php/Game.php` (351,732 bytes, CRLF, 6,533 lines, blob `409ac5ff45107e92c3f011d9de118a1eb39c27e8`) and `modules/php/UtilTrait.php` (79,706 bytes, CRLF, 1,594 lines, blob `f6b68a818f64916a783805dd872c32006da90abc`). `git diff --stat`: 2 files, 181 insertions, 182 deletions (`Game.php` 339 changed lines, 169 + 170; `UtilTrait.php` 24, 12 + 12). Both files end without a final newline, as before.
+- **Expected Studio sizes after the deploy** (CRLF, uploaded as in the working copy): `Game.php` **351,732 bytes, 6,533 lines**; `UtilTrait.php` **79,706 bytes, 1,594 lines**. The design discussion's own build agrees (Jonathan's stop A review, item 2).
+- **Files outside git, in `D:\Documents\BGA Studio\`** (new in this session; lines are LF counts):
+  - the diffs: `p1-5-self.diff` (1,346 lines, 80,689 bytes), `p1-5-deck.diff` (14, 754), `p1-5-var.diff` (13, 793), `p1-5-i18n.diff` (13, 899), `p1-5-all.diff` (1,371, 82,631), and `p1-5-scratch-all.diff` (the scratch clone's `git diff HEAD`, 1,371, 82,631, `cmp` equal to `p1-5-all.diff`); hashes below;
+  - `p1-5-scratch\`, a clone of the repo at `0bdad52` with only the two code files checked out and the four diffs applied (the check below; it can be deleted);
+  - `p1-5-inventory.txt` (53 lines, 2,811 bytes: the tokenizer count before and after);
+  - the four draft commit messages `p1-5-msg-1.txt` (22 lines, 1,055 bytes), `p1-5-msg-2.txt` (20, 812), `p1-5-msg-3.txt` (21, 1,113), `p1-5-msg-4.txt` (16, 735), LF, for `git commit -F`;
+  - `p1-5-harness\`: `lib.php` (44 lines, 2,385 bytes), `inventory.php` (34, 2,317), `rewrite.php` (65, 4,702; the rewrite script), `harness.php` (114, 8,768), `mutants.php` (80, 7,188), `sitemap.php` (30, 1,897), `deprecated.php` (31, 2,184), `static-check.php` (8, 657), `var-check.php` (16, 906), `make-v3.php` (15, 2,391), `coverage-gen.php` (133, 13,969; the generator of coverage v3; `coverage-gen-v1.php` and `-v2.php` are its earlier versions); results `harness-result.txt` (7, 1,003), `mutants-result.txt` (55, 5,501), `deprecated-result.txt` (28, 1,293), `var-check-result.txt` (6, 233), `tm-old.txt` and `tm-new.txt` (21, 2,041 each), `sitemap.tsv` (180, 11,156); `stages\` (the stage 0 to 4 snapshots of the two files: `Game.stage0..4.php`, `UtilTrait.stage0/1/4.php`); `mutants\` (the 27 mutant copies);
+  - the playtest list **`p1-5-playtest-v3.md`** (177 lines, 32,603 bytes; **v3 is the version Jonathan plays**; `p1-5-playtest-v1.md`, 105 lines, 21,027 bytes, and `p1-5-playtest-v2.md`, 177, 31,924, are kept and superseded) and the coverage map **`p1-5-coverage-v3.md`** (343 lines, 47,938 bytes; `p1-5-coverage.md`, 340, 44,397, is v1 and `p1-5-coverage-v2.md`, 343, 47,794, is v2, both kept and superseded);
+  - the raw docs diff of this entry and its commit message (`p1-5-docs.diff`; its counts are in the session's report, not here).
+  - Not from this session, not touched: `p1-5-files.zip` (the design discussion's upload).
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's stop A review, item 3). The code commits' co-author line reads Claude Sonnet 5.5.
+- **Transcript** (outside the repo): `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\42028aed-11a4-4a40-aa34-0e54ec844b33.jsonl` [path by the P1.4 pattern; the file exists]; the session prompt is its first message. Scratchpad: `C:\Users\Jonat\AppData\Local\Temp\claude\8fc825ef9cb91d6c\42028aed-11a4-4a40-aa34-0e54ec844b33\scratchpad\`.
+- **Compaction:** none that I know of; the context was not summarised.
+
+**Status of each item**
+- Start check: done (below). Nothing differed.
+- The recount, the four changes, the four diffs, the scratch-clone check and the checks: done (below).
+- The harness and its mutation test (27 of 27 killed): done. The playtest list and coverage map: written, **v3 final** (Jonathan's stop B review led to v2, and his round 2 review to v3). Not run.
+- The four commits and the closing docs (below): session 2.
+
+**Grant of this session, quoted from the prompt's §1**
+
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session.
+>
+> This session runs step P1.5, "PHP modernization sweep". It may change code in these files only (the step's Files list):
+> - `modules/php/Game.php`
+> - `modules/php/UtilTrait.php`
+>
+> Docs: only `misc/docs/progress.md` in this session. For the record, the closing session (session 2) will also edit:
+> - `misc/docs/MIGRATION_PLAN.md`: P1.5's Status; the Scope line that says the `${var}` fix "changes the log" (it doesn't, §4.4); commit 4 added to the Scope (§4.5); a note that `getActivePlayerName` is deprecated, for a later step (§10).
+> - `misc/docs/TODO.md`: the `${var}` entry narrowed to its translation question, now covering `Game.php:2015` too; the `objectives_2_for_log` entry removed with its fix; the reading of the spectator's card 15 B problem (§10) added to that entry; any new findings.
+> - `misc/docs/BGA_PITFALLS.md`, only for framework findings.
+>
+> None of those edits happens in this session.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-5-`: the inventory, the diffs, the harness, the scratch clone, the playtest list and the coverage map.
+>
+> Git: you may stage `modules/php/Game.php` and `modules/php/UtilTrait.php` temporarily to build the stacked diffs (§4.6). At the end of the session nothing of the code is staged, and the working tree holds the whole change, uncommitted. The only commit in this session is the `docs:` commit of §8, made on my "commit docs" and pushed on my "push".
+>
+> Anything else needs my explicit go-ahead: another file, another doc, another commit, a push, an install. You don't deploy; I deploy to Studio. Nothing goes to the BGA Production site.
+>
+> This step spans two sessions by design. This session ends after stop B with an "in progress" `progress.md` entry, before my playtest. A new session takes the playtest results, makes the four commits, and writes the closing docs.
+>
+> Record in the entry the model and effort this session runs on (ask me if your context doesn't say).
+
+**Start check** (all as the prompt said): `git fetch origin`; HEAD `0bdad52`, level with `origin/main`; working tree clean; nothing staged. `git rev-parse HEAD:modules/php/Game.php` `66512c5b68ca976a6f0b09e311d6370716197795` and `HEAD:modules/php/UtilTrait.php` `6f704c7ab26c7575acbde08a56c65eb93b0c5f2d`. `Game.php` 351,608 bytes, 6,534 lines; `UtilTrait.php` 79,694 bytes, 1,594 lines; both CRLF (`core.autocrlf` true). PHP 8.4.25 CLI.
+
+**The change: the inventory** (a PHP tokenizer count, live calls only, comments excluded; `p1-5-harness\inventory.php`, output in `p1-5-inventory.txt`). All as the design discussion counted: **180 live `self::` tokens, 168 in `Game.php` and 12 in `UtilTrait.php`**, every one a method call (no constant, no static property; no `static` token in either file). 167 of the `Game.php` sites are on 166 lines (line 746 holds two), so commit 1's diff has 178 changed lines on each side. The two commented-out `self::applyDbUpgradeToAllDB` lines (`Game.php:6520`, `6527`) are not changed. Raw text search: `Game.php` 170 occurrences of `self::` on 169 lines, `UtilTrait.php` 12 on 12.
+
+| Method | `Game.php` | `UtilTrait.php` | Total | Static in `_ide_helper.php` |
+|---|---|---|---|---|
+| `getActivePlayerName` | 69 | 1 | 70 | no |
+| `getActivePlayerId` | 27 | 3 | 30 | no |
+| `checkAction` | 25 | – | 25 | no |
+| `getCollectionFromDB` / `getCollectionFromDb` | 17 + 3 | 5 | 25 | yes |
+| `giveExtraTime` | 8 | – | 8 | no |
+| `getObjectListFromDb` | 4 | 2 | 6 | yes |
+| `DbQuery` | 3 | – | 3 | yes |
+| `activeNextPlayer` | 3 | – | 3 | no |
+| `reloadPlayersBasicInfos` | 2 | – | 2 | no |
+| `getCurrentPlayerId` | 2 | – | 2 | no |
+| `initGameStateLabels`, `getNew`, `getGameinfos`, `reattributeColorsBasedOnPreferences`, `activePrevPlayer` | 1 each | – | 1 each | no |
+| `loadPlayersBasicInfos` | – | 1 | 1 | no |
+| **Total** | **168** | **12** | **180** | |
+
+After all four commits: no live `self::` token is left in either file (`p1-5-inventory.txt`, second section).
+
+**The four changes** (each a separate future commit; the future commit messages are below)
+1. **Commit 1, `struct:` `self::` → `$this->`, 179 sites** (167 in `Game.php`, 12 in `UtilTrait.php`; all of the 180 but `self::getNew`). Only the two tokens `self` and `::` change; the method name keeps its exact spelling and case (`getCollectionFromDb` stays as written) and the arguments are untouched. The 25 `checkAction` calls are converted too. Done by `p1-5-harness\rewrite.php self`, with an exact-match check at each site and a count check per file (167 and 12); it stops before writing if a site doesn't fit. **Static methods:** `DbQuery` (`_ide_helper.php:1350`), `getObjectListFromDB` (1381) and `getCollectionFromDB` (1494) are `final public static` in the stub; the other 13 methods are instance methods. A PHP 8.4 test with all errors on (`static-check.php`) shows `$this->getCollectionFromDb()` calling a static method correctly, including from a trait. Nothing in the repo calls `Game::` statically.
+2. **Commit 2, `struct:` the Deck from the factory.** `Game.php:39–40` (`__construct`) `self::getNew('module.common.deck')` and `->init('cards_and_tokens')` become `$this->cards_and_tokens = $this->bga->deckFactory->createDeck('cards_and_tokens');` (one line). Lines 41–43 and the comment above are unchanged.
+   - **What it rests on, as read:** `_ide_helper.php:2274` `getNew` is `@deprecated use $this->bga->deckFactory->createDeck($tableName)` and its stub body is `return $this->deckFactory->createDeck('');`; `createDeck` is documented "Create a Deck component and set the DB table name" (2670); `Table` declares `readonly public Bga $bga` (1208) and `readonly public DeckFactory $deckFactory` (1253; the Deck doc page uses `$this->deckFactory`, the plan and the deprecation note use `$this->bga->deckFactory`); the Deck doc's examples call `createDeck` in the constructor with no `init`.
+   - **The wording I flagged at stop A:** the stub's `Deck::init` doc (2439) says "MUST be called before any other method", and the Deck doc's "Initializing" section (lines 175 and 177) says `init` "must be called before any other Deck method" and is "usually … called in your game constructor"; its HINT and example (79–83, 179–189) use `createDeck` alone. I did not read that as saying `init` is still needed after `createDeck`, and went on (nothing is committed or deployed); Jonathan's stop A review, item 1, confirms: commit 2 stands, since `createDeck` does `init`'s job and `getNew`'s stub body is `createDeck('')`, a Deck with no table name, which is why the old code needed `init`. **That `createDeck` sets the table name `init` set, and that `$this->bga` exists in `__construct` after `parent::__construct()`, are readings of the stubs, not of the framework's implementation [inferred]; T1.1 (the first page load of a new table) and E2 (an existing table after the deploy) test both.**
+3. **Commit 3, `fix:` the `${var}` string in `confirmClimbingCardChoice` (cards 15 and 24, option B).** `Game.php:2591` (2590 now): `"[${new_asset_name}(${new_asset_type_arg[0]})]"` → `"[{$new_asset_name}({$new_asset_type_arg[0]})]"`, the syntax the sibling site at `Game.php:2015` already uses. **The log text does not change** (the plan's wording that it "changes the log" is wrong): `p1-5-harness\var-check.php`, on PHP 8.4.25, gives the same string for five inputs (`Nuts`/`[23]`, `Cam's #2`/`['7']`, empty/`[0]`, one with `&`, quotes and `<>`, one with accents). `php -l` no longer warns at 2591, and 2591 was the only site. The other point of the `TODO.md` entry (PHP pastes in the English name before the log's own placeholders see it, so the name is likely not translated) applies to 2015 too; it is not in this commit.
+4. **Commit 4, `fix:` the `i18n` key of the end-of-game objectives line.** `Game.php:6376` (6375 now), the branch that logs `held ${objective_2_for_log}` after objective 1 was scored: `'objectives_2_for_log'` → `'objective_2_for_log'`, the argument's name (6375); the other branches already use the right keys (6361, 6366, 6371, 6381). Effect [inferred, from `TODO.md`]: the objective name in that branch is now marked for translation; in English the line is expected to read the same. The key occurred once in the file. This commit is not in the plan's P1.5 Scope; Jonathan approved adding it.
+5. **No T, F or B id exists for commits 3 and 4.** `TODO.md` lists both (Server bugs) without one, the plan gives neither one, and T29 is the id of the player-id-length scenario, not of these fixes. I did not invent ids; the draft messages say so (Jonathan's stop A review, item 4).
+
+**The four diffs** (stacked; each against the state the previous one leaves; the future commits, in this order)
+
+| Diff | Changes | Lines, bytes | `index` line | SHA-256 |
+|---|---|---|---|---|
+| `p1-5-self.diff` (against `0bdad52`) | commit 1: 167 + 12 sites; `Game.php` 332 changed lines, `UtilTrait.php` 24; 178 insertions, 178 deletions | 1,346 lines, 80,689 bytes | `Game.php` `66512c5..2b445f1`; `UtilTrait.php` `6f704c7..f6b68a8` | `fe119050c7d9cc42fb0d3d5173db6641d0c661a46454ec3d67a82e8d3a094c0e` |
+| `p1-5-deck.diff` (on top of 1) | commit 2: `Game.php` +1 −2 | 14 lines, 754 bytes | `2b445f1..4ace756` | `a4ec2d3a19ad7331c662aa511443e8e782b80c3bce486c0e6e959309f46ee00f` |
+| `p1-5-var.diff` (on top of 2) | commit 3: `Game.php` +1 −1 | 13 lines, 793 bytes | `4ace756..4f28154` | `d2664d3c650c7760d8ba53e9e8067c1c1824ea1168018eb4294b876d25bbae29` |
+| `p1-5-i18n.diff` (on top of 3) | commit 4: `Game.php` +1 −1 | 13 lines, 899 bytes | `4f28154..409ac5f` | `254eb5a01592ed94c85fe17c2d06de84d44d0b23d1b70a6b865dbd4ef9f55dc7` |
+| `p1-5-all.diff` (`git diff HEAD`) | everything; 181 insertions, 182 deletions | 1,371 lines, 82,631 bytes | `Game.php` `66512c5..409ac5f`; `UtilTrait.php` `6f704c7..f6b68a8` | `545e55934f78ecef94b9abd0f7ea36335a79456d1db452b3a170404680b84390` |
+
+All five were written with `git diff --output=<file>` before the `--`, and are LF only (no CR). **Scratch clone** (`p1-5-scratch\`, a `git clone -n` at `0bdad52` with only the two code files checked out): `git apply --check --index` and `git apply --index` of the four diffs in order each applied cleanly; the blobs after each step are `2b445f1`/`f6b68a8`, `4ace756`, `4f28154`, `409ac5f`, matching the `index` lines (the chain is intact); `git diff HEAD` in the clone is byte-identical (`cmp`) to `p1-5-all.diff` (`p1-5-scratch-all.diff`); the two resulting files are `cmp`-identical to the working tree. `git apply` warns of one trailing-whitespace line (`initGameStateLabels( array( `), which was already there.
+
+**The checks**
+- **The harness** (`p1-5-harness\harness.php`): **PASS**. Commit 1: the old and new token streams (whitespace and comments included) are compared in lock step; they have the same length (61,217 tokens in `Game.php`, 17,787 in `UtilTrait.php`); at each of the 167 and 12 sites `self ::` become `$this ->` and nothing else changes (the method name, case included, is identical; per method: `getActivePlayerName` 69, `getActivePlayerId` 27, `checkAction` 25, `getCollectionFromDB` 17, `getCollectionFromDb` 3, `giveExtraTime` 8, `getObjectListFromDb` 4, `DbQuery` 3, `activeNextPlayer` 3, `reloadPlayersBasicInfos` 2, `getCurrentPlayerId` 2, and one each of `initGameStateLabels`, `reattributeColorsBasedOnPreferences`, `getGameinfos`, `activePrevPlayer`); a byte rebuild of the old file from the sites equals the new file; the only `self::` left is `getNew` in `Game.php`. Commits 2 to 4: each new file is the previous one with exactly one replacement. Every stage: CRLF intact; `php -l` clean (no warning from commit 3 on).
+- **The mutation test** (`mutants.php`): **27 of 27 mutants killed**: a missed site (in `Game.php` and in `UtilTrait.php`), a changed method name, a changed case (both ways), an edit to a comment and to code outside the sites, `self::getNew` converted by commit 1, a changed argument, `static::`, `$this::` and `parent::`, whitespace after the arrow, a commented-out `self::` converted, a bare LF, a wrong receiver, and eleven defects in commits 2 to 4 (commit not made, init line kept, `$this->deckFactory`, wrong table name, a dropped autoreshuffle line, a missing brace, the sibling string changed, an `i18n` key changed in another branch or to another value).
+- **`php -l`** on both files: no message at all (the only `${var}` site was 2591; the `${var}` warning at HEAD is gone with commit 3).
+- **`php misc/tests/technique_matching.php modules/php/Game.php`:** 24,192 + 188,160 + 20,000 = 232,352 cases, 0 failures, 13 named cases, "All checks passed"; the output is byte-identical to the run on the HEAD file (`tm-old.txt`, `tm-new.txt`).
+- **T29** (fixed-length player ids; searched both files for `substr`, `strlen`, `str_pad`, `str_split`, `sprintf`, `intdiv`, `preg_*`, 7-digit literals and id arithmetic): no 7-digit or fixed-width assumption on a player id. The hits are not about ids: `UtilTrait.php:782` and `1319` (`substr` on log text and a file path), `1350`, `1351`, `1360` (`sprintf('%02d')` on indexes), `Game.php:5835` and `5845` (`intdiv` on symbols), `otherSideOf` (`% 2`), `preg_match('/^\d+$/')` at `UtilTrait.php:1516` (parses debug card ids); `UtilTrait.php:1407–1473` has hard-coded sample ids 2369493 and 2369492 in the fixtures of `debugShapeCases`. **Two findings, recorded for session 2's `TODO.md` (Jonathan's stop A review, item 4):** (a) the `card_location` width: player ids are used in `card_location` values (`"{id}_played_gear"` and so on at `UtilTrait.php:268–271`, `Game.php:4257`, `4301`, and `strval($playerId)`), and `dbmodel.sql` declares `card_location varchar(26)` (`cards_and_tokens`, lines 48–50), with `_played_crack` the longest suffix at 13 characters, so a player id over 13 digits would be cut off [inferred]; today's ids are about 7 to 10 digits; (b) the prefix comparison in `modules/utils.js:2787–2806`, which takes the id's length from the id itself (not fixed) but compares by prefix, so an id that is a prefix of another would match both [inferred, not traced]; client code, not changed. The plan's "none found" stays true for fixed-length assumptions in the two PHP files.
+- **The §10 readings.** *`getActivePlayerName`* is deprecated (`_ide_helper.php:1465`: "use `getPlayerNameById($activePlayerId)` with `$activePlayerId` magic param, or `getPlayerNameByNo`"); 70 calls (69 + 1). Compared with the stub's 26 deprecated methods (`deprecated.php`), the only ones called are `getActivePlayerName` and `getNew` (gone with commit 2). `getCurrentPlayerName` appears only in a comment (`Game.php:6426`), and `setStat` only in two commented-out lines (6327, 6338). Replacing `getActivePlayerName` needs the autowired actions' magic parameter (P1.6 to P1.9 or later); P1.5 only converts the calls. *The spectator's card 15 B problem* [read, client not traced]: the server side of the reading holds. In `confirmClimbingCardChoice` the `$bespoke` branch sends the choice line (`log_only`) with `notify->player` to each key of `$names_and_colors` (the global `player_names_and_colors`: seated players only; `Game.php:2542–2547`), while the other branches use `notify->all`; for cards 15 and 24, `climbingCards15And24Public` goes only to the acting player (2630) and `climbingCards15And24Private` to each opponent (2668); card 24 B's symbol-token notifications are `notify->player` too. A spectator receives none of them. **The 10 choices that take the `$bespoke` branch** (`'bespoke' => true` in `material.inc.php`): **9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B and 68 B**: all send their choice line to the players only, so none reaches a spectator (Jonathan's stop A review, item 4). The link to the dimmer that stays on in the spectator's tab stays [inferred]: both card-15 handlers start by retracting the card, and I did not trace which client code removes `climbing_dimmer`. Fixing it is not in P1.5's scope.
+- **Dead code found while mapping the sites** (read; for session 2's decision): `getActivePlayerColor()` (`UtilTrait.php:237`) has no caller in any `.php`, `.js` or `.tpl` file, so its two converted sites (`getActivePlayerId` at 238, `loadPlayersBasicInfos` at 239) can't run, and `loadPlayersBasicInfos` has no other converted site; and `getTechniqueType`'s `getActivePlayerId` site (`UtilTrait.php:466`) is the right-hand side of `$player_id ?? $this->getActivePlayerId()` while all three callers (`Game.php:6037`, `6143`, `UtilTrait.php:490`) pass a player id, so it never runs [read].
+- **The design discussion's check** (Jonathan's stop A review, item 2, quoted below): it built the four changes itself from the `9e1784f` files; its blobs after each commit are the ones in the `index` lines above (`2b445f1` and `f6b68a8`; `4ace756`; `4f28154`; `409ac5f`), and its expected Studio sizes are the same (`Game.php` 351,732 bytes, 6,533 lines; `UtilTrait.php` 79,706 bytes, 1,594 lines).
+
+**What didn't fit the plan**
+- The plan's wording that the `${var}` fix "changes the log" is wrong (above).
+- Neither fix has a T, F or B id (above).
+- The `init` wording in the Deck doc and the stub (above; settled by Jonathan's stop A review).
+- Line numbers: commit 2 shifts `Game.php` by one line (the list and coverage map cite lines at `9e1784f`).
+- `BGA_PITFALLS.md` line 29 ("`${var}` string interpolation is deprecated. One remains: …, planned for P1.5") will be stale once commit 3 is in; for session 2, with Jonathan's go-ahead.
+
+**Draft commit messages for session 2** (`p1-5-msg-1.txt` to `-4.txt`, used with `git commit -F`; each diff is staged by explicit path, `modules/php/Game.php` and `modules/php/UtilTrait.php`; the co-author line names the model that wrote the code)
+
+Commit 1, `p1-5-self.diff`:
+
+```
+struct: self:: calls on $this-> (P1.5)
+
+Converts the live self:: method calls to $this->: 167 in Game.php (on 166
+lines; one line has two) and 12 in UtilTrait.php, 179 in all. Only the two
+tokens self and :: change at each site; the method name keeps its exact
+spelling and case (getCollectionFromDb stays as written) and the arguments
+are untouched. The 25 checkAction calls are converted too; P1.6-P1.9
+remove them with the autowired actions.
+
+Not converted: the one self::getNew in Game.php (the next commit) and the
+two commented-out self::applyDbUpgradeToAllDB lines (Game.php 6520 and
+6527 at 9e1784f).
+
+DbQuery, getCollectionFromDB and getObjectListFromDB are declared static in
+_ide_helper.php; $this-> calls a static method correctly in PHP (checked
+on 8.4, including through a trait).
+
+No behavior change. Checked with a tokenizer comparison of the old and new
+files (every token outside the sites identical; every site keeps its name
+and arguments), and with 16 mutants that it kills.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+Commit 2, `p1-5-deck.diff`:
+
+```
+struct: Deck from bga->deckFactory (P1.5)
+
+In Game::__construct, the two lines
+  $this->cards_and_tokens = self::getNew('module.common.deck');
+  $this->cards_and_tokens->init('cards_and_tokens');
+become one:
+  $this->cards_and_tokens = $this->bga->deckFactory->createDeck('cards_and_tokens');
+
+getNew is deprecated in _ide_helper.php ("use $this->bga->deckFactory->
+createDeck($tableName)"), and createDeck sets the DB table name, so the
+separate init is no longer called. The autoreshuffle lines that follow
+(autoreshuffle, autoreshuffle_custom, autoreshuffle_trigger) and the
+comment above are unchanged.
+
+This was the last live self:: call: none is left in Game.php or
+UtilTrait.php.
+
+1 file, +1 -2. No change in the cards table or in any Deck call.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+Commit 3, `p1-5-var.diff`:
+
+```
+fix: ${var} string in confirmClimbingCardChoice, cards 15 and 24 (P1.5)
+
+Cards 15 and 24, option B (all other players gain 1 Gear Card from The
+Portaledge): the log string "[${new_asset_name}(${new_asset_type_arg[0]})]"
+becomes "[{$new_asset_name}({$new_asset_type_arg[0]})]", the syntax the
+sibling site already uses (the "[{$drawn_name}({$drawn_type_arg})]" string
+in the same function). ${var} interpolation is deprecated since PHP 8.2;
+php -l reported it at this line, and it was the only site in the two files.
+
+The log text is unchanged: both forms give the same string (checked on
+PHP 8.4 for five inputs, among them 'Nuts' with [23], "Cam's #2" with
+['7'] and an empty name with [0]). php -l now reports no warning.
+
+Not part of this commit: PHP pastes the English card name in before the
+log's own placeholders see it, so that name is likely not translated. The
+sibling string has the same shape. Recorded in TODO.md.
+
+References: no T, F or B id exists for this item; it is in TODO.md, Server
+bugs ("php:confirmClimbingCardChoice ... ${var}").
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+Commit 4, `p1-5-i18n.diff`:
+
+```
+fix: i18n key of held objective 2 in the end-of-game objectives line (P1.5)
+
+In the branch that logs 'held ${objective_2_for_log}' after objective 1 was
+scored, the key added to $objectives_msg['args']['i18n'] was
+'objectives_2_for_log', while the argument is named 'objective_2_for_log'
+(the line above it). It is now 'objective_2_for_log', as in the other
+branches.
+
+Effect [inferred]: the objective's name in that branch is now marked for
+translation. The visible English line is expected to be unchanged.
+
+1 file, +1 -1. The line was found in P1.3 (TODO.md, Server bugs: "the
+end-of-game objectives log line registers a wrong key in i18n"); no T, F or
+B id exists for it.
+
+Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>
+```
+
+**Playtest list v3, in full** (`p1-5-playtest-v3.md`, 177 lines, 32,603 bytes; **version v3; the list Jonathan plays**; v1 and v2 are kept and superseded). v2 changed v1 by Jonathan's stop B review (eight points: T3 restructured around a trade before a climb, the R-5 source stated, the `$bespoke` choices in the known findings, T2's objective rule retagged, the Water and Psych budget with Z = The Overstoker and W = Rope Gun, the two unread effects answered, T1.3 dropped, T3.6 to T3.8 optional and last); v3 changed v2 by his round 2 review (T1.10's card 3 not forced; T3.5's R-5 reshuffle note), shown in his messages below. Step ids are unchanged from v1; T1.3 is not used.
+
+Note: the list's "What the list does not cover" section refers to `p1-5-coverage-v2.md`; the map that goes with v3 is `p1-5-coverage-v3.md`. The list file itself is not changed.
+
+> # P1.5 playtest list v3 (PHP modernization sweep)
+>
+> v3 is `p1-5-playtest-v2.md` changed by Jonathan's stop B round 2 review (T1.10's card 3, T3.5's R-5 note; the coverage map's `stNextClimb` sites are in `p1-5-coverage-v3.md`). **v3 is the list to play.** v2 is `p1-5-playtest-v1.md` changed by his stop B review (eight points). Step ids are unchanged so the reviews' references stay valid; T1.3 is dropped (its number is not reused). v1 and v2 are kept.
+>
+> Legend. [R] = `RULES.md`, with its page. [R-5 answer] = `RULES_CHECK.md` R-5. [C] = what the code does (read, not run). [S] = shown on Studio before. [inferred] = my reasoning, not run. A [C] on a move only means the code allows it; it is not a rule. Where the code and the rules disagree I write a finding, never an expected result. **Lines of `Game.php` are at `9e1784f`** (the working copy after commit 2 is one line lower from line 40 on); `UtilTrait.php` lines are the same in both.
+>
+> **What P1.5 changes** (four commits, one change set; nothing else): (1) 179 `self::` method calls become `$this->` (167 in `Game.php`, 12 in `UtilTrait.php`); (2) the Deck is built in `__construct` with `$this->bga->deckFactory->createDeck('cards_and_tokens')`, and the separate `init` call is gone; (3) the log string of cards 15 and 24 option B uses `{$var}` (same text); (4) the `i18n` key of one end-of-game objectives line. P1.5 sends the same notifications as before, so there is no replay check (F13). What can differ at run time: a `$this->` call that does not resolve (every action fails), the Deck built without a table name or `$this->bga` unavailable in the constructor (setup or the first page load fails with "Unexpected error" or an SQL error), a log line that changed text, the objectives line.
+>
+> ## Before anything else: the existing table (E1)
+>
+> **E1. Before the deploy.** Create a 2-player table E now, on the build that is on Studio today. Both players confirm a character (any except Phil, Free Soloist and Cool-headed Crimper); Rack Up; stop when round 1's `climbOrRest` shows for the first climber. Leave table E and its tabs open. Do not play a move. Note the build number if Studio shows one. (E2 to E4 come after the deploy.)
+>
+> ## Instructions that apply across rounds (read before round 1 of every table)
+>
+> - **Z and W.** On T1, Z is the player who climbs first in round 1 (the First Player Marker shows it before characters are chosen) and W the other; T2 and T3 define their roles at their own start. **Turn order alternates:** if Z climbs first in round 1, W climbs first in round 2, Z in round 3, and so on; each round's step names who goes first [R: p. 11, the First Player Marker passes every round]. Accounts: A = IndianaScones0 (2369492), B = IndianaScones1 (2369493), S = a spectator tab.
+> - **Movement** [R: p. 9; p. 7]: a first Pitch is on the bottom row; after that, a neighbor of your current Pitch. No one climbs a Pitch another climber is on (summits excepted) or one they climbed before. The server does not stop an occupied pitch (`getAvailablePitches`, `UtilTrait.php:88`, returns all neighbors), so plan your own route and keep W's route on the other side of the board from Z's.
+> - **Water and Psych (the budget that makes the planned options payable).** Water and Psych each start at the character's starting value and cap at 6 [C: `UtilTrait.php:531`]; only a rest or a card gives them back (no debug function does). T1 and T2 name the characters: **Z = The Overstoker (character 5, 6 Water and 6 Psych) and W = Rope Gun (character 1, 4 and 4)**; run **`debug_setAvailableCharacters("5,1")`** in `characterSelection` before anyone confirms, and Z picks the Overstoker, W the Rope Gun (other characters may also be offered; ignore them). Rope Gun uses 1 less Water on a Pitch that needs Water; the Overstoker may substitute 1 Psych for another asset [R: p. 15]; neither changes the plan. Do not use Phil (rolls the die on every Pitch), Free Soloist (no Gear) or Cool-headed Crimper (draws 2 climbing cards) on any table. The costs are in the next section, with a worst-case check for each climb; **no Pitch that can appear costs more than 2 Water or 2 Psych** (the table below, from `material.inc.php`).
+> - **Permanent Asset tokens** [R: p. 10]: decline every token offered, **except** that on T1 you accept the first one offered to either player (it reaches `confirmPermanentAssets`); then decline the rest.
+> - **`debug_giveAssets`** may be used any time to avoid a forced retreat or to meet a requirement. It is a deviation: write down each use. Run `debug_stackClimbingDeck` right before the climb that draws the card, and `debug_forceDie` right before the roll. After any successful debug call press F5 in the other tabs before acting there (only the calling window reloads [S]).
+> - **Record** every refused debug call, every Studio save restored, every "Play one move (using zombie code)" and every use of `debug_giveAssets`. **Save each tab's console (A, B, S) as a `.log` file from the start of each table**; select `frame.html` in the context dropdown for queries. Expected on every table: no new console error, no `[FA animation fallback]`, no raw `${...}` text in any log line.
+> - **Known open findings P1.5 does not touch** (`TODO.md`; do not blame P1.5 if they appear): **the spectator gets no choice line for any of the 10 `$bespoke` choices (9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B and 68 B), because that line is sent with `notify->player` to the seated players only [C: `Game.php:2542–2546`]; on card 15 B the dimmer also stays on in S's tab**; card 9 B discards early; two spectator hangs (`resource_tracker` is undefined for a spectator); the Permanent Asset discard animation hang; the `onUndoSummitBetaPassive` click error after "Load previous state"; objectives 15 and 16 score the sum, not 2 + 2; personal objective "Call it like you see it" counts one pitch per route type (so never use personal objective 3); the sunny-pitch log line does not color the player's name; the personal-objective tooltips overlap their image.
+>
+> ## Costs (from `material.inc.php`) and the budget for each climb
+>
+> **Pitches that can appear (desert board; the Trifecta is hex 5)**, as Gear / Face / Crack / Slab / Any skill / Water / Psych:
+>
+> | Tier | Pitch (id, points) | G F C S Any W P |
+> |---|---|---|
+> | 1 point (ids 1–6) | Dinkus Dog (1) | 0 0 0 2 1 1 0 |
+> | | Roger's Roof (2) | 2 0 0 0 1 1 0 |
+> | | Corrugation Corner (3) | 2 0 0 0 1 1 0 |
+> | | Rebuffat's Arete (4) | 1 0 0 0 1 **2** 0 |
+> | | Leap Year Flake (5) | 1 1 0 0 1 1 0 |
+> | | Half-a-finger (6) | 0 0 1 0 1 **2** 0 |
+> | 2 points (13–23) | Bird Cage (13) | 1 1 0 1 0 0 **2** |
+> | | Bishop Jaggers (14) | 1 0 0 2 0 1 1 |
+> | | Closer to the Heart (15) | 2 1 0 2 0 0 0 |
+> | | Irene's Arete (16) | 1 2 1 0 0 1 0 |
+> | | Flight of the Gumby (17) | 0 1 2 1 0 0 1 |
+> | | Bee Sting Corner (18) | 2 0 0 1 0 1 1 |
+> | | Black Snake (19) | 2 1 0 1 0 1 0 |
+> | | Flakes of Wrath (20) | 0 1 0 1 0 1 **2** |
+> | | Fickle Finger of Fate (21) | 0 2 2 1 0 0 0 |
+> | | Dr. Rubo's Wild Ride (22) | 0 1 2 0 0 1 1 |
+> | | Skull (23) | 2 1 1 1 0 0 0 |
+> | 3 points (25–28) | Screaming Yellow Zonkers (25) | 1 2 1 2 0 0 0 |
+> | | The Don Juan Wall (26) | 3 1 2 0 0 0 0 |
+> | | Bloody Fingers (27) | 2 2 2 0 0 0 0 |
+> | | Black Elk (28) | 0 0 2 2 0 0 **2** |
+> | 4 points (29–33) | Tierrany (29) | 2 3 2 0 0 0 0 |
+> | | Abracadaver (30) | 2 0 2 1 0 **2** 0 |
+> | | Bulldog Arete (31) | 1 1 1 2 0 0 **2** |
+> | | Red Rider (32) | 3 1 1 1 0 0 1 |
+> | | Tooth or Consequences (33) | 1 0 1 2 0 **2** 1 |
+> | 5 points (38–43; Headwall) | The S.A.T. (38) | 2 0 0 3 0 1 **2** |
+> | | Desert Gold (39) | 1 2 2 0 0 **2** 1 |
+> | | No Place Like Home (40) | 2 2 0 1 0 1 **2** |
+> | | Teflon Corner (41) | 3 1 1 1 0 1 1 |
+> | | Scarlet Begonias (42) | 1 3 1 1 0 1 1 |
+> | | Belly Full of Bad Berries (43) | 2 0 3 0 0 1 **2** |
+> | Fixed, hex 5 | The Trifecta (36), 3 points, any type | 2 1 1 1 1 1 1 |
+>
+> Bottom row = hexes 1–8: the six 1-point pitches sit on hexes 1, 3, 6, 8 (and two more on row 2), 2-point pitches on 2, 4, 7, and hex 5 is the Trifecta [C: `Game.php:405–409`; `UtilTrait.php:88`]. Which pitch is on which hex is random per table: read the board.
+>
+> **Climbing cards used in T1 and T2** (`material.inc.php`; [R: p. 8] a player who can fulfil only one option must take it; with both payable the choice is free):
+>
+> | Card | Option A | Option B | Used as |
+> |---|---|---|---|
+> | 3 Party above you forgot some gear | Lose 1 Water, gain 1 Summit Beta Token | Lose 1 Card, take 1 Gear Card from another player's Asset Board | T1.10: A (both probably payable; W takes A) |
+> | 9 Benighted | Lose 1 Psych, gain 1 Summit Beta Token | You and another player gain Technique Tokens | T1.11: B (free) |
+> | 11 Choss pile | Lose 1 Psych, gain 1 Balance Token | Lose 1 Water, gain 1 Face Card (Portaledge draw) | T1.6: B |
+> | 15 Too Much Gear | Lose 1 Water, gain 1 Power Token | All other players gain 1 Gear Card from the Portaledge | T2.2: B (free) |
+> | 20 Desperate throw | Lose 1 Psych, gain 1 Power Token | Lose 1 Slab Card, gain 1 Water | T1.13: A |
+> | 24 Gassy as heck | Lose 1 Water, gain 1 Face Card | Gain 1 Pain Tolerance Token; all other players gain 1 Gear Card | T2.3: B (free) |
+> | 29 Falling poop bag | Lose 1 Psych, gain 1 Balance Token | All players gain 1 Card from the Portaledge | T1.14: B (A is payable only with Psych left) |
+> | 42 Lucky flask ("neutral") | All players gain 1 Water and 1 Psych | You gain 1 Water | T2 rounds 2–4 and T3: A |
+>
+> **"Neutral" in v2 means card 42, option A: it costs nothing and gives every player 1 Water and 1 Psych.** v1 used card 5 (A: all gain 2 Water; B: you gain 1 Water); it replenishes no Psych, so a four-climb table could run out of it. Card 5 is no longer used.
+>
+> **Worst-case budget (Z = Overstoker 6/6; every pitch ≤ 2 Water and ≤ 2 Psych):**
+> - **T1, Z.** R1 pitch → ≥ 4/4; card 11 B (−1 Water) → ≥ 3/4 (both options payable). R2 pitch → ≥ 1/2; card 9 B costs nothing. R3 Energy Drink (+1/+1) → ≥ 2/3; pitch → ≥ 0/1; card 20 A (−1 Psych) is payable (Psych ≥ 1). Every planned option is payable in the worst case.
+> - **T1, W = Rope Gun 4/4.** Rests in R1 and takes 2 Water at Rerack (4 → 6). R2 pitch → Water ≥ 4 (Rope Gun's −1 helps), Psych ≥ 2; card 3 A (−1 Water) payable. R3 pitch → Psych ≥ 0; card 29: A may be unpayable, then B is forced, which is the plan.
+> - **T2, Z.** R1 pitch → ≥ 4/4, card 15 B costs nothing. R2 pitch → ≥ 2/2, card 42 A (+1/+1) → ≥ 3/3. R3 pitch → ≥ 1/1, card 42 A → ≥ 2/2. R4 pitch → ≥ 0/0. Payable throughout. If a pitch on the chain would cost more than Z has left, Z rests instead (see T2).
+> - **T2, W = Rope Gun 4/4.** One climb in R1 (≥ 2/2 left, card 24 B costs nothing, A payable); rests R2–R4.
+> - **T3 and E:** any character allowed above; one climb each at most, ≤ 2/2.
+>
+> ## Deploy and checks (once)
+>
+> - **G1. Deploy** `modules/php/Game.php` and `modules/php/UtilTrait.php` to Studio. Expected sizes (CRLF): `Game.php` **351,732 bytes / 6,533 lines**, `UtilTrait.php` **79,706 bytes / 1,594 lines** [C: the design discussion's build and mine agree]. Nothing else is uploaded or deleted.
+> - **E2. Table E, after the deploy.** In each tab (A, B) press F5. Expected: the page loads, the same state as before (`climbOrRest` for the first climber), no "Unexpected error", no SQL error, no console error. This is the existing-table check: the Deck is now built by the new constructor on every request, so an existing table loading proves it works with data created by the old constructor [inferred: the constructor runs per request].
+> - **E3. Table E, one move.** The first climber climbs one bottom-row pitch (≤ 2 Water, ≤ 2 Psych on any pitch; the character starts with at least 4 of each, so it is payable; `debug_giveAssets` if the hand lacks an asset: deviation) and resolves the climbing card with whichever option the game lets them take. Expected: normal play, no error; the log shows the climb and the card. The climbing card comes out of the same Deck.
+> - **E4. Table E (optional): finish the round.** The second climber rests or climbs; Follow Phase; Rerack draws. Expected: no error. Then "Express stop" table E.
+>
+> ## Table T1: the S-smoke, commit 2 and the call sites (new 2-player table + spectator, 4 rounds)
+>
+> - **T1.1 First step on the new table: commit 2 directly.** Create the table (A, B) and open S as a spectator. Expected [C, inferred from the stubs; the first page load tests it]: the table is created, setup runs, and the first page of **all three tabs** loads (`characterSelection`: the board, the three shared objectives, the characters), with **no "Unexpected error" and no SQL error**. If either appears, stop: record the exact text; it means `$this->bga` or `createDeck`'s table name failed in the constructor. A: the same load again on F5.
+> - **T1.2 The two count queries** (P1.2's 1e; "Go to game database", SQL tab). Before anything is drawn from the Portaledge.
+>   - `SELECT card_location, COUNT(*) AS n, MIN(card_type_arg) AS lowest, MAX(card_type_arg) AS highest FROM cards_and_tokens WHERE card_location LIKE 'porta%' GROUP BY card_location;` Expected [C]: four rows, **n = 7 each**; lowest and highest within `portaCrack` 1–7, `portaFace` 15–21, `portaGear` 22–37, `portaSlab` 8–14. Anything else is a finding.
+>   - `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_type='asset';` Expected [C]: **n = 124**.
+> - **T1.3** is dropped in v2 (`debug_frameworkCheck` exercises nothing P1.5 changes).
+> - **T1.4 Characters (S-smoke 1).** In `characterSelection` run `debug_setAvailableCharacters("5,1")`; Z confirms the Overstoker and W the Rope Gun. Expected: as before; the spectator's log follows; no new console error or `[FA …]` warning.
+> - **T1.5 Rack Up draws (S-smoke 1).** Each player draws their Rack Up cards (5 for the first and second player [R: p. 5]); the Spread refills. Expected: as before.
+>
+> **Round 1 (Z first, then W)**
+> - **T1.6 Z climbs, a climbing card with a Portaledge draw (S-smoke 2 and 3).** Z climbs a bottom-row pitch (costs in the table above: ≤ 2 Water, ≤ 2 Psych; `debug_giveAssets` for the Gear, Face, Crack, Slab it needs). `debug_stackClimbingDeck("11")` just before. Card 11: A lose 1 Psych, gain a Balance Token; B lose 1 Water, gain 1 Face Card. Both are payable (Z has ≥ 4 Water and ≥ 4 Psych), so the choice is free: Z takes **B** (an automatic Portaledge draw [C: `material.inc.php`; S: P1.2 1h]). Expected: the log shows the choice for W and S; Z's own log ends with `gaining` and the drawn Face card's name (a Face card is `card_type_arg` 15–21); Water −1; one Face card added to Z's hand [C].
+> - **T1.7 W rests (S-smoke 2).** Expected [R: p. 7]: W lays the climber down and skips the rest of the turn; the rest log line shows in all three tabs.
+> - **T1.8 Follow Phase, then Rerack (S-smoke 4).** In turn order (Z first): Z draws 3 cards from the Spread and/or Deck; the Spread refills; W gains 5 Assets (Water, Psych, or cards from the Portaledge) [R: p. 11]. W takes **2 Water (4 → 6), 2 Gear and 1 Face** (the Gear pile goes from 7 to 5). Expected: as before, no new console error. The Portaledge draws come from the piles of T1.2 (each pile 7 at setup).
+>
+> **Round 2 (W first, then Z)**
+> - **T1.9 F5 in `climbOrRest` (S-smoke 5).** With W active, press F5 in W's tab, then Z's, then S's. Expected: each tab returns to the same state, no console error, no `[FA …]` warning.
+> - **T1.10 W risks it, die 2, card 3 option A.** W's first pitch: a bottom-row pitch W lacks exactly one required asset for (arrange with `debug_giveAssets`: deviation), not Z's pitch. **W must still hold at least 2 cards in hand after laying down the others**, and must hold no Summit Beta token numbered 1, 4, 7 or 11 [C: `Game.php:1881–1890`]. `debug_stackClimbingDeck("3")`, then `debug_forceDie(2)` just before the roll. W risks it [R: p. 7]. Expected [C: `Game.php:1892–1898`]: the die shows 2 cards; with 2 players the game still goes to `selectOpponent` (W picks Z, the only opponent) and W gives 2 cards to Z. A Summit Beta token from that list would go to `riskSummitBeta` first; with fewer than 2 cards available W would retreat instead [C: `Game.php:1900–1909`; R: p. 7], which is not this step. The log shows the risk, the die and the give: S sees the public line (`confirmAssetsForDiscardPublic`, `notify->all`, `Game.php:3147–3149`); the cards go to Z privately (`Game.php:3173–3176`, `3200–3203`), so Z's tab shows the cards received and S only that cards moved. Then card 3: **both options are probably payable**: Z climbed in round 1, and the cards Z laid down stay on Z's Asset Board, face down, after the Follow Phase [R: p. 10, step 3]; most bottom-row pitches need Gear, so Z's board usually holds a Gear card; and p. 8 does not limit taking a card to face-up ones [R: p. 8]. **W takes A** (lose 1 Water, gain a Summit Beta Token). If the game offers only A, record that, and which cards Z's board held. W's tab shows the token, the others "gains a Summit Beta Token".
+> - **T1.11 Z climbs, card 9 option B.** Z climbs a neighbor of Z's first pitch that W is not on. `debug_stackClimbingDeck("9")`, option B (technique tokens for you and another; free; A would cost 1 Psych). Expected [C]: Z chooses the opponent (W), then each player chooses a Technique token (W first or Z first: record the order). **9 B is one of the 10 `$bespoke` choices: S gets no choice line for it** (the known finding: not a regression). Known: the card may discard early (open finding).
+> - **T1.12 Follow Phase, then Rerack.** Both climbed: each draws 3, in turn order (W first). Expected: as before.
+>
+> **Round 3 (Z first, then W)**
+> - **T1.13 Z: trade, Energy Drink, climb, card 20 option A.** Before the climb: `debug_giveAssets(Z, "1,2,3")` (three Crack cards, one type [R: p. 7]); Z trades them in for any Portaledge card (take a Face card). A trade makes no state change, so the turn continues to the climb [C: `confirmTrade`, `Game.php:1981–2041`; R: p. 7]. `debug_giveSummitBeta(4, Z)`; Z uses Energy Drink (+1 Water, +1 Psych [S: P1.4 4.4]). `debug_stackClimbingDeck("20")`; Z climbs a neighbor of Z's second pitch (W is not on it) and takes option A (lose 1 Psych, gain a Power Token; payable: Z has at least 1 Psych left after the pitch, see the budget). Expected: the trade shows its public and private lines; the Energy Drink line; the token line (public "gains a Power Token", Z's private copy).
+> - **T1.14 W climbs, card 29 option B (everyone takes a Portaledge card).** W climbs a neighbor of W's first pitch (not Z's). `debug_stackClimbingDeck("29")`, option B: all players gain 1 card from the Portaledge, W first, then Z [R: p. 8, clockwise from the current player; C]. Expected: each player is asked in turn; the log shows each draw.
+> - **T1.15 Follow Phase, then Rerack.** Both climbed; each draws 3. If a Follow Phase offers a Permanent Asset token to either player, accept the first one offered (the rest of the list declines them).
+>
+> **Round 4 (W first, then Z)**
+> - **T1.16 Both rest.** W rests, then Z rests. Expected [R: p. 7].
+> - **T1.17 F5 in `resting` (S-smoke 5).** At Rerack, in W's `resting` state, press F5 in W's tab. Expected [C; S: P1.2 1j]: the Portaledge panel opens by itself and the four piles are visible (a pile with no card would be hidden; none is empty). Both players take 5 Assets. No console error. "Express stop" the table.
+>
+> ## Table T2: cards 15 and 24 option B, and the end-of-game objectives line (new 2-player table + spectator, 4 rounds)
+>
+> **Set up before round 1, in `characterSelection`.** The player who confirms a character first (the one who is active when `characterSelection` opens) receives the objectives stacked below [C: `confirmCharacter` deals two cards per player, in the order they confirm, `Game.php:910–914`]: **call that player Z** on this table. Run `debug_setAvailableCharacters("5,1")` first: Z picks the Overstoker, W the Rope Gun (the budget in the cost section applies: Z climbs in every round). Record who climbs first in round 1: if Z, Z is first in rounds 1 and 3 and W in rounds 2 and 4; otherwise the reverse.
+>
+> **Choose Z's objectives from the board.** Look at the three face-up rows. A personal objective scores when 3 pitches from its list are climbed [C: `Game.php:6322`]. **Only one personal objective may be scored** [R: p. 12; p. 13]; **that the code picks the higher-scoring one, and on a tie the first-listed one, is [C: `Game.php:6320–6326`], not [R]**. Pick **S** (the objective Z will score) with a **smaller id than L** (the objective Z will hold), neither of them 3 (open finding), and:
+> - S has at least 3 pitches in its list on the face-up rows, forming a chain Z can climb: a bottom-row pitch first, then neighbors, up to rows 2 and 3 (the pitch ids of each objective are in `material.inc.php`, `personal_objectives`; the card shows the names);
+> - fewer than 3 of the pitches Z climbs are on L's list (otherwise L may score instead or tie: [C] as above).
+> Then run **`debug_stackPersonalObjectives("S,L")`** (the smaller id first, then the larger). The first confirmer is dealt the first-listed card first [C: the call puts the first-listed id on the end of the deck, and `confirmCharacter` pops from the end, `Game.php:913–914`], so the dealt order is [S, L]; sorting the keys numerically gives the same order [inferred from P1.3's key-order finding]. The end-of-game line calls the first key objective 1 [C: `Game.php:6348–6349`], so Z's objective 1 is S, whichever way the keys are ordered. Z must then confirm a character first. Check Z's two objective cards show L and S. If the table cannot offer such a chain, record it: step T2.9 is then not run.
+>
+> **Across rounds.** Z climbs on the chain; W climbs only on the other side of the board, far from Z. No Permanent tokens. `debug_giveAssets` as needed (deviation). **Water and Psych:** the worst-case budget in the cost section covers four climbs for Z with card 42 A after rounds 2 to 4. If a pitch on the chain would cost more than Z has left, Z rests that round instead and climbs the next one: the later rounds then shift by one (the first climber of each round still alternates), W rests as well in that round, and the game ends one round later; write the new round numbers down.
+>
+> - **T2.1 Setup done.** Both confirm characters; Rack Up. Expected: as before; no raw `${...}`.
+> - **T2.2 Round 1, Z's climb: card 15 option B (commit 3).** Z climbs the first pitch of the chain (bottom row). `debug_stackClimbingDeck("15")` just before. Card 15: A lose 1 Water, gain a Power Token; B all other players gain 1 Gear Card from The Portaledge ("Offload some gear onto your partner"). Both are payable; Z takes **B**. Expected [C, `Game.php:2542–2684`]:
+>   - W's log: "W draws [Gear card name(n)] from the Portaledge", with the card's tooltip on the bracketed name, as before commit 3; W's hand +1 Gear.
+>   - Z's own log shows no "draws" line (`climbingCards15And24Public` sends Z an empty message); both players see the choice line.
+>   - **S: no line for this choice (15 B is one of the 10 `$bespoke` choices), and the dimmer may stay on in S's tab: the known spectator finding, not a regression.** Record what S shows.
+>   - Commit 3 changes only the string's syntax: the line's text and tooltip are the same as the Portaledge draw line of T1.6 (also a `[Name(n)]` string).
+> - **T2.3 Round 1, W's climb: card 24 option B (commit 3).** W climbs a bottom-row pitch on the other side. `debug_stackClimbingDeck("24")`. Card 24: A lose 1 Water, gain 1 Face Card; B gain 1 Pain Tolerance Token and all other players gain 1 Gear Card. Both payable; W takes **B**. Expected: Z's log shows "Z draws [Gear card(n)] from the Portaledge" with its tooltip; W's tab shows the token line; S gets none of it (24 B is a `$bespoke` choice; known).
+>   - Order inside round 1: whichever of Z and W goes first does 2.2 or 2.3 first; stack each card right before that climb.
+> - **T2.4 Round 1: Follow Phase, then Rerack.** Climbers draw 3; as before.
+> - **T2.5 Round 2 (first climber: whoever was second in round 1).** Z climbs the second pitch of the chain (a neighbor, not W's). `debug_stackClimbingDeck("42")`, option A (all players gain 1 Water and 1 Psych; B: you gain 1 Water; both free). W rests. Rerack as usual.
+> - **T2.6 Round 3 (first climber: the same player as in round 1).** Z climbs the third pitch of the chain. `debug_stackClimbingDeck("42")`, option A. W rests. After the Follow Phase and Rerack, Z holds 3 pitches of S's list.
+> - **T2.7 Start of round 4, in `climbOrRest`: `debug_endGameSoon(Z)`** (Z has 3 climbed pitches, so no refusal or warning [S: P1.4 T1]). Expected: Z's window reloads; no log warning.
+> - **T2.8 Round 4 (first climber: whoever was second in round 3).** Z climbs a fourth pitch (a neighbor, any, preferably not on L's list); `debug_stackClimbingDeck("42")`, option A. W rests. The game ends after this round's Follow Phase, with no Rerack [R: p. 13].
+> - **T2.9 End-of-game objectives line (commit 4) and site 6337.** Expected [C: `Game.php:6342–6382`]:
+>   - Z's line reads "Z scores [S's name(id)] and held [L's name(id)]" (the branch whose key `objective_2_for_log` commit 4 fixes). In English it is expected to read exactly as before commit 4; copy it. No raw `${...}`. If it reads "held [L] and scores [S]", the key order is the other way: record it (a finding about key order), and this branch was not reached.
+>   - W's line (W held both): "W held [first] and [second]", nothing after "and".
+>   - Z's score includes S's points: `SELECT player_id, player_score, player_score_aux FROM player;` equals the panel and the score tracker; the statistics panel shows `personal_objective_scored` = S's id and `personal_objective_points` = S's score for Z only (site 6337, which P1.4 never ran) [C].
+>   - S's tab sees the same final table and lines.
+>
+> ## Table T3: the Portaledge refill (new 2-player table, 2 rounds; the optional reshuffle needs a third)
+>
+> Purpose: Deck draws, a trade, the discard pile, and a Portaledge refill. **Roles (before round 1).** F is the player who climbs first in round 1. **Q = F, P = the other player.** Turn order: **round 1: Q first, then P; round 2: P first, then Q; round 3 (optional steps only): Q first, then P** [R: p. 11]. Q climbs in round 1 only (and in the optional round 3); P rests in rounds 1 and 2; Q rests in round 2. Characters: any except Phil, Free Soloist and Cool-headed Crimper. No Permanent tokens (only one pitch is climbed).
+>
+> - **T3.1 Setup.** Create, characters, Rack Up. Run the first query of T1.2: n = 7 for the four piles.
+> - **T3.2 Round 1 (Q first, then P): a trade before a climb.** Q's first pitch is a bottom-row pitch that needs at least one **Face** card (ids 5, 13, 15, 16, 17, 19, 20, 21, 22, 23 or the Trifecta, hex 5: see the table). `debug_giveAssets(Q, …)` so that Q holds everything the pitch needs **except one Face card**, plus **three spare Crack cards beyond any Crack the pitch needs** (Crack is `card_type_arg` 1–7). Q is missing an asset and does not want to rest, so Q trades the three spare Crack cards for a **Face** card from the Portaledge [R: p. 7, "Missing an Asset but don't want to Rest?"; C: the trade makes no state change, so the turn continues]. The three Crack cards go to the discard pile [C: `Game.php:1981–1995`, `updateAssetDiscard`]. Q then climbs the pitch (≤ 2 Water and ≤ 2 Psych: payable) with `debug_stackClimbingDeck("42")`, option A. P then rests. Expected: the trade's public and private lines; query `SELECT card_type_arg FROM cards_and_tokens WHERE card_location='discard';` returns at least the three Crack ids, and no Gear id (22–37) unless something else was discarded.
+> - **T3.3 Round 1 Rerack (Q first, then P).** Q draws 3 (Spread and/or Deck). P gains **5 Gear** cards from the Portaledge [R: p. 11] (the Gear pile goes from 7 to 2). Run `SELECT card_location, COUNT(*) AS n FROM cards_and_tokens WHERE card_location LIKE 'porta%' GROUP BY card_location;`. Expected [C]: `portaGear` n = 2, `portaFace` n = 6 (Q's trade took one), the other two 7.
+> - **T3.4 Round 2 (P first, then Q).** P rests, then Q rests.
+> - **T3.5 Round 2 Rerack (P first, then Q): the Portaledge refill.** Before it, run `SELECT card_type_arg FROM cards_and_tokens WHERE card_location='discard';` and write the ids down. P gains **2 Gear** + 3 Water/Psych: the second Gear is the last card of the pile, so the pile is refilled [R: p. 8, "refill it with 7 more"; C: `drawFromPortaledge`, `UtilTrait.php:593–`]. Q gains 5 Water/Psych (no cards). **Where the 7 cards come from:** [R, R-5 answer] the discard pile first, then the Asset deck; [C] the code tops up from the Asset deck. **At this point the discard pile holds the 3 Crack cards and no Gear card, so there is no Gear card in the discard pile to take first: both give the same result, 7 Gear cards from the Asset deck.** R-5's answer also has the Asset deck reshuffled after a top-up from it; whether the code does that has not been checked (R-5, left to P5.4) and play cannot show it: that is R-5's open part, not checked here. If the query shows a Gear id (22–37) in the discard pile, the code and the rule differ: that is the known R-5 item (`RULES_CHECK.md`, accepted; Portaledge slice P5.4), not an expected result and not P1.5's. Expected: no error; the Portaledge panel shows the Gear pile again; `portaGear` n = 7; `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_type='asset';` = 124. Record the animation of the refill. If you will run T3.6 to T3.8, do not stop the table here; otherwise "Express stop".
+>
+> ## Optional, last: the auto-reshuffle (T3.6 to T3.8)
+>
+> Run these only after every step above, on table T3, if the page can cope with a very large hand. **If they are skipped, record "auto-reshuffle not run; lines 41–43 of `Game.php` unchanged"** [C: the commit-2 diff shows `autoreshuffle`, `autoreshuffle_custom` and `autoreshuffle_trigger` as unchanged context lines].
+>
+> - **T3.6 (optional) Round 3 (Q first, then P), in `climbOrRest`, before anyone moves: empty the Asset deck.** Queries: `SELECT COUNT(*) AS n FROM cards_and_tokens WHERE card_location='asset_deck';` and `... WHERE card_location='discard';` (the discard pile must hold at least 3 cards, which the trade of T3.2 provides). Then `SELECT card_type_arg, COUNT(*) AS n FROM cards_and_tokens WHERE card_location='asset_deck' GROUP BY card_type_arg ORDER BY card_type_arg;`. Build the argument by repeating each `card_type_arg` n times, e.g. 5 copies of 1 and 4 of 2 give `1,1,1,1,1,2,2,2,2`. **`debug_giveAssets(Q, "<list>")`** gives them to Q [C: `findDebugAssets` takes copies from the deck first, then the discard pile; a list with exactly the deck's counts leaves the discard pile alone]. Expected: the deck query now returns n = 0 and the discard query is unchanged. This is a deviation, and Q's hand is very large.
+> - **T3.7 (optional) Round 3: Q climbs; Rerack draws.** Q climbs a bottom-row pitch (≤ 2 Water and ≤ 2 Psych; Q holds every card) with `debug_stackClimbingDeck("42")`, option A; P rests. In the Rerack (Q first), Q draws 3 cards: pick them from the **Asset deck**, not the Spread. Expected [C: `Game.php:1117, 1144`; `UtilTrait.php:579`]: the discard pile is shuffled into the deck, `deckAutoReshuffle` sets `deck_reshuffle`, the notification carries it, and the client plays the reshuffle (`firstascent.js:7798, 8093`). No error. P gains 5 Assets.
+> - **T3.8 (optional) After the reshuffle.** Queries: `asset_deck` n = the old discard count minus Q's draws and the Spread refill; `discard` n = 0 or only newly discarded cards; `SELECT COUNT(*) ... card_type='asset'` = 124 again. "Express stop".
+>
+> ## What the list does not cover
+>
+> - **No replay check** (F13): P1.5 sends the same notifications. If a table ends, say so; do not plan replays.
+> - **Not reached by any step** (the coverage map, `p1-5-coverage-v2.md`, lists each site and its evidence): the Bail, undo and pass-card actions, Lucky Chalkbag, Bomber Anchor and Rerack tokens, the steal and add-token cards, the Cool-headed Crimper, The Trifecta, Spider Stick, the Jesus Piece, and 3 sites that no play can reach (the two in `getActivePlayerColor`, which nothing calls; the null branch of `getTechniqueType`, which every caller avoids). The harness checked each of these sites call for call.
+> - **Studio cleanup list:** none. No file is added or removed by P1.5.
+> - **Fresh table needed?** Not for P1.5: no schema, state or file layout changes, so tables open at the deploy keep working (E2 to E3 check it). T1 to T3 are new tables only because their steps need a new setup, the setup being the path commit 2 changes.
+
+**Coverage map v3** (`p1-5-coverage-v3.md`; generated by `coverage-gen.php` from the site map and the step mapping; the per-site table and the per-step table are in the file). Summary: of the 180 converted sites (179 `self::` sites plus the `getNew` site), the list is planned to reach **109 of the 179 `self::` sites and the `getNew` site** (110 of 180 rows), from a reading of the code (planned, not seen); **70 `self::` sites are reached by no step, 3 of which no play can reach** (the two in `getActivePlayerColor` and the `getTechniqueType` null branch). Methods: every method that play can reach has at least one site reached; of the 16, 15 are reached, and `loadPlayersBasicInfos` has one converted site, in dead code. 30 steps have a planned site. v3's only change from v2 is that T2.6 and T2.8, which are climbs, now reach `stNextClimb`'s three sites (5722, 5746, 5747) like T2.5; the counts did not change. Not reached by any step (the harness's per-site check is the evidence): the Bail, undo and pass-card actions, Lucky Chalkbag, Bomber Anchor and Rerack tokens, the steal and add-token cards, Cool-headed Crimper, The Trifecta, Spider Stick, the Jesus Piece, the discard-and-gain cards, the shared-effect and 69 A branches. Commit 2: `Game.php:39` runs on every request, so E2, E3 and T1.1 reach it; T1.2 checks what setup built through the Deck; the auto-reshuffle (T3.6 to T3.7) is optional and last, and if skipped is recorded with the code reading that lines 41 to 43 are unchanged context. Commit 3 is reached by T2.2 and T2.3, commit 4 by T2.9 (only if the objective pair chosen at T2.1 puts the scored objective first), site 6337 (personal objective scoring, which P1.4 never ran) with it. The existing-table check is E1 to E3: the constructor runs on every request, and P1.5 changes no schema.
+
+**What session 2 does**
+- Takes Jonathan's Studio results for list v3, by step, and the consoles saved as `.log` files.
+- Makes the four commits in order, from the four diffs, by P1.4's method; the working tree, which holds the sum of the changes, is never touched. For each diff in order: `git apply --cached --check` and `git apply --cached` the diff; check that `git diff --cached --output=p1-5-staged-<name>.diff` is `cmp`-identical to the diff; then `git commit -F p1-5-msg-<n>.txt`. The stacked diffs apply in order, as `p1-5-scratch` showed, and the blobs after each commit must be `2b445f1` and `f6b68a8`; `4ace756`; `4f28154`; `409ac5f` for `Game.php`, `f6b68a8` for `UtilTrait.php`. A commit whose playtest result showed a failure is not made until Jonathan decides.
+- Writes the closing docs, each with Jonathan's go-ahead: `MIGRATION_PLAN.md` (P1.5's Status; the Scope line that says the `${var}` fix "changes the log" (it doesn't); commit 4 added to the Scope; a note that `getActivePlayerName` is deprecated, for a later step); `TODO.md` (the `${var}` entry narrowed to its translation question, now covering `Game.php:2015` too; the `objectives_2_for_log` entry removed with its fix; the reading of the spectator's card 15 B problem, with the 10 `$bespoke` choices, added to that entry, the dimmer link staying [inferred]; the T29 findings (the `card_location` width and the prefix comparison in `modules/utils.js:2787–2806`); the dead-code findings; any new findings from the playtest); `BGA_PITFALLS.md` only for framework findings (and its stale `${var}` bullet).
+
+**Jonathan's review messages, quoted in full**
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the entry, quoted in full.
+>
+> 1. Commit 2 stands. In _ide_helper.php, init's doc (about line 2439) is "Set the databasetable name. MUST be called before any other method", and createDeck's is "Create a Deck component and set the DB table name". So createDeck does init's job. getNew's stub body is createDeck(''), a Deck with no table name, which is why the old code needed init after it. This is a reading of the stubs, not of the framework's implementation [inferred], and the same goes for $this->bga in __construct. The first page load tests both: if either is wrong, setup or the first load fails. The list makes that step explicit (item 5).
+>
+> 2. The design discussion's independent check: it built the four changes itself from the 9e1784f files. Its blobs after each commit are the ones in your index lines (2b445f1 and f6b68a8; 4ace756; 4f28154; 409ac5f), and its expected Studio sizes are the same (Game.php 351,732 bytes, 6,533 lines; UtilTrait.php 79,706 bytes, 1,594 lines). Record it in the entry.
+>
+> 3. Model and effort: record Sonnet 5.5 at High effort.
+>
+> 4. Record these in the entry, for session 2's TODO.md edits:
+>    - T29: the card_location width (varchar(26), with _played_crack as the longest suffix at 13 characters, so a player id over 13 digits would be cut off [inferred]) and the prefix comparison in modules/utils.js:2787–2806 [inferred, not traced]. The plan's "none found" stays true for fixed-length assumptions in the two PHP files.
+>    - The 10 choices that take the $bespoke branch and send their choice line with notify->player only: 9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B and 68 B. This goes into the card 15 B spectator entry; the dimmer link stays [inferred].
+>    - Commits 3 and 4 have no T, F or B id, as your draft messages say.
+>
+> 5. Go ahead with §6, the playtest list and coverage map, with two additions:
+>    - The first step on the new table checks commit 2 directly: table creation, setup and the first page load in all three tabs, with no "Unexpected error" and no SQL error. Then the two count queries from P1.2's list (1e, in MIGRATION_PLAN.md) in "Go to game database": the four porta piles at n = 7 each within their ranges, and 124 asset cards.
+>    - One step on a table that already exists when P1.5 is deployed. The Deck is now built by the new constructor on every request, so loading an existing table and playing one move checks it. The list's first instruction, before round 1 and before the deploy, is to create that table (2 players), play it into round 1, and leave it open. After the deploy: F5 in each tab, then one move, with no error.
+>
+> Then stop at stop B.
+
+Stop B review:
+
+> Stop B reviewed. Write the changes below as "D:\Documents\BGA Studio\p1-5-playtest-v2.md" and "p1-5-coverage-v2.md" (v1 stays as it is). Record this message in the entry, quoted in full.
+>
+> 1. T3.2: no trade before a rest. RULES.md p. 7 places trading under "Missing an Asset but don't want to Rest?", and a rest is announced at the start of the turn, so the list mustn't plan a trade followed by a rest. Restructure T3 so the cards reach the discard pile in a way the rules show, for example a trade before a climb. Keep the refill (T3.5) and the before-round-1 instructions consistent with the new order, and give the turn order of each round.
+>
+> 2. T3.5: the refill against R-5. My answer in RULES_CHECK.md R-5 is that a refill takes cards from the discard pile first, then from the Asset deck. The code tops up from the deck. State the pile's expected source as [R, R-5 answer] and [C]. If, at that point on T3, the discard pile holds no card of the pile's type, both give the same result: say so. If it holds some, the difference is the known R-5 item, not an expected result.
+>
+> 3. The spectator and the $bespoke choices. T1.11 (card 9 B) is one of the 10 choices whose choice line goes to the players only (9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B, 68 B). In the known findings, and in T1.11's expected results for S, say that S gets no choice line for any of them.
+>
+> 4. T2's objective rule. RULES.md p. 12 says only one personal objective may be scored. That the code picks the higher-scoring one is [C] (Game.php:6320–6326), not [R]. Retag it.
+>
+> 5. Water and Psych. Z climbs in every round of T2 and in rounds 1 to 3 of T1, and cards 11 B, 4 A and 3 A cost Water. RULES.md p. 8: a player who can fulfil only one option must take it. For each climb in T1 and T2, give the pitch's requirements and the climbing card's two options from material.inc.php (card 5 included: say what "neutral" means), and check from the character's starting Water and Psych that the planned option can be paid. Name a character for Z on each table if that's what makes it work. Where it can't be paid, add a rest and say how it changes the turn order and the later steps. This goes before round 1 where it applies to several rounds.
+>
+> 6. The two unread effects, answered from the code (Game.php at 9e1784f):
+>    - T1.10: a risk die of 2 goes to selectOpponent even with 2 players (1892–1898), unless the risker holds a Summit Beta token from that face's list, which goes to riskSummitBeta first (1881–1890). With fewer than 2 cards available it retreats (1900–1909; RULES.md p. 7). Say W must keep at least 2 cards in hand after laying down. S sees the public line (confirmAssetsForDiscardPublic, notify->all, 3147); the cards go to Z privately.
+>    - T1.13: confirmTrade makes no state change, so the turn continues to the climb [C], as RULES.md p. 7 presents a trade.
+>    Take both out of the unread list.
+>
+> 7. Drop T1.3 (debug_frameworkCheck): it exercises nothing P1.5 changes.
+>
+> 8. T3.6 to T3.8 (the auto-reshuffle) become optional and come last, after everything else in the list. Say "optional" in the heading, and keep the fallback line for when it's skipped.
+>
+> Show v2's line and byte counts and the steps that changed from v1, then stop and wait for my review.
+
+Stop B, round 2, review:
+
+> Stop B, round 2, reviewed. Record this message in the entry, quoted in full.
+>
+> 1. T1.10, card 3: option A isn't forced. Z climbed in round 1, and the cards Z laid down stay on Z's Asset Board after the Follow Phase, face down (RULES.md p. 10, step 3). Most bottom-row pitches need Gear, so Z's board usually holds a Gear card, and p. 8 doesn't limit taking a card to face-up ones. Write it as: both options are probably payable; W takes A. If the game offers only A, record that, and which cards Z's board held.
+>
+> 2. T3.5 and R-5: my R-5 answer also says the Asset deck is reshuffled after a top-up from it. Whether the code does that hasn't been checked (R-5, left to P5.4), and play can't show it. Keep "7 Gear from the Asset deck" as the result both give at this point, and add that the reshuffle after the top-up is R-5's open part, not checked here.
+>
+> 3. The coverage map: T2.6 and T2.8 are climbs, so they reach stNextClimb's sites as T2.5 does (5722, 5746, 5747). Add them, and correct any counts that change.
+>
+> Write these as "D:\Documents\BGA Studio\p1-5-playtest-v3.md" and "p1-5-coverage-v3.md" (v1 and v2 stay as they are), and show the lines that changed from v2. v3 is the list I'll play.
+>
+> Then go ahead with §8: the "in progress" progress.md entry, with list v3 in full and its version, and every one of my review messages quoted in full; the raw docs diff in "D:\Documents\BGA Studio\p1-5-docs.diff" with its lines, bytes and --stat; and the docs: commit message as text. Then stop and wait for my "commit docs".
+
+Docs diff review:
+
+> Docs diff reviewed. Make these changes to the entry; nothing else changes. Record this message in the entry, quoted in full.
+>
+> 1. "What session 2 does", the commit method: replace the "one way: copy the two working files aside, git restore them, then git apply …" suggestion with P1.4's method: for each diff in order, git apply --cached the diff, check that git diff --cached is cmp-identical to it, then commit with its message file; the working tree is never touched. Keep the blob list after each commit, and the line that a commit whose playtest result showed a failure isn't made until I decide.
+>
+> 2. "The design discussion's check" appears twice (at the end of the checks, and again as the entry's last paragraph). Keep the first, and delete the last paragraph.
+>
+> 3. Add one line under the playtest list's heading: its "What the list does not cover" section refers to p1-5-coverage-v2.md; the map that goes with v3 is p1-5-coverage-v3.md. The list file itself isn't changed.
+>
+> Write "D:\Documents\BGA Studio\p1-5-docs-v2.diff" (don't overwrite the first), give its lines, bytes and --stat, show the lines that changed from p1-5-docs.diff, and show the docs: commit message again, updated if needed. Then stop and wait for my "commit docs".
+
 ## 2026-11-20 (P1.4, Notification, statistics and score APIs: done)
 
 P1.4 is done. Session 2 checked session 1's change, made the three `struct:` commits, took Jonathan's Studio results for playtest list v3, and wrote these closing docs. The code is exactly session 1's reviewed change; no code file was edited in this session. Nothing was deployed by this session and nothing went to the BGA Production site. The three `struct:` commits and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push". (Session 1's `docs:` commit `e2cdad4` was level with `origin/main` at the start.)
