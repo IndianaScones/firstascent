@@ -6372,7 +6372,7 @@ class Game extends \Bga\GameFramework\Table
                 else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg === $scored_objective_id) {
                     $objectives_msg['log'] .= clienttranslate('held ${objective_2_for_log}');
                     $objectives_msg['args']['objective_2_for_log'] = $objective_2_for_log;
-                    $objectives_msg['args']['i18n'][] = 'objectives_2_for_log';
+                    $objectives_msg['args']['i18n'][] = 'objective_2_for_log';
                 }
                 else if ($objective_2_type_arg !== $scored_objective_id && $objective_1_type_arg !== $scored_objective_id) {
                     $objectives_msg['log'] .= '${objective_2_for_log}';
