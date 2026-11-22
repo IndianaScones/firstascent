@@ -82,7 +82,7 @@ trait UtilTrait {
     }
 
     function getPitchOrder() {
-        return self::getCollectionFromDb('SELECT pitch_location location, pitch_id id FROM board ORDER BY pitch_location', true);
+        return $this->getCollectionFromDb('SELECT pitch_location location, pitch_id id FROM board ORDER BY pitch_location', true);
     }
 
     function getAvailablePitches($current_pitch, $board) {
@@ -235,8 +235,8 @@ trait UtilTrait {
     }
 
     function getActivePlayerColor() {
-       $player_id = self::getActivePlayerId();
-       $players = self::loadPlayersBasicInfos();
+       $player_id = $this->getActivePlayerId();
+       $players = $this->loadPlayersBasicInfos();
        if (isset($players[$player_id]))
            return $players[$player_id]['player_color'];
        else
@@ -245,7 +245,7 @@ trait UtilTrait {
 
     function getHandAssets($player_id) {
         $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE card_type='asset' AND card_location='$player_id'";
-        return self::getCollectionFromDb($sql, true);
+        return $this->getCollectionFromDb($sql, true);
     }
 
     function nextRound() {
@@ -271,7 +271,7 @@ trait UtilTrait {
         $played_slab = "{$player_id}_played_slab";
         $sql = "SELECT card_id, card_type_arg FROM cards_and_tokens WHERE (card_type='asset') AND
                 (card_location='$played_gear' OR card_location='$played_face' OR card_location='$played_crack' OR card_location='$played_slab')";
-        return self::getCollectionFromDb($sql, true);
+        return $this->getCollectionFromDb($sql, true);
     }
 
     function fillLowerSlot($board_assets, $player_id, $type, $assets, $target_slot, $upper_slots) {
@@ -463,7 +463,7 @@ trait UtilTrait {
         }
 
         // sendy jammer
-        $player_id = $player_id ?? self::getActivePlayerId();
+        $player_id = $player_id ?? $this->getActivePlayerId();
         $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
         $asset_type = $this->getAssetType($type_arg);
         if ($character_id === '4' && $asset_type === 'gear') { $technique = 'wild'; }
@@ -592,8 +592,8 @@ trait UtilTrait {
 
         if (count($remaining_cards) === 1) {
 
-            $asset_discard = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='discard'");
-            $asset_deck = self::getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
+            $asset_discard = $this->getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='discard'");
+            $asset_deck = $this->getObjectListFromDb("SELECT card_location_arg, card_type_arg, card_id FROM cards_and_tokens WHERE card_location='asset_deck'");
 
             $sortType = function ($asset) use ($type) {
                 switch ($type) {
@@ -658,7 +658,7 @@ trait UtilTrait {
 
     function checkSpread() {
 
-        $spread_assets = array_keys(self::getCollectionFromDb("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'"));
+        $spread_assets = array_keys($this->getCollectionFromDb("SELECT card_id FROM cards_and_tokens WHERE card_location='the_spread'"));
         $first_type = '';
         foreach($spread_assets as $id) {
 
@@ -704,7 +704,7 @@ trait UtilTrait {
             $third_row = array_filter($pitches, function($pitch) use($third_row_min) { return $pitch >= $third_row_min; });
             if ($third_row) {
 
-                $board = self::getCollectionFromDb("SELECT pitch_location location, pitch_id id FROM board", true);
+                $board = $this->getCollectionFromDb("SELECT pitch_location location, pitch_id id FROM board", true);
                 $this->bga->notify->all('revealHeadwall', clienttranslate('The Headwall is revealed'), array(
                     'board' => $board,
                     'tile_coords' => $tile_coords,
@@ -739,9 +739,9 @@ trait UtilTrait {
                 if ($card_type_arg == '55' && $choice == 'a') {
                     foreach ($sunny_players as $player_id) {
 
-                        if ($jesus_piece && $player_id == self::getActivePlayerId()) {
+                        if ($jesus_piece && $player_id == $this->getActivePlayerId()) {
                             $this->bga->notify->all("discardJesusPiece", clienttranslate('${player_name} uses +Jesus Piece(10)+ to avoid the negative effect'), array(
-                                'player_name' => self::getActivePlayerName(),
+                                'player_name' => $this->getActivePlayerName(),
                                 'player_id' => $player_id,
                             ));
                             $player_idx = array_search($player_id, $sunny_players);
