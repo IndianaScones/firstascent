@@ -2,6 +2,185 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-22 (P1.5, PHP modernization sweep: done)
+
+P1.5 is done. Session 2 checked session 1's change, made the four commits (two `struct:`, two `fix:`) by P1.4's method, took Jonathan's Studio results for playtest list v4 (played 2026-11-21 to 2026-11-22), and wrote these closing docs. The code is exactly session 1's reviewed change; no code file was edited in this session. Nothing was deployed by this session and nothing went to the BGA Production site. The four commits and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push". (Session 1's `docs:` commit `19b9463` was level with `origin/main` at the start.)
+
+**Line numbers in this entry.** `Game.php` lines are cited **at `9e1784f`** (the same file as at `0bdad52`) unless marked "now"; commit 2 removes one line, so in HEAD every `Game.php` line after 40 is one lower. `UtilTrait.php` lines are the same in both.
+
+**State at the end of the session**
+- **Commits of P1.5** (all by `Jonathan Morgan`, with the Claude Sonnet 5.5 co-author line):
+  - `19b9463` `docs: P1.5 in progress, session 1 (change in the working tree, playtest list v3)` (session 1; on `origin/main`);
+  - `42ba46d` `struct: self:: calls on $this-> (P1.5)` (`git show --stat`: 2 files, 178 insertions, 178 deletions: `Game.php` 332 changed lines, `UtilTrait.php` 24); `Game.php` blob after it `2b445f11c88912778a37d479d68757071e4c6d9d`, `UtilTrait.php` `f6b68a818f64916a783805dd872c32006da90abc`;
+  - `8e4a6e0` `struct: Deck from bga->deckFactory (P1.5)` (1 file, 1 insertion, 2 deletions); `Game.php` blob `4ace756465f058bed0e2bc7ab37c1ddf5765bcb9`;
+  - `f925458` `fix: ${var} string in confirmClimbingCardChoice, cards 15 and 24 (P1.5)` (1 file, 1 and 1); `Game.php` blob `4f281544b3e5bc709df8053aa3ef0bf4abb6ee62`;
+  - `aa7eaaf` `fix: i18n key of held objective 2 in the end-of-game objectives line (P1.5)` (1 file, 1 and 1); `Game.php` blob `409ac5ff45107e92c3f011d9de118a1eb39c27e8`;
+  - the `docs:` commit that holds this entry (made only on Jonathan's "commit docs", after stop B).
+- **Working tree after the fourth commit:** clean (`git status --short` printed nothing). `git rev-parse HEAD:modules/php/Game.php` is `409ac5ff45107e92c3f011d9de118a1eb39c27e8` and `HEAD:modules/php/UtilTrait.php` `f6b68a818f64916a783805dd872c32006da90abc`: the working files' blobs (`git hash-object`), the final blobs of session 1's entry. `Game.php` is 351,732 bytes, 6,533 lines, and `UtilTrait.php` 79,706 bytes, 1,594 lines (the sizes Jonathan reported on Studio at G1). The four commits are 4 ahead of `origin/main`, unpushed.
+- **How the commits were made** (P1.4's method; the working tree was never touched): for each diff in order, `git apply --cached --check`, `git apply --cached`, `git diff --cached --output=…\p1-5-staged-<name>.diff` (`cmp`-identical to the diff: `p1-5-staged-self.diff` 1,346 lines, 80,689 bytes; `-deck` 14, 754; `-var` 13, 793; `-i18n` 13, 899), `git commit -F p1-5-msg-<n>.txt`, then the `HEAD:` blob check above. (My first run of the loop mis-quoted a `tr < $s` in its report line, so the report printed 0 lines; the `cmp` calls, which were quoted, had passed, and I re-ran the `cmp` and the counts afterwards: all four identical.)
+- **Files outside git, in `D:\Documents\BGA Studio\`** (new in this session): `p1-5-staged-self.diff`, `p1-5-staged-deck.diff`, `p1-5-staged-var.diff`, `p1-5-staged-i18n.diff` (counts above); `p1-5-done-docs.diff`, the raw diff of this entry and the other closing docs (its counts are in the session's report, not here); `p1-5-harness\done-head.md`, `done-edit.php`, `qsa.txt` (the scripts and text that built this entry). Jonathan's files, recorded below: `p1-5-playtest-v4.md`, `P1.5-playtest-v4.txt`, `P1.5-playtest-v4-logs\`. Session 1's files are unchanged.
+- **Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's stop A review, item 1). The `struct:` and `fix:` commits' co-author line reads Claude Sonnet 5.5.
+- **Transcript** (outside the repo): this session ran in the same conversation as session 1: `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\42028aed-11a4-4a40-aa34-0e54ec844b33.jsonl` [path by the P1.4 pattern]; the session prompt is its message after session 1's last push.
+- **Compaction:** none that I know of; the context was not summarised.
+
+**Status of each item**
+- Start check: done (below). Nothing differed.
+- The four commits: done, each from its reviewed diff, with its staged diff `cmp` equal to the diff and its blob as session 1's entry gives.
+- The playtest (list v4): run by Jonathan; recorded below.
+- The closing docs: `MIGRATION_PLAN.md` (P1.5's Status, Scope), `TODO.md`, `BGA_PITFALLS.md`: this commit.
+- Nothing was found that P1.5 broke. Every finding below was found in play or in the console, or by reading, and none has a cause in the changed lines as far as can be told.
+
+**Start check** (as the prompt asked, read-only)
+- `git fetch origin`; HEAD `19b94632cf5efecd1fc782a3397269476670925a` is session 1's `docs:` commit, parent `0bdad528504f19a787aa5978e8c343af2f669f73`, and level with `origin/main` (both the same hash).
+- Nothing staged; only `modules/php/Game.php` and `modules/php/UtilTrait.php` modified.
+- `git hash-object` of the working files `409ac5ff45107e92c3f011d9de118a1eb39c27e8` and `f6b68a818f64916a783805dd872c32006da90abc`; 351,732 bytes and 6,533 lines, 79,706 bytes and 1,594 lines; both pure CRLF (6,533 and 1,594 CRLF, no lone CR). HEAD's own blobs were still `66512c5…` and `6f704c7…`.
+- The five diffs have session 1's SHA-256 values (`p1-5-self.diff` `fe119050…`, `-deck` `a4ec2d3a…`, `-var` `d2664d3c…`, `-i18n` `254eb5a0…`, `-all` `545e5593…`), and the four message files are there (`p1-5-msg-1.txt` 22 lines, 1,055 bytes; `-2` 20, 812; `-3` 21, 1,113; `-4` 16, 735).
+- Jonathan's files, as found:
+
+| File | Lines | Bytes |
+|---|---|---|
+| `p1-5-playtest-v4.md` | 367 | 11,344 |
+| `P1.5-playtest-v4.txt` (CRLF) | 45 | 5,215 |
+| `P1.5-playtest-v4-logs\E-IndianaScones0.log` | 151 | 9,646 |
+| `…\E-IndianaScones1.log` | 133 | 8,071 |
+| `…\E-spectator.log` | 133 | 8,074 |
+| `…\T1-IndianaScones0.log` | 616 | 40,057 |
+| `…\T1-IndianaScones1.log` | 510 | 33,827 |
+| `…\T1-spectator.log` | 655 | 43,477 |
+| `…\T2-IndianaScones0.log` | 541 | 35,033 |
+| `…\T3-IndianaScones0.log` | 363 | 23,623 |
+| `…\T3-IndianaScones1.log` | 317 | 20,758 |
+| `…\T3-spectator.log` | 413 | 26,757 |
+
+**The list played.** Jonathan played **`p1-5-playtest-v4.md`** (367 lines, 11,344 bytes), not v3. v4 is v3 "simplified": the same steps with the same step numbers, in a simpler layout (a "Before you start" block, one "Report" box per step). I compared the step ids: v4 has E1, G1, E2 to E4, T1.1, T1.2, T1.4 to T1.17, T2.1 to T2.9 and T3.1 to T3.8, which are v3's (v3 notes T1.3 as dropped; there is no T1.3 in v4). Reading the steps side by side, what is played is the same; v4 drops v3's [R]/[C] citations, expected-value tags and its cost and budget sections. **It changes only the wording.** It is not copied here: v3 is in session 1's entry in full. Every one of v4's 38 steps has a line in Jonathan's results, so nothing the list planned is unreported.
+
+**Jonathan's results** (`P1.5-playtest-v4.txt`, 45 lines, 5,215 bytes), quoted in full, as his results:
+
+> E:
+> E1. Complete.
+> G1. Game.php = 351,732 B, UtilTrait.php = 79,706 B
+> E2. As expected.
+> E3. As expected, with one exception. The climbing card was "Awesome view", and I chose option A: All players draw 1 card from the Portaledge. The current climber drew first, and there was a visual glitch where appeared to be two of the same card drawn. One of them disappeared before going into hand, so the end result was normal. The opponent experienced no similar problem when drawing their card from the Portaledge. There were no errors or warnings to go along with this visual glitch.
+> E4. Hmm, when the same player who experienced the visual glitch drew from the deck and spread during rerack, that crack card once again appeared on the board. It turns out it's been sitting in element #deck_draw_1. I haven't refreshed, though I'm certain a refresh would fix it. Other than that, no problems with resting, or the follow or rerack phases.
+>
+> T1: IndianaScones1 is Z, IndianaScones0 is W
+> 1.1. As expected.
+> 1.2. As expected.
+> 1.4. Mostly as expected. The spectator is frozen while titlebar reads "Placing Characters and dealing Personal Objectives" and in the console there is an error: dojo.js:1 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'ownerDocument'). It might have something to do with me alt-tabbing out mid animation. I refreshed the page to fix it.
+> 1.5. As expected.
+> 1.6. As expected.
+> 1.7. As expected.
+> 1.8. As expected.
+> 1.9. As expected.
+> 1.10. For climbing card 3 option b, Z's board has one crack and two slab cards on it, so that option is unavailable. All as expected.
+> 1.11. Z chose a token first. Both known issues were reproduced.
+> 1.12. As expected.
+> 1.13. As expected.
+> 1.14. I used debug_forceDie here to force a 1 to facilitate a risky climb with W. As expected, except that Falling poop bag was discarded early, after the first player drew from the Portaledge but before the second player drew from it. Similar to climbing card #9. Also the card discard animation was off. It started to animate but then snapped into place before the animation completed.
+> 1.15. As expected. A token was offered to and accepted by Z.
+> 1.16. Completed.
+> 1.17. As expected.
+>
+> T2: IndianaScones0 is W, IndianaScones1 is Z. S is #6, Southern Rock. L is #7, Climb Your Way Out. W climbs first in Round 1.
+> 2.1. Completed.
+> 2.2. As expected (S shows no choice line and the dimmer stays on. I will refresh the page to fix.).
+> 2.3. Z's log is as expected. W's token line is "IndianaScones1 gains a Pain Tolerance Token". S once again has no choice line and the dimmer on. Once again refreshed to fix.
+> 2.4. Completed.
+> 2.5. Completed.
+> 2.6. Completed.
+> 2.7. As expected.
+> 2.8. Completed.
+> 2.9. I mistakenly sent the wrong player on the circuit. I was able to score them a personal objective, but it's not the S/L from the targeted player. W's objective line is: "IndianaScones0 scores A Day at the Zoo and held Rainbow Vibes", Z's is: "IndianaScones1 held Southern Rock and Climb Your Way Out". The scores in the query match the player panels and the score tracker. Stats for scored personal objective are as expected. The spectator sees the same lines and final table. In the future, please go back to putting the stats' ids in parentheses after the name so it's easier to run down. I also accidentally closed IndianaScones1 and the spectator's tabs before saving the console logs.
+>
+> T3: IndianaScones1 is Q, IndianaScones0 is P.
+> 3.1. `debug_setAvailableCharacters` was used to force characters 6 and 3 because original options only included one non-Phil/Free Soloist/Cool-headed Crimper character. Query report as expected.
+> 3.2. `debug_giveAssets` gave 1 crack card to Q. Q's trade line: "IndianaScones1 trades 3 Crack Assets and draws Undercling from the Portaledge". P and spectator's trade line: "IndianaScones1 trades 3 Crack Assets and draws 1 Face Asset from the Portaledge". Crack cards confirmed in the discard pile by the query.
+> 3.3. Query results as expected.
+> 3.4. Completed.
+> 3.5. P was unable to take 3 water/psych due to limits, so they took 2 gear, 1 face, and 2 water/psych. Q was only able to take 4 water/psych, so they also took 1 face card as well. No error, and the Gear pile shows again. Queries report portaGear 7 and 124 asset cards. The refill animation looked incorrect in the same way as previously reported. The first half, where the cards animate from the discard/deck, show the cards as way too large, but then they snap into the correct size/position for the shuffling animation. There were no Gear cards in the discard pile before the refill.
+> 3.6. All deck cards given to Q. Make a note that the Asset deck appears as usual when there are no cards in it. It needs to show as empty. It can be implemented later, after the migration. After drawing deck, the deck count is 0 and the discard count is unchanged (3).
+> 3.7. As expected. Unlike for the Portaledge decks, this refill animation looks correct.
+> 3.8. Deck correctly reports 0 cards (because the 3 cards in the discard that repopulated the deck went to Q as part of the draw action that forced the reshuffle. Discard correctly reports 0 cards. T1.2's second query correctly reports 124 cards.
+
+(For T2.3: IndianaScones1 is Z in Jonathan's T2 roles, so "W's token line" with IndianaScones1's name means either that he read Z's tab (the line the opponent sees) or that the players swapped roles for card 24. It doesn't change commit 3's result: both "draws [card] from the Portaledge" lines come from the same string, and both read as expected. Jonathan's stop A review, item 2.)
+
+**The console scan** (all 10 `.log` files, 3,832 lines)
+- **`Uncaught`, `TypeError`, "During notification":** one line in all the consoles: **`T1-spectator.log:69`**, `dojo.js:1 Uncaught (in promise) TypeError: Cannot read properties of null (reading 'ownerDocument')`, at `e.place` (`dojo.js:1`), from `notif_dealOpponentObjectives` (`firstascent.js:7739` on Studio). No "During notification" line anywhere.
+- **`[FA …]`:** none, in any file.
+- **Every other `Error` line** is the browser's `Error with Permissions-Policy header` notice. Permissions-Policy lines per file, in the order of the table above: 35, 25, 25, 185, 135, 180, 135, 110, 90, 115; every file's `Error` count equals its Policy count, except the T1 spectator's 181, which is its 180 plus the error above. The only other noise is `browser-update.org/update.min.js … net::ERR_BLOCKED_BY_CLIENT` (an ad blocker, not game code).
+- **The spectator error, read** (client code, untouched by P1.5): the failing call is the `dojo.place(…, 'personal_objective_1_wrap')` of `notif_dealOpponentObjectives` (`firstascent.js:7739–7743`), so the target element was null; that branch runs only when `shouldAnimate()` is true, i.e. the tab is visible (`modules/utils.js:1306`), which fits Jonathan's alt-tab remark. The exception comes before the handler's release (`FREEZE_INVESTIGATION.md`'s inventory row, line 452: "anim → R@7770") so it is the "loud" freeze class [inferred]; F5 fixed it. The server sends `dealOpponentObjectives` with `notify->all` and only `player_id` (`Game.php:948` now), unchanged by P1.5 [read]. **Not traced (UNVERIFIED):** whether a spectator's page has `personal_objective_1_wrap` at that moment (it is in the `.tpl`, line 135).
+- **Tables and consoles saved:** E (table 1007266): both players and the spectator; T1 (1007666): both players and the spectator; T2 (1001376): only IndianaScones0 (W) (Jonathan closed IndianaScones1's and the spectator's tabs before saving); T3 (1001607): both players and the spectator. Table ids as the consoles' URLs show them.
+
+**What the results show for each commit** (the design discussion's reading, checked against the results and the consoles)
+- **Commit 1 (`self::` → `$this->`):** every table played with no "Unexpected error" and no game-code console error in any saved console, apart from the spectator error above; the results file reports no server error. The T2 evidence for Z and the spectator rests on Jonathan's reports, since those consoles were not saved.
+- **Commit 2 (the Deck):**
+  - **T1.1 and T1.2:** "As expected": setup, the first page load in all three tabs, four Portaledge piles at n = 7, 124 asset cards. So `$this->bga` exists in `__construct` and `createDeck` sets the table name [the readings of the stubs, now run].
+  - **Existing table E** (1007266, created before the deploy): E2 "As expected" (F5 in both tabs), E3 and E4 played (the E logs show `climbOrRest` → `climbingCard` → `selectPortaledge` → `portaledgeAll`, so E3's card 66 A also reached `stPortaledgeAll`, which the coverage map had planned for T1.14), with the display findings 1 below and no error. The plan's "existing tables still work" is now checked on Studio.
+  - **T3.5, the Portaledge refill:** no error, the Gear pile shows again, `portaGear` 7 and 124 asset cards, no Gear card in the discard pile first (so the R-5 difference did not arise); the refill animation finding is 4 below. **T3.6 to T3.8, the auto-reshuffle:** ran. The deck was emptied (T3.6: deck count 0, discard 3), Q's draw from the empty deck forced the reshuffle (T3.7: "As expected"; the Asset deck's reshuffle animation "looks correct"), and afterwards deck 0 and discard 0 (the three discard cards went to Q in that draw), 124 asset cards (T3.8). So `deckAutoReshuffle` works with the Deck from the factory. The empty-deck display finding is 5 below.
+- **Commit 3 (`${var}`):** T2.2 and T2.3 showed the "draws [card] from the Portaledge" lines as expected (T2.2 "As expected"; T2.3 "Z's log is as expected"), with no raw `${…}` reported.
+- **Commit 4 (the `i18n` key): reached, though not as planned.** Jonathan sent the wrong player along the chain (T2.9), so W scored a personal objective instead of Z. **W's line, "IndianaScones0 scores A Day at the Zoo and held Rainbow Vibes", is the branch commit 4 changes** (objective 1 scored, objective 2 held; `Game.php:6376`, 6375 now). **Z's line, "IndianaScones1 held Southern Rock and Climb Your Way Out", is the neither-scored branch.** W's objectives are #2 and #5 (key order [2, 5], the smaller id first, as session 1 assumed); Z's are #6 (S) and #7 (L), S first. The English line is as the code builds it; Jonathan did not compare it with a run before commit 4, which the list did not ask for (the visible English line is only "expected" to be unchanged).
+- **Site 6337** (scoring a personal objective, which P1.4 never ran) **ran**: the scores in the query match the player panels and the score tracker, the statistics for the scored personal objective are as expected, and the spectator sees the same lines and final table.
+
+**Deviations and what was not run** (from Jonathan's results, checked against v4 step by step)
+- **E3:** the climbing card was "Awesome view" (card 66), option A.
+- **T1.10:** card 3 offered only option A: "Z's board has one crack and two slab cards on it, so that option [B] is unavailable". v3 had said both options were probably payable (Z's board usually holds a Gear card); on this table it held no Gear, so A was the only option. Recorded as v3's note asked.
+- **T1.11:** Z chose a token first; "Both known issues were reproduced" (the spectator gets no choice line for 9 B, and the card discarded early).
+- **T1.14:** `debug_forceDie` forced a 1 for a risky climb with W (not in the list).
+- **T1.15:** a Permanent token was offered to and accepted by Z (so `confirmPermanentAssets` ran).
+- **T2:** the targeted S/L pair was not scored by Z (the wrong player took the circuit); the branch was reached by W. The T2 statistics step for Z's S was therefore not seen; W's were. Jonathan closed IndianaScones1's and the spectator's tabs before saving their consoles.
+- **T3.1:** `debug_setAvailableCharacters` forced characters 6 and 3 (the original options had only one character outside Phil, Free Soloist and Cool-headed Crimper). **T3.2:** `debug_giveAssets` gave Q 1 Crack card. **T3.5:** Water and Psych caps changed the Portaledge picks: P took 2 Gear, 1 Face and 2 Water/Psych; Q took 4 Water/Psych and 1 Face card.
+- **Not run:** nothing else that the list planned, as far as the results say. Not planned, so not reached (the coverage map's section 4): the Bail, undo and pass-card actions, Lucky Chalkbag, Bomber Anchor and Rerack tokens, the steal and add-token cards, Cool-headed Crimper, The Trifecta, Spider Stick, the Jesus Piece, and the 3 sites no play can reach.
+- **A standing request from Jonathan (T2.9):** "In the future, please go back to putting the stats' ids in parentheses after the name so it's easier to run down." v4 left the statistics ids out of its steps; future lists put the `stats.json` id in parentheses after each statistic name (as P1.4's lists did).
+
+**Findings** (none caused by P1.5 as far as can be told; each in `TODO.md`; Jonathan's words quoted there; lines at `9e1784f`)
+1. **A duplicate card in a Portaledge draw** (E3–E4; client display, no error or warning): "Awesome view" is card 66, option A (`portaledgeChoose` with `all`, state `portaledgeAll`, the branch card 29 B shares); the current climber appeared to draw the card twice, one copy vanished, and the same card later reappeared during that player's Rerack draws, sitting in `#deck_draw_1`. New entry; `TODO.md:51` (card 49, both Portaledge draws at once) is a related race on a different card.
+2. **A spectator freeze while characters are placed** (T1.4): the title bar stayed on "Placing Characters and dealing Personal Objectives" with the console error above; F5 fixed it. New entry; `FREEZE_INVESTIGATION.md` lists the handler in its inventory (row 452, suspect S5); not traced.
+3. **Card 29 B discards early** (T1.14): discarded after the first player's Portaledge draw and before the second player's, like card 9 B; its discard animation snapped into place before finishing. Added to the card 9 B entry (the same class [inferred]), with a cross-reference to `TODO.md:38` (the snapping).
+4. **The Portaledge refill animation** (T3.5): the cards are drawn far too large while moving from the discard/deck, then snap to the right size for the shuffle. Added to the existing `refillPortaledge` entry (`TODO.md:50`); the Asset deck's reshuffle animation (T3.7) looks correct.
+5. **The empty Asset deck still looks like a deck** (T3.6): UX, in Jonathan's words ("It can be implemented later, after the migration."), under Planned improvements. A UX id in `UX_CHANGES.md` is Jonathan's decision.
+6. **The spectator's card 15 B problem, more:** session 1's reading (the 10 `$bespoke` choices: 9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B and 68 B send their choice line with `notify->player` to the seated players only, so a spectator gets none; the dimmer link stays [inferred]), and that Jonathan saw it again on T2.2 (15 B) and T2.3 (24 B, where the dimmer had not been reported before). Added to the card 15 B entry.
+7. **T29, session 1's two findings** (the `card_location` width: `varchar(26)` with `_played_crack` the longest suffix at 13 characters, so a player id over 13 digits would be cut off [inferred]; the prefix comparison in `modules/utils.js:2787–2806` [inferred, not traced]), added to the T29 test-scenario item; the plan's "none found" stays true for fixed-length assumptions in the two PHP files.
+8. **Session 1's dead-code findings:** `getActivePlayerColor()` (`UtilTrait.php:237`) has no caller, so its two converted sites cannot run; `getTechniqueType`'s `getActivePlayerId` site (`UtilTrait.php:466`) never runs, since all three callers pass a player id [read]. A new item under Planned improvements.
+
+**What the docs commit changed, by file**
+- `misc/docs/progress.md`: this entry (session 1's entry stays as it is).
+- `misc/docs/MIGRATION_PLAN.md`: P1.5's Status (done, with the four commits, the playtest on list v4 and a pointer here); the Scope line about the `${var}` fix (it doesn't change the log; session 1's check); commit 4 (the `i18n` key) added to the Scope; a note that `getActivePlayerName` is deprecated, with a proposed place for replacing it.
+- `misc/docs/TODO.md`: the `${var}` entry narrowed to its translation question and covering `Game.php:2015` too; the `objectives_2_for_log` entry removed (fixed by commit 4); the additions and new entries above; the planned fix of objectives 15 and 16 (its own `fix:` step after P1.5, before P1.6).
+- `misc/docs/BGA_PITFALLS.md`: the `${var}` bullet (none remains in the two files).
+- Not edited (outside the grant): `FREEZE_INVESTIGATION.md`, `UX_CHANGES.md`, `RULES_CHECK.md`, `p1-5-coverage-v3.md` and the other files outside git.
+
+**What's next**
+- Jonathan's "push" (the four P1.5 commits and the `docs:` commit are local).
+- The objectives 15 and 16 fix: its own `fix:` step after P1.5 and before P1.6 (Jonathan's decision, 2026-11-20, in the design discussion; `TODO.md`). Its `MIGRATION_PLAN.md` entry comes with that step's own prompt, not in this commit.
+- P1.6 (autowired actions, first step: `confirmCharacter`, `confirmAssets`, `rest`, `confirmTrade`, `confirmBail`), per the plan; P1.6 to P1.9 are where the 66 `getActivePlayerName` calls in the 22 action methods can take the magic `$activePlayerId` (proposed in the plan's P1.5 note).
+- For Jonathan to decide: whether the empty Asset deck gets a UX id; whether the two dead-code sites are removed (a `struct:` step of their own); T2.3's wording note (above).
+
+**Jonathan's review messages of this session, quoted in full**
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the entry, quoted in full.
+>
+> 1. Effort: High.
+>
+> 2. T2.3: quote my words as they are, with your bracketed note: IndianaScones1 is Z in my T2 roles, so either I read Z's tab or the players swapped roles for card 24. It doesn't change commit 3's result: both "draws [card] from the Portaledge" lines come from the same string, and both read as expected.
+>
+> 3. The outline, the per-commit readings, the console scan, the deviations and the placement of the findings are approved as you propose, including the cross-references to TODO.md:51 (card 49) and TODO.md:38 (the snapping), the additions to TODO.md:50 (refillPortaledge) and to the card 9 B entry, and the 24 B dimmer added to the card 15 B entry.
+>
+> Commit the P1.5 commits. Then go ahead with §5, and stop at stop B.
+
+Docs diff review:
+
+> Docs diff reviewed. Make these changes; nothing else changes. Record this message in the entry, quoted in full.
+>
+> 1. TODO.md, the spectator freeze entry: tag "The two spectator hangs above are the same kind (a spectator's client throwing before its release)" as [inferred], as your report did.
+>
+> 2. The objectives 15 and 16 fix: I decided on 2026-11-20, in the design discussion, that it gets its own small fix: step after P1.5 and before P1.6. In TODO.md, add "Planned fix: its own fix: step after P1.5, before P1.6 (Jonathan's decision, 2026-11-20)" to the objectives 15 and 16 entry. In the entry's "What's next", list that step before P1.6. Its MIGRATION_PLAN.md entry comes with that step's own prompt, not in this commit.
+>
+> 3. The empty Asset deck stays in TODO.md only, as you wrote it. Whether it gets a UX id I'll decide later.
+>
+> Write "D:\Documents\BGA Studio\p1-5-done-docs-v2.diff" (don't overwrite the first), give its lines, bytes and --stat, show the lines that changed from p1-5-done-docs.diff, and show the docs: commit message again, updated if needed. Then stop and wait for my "commit docs".
+
 ## 2026-11-20 (P1.5, PHP modernization sweep: in progress, session 1)
 
 P1.5 is half done. Session 1 recounted the `self::` sites, made the four changes in the working tree (uncommitted), built and checked four stacked diffs, ran a tokenizer harness with a mutation test, and wrote the playtest list and its coverage map. The change waits for Jonathan's Studio playtest. Session 2 (a new session) takes the playtest results, makes the four commits (two `struct:`, two `fix:`) and writes the closing docs. Nothing is deployed, no code is committed, and nothing went to the BGA Production site. The `docs:` commit that holds this entry is made only on Jonathan's "commit docs" and pushed only on his "push".

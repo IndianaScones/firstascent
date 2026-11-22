@@ -26,7 +26,7 @@ Moved from `MIGRATION_PLAN.md` §9.5 (decision D3, 2026-10-21). They come from t
 - **`getCollectionFromDb` keys by the first column.** Duplicate values silently overwrite rows.
 - **Database values come back as strings.**
 - **`playerStats->init` takes no player id** (P1.4).
-- **`${var}` string interpolation is deprecated.** One remains: a log string in `php:confirmClimbingCardChoice` (cards 15 and 24), found by `php -l` in P0.2. It is in `TODO.md`, planned for P1.5.
+- **`${var}` string interpolation is deprecated.** The last one, a log string in `php:confirmClimbingCardChoice` (cards 15 and 24), was found by `php -l` in P0.2 and fixed in P1.5 (`f925458`; the log text is unchanged): none remains in `Game.php` or `UtilTrait.php`, and `php -l` reports no warning on either. Write `{$var}`.
 - **`define()` constants under a namespace.** Unqualified names fall back to the global namespace **[inferred: PHP semantics]**, so the risk is smaller than claude-code-bga says.
 - **`bga->globals` against the old `global_variables` JSON column.** Seen on Studio in P1.3 (`debug_globalsShape`, 37 cases; DB 8.4.4-4, PHP 8.4.27; `progress.md`, 2026-11-10 and 2026-11-11).
   - `bga->globals->get` returns JSON objects as PHP arrays (nested ones too), with their keys in the order the old column returned them on MySQL 8.4: shorter keys first, then bytewise (`9` before `10`). A top-level empty object comes back as `stdClass`, and a stored `0` as int `0`. Lists, null, false, `""`, `"0"`, fractional floats and a missing key (null) come back as stored; a whole float is stored as an int (`2.0` reads `2`).
