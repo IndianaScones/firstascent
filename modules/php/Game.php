@@ -2587,7 +2587,7 @@ class Game extends \Bga\GameFramework\Table
 
                                 $drawn_gear_cards[$id] = array('id' => $new_asset['id'], 'type_arg' => $new_asset['type_arg']);
                                 $asset_for_log = [
-                                    'log' => "[${new_asset_name}(${new_asset_type_arg[0]})]",
+                                    'log' => "[{$new_asset_name}({$new_asset_type_arg[0]})]",
                                     'args' => [
                                         'new_asset_name' => $new_asset_name,
                                         'new_asset_type_arg' => $new_asset_type_arg,
