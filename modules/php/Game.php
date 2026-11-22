@@ -36,8 +36,7 @@ class Game extends \Bga\GameFramework\Table
         ) );     
 
         // init deck for transient assets
-        $this->cards_and_tokens = self::getNew('module.common.deck');
-        $this->cards_and_tokens->init('cards_and_tokens');   
+        $this->cards_and_tokens = $this->bga->deckFactory->createDeck('cards_and_tokens');
         $this->cards_and_tokens->autoreshuffle = true;
         $this->cards_and_tokens->autoreshuffle_custom = array('asset_deck' => 'discard');
         $this->cards_and_tokens->autoreshuffle_trigger = array('obj' => $this, 'method' => 'deckAutoReshuffle');
