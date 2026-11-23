@@ -2,6 +2,209 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-23 (P1.5a, Shared objectives 15 and 16: 2 + 2: done)
+
+P1.5a, session 2 of 2: **the `fix:` commit is made** (`ee04c20`), Jonathan's Studio playtest of list v3 is recorded, and the closing docs are written. Objectives 15 (Stonemaster) and 16 (Off-Width Aficionado) now score at 2 + 2 of the two types, not at a sum of 4. Table A passed; Table B was not run, by Jonathan's decision (below). The playtest found one problem that P1.5a did not cause: climbing card 49 option A leaves the opponent's Summit Beta hand undefined on the client, so the opponent cannot climb until a reload (the card 49 entry in `TODO.md`; legacy has it too; its fix step is to be decided). No code file was edited in this session; nothing was deployed by it, and nothing went to the BGA Production site.
+
+**Line numbers in this entry.** `Game.php`, `firstascent.js` and `utils.js` lines are cited **at `ee04c20`** (HEAD after the `fix:` commit; the commit replaced four lines in place, so no line moved, and the same numbers hold at `7caf327`). Lines of the legacy build are cited at the tag `legacy-final` and are marked "legacy".
+
+**State at the end of the session**
+- **Commits of P1.5a:** `ee04c20dec057e06d38983c4fe36d3f95854cee1` (`fix: shared objectives 15 and 16 need 2 of each type, not a sum of 4 (P1.5a)`, parent `7caf327`; 1 file, 4 insertions, 4 deletions), on top of session 1's `7caf327ad957b709aab295c2409ca009ce7a2462` (`docs: P1.5a in progress, session 1 (change in the working tree, playtest list v3)`). The `docs:` commit that holds this entry goes on top of `ee04c20`, on Jonathan's "commit docs".
+- **Pushed:** `origin/main` is still `7caf327`. `ee04c20` is local only, and so will be the `docs:` commit until Jonathan says "push".
+- **Blobs** (`git hash-object`): `modules/php/Game.php` `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f` (`git rev-parse HEAD:modules/php/Game.php` after the commit; the working file has the same blob). Every other code file is unchanged.
+- **Working tree after the `fix:` commit:** `git status --short` was empty.
+
+**How the `fix:` commit was made** (P1.4's method; the working tree was never touched). On Jonathan's "commit the P1.5a fix":
+1. `git apply --cached --check "D:\Documents\BGA Studio\p1-5a-fix.diff"` passed, then `git apply --cached` with the same file.
+2. `git diff --cached --output="D:\Documents\BGA Studio\p1-5a-staged-fix.diff"`: 26 lines, 1,726 bytes, SHA-256 `3a33a5f09ac06a08270cfbd81cb39e615d7ef4e47757cb2014e576de1171fd61`. **`cmp` against `p1-5a-fix.diff`: identical.**
+3. `git commit -F "D:\Documents\BGA Studio\p1-5a-msg-1.txt"`: commit `ee04c20dec057e06d38983c4fe36d3f95854cee1`.
+4. `git rev-parse HEAD:modules/php/Game.php` is `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f`, and `git status --short` is empty. Both as expected.
+
+**This session's grant** (§1 of the session prompt), quoted:
+
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session.
+>
+> This session closes step **P1.5a, "Shared objectives 15 and 16: 2 + 2"**. Session 1 left the reviewed change in the working tree, and its record is the 2026-11-22 P1.5a entry in `misc/docs/progress.md`; read that entry first.
+>
+> **No code file is edited in this session.** The session makes one code commit from session 1's reviewed diff (§4), on my "commit the P1.5a fix".
+>
+> Docs this session may edit:
+> - `misc/docs/progress.md`: a new entry (§6). Session 1's entry stays as it is.
+> - `misc/docs/MIGRATION_PLAN.md`: P1.5a's Status, and its Playtest line if the record needs it. Nothing else.
+> - `misc/docs/TODO.md`:
+>   - remove the objectives 15 and 16 entry (Server bugs), fixed by the commit;
+>   - add the card 49 A finding of §5 to the existing card 49 entry (the one about both Portaledge draws running at once);
+>   - nothing else.
+>
+> Read-only, and allowed: `git grep` or `git show` on the tag `legacy-final`, for the legacy check in §5.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-5a-`.
+>
+> Git:
+> - the `fix:` commit of §4, on my "commit the P1.5a fix";
+> - one `docs:` commit, staged by explicit path, on my "commit docs";
+> - a push on my "push".
+>
+> No deploy and nothing on the BGA Production site. No installs without my confirmation (PHP 8.4 CLI is available; node is not). Anything outside this grant needs my explicit go-ahead.
+
+**Status of each item**
+- Start check: done, nothing differed (below).
+- The `fix:` commit: done, `ee04c20`.
+- The playtest record: done (below). Table A passed; Table B not run, by Jonathan's decision.
+- The card 49 A finding: recorded in `TODO.md`; not fixed (outside this step).
+- The closing docs: `MIGRATION_PLAN.md` (P1.5a Status and Playtest line), `TODO.md` (objectives 15 and 16 entry removed; card 49 finding added), this entry: the `docs:` commit.
+
+**Start check** (read-only)
+- `git fetch origin`: HEAD `7caf327ad957b709aab295c2409ca009ce7a2462`, level with `origin/main`.
+- Only `modules/php/Game.php` modified, nothing staged. Its working blob `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f`: 351,760 bytes, 6,533 newlines and 6,533 CRs (pure CRLF). HEAD's blob `409ac5ff45107e92c3f011d9de118a1eb39c27e8`.
+- `p1-5a-fix.diff`: 26 lines, 1,726 bytes, SHA-256 `3a33a5f09ac06a08270cfbd81cb39e615d7ef4e47757cb2014e576de1171fd61`. `p1-5a-msg-1.txt`: 19 lines, 1,032 bytes.
+- Jonathan's playtest files are in `D:\Documents\BGA Studio\P1-5a-playtest-v3\` (found there; also a `.zip` of it):
+
+  | File | Lines | Bytes |
+  |---|---|---|
+  | `P1-5a-playtest-v3-results.txt` | 40 | 3,233 |
+  | `A-IndianaScones0.log` | 1,080 | 69,917 |
+  | `A-IndianaScones1.log` | 990 | 64,411 |
+  | `A-spectator.log` | 1,132 | 76,749 |
+
+- Everything matched the prompt. Three small differences were found later, in the readings (below).
+
+**The playtest.** Jonathan played list v3 (`p1-5a-playtest-v3.md`, in full in session 1's entry) on Studio on 2026-11-23: G1 and Table A, which was table 1008277. IndianaScones0 was Z (The Overstoker) and IndianaScones1 was W (Rope Gun). The game was a two-player table with a spectator S.
+
+**Jonathan's results file**, quoted in full (`P1-5a-playtest-v3-results.txt`, 40 lines, 3,233 bytes):
+
+````text
+G1. modules/php/Game.php = 351,760 B
+
+A: IndianaScones0 is Z, IndianaScones1 is W.
+
+A1. Shared objectives shown are as expected. Both players have 0 points and X's for both all objectives. All queried stats are at 0.
+
+A2. Round 1, Z calls `debug_giveAssets(1,2,3)`.
+Round 1, W used `LOAD PREVIOUS STATE` after climbing a pitch and drawing the climbing card, because I forgot to stack Climbing Card 28.
+Round 2, W calls `debug_giveAssets(19,20,21)`.
+Round 2, Z uses The Overstoker psych substitution on a slab requirement. I assume the ban on using the substitution only applies to the two asset types relevant to the objective.
+Round 3, W calls `debug_giveAssets(19,20,21)`.
+Round 4, Z calls `debug_giveAssets(1,18,30)`.
+Round 5, W calls `debug_giveAssets(16,16,17,18,28)` but it was denied: "Unexpected error: Asset card 28: 1 listed, but only 0 of its 2 copies are in the deck or the discard pile (elsewhere: portaGear, the_spread) (reference: GS1 23/11 17:51:19)"
+Round 5, W calls `debug_giveAssets(16,16,17,18,27)`.
+Round 6, W calls `debug_giveAssets(26)`.
+
+A3. Z's score went from 14 to 22. The X turned to a ✓ for Z, W, and S. The log line for gaining the tokens is, "IndianaScones0 gains 1 Gear and 1 Crack and IndianaScones1 gains 1 Face Permanent Asset Token/s". There is no log line for scoring shared objectives. Objective only scored once the 4th token was earned (3rd and 4th tokens were earned at the same time). Stats for Z from query are as follows: 40:1, 41:8, 56:0, 57:8, 81:2, 82:0, 83:2, 84:0.
+
+A4. W's score went from 16 to 16. The X stayed an X for Z, W, and S. The log line is, "IndianaScones1 gains 1 Face and 1 Slab Permanent Asset Token/s". Stats for W from query are as follows: 40:0, 41:0, 56:0, 57:0, 81:0, 82:3, 83:0, 84:1.
+
+A5. W's score went from 16 to 24. The X turned to a ✓ for Z, W, and S. The log line for gaining the tokens is, "IndianaScones1 gains 1 Slab Permanent Asset Token/s". Objective only scored once 4th token was earned. Stats for W from query are as follows: 40:1, 41:8, 56:8, 57:0, 81:0, 82:3, 83:0, 84:2.
+
+A6. Most likely unrelated issue: After `debug_endGameSoon`, W climbed their last pitch. Then, on Z's turn, they were unable to climb any pitches. When selecting an available pitch (where Z had the requisite assets), the climb button never enabled. Errors in the log when selecting an available pitch:
+ly_studio.js:1 Script error.
+onScriptError	@	ly_studio.js:1
+window.onerror	@	firstascent?table=1008277:1729
+
+ly_studio.js:1 url=
+onScriptError	@	ly_studio.js:1
+window.onerror	@	firstascent?table=1008277:1729
+ly_studio.js:1 line=0
+onScriptError	@	ly_studio.js:1
+window.onerror	@	firstascent?table=1008277:1729
+utils.js:4169 Uncaught TypeError: Cannot convert undefined or null to object
+getHandSummitBetaTokens	@	utils.js:4169
+onSelectPitch	@	firstascent.js:3326
+ly_studio.js:1 Uncaught null
+onGameError	@	ly_studio.js:1
+window.onerror	@	firstascent?table=1008277:1730
+Z rested instead. Final scores matched panel and score tracker. Objectives in end-of-game table correctly show 8 points apiece for Z and W. Stats for Z: 40:1, 41:8, 56:0, 57:8, 81:2, 82:0, 83:2, 84:0. Stats for W: 40:1, 41:8, 56:8, 57:0, 81:0, 82:3, 83:0, 84:2.
+````
+
+**The results, step by step** (the design discussion's readings, each checked against the results file, the consoles and the code)
+- **G1: agrees.** `Game.php` 351,760 bytes on Studio, as expected.
+- **A1: agrees.** The shared objectives shown were as expected; both players at 0 points with an X on every objective; "All queried stats are at 0."
+- **A3 (16 at exactly 2 Crack + 2 Gear): agrees.** Z's score went from 14 to 22, with ✓ in all three tabs (Z, W, S). Statistics for Z: 40:1, 41:8, 56:0, 57:8, 81:2, 82:0, 83:2, 84:0. The log line was "IndianaScones0 gains 1 Gear and 1 Crack and IndianaScones1 gains 1 Face Permanent Asset Token/s". Jonathan: "Objective only scored once the 4th token was earned (3rd and 4th tokens were earned at the same time)." So "only at the fourth token" can't be told apart from "at the third": Z's statistics (81:2, 83:2) show the 1 + 1 gained in that Follow Phase were its third and fourth tokens, and the old code would not have scored at the third either (a sum of 3). A3 doesn't separate old code from new; both score at 2 + 2.
+- **A4 (15 at the near miss, 3 Face + 1 Slab): agrees. This is the step where the old and the new code differ.** W's score went "from 16 to 16"; "The X stayed an X for Z, W, and S." The log line was "IndianaScones1 gains 1 Face and 1 Slab Permanent Asset Token/s" (W gained the third Face and the first Slab together). Statistics for W: 40:0, 41:0, 56:0, 57:0, 81:0, 82:3, 83:0, 84:1. The old sum condition (3 + 1 = 4) would have scored 8 here.
+- **A5 (15 at 3 Face + 2 Slab): agrees.** W's score went from 16 to 24, the X became ✓ for Z, W and S. Log line "IndianaScones1 gains 1 Slab Permanent Asset Token/s". Statistics for W: 40:1, 41:8, 56:8, 57:0, 81:0, 82:3, 83:0, 84:2. "Objective only scored once 4th token was earned."
+- **A6 (end of table A): agrees.** "Final scores matched panel and score tracker. Objectives in end-of-game table correctly show 8 points apiece for Z and W." Final statistics for Z are as in A3 and for W as in A5 (40:1, 41:8, 56:8, 57:0, 81:0, 82:3, 83:0, 84:2). The error that Jonathan reported at A6 is a separate finding (below).
+- **No separate log line for scoring a shared objective: agrees, and it was so before P1.5a.** `stGrantPermanentAssets` sends only `grantPermanentAssets` (`Game.php:6244`); scoring adds no notification or log line of its own.
+
+**Not run: Table B, by Jonathan's decision.** Jonathan's message, quoted in full:
+
+> I'm uploading for table A only. Table B seems practically redundant. If you can explain to me why it's necessary I will run it, but 3 Face + 1 Slab has already been tested and shown to not trigger the objective. With the code change being simple, do I really need to test 4 Face tokens and 3 Crack + 1 Gear tokens?
+
+The design discussion agreed, and Jonathan then said to go ahead. Why the harness covers Table B's two cases (4 Face + 0 Slab for 15, and 3 Crack + 1 Gear for 16): session 1's harness executes the real code of both `case` blocks over every count of Gear, Face, Crack and Slab from 0 to 6 (9,604 runs, 0 failures on the working file, 1,372 failures on HEAD's blocks), and its mutation test kills the old sum condition left in either block, and swapped types (34 mutants, 34 killed). On Studio, A4 showed a refusal through the real Follow Phase path, and A3 showed 16's line reading Crack and Gear correctly. Not covered by any table or the harness: zombies, replay (F13) and more than two players.
+
+**Jonathan's deviations from the list** (recorded as they are; none affects a result, as far as can be told):
+- **Round 1:** W used "Load previous state" after climbing, because Jonathan forgot to stack climbing card 28.
+- **Round 2: a deviation from the list's wording.** Z used The Overstoker's Psych substitution on a Slab requirement. List v3 says, without exception, "The Overstoker never uses the Psych substitution." Jonathan's reading, from his results file: "I assume the ban on using the substitution only applies to the two asset types relevant to the objective." Slab is not one of Z's target types (Crack and Gear), and the substitution did not touch Z's Crack or Gear counts, so the objective's counts were not affected.
+- **Round 5:** `debug_giveAssets(16,16,17,18,28)` was refused ("Asset card 28: 1 listed, but only 0 of its 2 copies are in the deck or the discard pile (elsewhere: portaGear, the_spread)", reference GS1 23/11 17:51:19). The retry without 28 (`16,16,17,18,27`) went through. No replay check was needed, so the refused call does not matter.
+- **A6:** after `debug_endGameSoon`, Z could not climb (the finding below) and rested instead.
+- **The `debug_giveAssets` calls** are listed in Jonathan's results file (A2): round 1 Z (1,2,3); round 2 W (19,20,21); round 3 W (19,20,21); round 4 Z (1,18,30); round 5 W (the refused call, then 16,16,17,18,27); round 6 W (26).
+
+**The console rescan** (all three consoles, for errors, warnings, raw `${…}` placeholders, `[FA` warnings, `undefined`, `null`, `NaN`, "failed" and "denied"; the "Permissions-Policy" header messages, 300, 265 and 340 lines in Z, W and S, are Studio noise and were left out):
+- **Z (`A-IndianaScones0.log`):** only the A6 error, three times (lines 1018–1062): `Script error`, then `utils.js:4169 Uncaught TypeError: Cannot convert undefined or null to object` at `getHandSummitBetaTokens`, from `onSelectPitch` (`firstascent.js:3326`), then `Uncaught null` from `onGameError`.
+- **W (`A-IndianaScones1.log`):** the refused debug call at **line 742** (`Unexpected error: Asset card 28: …`) and the `Uncaught (in promise) {message: '', args: null}` at line 778. Line 6 is a `net::ERR_BLOCKED_BY_CLIENT` for `browser-update.org`, which a browser extension or ad blocker caused, not the game.
+- **S (`A-spectator.log`):** nothing but the same blocked `browser-update.org` request at line 6.
+- No `[FA` warning and no raw `${…}` in any console.
+
+**Three small differences from the design discussion's readings**
+1. **The refused call's line in W's console:** it is line 742, not "about 757". The `Uncaught (in promise)` is at 778, as read.
+2. **The Psych substitution:** it breaks the list's wording ("never uses"), not only its spirit. Recorded above as a deviation, with Jonathan's reading.
+3. **Card 49 is not in the results file.** Jonathan named it in the design discussion, not in his results file. His words: "The climbing card W drew on the last climb was Party on the ledge, and option a was chosen." The consoles are consistent with it (Z's console shows `climbingCard`, `selectOpponent`, `nextClimb`, then `climbOrRest`) but do not prove it, because `selectOpponent` is shared by several cards.
+
+**New finding: card 49 option A leaves the opponent's Summit Beta hand undefined** (found at A6, 2026-11-23; **not caused by P1.5a**, which changes only the two conditions in `stGrantPermanentAssets`; read in the code, not run; recorded in `TODO.md`, in the card 49 entry; **not fixed here, and its fix step is to be decided**).
+- **What happened.** Jonathan's results file (A6): "After `debug_endGameSoon`, W climbed their last pitch. Then, on Z's turn, they were unable to climb any pitches. When selecting an available pitch (where Z had the requisite assets), the climb button never enabled." And: "Z rested instead." He called it "Most likely unrelated issue". His words from the design discussion: "The climbing card W drew on the last climb was Party on the ledge, and option a was chosen." (card 49, "You and another player lose 1 Psych and each gain 1 Gear Card"; Z was the other player.) Jonathan did not try F5.
+- **The stack,** in Z's console: `utils.js:4169 Uncaught TypeError: Cannot convert undefined or null to object`, at `getHandSummitBetaTokens` (`modules/utils.js:4169`), from `onSelectPitch` (`firstascent.js:3326`), once for every pitch Z selected (three times).
+- **The reading, checked in the code** (at `ee04c20`): `Game.php:3807` sends `shareEffectPrivate` to the active player with `player_token_tracker` (line 3815). `Game.php:3830` sends it to the opponent **without** `player_token_tracker` (and without `asset_discard_top_card`). The client's `notif_shareEffectPrivate` (`firstascent.js:10829`) sets `this.gamedatas.player_token_tracker = notif.args.player_token_tracker` (10835) and `this.gamedatas.asset_discard_top_card` (10834) whoever receives it, so the opponent's become undefined. `getHandSummitBetaTokens` then calls `Object.values` on the undefined tracker (`utils.js:4169`) and throws; the Climb button is never enabled.
+- **The reload does not explain it.** The "Starting game setup" near line 1001 of Z's console is the automatic reload of `debug_endGameSoon` (it carries `reload: true`), not an F5. It came **before** W's card 49 climb, and the error came after it, so the reload did not cause the error, and the card 49 A reading stands. This is Jonathan's review point 2 (below).
+- **Recovery** [inferred, not run]: F5 should recover, because `getAllDatas` reloads the tracker (`Game.php:791`). **The discard top card** [inferred, not traced further]: `updateDiscardTopCard` (`utils.js:3640`) tests `asset_discard_top_card` before using it, so at worst the top discard card is not shown; no crash from that.
+- **Legacy check** (read-only, `git grep` and `git show` on `legacy-final`): **the same omission is in the legacy build, which Production runs.** Legacy: `firstascent.game.php:3855` (the active player's send, with `player_token_tracker`) and `3878` (the opponent's send, without it and without `asset_discard_top_card`); `firstascent.js:10820` (`notif_shareEffectPrivate`, which assigns the tracker unconditionally, as at `ee04c20`); `modules/utils.js:4128` and `4137` (`getHandSummitBetaTokens`, the same `Object.values` call), called at `firstascent.js:3326`.
+
+**The closing docs**
+- `MIGRATION_PLAN.md`: P1.5a's Status is done (the `fix:` commit's hash, the playtest, Table B not run, the card 49 finding, a pointer here), and its Playtest line says B3 and B4 were not run. The Production line is as it was.
+- `TODO.md`: the objectives 15 and 16 entry is removed (fixed by `ee04c20`; the fix reaches Production at P7.4, as the plan entry says); the card 49 finding is added under the card 49 entry.
+- Edited by script with exact-match checks (each old text had to occur once), keeping each file's CRLF line endings.
+
+**Files outside git, in `D:\Documents\BGA Studio\`**
+- Jonathan's playtest folder `P1-5a-playtest-v3\` (`P1-5a-playtest-v3-results.txt` 40 lines, 3,233 bytes; `A-IndianaScones0.log` 1,080 lines, 69,917 bytes; `A-IndianaScones1.log` 990 lines, 64,411 bytes; `A-spectator.log` 1,132 lines, 76,749 bytes) and its `.zip`.
+- `p1-5a-staged-fix.diff` (26 lines, 1,726 bytes; `cmp`-identical to `p1-5a-fix.diff`). From session 1: `p1-5a-fix.diff`, `p1-5a-msg-1.txt`, `p1-5a-playtest-v1.md`, `-v2.md`, `-v3.md`, `p1-5a-docs.diff`, `p1-5a-docs-v2.diff`, and `p1-5a-harness\`.
+- This session's: `p1-5a-done-entry.md` (this entry's source), `p1-5a-edit-done-docs.php` (the edit script), and `p1-5a-done-docs.diff` (the raw diff of the three docs; its counts are in the session's report, not here).
+
+**Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names). Effort: High (Jonathan's stop B review, item 1).
+
+**Transcript** (outside the repo): `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\5c316c6b-7cc3-4cbf-bd56-fb9bc8470c55.jsonl` (the id is the one in this session's scratchpad directory name; the file exists).
+
+**Compaction:** none that I know of; the context was not summarised.
+
+**What's next**
+- Jonathan reviews the three docs (stop B) and says "commit docs"; then "push" (the `fix:` commit `ee04c20` and the `docs:` commit go together; nothing has been pushed).
+- **P1.6**, the next step of `MIGRATION_PLAN.md` (autowired actions, P1.6–P1.9).
+- The **card 49 A fix step** (`TODO.md`, card 49 entry) is to be decided; it also exists in the legacy build.
+- The `checkPotential` finding (`TODO.md`) from session 1 is also unfixed.
+
+**Jonathan's review messages in this session**, quoted in full:
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the entry, quoted in full.
+>
+> 1. Card 49: I named it in the design discussion, not in my results file. My words, to quote in the entry and in the TODO.md finding: "The climbing card W drew on the last climb was Party on the ledge, and option a was chosen."
+>
+> 2. The reload in Z's console near line 1001 is the automatic reload of debug_endGameSoon (it carries reload: true), not an F5. It came before W's card 49 climb, and the error came after it, so the reload didn't cause it; the card 49 A reading stands. Say so in the finding.
+>
+> 3. The Psych substitution: record it as you say, a deviation from the list's wording, with my reading quoted from my results file. It didn't touch Z's Crack or Gear counts.
+>
+> 4. Your outline of the docs is approved. The three differences you found go in the entry.
+>
+> Commit the P1.5a fix. Then go ahead with §6, and stop at stop B.
+
+Stop B review:
+
+> Stop B reviewed. Record this message in the entry, quoted in full, after the stop A review.
+>
+> 1. Effort: High. Put it in the entry's "Model and effort" line, in place of "Effort: not named to me; my context carries a reasoning-effort setting of 10. Jonathan to confirm the effort level for the record."
+>
+> 2. In "Not run: Table B", the last sentence names "the 4-slot characters" and "16 after a near miss" as not covered by the harness, but the harness covers both: it runs every count from 0 to 6 for both objectives, including 3 + 2 with the player not yet in players_met, the state after a near miss, and a 4-slot character only limits which counts can occur. Change that sentence to: "Not covered by any table or the harness: zombies, replay (F13) and more than two players."
+>
+> Make both edits by exact match, write p1-5a-done-docs-v2.diff (don't overwrite the first), and check it against p1-5a-done-docs.diff: the only differences may be these two edits, this message's quote, and the index lines and hunk header they change. If so, commit docs: stage only the three docs by explicit path, commit with the proposed message, and report the hash and git show --stat. If anything else differs, stop and report instead. Push only on my "push".
+
 ## 2026-11-22 (P1.5a, Shared objectives 15 and 16: 2 + 2: in progress, session 1)
 
 P1.5a, session 1 of 2: the change is made and checked, and is in the working tree, **uncommitted and unstaged**. The step is a small `fix:` step after P1.5 and before P1.6: objectives 15 (Stonemaster) and 16 (Off-Width Aficionado) score at 2 + 2 of the two types, not at a sum of 4. This session wrote the four-line change, a harness and a mutation test for it, the diff, the commit message for session 2, and Jonathan's Studio playtest list (final: v3, below). Nothing was deployed by this session, nothing was committed except the `docs:` commit that holds this entry (made only on Jonathan's "commit docs"), nothing was pushed, and nothing went to the BGA Production site.

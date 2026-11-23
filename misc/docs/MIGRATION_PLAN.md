@@ -692,14 +692,14 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Studio after:** playable.
 
 **P1.5a Shared objectives 15 and 16: 2 + 2** (S, fix)
-- **Status:** in progress (session 1: the change is in the working tree, uncommitted; the `fix:` commit comes in session 2, after Jonathan's Studio playtest). Details in `progress.md` (2026-11-22, P1.5a).
+- **Status:** done. The `fix:` commit is `ee04c20` (after session 1's `docs:` commit `7caf327`). Playtested on Studio by Jonathan on 2026-11-23, on list v3: G1 and Table A passed (A3: 16 at 2 Crack + 2 Gear scored; A4: 15 at 3 Face + 1 Slab didn't; A5: 15 at 3 Face + 2 Slab scored). Table B was not run, by Jonathan's decision; its two cases (15 at 4 + 0, 16 at 3 + 1) are covered by the harness. One finding, not caused by P1.5a: climbing card 49 option A leaves the opponent's Summit Beta hand undefined on the client (`TODO.md`, card 49 entry; also in the legacy build; its fix step is to be decided). Details in `progress.md` (2026-11-23, P1.5a).
 - **Scope:**
   - The two conditions in `stGrantPermanentAssets` (`Game.php:6203–6204` and `6221–6222`, at `cc522f4`): objective 15 (Stonemaster) scores when Permanent Face >= 2 and Permanent Slab >= 2, and 16 (Off-Width Aficionado) when Permanent Crack >= 2 and Permanent Gear >= 2. Until now each scored when its two types summed to 4, so 4 + 0 or 3 + 1 scored 8 points (`RULES.md` p. 12; `TODO.md`, Server bugs; found in P1.4).
   - Jonathan's rulings (2026-11-22): "2 + 2" means at least 2 of each (2 + 2, 3 + 2 and 2 + 4 score; 4 + 0 and 3 + 1 don't). Timing is unchanged: all shared objectives score as soon as they are achieved, and 15 and 16 keep scoring when the Permanent Asset is gained in the Follow Phase.
   - Nothing else changes: the 8 points, `players_met`, `score_tracker`, the three statistics and the notification's arguments (so no F13 replay check). No client change and no new debug function. The bug has no T, F or B id.
 - **Files:** `modules/php/Game.php`.
 - **Done when:** 15 scores only with face >= 2 and slab >= 2, and 16 only with crack >= 2 and gear >= 2, by the harness and the Studio playtest.
-- **Playtest:** tables A and B (2 players and a spectator each; list v3, `progress.md`): A3 2 Crack + 2 Gear (16 scores), A4 3 Face + 1 Slab (15 doesn't), A5 3 Face + 2 Slab (15 scores), B3 4 Face + 0 Slab (15 doesn't), B4 3 Crack + 1 Gear (16 doesn't). 15 at exactly 2 + 2 is covered by the harness only.
+- **Playtest:** tables A and B (2 players and a spectator each; list v3, `progress.md`): A3 2 Crack + 2 Gear (16 scores), A4 3 Face + 1 Slab (15 doesn't), A5 3 Face + 2 Slab (15 scores), B3 4 Face + 0 Slab (15 doesn't), B4 3 Crack + 1 Gear (16 doesn't). 15 at exactly 2 + 2 is covered by the harness only. Played 2026-11-23: Table A only (A3, A4 and A5 as expected); Table B (B3 and B4) not run, by Jonathan's decision, the harness covering both cases.
 - **Studio after:** playable.
 - **Production:** most likely live on Production (Jonathan, 2026-11-22; not checked). No legacy hotfix for now (Jonathan's decision, 2026-11-22); the fix reaches Production at P7.4.
 
