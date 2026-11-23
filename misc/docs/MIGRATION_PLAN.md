@@ -691,6 +691,18 @@ Jonathan decided D1–D14. The full text and reasons are in `DECISIONS.md` ("Mig
 - **Playtest:** S-smoke.
 - **Studio after:** playable.
 
+**P1.5a Shared objectives 15 and 16: 2 + 2** (S, fix)
+- **Status:** in progress (session 1: the change is in the working tree, uncommitted; the `fix:` commit comes in session 2, after Jonathan's Studio playtest). Details in `progress.md` (2026-11-22, P1.5a).
+- **Scope:**
+  - The two conditions in `stGrantPermanentAssets` (`Game.php:6203–6204` and `6221–6222`, at `cc522f4`): objective 15 (Stonemaster) scores when Permanent Face >= 2 and Permanent Slab >= 2, and 16 (Off-Width Aficionado) when Permanent Crack >= 2 and Permanent Gear >= 2. Until now each scored when its two types summed to 4, so 4 + 0 or 3 + 1 scored 8 points (`RULES.md` p. 12; `TODO.md`, Server bugs; found in P1.4).
+  - Jonathan's rulings (2026-11-22): "2 + 2" means at least 2 of each (2 + 2, 3 + 2 and 2 + 4 score; 4 + 0 and 3 + 1 don't). Timing is unchanged: all shared objectives score as soon as they are achieved, and 15 and 16 keep scoring when the Permanent Asset is gained in the Follow Phase.
+  - Nothing else changes: the 8 points, `players_met`, `score_tracker`, the three statistics and the notification's arguments (so no F13 replay check). No client change and no new debug function. The bug has no T, F or B id.
+- **Files:** `modules/php/Game.php`.
+- **Done when:** 15 scores only with face >= 2 and slab >= 2, and 16 only with crack >= 2 and gear >= 2, by the harness and the Studio playtest.
+- **Playtest:** tables A and B (2 players and a spectator each; list v3, `progress.md`): A3 2 Crack + 2 Gear (16 scores), A4 3 Face + 1 Slab (15 doesn't), A5 3 Face + 2 Slab (15 scores), B3 4 Face + 0 Slab (15 doesn't), B4 3 Crack + 1 Gear (16 doesn't). 15 at exactly 2 + 2 is covered by the harness only.
+- **Studio after:** playable.
+- **Production:** most likely live on Production (Jonathan, 2026-11-22; not checked). No legacy hotfix for now (Jonathan's decision, 2026-11-22); the fix reaches Production at P7.4.
+
 **P1.6–P1.9 Autowired actions**
 - **Shared shape of each step:**
   - The `Game.php` method is renamed `actX` and gets typed parameters (`#[IntArrayParam]`, `#[StringParam(enum: …)]`, `bool`, `int`) [Game.php doc:810–922]. These replace `action.php`'s numberlist parsing.

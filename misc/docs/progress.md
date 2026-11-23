@@ -2,6 +2,377 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-22 (P1.5a, Shared objectives 15 and 16: 2 + 2: in progress, session 1)
+
+P1.5a, session 1 of 2: the change is made and checked, and is in the working tree, **uncommitted and unstaged**. The step is a small `fix:` step after P1.5 and before P1.6: objectives 15 (Stonemaster) and 16 (Off-Width Aficionado) score at 2 + 2 of the two types, not at a sum of 4. This session wrote the four-line change, a harness and a mutation test for it, the diff, the commit message for session 2, and Jonathan's Studio playtest list (final: v3, below). Nothing was deployed by this session, nothing was committed except the `docs:` commit that holds this entry (made only on Jonathan's "commit docs"), nothing was pushed, and nothing went to the BGA Production site.
+
+**Line numbers in this entry.** `Game.php` lines are cited **at `cc522f4`** (HEAD at the start; the same code as at `aa7eaaf`, since `cc522f4` is a docs commit). The four changed lines are 6203, 6204, 6221 and 6222; the change replaces lines in place, so no later line moves. `utils.js` and `UtilTrait.php` lines are at `cc522f4` too.
+
+**State at the end of the session**
+- **HEAD** before the `docs:` commit: `cc522f44f3e3376442f85cb9113d3dd84f918144` (`docs: P1.5 done (struct: and fix: commits, playtest v4 results, closing docs)`), parent `aa7eaaf`, level with `origin/main`. The `docs:` commit that holds this entry goes on top of it.
+- **Staged:** nothing. **Unstaged:** `modules/php/Game.php` only.
+- **Blobs** (`git hash-object`, which normalises CRLF to LF): `Game.php` `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f` (HEAD's is `409ac5ff45107e92c3f011d9de118a1eb39c27e8`; the HEAD blob is stored with LF, 345,199 bytes, because `core.autocrlf` is `true`). `UtilTrait.php` and every other file are unchanged.
+- **Working `Game.php`:** 351,760 bytes, 6,533 newlines (the file has no final newline, so an editor counts 6,534 lines), pure CRLF (6,533 CRLF, 0 lone CR or LF). The same as the design discussion's own build from the uploaded HEAD file, which it confirmed by applying `p1-5a-fix.diff` to HEAD's file (Jonathan's stop A review, item 1).
+- **Expected size on Studio after Jonathan's deploy:** 351,760 bytes, 6,533 lines (G1 of the list).
+
+**This session's grant** (§1 of the session prompt), quoted:
+
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session.
+>
+> This session runs a new step, **P1.5a, "Shared objectives 15 and 16: 2 + 2"** (a small `fix:` step after P1.5 and before P1.6). This is session 1 of 2. It **may change code** in one file only:
+> - `modules/php/Game.php`: the two conditions described in §4, and nothing else.
+>
+> Docs this session may edit:
+> - `misc/docs/progress.md`: a new entry (§8).
+> - `misc/docs/MIGRATION_PLAN.md`: a new P1.5a entry, placed after P1.5 and before P1.6. Nothing else in the file.
+> - `misc/docs/TODO.md`: one new entry, the `checkPotential` finding in §8, plus a one-line pointer to it in the existing Bionic Woman entry ("a plain climb without the risk message"). Nothing else in the file. The objectives 15 and 16 entry is updated in session 2, not here.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-5a-`.
+>
+> Git: no code is committed in this session. At the end, the change is in the working tree, uncommitted, with nothing staged. The only commit is the `docs:` commit of §8: staged by explicit path, made on my "commit docs", and pushed on my "push".
+>
+> No deploy (I deploy), and nothing on the BGA Production site. No installs without my confirmation (PHP 8.4 CLI is available; node is not). Anything outside this grant needs my explicit go-ahead.
+
+**Jonathan's decisions of 2026-11-22** (§2 of the prompt): "2 + 2" means at least 2 of each (2 + 2, 3 + 2 and 2 + 4 score; 4 + 0 and 3 + 1 don't). Timing stays as it is: all shared objectives score as soon as they are achieved, and 15 and 16 keep scoring when the Permanent Asset is gained in the Follow Phase. Production: the bug is most likely live there (not checked); no legacy hotfix for now, and the fix reaches Production at P7.4. Testing: a PHP harness and a Studio playtest on two tables, no new debug function. The id is P1.5a.
+
+**Status of each item**
+- Start check: done (below). Nothing differed.
+- The change: done, in the working tree.
+- The harness and the mutation test: done, all pass.
+- The diff and the commit message: written (below).
+- The playtest list: final version v3, approved by Jonathan; in this entry in full, below. Not yet played.
+- The docs: `MIGRATION_PLAN.md` (new P1.5a entry), `TODO.md` (the `checkPotential` entry and a pointer), this entry: the `docs:` commit.
+
+**Start check** (read-only)
+- `git fetch origin`; HEAD `cc522f44f3e3376442f85cb9113d3dd84f918144` is P1.5's closing commit, parent `aa7eaaf…`, level with `origin/main` (the same hash).
+- Working tree clean, nothing staged.
+- `git rev-parse HEAD:modules/php/Game.php` is `409ac5ff45107e92c3f011d9de118a1eb39c27e8`; the working file was 351,732 bytes, 6,533 newlines, pure CRLF. Nothing differed from the prompt.
+- Two details the prompt didn't mention, found here: the HEAD blob is LF (345,199 bytes) because `core.autocrlf` is `true`, so the harness compares after normalising line endings, and the file has no final newline (6,533 newlines, 6,534 editor lines).
+
+**The change**
+- `modules/php/Game.php`, four lines replaced in place, by `p1-5a-harness\apply_change.php` (exact match: each old line had to occur once; CRLF kept):
+  - 6203: `$face_and_slab = $tracker['face'] + $tracker['slab'];` → `$face_and_slab_met = $tracker['face'] >= 2 && $tracker['slab'] >= 2;`
+  - 6204: `if ($face_and_slab >= 4 && !in_array(…))` → `if ($face_and_slab_met && !in_array(…))`
+  - 6221: `$crack_and_gear = $tracker['crack'] + $tracker['gear'];` → `$crack_and_gear_met = $tracker['crack'] >= 2 && $tracker['gear'] >= 2;`
+  - 6222: `if ($crack_and_gear >= 4 && !in_array(…))` → `if ($crack_and_gear_met && !in_array(…))`
+- Result: 351,760 bytes, 6,533 newlines, pure CRLF, blob `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f`: the design discussion's expected values, all matching.
+- `php -l modules/php/Game.php`: no syntax errors. `php misc/tests/technique_matching.php modules/php/Game.php`: all checks passed (24,192 + 188,160 + 20,000 = 232,352 cases, then the named cases). `git status --short`: only `Game.php`.
+- Nothing else in either `case` changed: the 8 points, `players_met`, `score_tracker` and the three statistics are as before.
+
+**The design discussion's readings, and what the checks found**
+- **Nothing else in the server decides 15 or 16: agrees.** Only `Game.php:6201–6222` (`stGrantPermanentAssets`). Setup (`Game.php:664–675`) only creates `players_met` and `'score' => 8`. The statistic ids are in `UtilTrait.php:1117–1118` (`stonemaster` 56, `off-width_aficionado` 57); `stats.json` agrees with the ids of the list (40, 41, 56, 57, 81 to 84).
+- **The client needs no change: agrees.** `updateSharedObjectivesDisplay` (`modules/utils.js:2229`) shows ✓ or X from the server's `players_met` for 15 and 16 (its list at line 2237 includes '15' and '16'). The tooltip (`sharedObjectiveTooltip`, `utils.js:1160`) shows the objective's text; `material.inc.php:1127` and `1137` already say "2 … + 2 …". No JavaScript file names either objective.
+- **The notification keeps its argument shape: agrees.** `grantPermanentAssets` (`Game.php:6244–6259`) sends the same arguments; only the condition changes. No replay (F13) check is needed.
+- **Id for the `fix:` commit:** `TODO.md:84` and `MIGRATION_PLAN.md` give this bug no T, F or B id. The message says so and invents none.
+- **Where the checks did not agree, or added a detail:**
+  - `MIGRATION_PLAN.md:664` (P1.4's Status) says "(live on Production)" without qualification; `TODO.md:84` calls it the design discussion's reading. Jonathan's ruling (stop A review, item 2): leave P1.4's line as it is, and word it "most likely live on Production (Jonathan, 2026-11-22; not checked)" in the new P1.5a plan entry. `TODO.md:84` is updated in session 2.
+  - The most Permanent Assets one board holds is **6**: the largest `permanent_asset_slots` in `material.inc.php` (Rope Gun 5, Young Prodigy and Bionic Woman 4, every other character 6; Free Soloist 6 but cannot earn Gear). The cap is applied in the client (`firstascent.js:2825`, `5249`) and in `stFlagPermanentAssets` (`Game.php:5984`, which offers a token only while `filled_slots < max_slots`); `confirmPermanentAssets` (`Game.php:4648`) does not check the total.
+  - The client lets a player pay a pitch with a Permanent Asset token by clicking it (`firstascent.js:2173`, `permanent_asset.selectable`), so tokens are optional, as the rules say; the list tells players to pay with cards so that cards keep piling up.
+  - A token needs 4 cards of a type on the board, and a pitch lays at most 3 of one type (`material.inc.php` requirements), so 4 tokens of the two target types (16 cards) take many rounds. See the list's notes below.
+
+**The harness** (`D:\Documents\BGA Studio\p1-5a-harness\`)
+- **Run:** `php "D:\Documents\BGA Studio\p1-5a-harness\run.php"` (optional argument: the repo path). Exit code 0 only if every check passes; the output of the final run is in `run-output.txt`.
+- **How it works:** it takes the two `case` blocks (15 and 16) of `stGrantPermanentAssets` out of HEAD's `Game.php` (`git show`) and out of the working file, and **executes** them (`eval`) against a recording stub (`$this->bga->playerScore`, `playerStats`, `setGlobalVariable`, `getGlobalVariable`), so the real code is tested, not a copy. Both sources are normalised to LF first.
+- **Check 1, the rule over every combination:** counts of gear, face, crack and slab each from 0 to 6 (the board maximum above): 7^4 = 2,401 tuples × 2 objectives × 2 states of `players_met` (player absent, player already in) = 9,604 runs. The expected effects are exact: when the rule is met and the player is not yet in `players_met`, one score call of 8, the three statistic calls, `players_met` extended, `score_tracker` +8; otherwise nothing at all.
+  - **Result:** 0 failures in 9,604 runs on the working file. The control, the same check on HEAD's blocks, fails in 1,372 runs (686 per objective: the bug).
+- **Old vs new** (player not yet in `players_met`): per objective, old and new both score in 1,225 tuples and differ in 686 (40 with a total of 6 or less). Every difference is "old scores, new does not, the pair sums to 4 or more without 2 of each"; the reverse never happens (0). The design discussion's own recount agrees (1,225 under the new condition, 1,911 under the old, 686 apart, 40 within a total of 6; HEAD fails 1,372 runs).
+- **Check 2, nothing else changed:** the CRLF-split files have the same number of lines, and exactly lines 6203, 6204, 6221 and 6222 differ, with the expected text; the two blocks are identical to HEAD's once those four lines are put back; the working file is pure CRLF.
+- **Check 3, the mutation test:** **34 mutants of the working blocks, 34 killed** (17 per objective): `>= 2` to `>= 1`, `>= 3` and `> 2` in each position; `&&` to `||` in the `_met` line and in the `if`; the types swapped between the objectives and one type at a time; the old sum condition put back (HEAD's block, and in the `_met` line only); the `in_array` guard removed and its negation dropped; the 8 points changed to 4; `players_met` not appended; a statistic changed from 8 to 4.
+- **Two harness bugs, fixed before the final run (not code bugs):** the HEAD blob is LF while the working file is CRLF, and my first expected order of `players_met` was wrong. After fixing them, check 1 went from 4,802 failures to 0, and the mutants' failing-run counts fell to their real values (the 34 kills are real).
+
+**The diff** (`D:\Documents\BGA Studio\p1-5a-fix.diff`, made with `git diff --output=… -- modules/php/Game.php`)
+
+| | |
+|---|---|
+| Lines | 26 |
+| Bytes | 1,726 |
+| `index` line | `index 409ac5f..9d86fd9 100644` |
+| SHA-256 | `3a33a5f09ac06a08270cfbd81cb39e615d7ef4e47757cb2014e576de1171fd61` |
+| Line endings | LF only (0 CR bytes) |
+| `--stat` | `modules/php/Game.php`, 4 insertions, 4 deletions |
+
+Jonathan's stop A review, item 1: the design discussion rebuilt the change by applying this diff to HEAD's `Game.php`; the result is blob `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f`, and the diff's SHA-256 and counts match.
+
+**The commit message for session 2:** `D:\Documents\BGA Studio\p1-5a-msg-1.txt` (19 lines, 1,032 bytes, LF), subject `fix: shared objectives 15 and 16 need 2 of each type, not a sum of 4 (P1.5a)`. The body names `RULES.md` p. 12, Jonathan's ruling, that timing is unchanged, and that the bug has no T, F or B id. Approved as written (stop A review, item 4). Session 2 makes the commit after Jonathan's Studio playtest.
+
+**The playtest list.** Three versions were written; **v3 is final** (Jonathan's stop B reviews). v1 (`p1-5a-playtest-v1.md`, 240 lines, 9,173 bytes) and v2 (`-v2.md`, 178 lines, 7,196 bytes) are kept. v2 changed v1 as Jonathan asked: the near-miss step number corrected and steps renumbered; the steps that neither the old nor the new code can tell apart dropped (A3, A4, A6, B3, B4, B6 of v1); Table B reshaped (Z: Rope Gun, 4 Face + 0 Slab; W: The Overstoker, 3 Crack + 1 Gear; the 3 + 2 step dropped); the list of who goes first in each round, and a few lines removed. v3 (`p1-5a-playtest-v3.md`, 182 lines, 7,348 bytes) is v2 with one line added at the top of each table ("Save all three consoles (Z, W and S) as .log files before closing any tab.") and the title changed from v2 to v3.
+
+*Choices behind the list* (not in the list): characters are The Overstoker (id 5, 6 Permanent Asset slots) and Rope Gun (id 1, 5 slots); Young Prodigy, Bionic Woman, Free Soloist, Phil and Cool-headed Crimper are left out, and so are The Dirtbag and Bold Brit (their abilities refer to Permanent Gear tokens), Crag Mama and Buff Boulderer (fewer cards laid) and Sendy Jammer (Technique points). The third shared objective is 10 (All-Arounding), which doesn't change scores at setup. Climbing card 28, option B ("Add 1 Card from your hand onto your Asset Board") is stacked every round to add one card of a target type. Not checked in the code: whether card 28 B's added card counts towards the token total (the list's per-round report asks Jonathan to check it) and the `stats_value` column name of the `stats` table (assumed from the standard BGA table).
+
+*The coverage note* (stop B report on v2, which v3 keeps):
+
+| Step | Condition reached | Old code | New code |
+|---|---|---|---|
+| A3 (Overstoker: 2 Crack + 2 Gear) | 16, positive | scores | scores |
+| A4 (Rope Gun: 3 Face + 1 Slab) | 15, near miss | scores | no |
+| A5 (Rope Gun: 3 Face + 2 Slab) | 15, positive | already scored at A4 | scores |
+| B3 (Rope Gun: 4 Face + 0 Slab) | 15, near miss | scores | no |
+| B4 (Overstoker: 3 Crack + 1 Gear) | 16, near miss | scores | no |
+
+- 15 at exactly 2 + 2 is covered by the harness only: no table reaches it.
+- Also not covered by any table: 16 after a near miss (3 + 2 in Crack and Gear); the 4-slot characters (Young Prodigy and Bionic Woman); zombies and replay (F13); more than two players; a player already in `players_met` gaining more tokens; timing in the Climb Phase (unchanged by this step). With the 8-round limit, some steps may be "not reached".
+- Concern raised at stop B: a token needs 4 cards of one type on the board, so 16 target cards in 8 rounds is tight, and the near-miss steps may not be reached. The list says "not reached", and Jonathan accepted the list.
+
+**The final playtest list, v3, in full:**
+
+````markdown
+# P1.5a playtest list v3
+
+## Before you start
+
+- Save each tab's console (Z, W and spectator S) from the start of each table.
+- Write down any debug call the list doesn't ask for, any refused debug call, and any save you restore.
+- After a successful debug call, press F5 in the other tabs before acting in them.
+- Never use Phil, Free Soloist, Cool-headed Crimper, Young Prodigy or Bionic Woman.
+- Pay for every pitch with cards. Never click a Permanent Asset token to pay: the cards have to pile up on the board.
+- The Overstoker never uses the Psych substitution.
+- On every table, report any console error, any `[FA …]` warning, and any raw `${...}` in the log.
+- Statistics are in phpMyAdmin (`stats_type` holds the id). Run this wherever a step says "stats":
+  ```
+  SELECT stats_player_id, stats_type, stats_value FROM stats WHERE stats_type IN (40,41,56,57,81,82,83,84) ORDER BY stats_player_id, stats_type;
+  ```
+  - `shared_objectives_met` (40), `shared_objectives_points` (41)
+  - `stonemaster` (56), `off-width_aficionado` (57)
+  - `permanent_gear_assets` (81), `permanent_face_assets` (82), `permanent_crack_assets` (83), `permanent_slab_assets` (84)
+
+Known issues, not caused by P1.5a:
+- The spectator gets no choice line for cards 9 B, 15 B, 19 B, 24 B, 28 B, 30 A, 40 A, 55 A, 55 B and 68 B. On 15 B the dimmer may also stay on.
+
+---
+
+## G1. Deploy
+
+- Deploy `modules/php/Game.php` only.
+
+> **Report**
+> - Size on Studio: `Game.php` 351,760 bytes, 6,533 lines.
+
+---
+
+## How every round goes (both tables)
+
+Each player has target types and a goal (set per table below). Z goes first in rounds 1, 3, 5 and 7, and W in rounds 2, 4, 6 and 8.
+
+**Your climb**
+- Pick the pitch you can reach (not occupied, not climbed before by you) that lays the most cards of your target types. The pitch's Any Skill slot counts, so pay it with a target type.
+- `debug_giveAssets` yourself everything the pitch needs, plus 1 more card of a target type. Put it right before the climb.
+- `debug_stackClimbingDeck("28")`
+- Climb, paying with cards. Take option B and add the extra target card to your Asset Board.
+- Rest only if you can't afford any pitch. After a rest, take 5 Assets in the Rerack: Water or Psych if you need them, otherwise cards of your target types.
+
+**Follow Phase**
+- Take or decline Permanent Asset tokens as your token rules say (per table, below).
+
+**Limits**
+- Play at most 8 rounds.
+- A step that isn't reached by then: write "not reached".
+
+> **Report (every round, only the exceptions)**
+> - Any error.
+> - Card 28 couldn't be stacked, or option B wasn't offered.
+> - The extra card didn't land on the Asset Board.
+> - A token was offered when it shouldn't have been, or wasn't offered when 4 cards of a type were on the board.
+
+---
+
+## Table A (2 players + spectator)
+
+Z is the player who climbs first in round 1, and W is the other. Write down who is who.
+
+Save all three consoles (Z, W and S) as .log files before closing any tab.
+
+- Z plays The Overstoker. Target types: Crack and Gear. Goal: 2 Crack + 2 Gear tokens. Z is the "positive" player.
+- W plays Rope Gun. Target types: Face and Slab. Goal: 3 Face + 1 Slab tokens, then 1 more Slab. W is the "near miss" player.
+
+**Token rules**
+- Z takes every Crack or Gear token offered, up to 2 of each. Declines everything else.
+- W takes Face tokens only, until holding 3. Then takes exactly 1 Slab token. After the near-miss step (A4), takes 1 more Slab token. Declines everything else. W never holds 2 Slab tokens before A4.
+
+### A1. Setup
+- Create the table and open S as a spectator.
+- In character selection, before anyone confirms:
+  - `debug_setAvailableCharacters("5,1")`
+  - `debug_setSharedObjectives(15, 16, 10)`
+- Z picks The Overstoker, and W picks Rope Gun.
+- Both confirm, then Rack Up.
+
+> **Report**
+> - Shared objectives shown in all three tabs: Stonemaster, Off-Width Aficionado and All-Arounding.
+> - Both players' scores at the start, and an X for both players on both objectives.
+> - Stats.
+
+### A2. Rounds
+- Play the rounds as in "How every round goes". Do each step below when its event comes up.
+
+### A3. Z's fourth token: 2 Crack + 2 Gear
+- At Z's fourth token. Z must hold exactly 2 of each type.
+
+> **Report**
+> - Z's score before and after.
+> - The log line, and any points line for the objective.
+> - ✓ or X for Z on Off-Width Aficionado in Z, W and S.
+> - Stats.
+> - Whether the objective scored only at this token.
+
+### A4. W's fourth token: 3 Face + 1 Slab (the near miss)
+- At W's first Slab token, with 3 Face already held.
+
+> **Report**
+> - W's score before and after: unchanged.
+> - The log line, and whether any points line for the objective appeared.
+> - ✓ or X for W on Stonemaster in Z, W and S.
+> - Stats.
+
+### A5. W's fifth token: 3 Face + 2 Slab
+- At W's second Slab token (W's last free slot).
+
+> **Report**
+> - W's score before and after.
+> - The log line, and any points line for the objective.
+> - ✓ or X for W on Stonemaster in Z, W and S.
+> - Stats.
+
+### A6. End of table A
+- `debug_endGameSoon` for either player, then play on until the game ends.
+- Skip this step if the debug call is refused for too many pitches; just play to the end.
+
+> **Report**
+> - The final scores match the panel and the score tracker.
+> - Objectives in the end-of-game table for Z and W.
+> - Stats.
+
+---
+
+## Table B (2 players + spectator)
+
+Z is the player who climbs first in round 1, and W is the other. Write down who is who.
+
+Save all three consoles (Z, W and S) as .log files before closing any tab.
+
+- Z plays Rope Gun. Target type: Face. Goal: 4 Face tokens (4 Face + 0 Slab).
+- W plays The Overstoker. Target types: Crack and Gear. Goal: 3 Crack + 1 Gear tokens.
+
+**Token rules**
+- Z takes Face tokens only, 4 of them. Declines everything else.
+- W takes Crack tokens only, until holding 3. Then takes exactly 1 Gear token. Declines everything else.
+
+### B1. Setup
+- Create the table and open S as a spectator.
+- In character selection, before anyone confirms:
+  - `debug_setAvailableCharacters("5,1")`
+  - `debug_setSharedObjectives(15, 16, 10)`
+- Z picks Rope Gun, and W picks The Overstoker.
+- Both confirm, then Rack Up.
+
+> **Report**
+> - Shared objectives shown in all three tabs: Stonemaster, Off-Width Aficionado and All-Arounding.
+> - Both players' scores at the start, and an X for both players on both objectives.
+> - Stats.
+
+### B2. Rounds
+- Play the rounds as in "How every round goes". Do each step below when its event comes up.
+
+### B3. Z's fourth token: 4 Face + 0 Slab
+- At Z's fourth Face token.
+
+> **Report**
+> - Z's score before and after: unchanged.
+> - The log line, and whether any points line for the objective appeared.
+> - ✓ or X for Z on Stonemaster in Z, W and S.
+> - Stats.
+
+### B4. W's fourth token: 3 Crack + 1 Gear
+- At W's first Gear token, with 3 Crack already held.
+
+> **Report**
+> - W's score before and after: unchanged.
+> - The log line, and whether any points line for the objective appeared.
+> - ✓ or X for W on Off-Width Aficionado in Z, W and S.
+> - Stats.
+
+### B5. End of table B
+- `debug_endGameSoon` for either player, then play on until the game ends.
+- Skip this step if the debug call is refused for too many pitches; just play to the end.
+
+> **Report**
+> - The final scores match the panel and the score tracker.
+> - Objectives in the end-of-game table for Z and W.
+> - Stats.
+````
+
+**Files outside git, in `D:\Documents\BGA Studio\`**
+- `p1-5a-harness\run.php` (238 lines, 15,707 bytes), `apply_change.php` (23 lines, 1,242 bytes), `run-output.txt` (66 lines, 4,654 bytes) and `entry.md` (the text of this entry, with a placeholder for the list).
+- `p1-5a-fix.diff` (26 lines, 1,726 bytes), `p1-5a-msg-1.txt` (19 lines, 1,032 bytes).
+- `p1-5a-playtest-v1.md`, `-v2.md`, `-v3.md` (counts above).
+- `p1-5a-docs.diff`: the raw diff of the three docs of this commit (its counts are in the session's report, not here).
+
+**Model and effort:** Sonnet 5.5 (`claude-sonnet-5-5`, which my own context also names) at High effort (Jonathan's stop C review, item 1).
+
+**Transcript** (outside the repo): `C:\Users\Jonat\.claude\projects\D--Documents-BGA-Studio-firstascent\fd4571cd-e7ae-409d-a8fd-7337b626bcb2.jsonl` [path by the usual pattern; the id is the one in this session's scratchpad directory name].
+
+**Compaction:** none that I know of; the context was not summarised.
+
+**What's next**
+- Jonathan deploys `Game.php` to Studio (G1: 351,760 bytes, 6,533 lines) and plays list v3: tables A and B.
+- Session 2 (after the playtest): makes the `fix:` commit from `p1-5a-fix.diff` with `p1-5a-msg-1.txt` (the working tree's change as reviewed; check its blob `9d86fd922a1cbc49e32385ccc88fb3e2bef2289f`), records the playtest results, and writes the closing docs, including `TODO.md`'s objectives 15 and 16 entry (and its "live on Production" wording: "most likely live on Production (Jonathan, 2026-11-22; not checked)") and `MIGRATION_PLAN.md`'s P1.5a Status.
+- The `checkPotential` finding (`TODO.md`) is not fixed in P1.5a; its fix step is to be decided.
+
+**Jonathan's review messages in this session**, quoted in full:
+
+Stop A review:
+
+> Stop A reviewed. Record this message in the entry, quoted in full.
+>
+> 1. The design discussion rebuilt the change by applying p1-5a-fix.diff to HEAD's Game.php: the result is blob 9d86fd922a1cbc49e32385ccc88fb3e2bef2289f, byte-identical to its own build, and the diff's SHA-256 and counts match yours. Its independent recount of the harness's figures agrees: 9,604 runs; per objective 1,225 tuples score under the new condition and 1,911 under the old, differing in 686, 40 of them with a total of 6 or less; HEAD fails 1,372 runs.
+>
+> 2. MIGRATION_PLAN.md:664, P1.4's Status ("live on Production"): leave it as it is. It records a past step and is outside this session's grant. In the new P1.5a entry and in the TODO.md entry, word it as "most likely live on Production (Jonathan, 2026-11-22; not checked)".
+>
+> 3. The board maximum of 6 Permanent Assets (4, 5 or 6 by character): in the playtest list, give each negative player a character with enough slots to go on from 3 + 1 to 3 + 2, so the list includes the step where that objective then scores. Name the characters chosen, and their slot counts, in your report (not in the list).
+>
+> 4. p1-5a-msg-1.txt is approved as written, for session 2.
+>
+> Go ahead with §7, and stop at stop B.
+
+Stop B review (list v1):
+
+> Stop B reviewed. Record this message in the entry, quoted in full. Write the changes as p1-5a-playtest-v2.md (don't overwrite v1); nothing else in the list changes.
+>
+> 1. Table A's token rules: W's near-miss step is A7, not A5. Correct both mentions ("After the near-miss step (A5)" and "W never holds 2 Slab tokens before A5").
+>
+> 2. Drop A3, A4, A6, B3, B4 and B6. Neither the old nor the new code scores at those totals, so they can't show a difference. Renumber the remaining steps.
+>
+> 3. Table B, reshaped:
+>    - Z plays Rope Gun and takes Face tokens only, 4 of them (4 Face + 0 Slab), declining everything else. That step's report is the same as A7's: score unchanged, log line, whether any points line appeared, ✓ or X on Stonemaster in all three tabs, stats.
+>    - W plays The Overstoker, with Crack as the fixed major type: 3 Crack tokens, then exactly 1 Gear token (3 Crack + 1 Gear), declining everything else. Drop "whichever W has more cards of after round 2".
+>    - Drop B8 (3 + 2). A8 already shows an objective scoring after a near miss.
+>    - Update the coverage table in your report to match. Note there that 15 at exactly 2 + 2 is now covered by the harness only.
+>
+> 4. "How every round goes": add one line naming who goes first: Z in rounds 1, 3, 5 and 7, W in rounds 2, 4, 6 and 8.
+>
+> 5. Remove "Climbers draw 3.", "The game ends at someone's eighth pitch, after that round's Follow Phase." and "The other open items in TODO.md.". In "Before you start", replace "Write down every debug_giveAssets use" with "Write down any debug call the list doesn't ask for".
+>
+> Show v2 in full, with the updated coverage table, then stop at stop B again.
+
+Stop B review (list v2):
+
+> Stop B (v2) reviewed. Record this message in the entry, quoted in full.
+>
+> 1. Write p1-5a-playtest-v3.md (don't overwrite v2), the same as v2 except for one line added at the top of Table A and of Table B, right under the "Write down who is who." line: "Save all three consoles (Z, W and S) as .log files before closing any tab." Nothing else changes. v3 is the final list: record it in the entry in full, with the coverage table from your stop B report.
+>
+> 2. Then go ahead with §8 (the docs), and stop at stop C.
+
+Stop C review:
+
+> Stop C reviewed. Record this message in the entry, quoted in full, with the others.
+>
+> 1. Effort: High. Add it to the entry's "Model and effort" line.
+>
+> 2. The "v3" title is right; keep it.
+>
+> 3. My stop A review's item 2: the TODO.md wording is for session 2's update of the objectives 15 and 16 entry, as your "What's next" already says. No change.
+>
+> Make the edit in item 1 by exact match, write p1-5a-docs-v2.diff (don't overwrite the first), and check it against p1-5a-docs.diff: the only differences may be the effort line, this message's quote, and the index lines and hunk header those change. If so, commit docs: stage only the three docs by explicit path, commit with the proposed message, report the hash and git show --stat, and confirm Game.php is still unstaged with blob 9d86fd922a1cbc49e32385ccc88fb3e2bef2289f. If anything else differs, stop and report instead. Push only on my "push".
+
 ## 2026-11-22 (P1.5, PHP modernization sweep: done)
 
 P1.5 is done. Session 2 checked session 1's change, made the four commits (two `struct:`, two `fix:`) by P1.4's method, took Jonathan's Studio results for playtest list v4 (played 2026-11-21 to 2026-11-22), and wrote these closing docs. The code is exactly session 1's reviewed change; no code file was edited in this session. Nothing was deployed by this session and nothing went to the BGA Production site. The four commits and the `docs:` commit that holds this entry are **not pushed**: they need Jonathan's "push". (Session 1's `docs:` commit `19b9463` was level with `origin/main` at the start.)
