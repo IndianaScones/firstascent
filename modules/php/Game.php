@@ -6200,8 +6200,8 @@ class Game extends \Bga\GameFramework\Table
 
                     case '15': // face + slab
                         $tracker = $resource_tracker[$player_id]['permanent_skills'];
-                        $face_and_slab = $tracker['face'] + $tracker['slab'];
-                        if ($face_and_slab >= 4 && !in_array($player_id, $info['players_met'])) {
+                        $face_and_slab_met = $tracker['face'] >= 2 && $tracker['slab'] >= 2;
+                        if ($face_and_slab_met && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
                             $this->bga->playerScore->inc($player_id, 8, null);
                             $shared_objective_points[$player_id] = 8;
@@ -6218,8 +6218,8 @@ class Game extends \Bga\GameFramework\Table
 
                     case '16': // crack + gear
                         $tracker = $resource_tracker[$player_id]['permanent_skills'];
-                        $crack_and_gear = $tracker['crack'] + $tracker['gear'];
-                        if ($crack_and_gear >= 4 && !in_array($player_id, $info['players_met'])) {
+                        $crack_and_gear_met = $tracker['crack'] >= 2 && $tracker['gear'] >= 2;
+                        if ($crack_and_gear_met && !in_array($player_id, $info['players_met'])) {
                             $info['players_met'][] = $player_id;
                             $this->bga->playerScore->inc($player_id, 8, null);
                             $shared_objective_points[$player_id] = 8;
