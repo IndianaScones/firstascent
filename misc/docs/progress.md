@@ -2,6 +2,256 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-24 (P1.6, Autowired actions, group 1: done)
+
+P1.6, session 2 of 2: **the step is done.** This session edited no code. It made the three code commits from the three reviewed diffs (`d7119b7`, `7d3f084`, `dd39726`), recorded Jonathan's Studio playtest of list v2 and wrote the closing docs. Nothing was deployed by this session, nothing is on Production, and nothing was pushed. **Model and effort:** Sonnet 5.5, High (as Jonathan's prompt states).
+
+**Line numbers in this entry.** `Game.php` and `firstascent.js` lines are cited **at HEAD `dd39726`** (the working tree equals it) unless a version is given; `firstascent.js` lines of the old handler are cited at `0062dd6`.
+
+**State at the end of the session**
+- **HEAD:** `dd397266f4a9d4ae619bc57637fb6fb99d2c37b9`, on top of `7d3f084` and `d7119b7`, on top of session 1's `docs:` commit `25a5ba92b9ab5d5e0020d58845236025cf97ebb9`. `origin/main` is still at `25a5ba9`: the three code commits and the `docs:` commit holding this entry are **not pushed** (push only on Jonathan's "push").
+- **Working tree:** clean after commit 3 (`git status --short` empty). The HEAD blobs of the four files equal the blobs session 1 left in the working tree (`8206ead0…`, `6b169d4c…`, `6f0e741e…`, `7d8a01cd…`).
+- **Files outside the repo** (`D:\Documents\BGA Studio\`): the staged diffs `p1-6-staged-1.diff`, `p1-6-staged-2.diff`, `p1-6-staged-3.diff` (written by `git diff --cached --output=…`); the playtest results folder `p1-6-playtest-v2-results\` (below); the docs helpers `p1-6-closing-entry.md`, `p1-6-closing-plan.md`, `p1-6-closing-todo.md` and `p1-6-edit-closing-docs.php`; and `p1-6-docs-closing.diff` (the docs diff of this entry). Session 1's files are listed in its entry.
+
+**This session's grant, and Jonathan's messages, quoted in full**
+
+*The prompt (first message):*
+
+> # P1.6, session 2 of 2: the three code commits and the closing docs
+>
+> ## 1. The grant
+>
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`.
+>
+> This session closes **P1.6, "Autowired actions (group 1)"**. Session 1 left the whole change in the working tree, uncommitted, and its record is the `progress.md` entry "2026-11-24 (P1.6, Autowired actions, group 1: in progress, session 1)". Read that entry first. I have played the Studio playtest on list v2.
+>
+> **This session edits no code.** It makes the three code commits from the three diffs I reviewed, records the playtest and writes the closing docs.
+>
+> Docs this session may edit:
+> - `misc/docs/progress.md`:
+>   - a new "done" entry at the top (§5);
+>   - one wording fix in session 1's entry (§5).
+> - `misc/docs/MIGRATION_PLAN.md`: the "P1.6 status" line and its notes in the P1.6–P1.9 section only (§5). Nothing else in the file.
+> - `misc/docs/TODO.md`: the one addition in §4, to an existing entry. Nothing else in the file.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-6-`.
+>
+> **Git:**
+> - The three code commits are made on my "commit the P1.6 code", by the method in §3. The working tree is never touched.
+> - The `docs:` commit is made on my "commit docs", staged by explicit path.
+> - Push only on my "push".
+>
+> No deploy (I deploy), and nothing on the BGA Production site. No installs without my confirmation. Anything outside this grant needs my explicit go-ahead.
+>
+> **Working rules** (as in session 1):
+> - The working copy is CRLF and the index LF (`core.autocrlf` is on). Don't check out `dbmodel.sql`.
+> - Edit docs by script with exact-match checks (each old text must occur exactly once), keeping each file's line endings.
+> - `git diff`: put `--output=<file>` before any `--`, and never use a `>` redirect for a diff.
+> - Cite line numbers with the version they are at.
+>
+> ## 2. Start check (read-only)
+>
+> - `git fetch origin`. HEAD should be `25a5ba92b9ab5d5e0020d58845236025cf97ebb9` (session 1's `docs:` commit), parent `0062dd6e16b28d322a782bd526854706844ac581`, level with `origin/main`. Report whether it is level.
+> - Nothing staged. Exactly four files modified, with these working-tree blobs (`git hash-object`):
+>   - `modules/php/Game.php` `8206ead0a3ce9e3944b7730f4788a715a1519f1b`
+>   - `states.inc.php` `6b169d4cf39bbcec77f2ddb03522bd824ff2967c`
+>   - `firstascent.action.php` `6f0e741e33ec4ad3c6e5390a1ac99a5fea34904d`
+>   - `firstascent.js` `7d8a01cdb0a62bdda0657baef7c161bbb20981c5`
+> - The reviewed files in `D:\Documents\BGA Studio\` are unchanged (SHA-256):
+>   - `p1-6-rename.diff` `272c2bbe6e4994b9b25fe14dad45475e7fa7ed88e150a9f4a970cfc05858db5b`
+>   - `p1-6-b3.diff` `30f2f9ad91938946618aff97c57677475d55636b0aefbdd4f0ca3389e216365b`
+>   - `p1-6-name.diff` `59526df789f9f29f643c7cde2492d9d4f6d4572f32111dac4b74b1c6e0d6dd2e`
+>   - `p1-6-msg-1.txt` `f76cc726fcbbfb902039d42a35bb6f12358d9b79075f06685e98cb826e610998` (2,684 bytes)
+>   - `p1-6-msg-2.txt` `40534400a857699693f36f898d9dd0b0817d9f3ecaf576fadb4e96dd315e3e46` (798 bytes)
+>   - `p1-6-msg-3.txt` `3516305b1e7c9f55c513c6c0d9d39957ba30605c7a5ae91af570917094e99051` (767 bytes)
+> - If anything differs, stop and report before doing anything else. Otherwise report the check and wait for my "commit the P1.6 code".
+>
+> ## 3. The three code commits (on my "commit the P1.6 code")
+>
+> This is P1.4's method, used again in P1.5 and P1.5a. The working tree is never touched. For each diff in order, with its message:
+>
+> | # | Diff | Message | Staged diff file |
+> |---|---|---|---|
+> | 1 | `p1-6-rename.diff` | `p1-6-msg-1.txt` | `p1-6-staged-1.diff` |
+> | 2 | `p1-6-b3.diff` | `p1-6-msg-2.txt` | `p1-6-staged-2.diff` |
+> | 3 | `p1-6-name.diff` | `p1-6-msg-3.txt` | `p1-6-staged-3.diff` |
+>
+> For each one:
+> 1. Run `git apply --cached --check "<diff>"`, then `git apply --cached "<diff>"`.
+> 2. Run `git diff --cached --output="<staged diff file>"`, then `cmp` it against the reviewed diff. **They must be identical.**
+> 3. Run `git commit -F "<message>"`.
+> 4. Check the HEAD blobs (`git rev-parse HEAD:<path>`) against the table below.
+>
+> If any step fails or any check differs, stop and report. Don't retry another way.
+>
+> | After | `Game.php` | `states.inc.php` | `firstascent.action.php` | `firstascent.js` |
+> |---|---|---|---|---|
+> | commit 1 | `b22c65c604c34a5ca9b8eb02487225082a629335` | `6b169d4cf39bbcec77f2ddb03522bd824ff2967c` | `6f0e741e33ec4ad3c6e5390a1ac99a5fea34904d` | `c66aead88488dea05f059125175e12c275c6cb4e` |
+> | commit 2 | `820761e85ac1192e9ce54190b8a1759fc89a7f62` | unchanged | unchanged | `7d8a01cdb0a62bdda0657baef7c161bbb20981c5` |
+> | commit 3 | `8206ead0a3ce9e3944b7730f4788a715a1519f1b` | unchanged | unchanged | unchanged |
+>
+> After commit 3, `git status --short` must be empty. Report the three commit hashes and `git log --stat -3`.
+>
+> ## 4. The playtest record
+>
+> The playtest ran on list v2 (`p1-6-playtest-v2.md`), on 2026-11-24, on one table: IndianaScones0 was W and IndianaScones1 was Z.
+> - My results are in `D:\Documents\BGA Studio\p1-6-playtest-v2-results\p1-6-playtest-v2-results.txt` (102 lines, 5,666 bytes).
+> - The consoles are in the same folder: `IndianaScones0.log` (231 lines, 13,117 bytes), `IndianaScones1.log` (240 lines, 14,364 bytes) and `spectator.log` (268 lines, 15,300 bytes).
+> - If the folder isn't there, ask me rather than search for it.
+>
+> Record the files by path and counts in the entry. Summarise each step's result from my file, and quote my wording where a summary would lose something.
+>
+> Below are the design discussion's readings. Check each against the files rather than take it as given, and say where a check agrees and where it doesn't.
+>
+> **4.1 What passed**
+> - G1: all four sizes and line counts as expected.
+> - Every step went as the list expected. Each action ran on the final code:
+>   - **`actConfirmCharacter`:** T1, both players.
+>   - **`actConfirmAssets`, the draw:** T1, T4 and T7. Both edge cases ran on the final code:
+>     - in T4, Z took all 3 from the Spread, so the deck count was 0;
+>     - in T7, Z took all 3 from the deck, so both Spread arrays were empty.
+>   - **`actConfirmAssets`, Simul Climb:** T6. Z took 1 card from the Spread and 2 from the deck, and Z's turn went on afterwards. That shows `simul_climb` arrived as true, since the false path ends the turn.
+>   - **`actConfirmTrade`:** T2.
+>   - **`actConfirmBail`:** T8. The titlebar showed "Bail", Z lost 1 Water and 1 Psych, and Z went back to P2.
+>   - **`actRest`:** T9. The commit 2 change shows twice: in `times_rested` (87), and in the Rerack offering W the resting picks in T10, which reads the `rested` global.
+> - **Commit 3:** every log line of the five actions named the right player in all three tabs.
+> - **The consoles:** no game error or warning in any of the three. The other lines are the framework's state messages, the browser's Permissions-Policy notices, the blocked `browser-update.org` request and the sandbox notice, plus each F5 reload that the list's debug steps call for.
+>
+> **4.2 Not run**
+> - Simul Climb in the 12 other states that allow `actConfirmAssets`, by my decision of 2026-11-23. The static checks cover the rename there.
+> - The plan's "Done when" ("each listed action works in every state that allows it") is therefore met by play for states 2, 10 and 20, and by the harness and static checks for the other 12.
+>
+> **4.3 One finding, not caused by P1.6 as far as can be told**
+> - **What I saw.** In T6, after Simul Climb, "once again a phantom card has ended up in #deck_draw_1 (for Z only)". Z's turn went on normally, and no console showed an error.
+> - **Where to record it.** Add it to the existing `TODO.md` entry "a card drawn twice on screen in a Portaledge draw for all players, and left in `#deck_draw_1`" (found in P1.5's playtest, card 66 A). Say that it was now seen after Simul Climb, which is a deck and Spread draw, not a Portaledge draw. Quote my words.
+> - **Why it's not P1.6's** [inferred]. P1.6 changed only how `onConfirmSummitBetaSimulClimbAssets` builds and sends its request. Its local arrays aren't used after the call. The animation runs from the notification's arguments, which the type rule keeps unchanged. Check this against the code. Whether the legacy build has it too isn't checked.
+>
+> ## 5. The closing docs
+>
+> **`misc/docs/progress.md`**
+> - A new entry at the top: "2026-11-24 (P1.6, Autowired actions, group 1: done)". It holds:
+>   - the start check;
+>   - the three commits, each step of §3 with its counts, hashes and `cmp` result;
+>   - the playtest record of §4.
+>   - **Model and effort:** Sonnet 5.5, High, as this message states.
+> - Record my messages to you in this session, quoted in full.
+> - **The wording fix in session 1's entry.** In its "What's next", replace "from the working tree and using `p1-6-msg-1.txt` to `-3.txt`" with "using `p1-6-msg-1.txt` to `-3.txt`". This is the contradiction you pointed out in session 1 (my edit 4 caused it).
+>
+> **`misc/docs/MIGRATION_PLAN.md`**
+> - Change the "P1.6 status" line to done. Give:
+>   - the three commit hashes with their subjects, after session 1's `docs:` commit `25a5ba9`;
+>   - the playtest (list v2, 2026-11-24, one table, as expected);
+>   - the "Done when" reading of §4.2;
+>   - the finding of §4.3, with a pointer to `TODO.md`;
+>   - "Studio after: playable".
+> - Keep the three notes (the type rule, existing tables, `getActivePlayerName`) as they are.
+>
+> **`misc/docs/TODO.md`:** the addition of §4.3 only.
+>
+> **Then:**
+> 1. Write the raw docs diff, `p1-6-docs-closing.diff`, and show its counts.
+> 2. Draft the `docs:` commit message as text: `docs: P1.6 done (three code commits, playtest v2 results, closing docs)`, plus a short body if one is useful.
+> 3. Stop and wait. On my "commit docs", stage only the three edited docs by explicit path and commit them. Push only on my "push".
+>
+> Finally, as always: update `misc/docs/progress.md` as above before the session ends.
+
+*Message 2 (go-ahead for the code commits):*
+
+> Commit the P1.6 code.
+>
+> Record this message in the entry, quoted in full.
+
+*Message 3 (after the commits):*
+
+> The commits are checked: the three staged diffs are byte-identical to the reviewed diffs. The two trailing-whitespace lines were already in the lines they replace at HEAD, so they aren't new; note that in the entry. Go on to §4 and §5.
+
+*Message 4 (docs review):*
+
+> Docs review.
+>
+> The closing docs need these edits. Make them by exact match, keeping each file's endings, before adding this message's quote:
+>
+> 1. misc/docs/progress.md: replace "(the same text in all three tabs, so it is log text: the climbing card's name [inferred])" with "(log text: the climbing card's name, from the log string `${climbing_card_for_log}: ${player_name} chooses …`, `Game.php:2262` at `dd39726`)". The design discussion checked it in the code.
+>
+> 2. The finding. E4's card was not a new deck-draw case: it was the card E3's Portaledge draw had duplicated, which showed again at that player's next deck draw. On this table Z had drawn from the Portaledge in T2's trade before the Simul Climb.
+>    - misc/docs/TODO.md: replace "not a Portaledge draw, like E4 above." with "not a Portaledge draw. In E4 above, the card left in `#deck_draw_1` was the one E3's Portaledge draw had duplicated, shown again at that player's next deck draw. On P1.6's table Z had drawn from the Portaledge in T2's trade before the Simul Climb, so it may be the same sequence [inferred, not traced: which card it was isn't recorded]."
+>    - misc/docs/TODO.md: replace "E4 above, seen before P1.6, is the only older sighting." with "E3 and E4, seen before P1.6, are the only older sightings."
+>    - misc/docs/progress.md: replace "The entry's own E4 was also a deck and Spread draw (in the Rerack), seen in P1.5's playtest on 2026-11-21, before any P1.6 change, with the same symptom (a card left in `#deck_draw_1`, for the drawer only)." with "In the entry's E4 (P1.5's playtest, 2026-11-21, before any P1.6 change), the card left in `#deck_draw_1` was the one E3's Portaledge draw had duplicated, shown again at that player's next deck draw. On this table Z had drawn from the Portaledge in T2's trade before the Simul Climb, so it may be the same sequence [inferred, not traced: which card it was isn't recorded]."
+>    - misc/docs/progress.md: replace "the E4 record above is the only older sighting, and it is of a Rerack draw." with "E3 and E4 are the only older sightings."
+>
+> Record this message in the entry, quoted in full, with my other messages.
+>
+> Then write p1-6-docs-closing-v2.diff (don't overwrite the first) and check it against p1-6-docs-closing.diff: the only differences may be these edits, this message's quote, and the index lines and hunk headers they change. If so, commit docs with the proposed message, staging only misc/docs/progress.md, misc/docs/MIGRATION_PLAN.md and misc/docs/TODO.md by explicit path, and report the commit hash and git show --stat. If anything else differs, stop and report instead. Push only on my "push".
+
+**Status of each item**
+- Start check: done, nothing differed.
+- The three code commits: done, each step as the prompt's §3 requires.
+- The playtest: played by Jonathan on list v2; recorded below. One finding, not caused by P1.6 as far as can be told (`TODO.md`).
+- The docs: this entry, `MIGRATION_PLAN.md`'s P1.6 status line, one `TODO.md` addition and the wording fix in session 1's entry: the `docs:` commit, on Jonathan's "commit docs".
+
+**Start check** (read-only; before any commit)
+- `git fetch origin` ran without error. HEAD was `25a5ba92b9ab5d5e0020d58845236025cf97ebb9`, parent `0062dd6e16b28d322a782bd526854706844ac581`, **level with `origin/main`**. Nothing staged; exactly the four files modified.
+- Working-tree blobs (`git hash-object`): `Game.php` `8206ead0…`, `states.inc.php` `6b169d4c…`, `firstascent.action.php` `6f0e741e…`, `firstascent.js` `7d8a01cd…`: all as the prompt said.
+- SHA-256 of the six reviewed files in `D:\Documents\BGA Studio\`: all as the prompt said (`p1-6-rename.diff` 23,802 bytes, `p1-6-b3.diff` 1,374, `p1-6-name.diff` 5,135; the messages 2,684, 798 and 767 bytes). Nothing differed, so the session went on.
+
+**The three code commits** (P1.4's method, working tree untouched; each commit: `git apply --cached --check`, `git apply --cached`, `git diff --cached --output=p1-6-staged-N.diff`, `cmp` against the reviewed diff, `git commit -F`, then the HEAD blobs checked)
+
+| # | Commit | Subject | Diff and staged diff | `cmp` | Stat |
+|---|---|---|---|---|---|
+| 1 | `d7119b7c4c9bfdc8b728f07153bb7bfda0c663dd` | `struct: autowired actions, group 1: confirmCharacter, confirmAssets, rest, confirmTrade, confirmBail (P1.6)` | `p1-6-rename.diff` and `p1-6-staged-1.diff`, 454 lines, 23,802 bytes | identical | 4 files, 64 insertions, 136 deletions |
+| 2 | `7d3f084269fd35a49e09b07e8f85e7962980f302` | `fix: rest takes the active player's id from the framework, not the client (P1.6, B3)` | `p1-6-b3.diff` and `p1-6-staged-2.diff`, 33 lines, 1,374 bytes | identical | 2 files, 3 insertions, 3 deletions |
+| 3 | `dd397266f4a9d4ae619bc57637fb6fb99d2c37b9` | `struct: the active player's name from getPlayerNameById in the five autowired actions (P1.6)` | `p1-6-name.diff` and `p1-6-staged-3.diff`, 93 lines, 5,135 bytes | identical | 1 file, 10 insertions, 9 deletions |
+
+- **HEAD blobs after each commit**, all equal to the prompt's table: after commit 1 `Game.php` `b22c65c6…`, `states.inc.php` `6b169d4c…`, `firstascent.action.php` `6f0e741e…`, `firstascent.js` `c66aead8…`; after commit 2 `Game.php` `820761e8…`, `firstascent.js` `7d8a01cd…` (the other two unchanged); after commit 3 `Game.php` `8206ead0…` (the other three unchanged). After commit 3, `git status --short` was empty.
+- **`git apply` whitespace warning (commit 1), not new.** `git apply` printed "2 lines add whitespace errors": the diff's lines 180 (`traded_resources.push(id);` followed by trailing spaces, in `firstascent.js`) and 332 (the state 10 `possibleactions` line ending in `, `, in `states.inc.php`). Jonathan's message 3: they were already in the lines they replace at HEAD. Checked at `0062dd6`: `firstascent.js:3915` (``traded_resources += `${id},`;`` plus 16 trailing spaces) and `states.inc.php:51` (the same `possibleactions` line, ending in `, `). They are not new, and the diff was committed as reviewed, whitespace included.
+
+**The playtest** (list v2, `p1-6-playtest-v2.md`; played by Jonathan on 2026-11-24 on one table, 2 players and a spectator, 3 rounds; the consoles show it is table 1009078. IndianaScones0 was W and IndianaScones1 was Z.)
+- **Files** (`D:\Documents\BGA Studio\p1-6-playtest-v2-results\`; counts checked with `wc`): `p1-6-playtest-v2-results.txt` (102 lines, 5,666 bytes), `IndianaScones0.log` (231 lines, 13,117 bytes), `IndianaScones1.log` (240 lines, 14,364 bytes) and `spectator.log` (268 lines, 15,300 bytes). All as the prompt said.
+
+**Each step's result** (from the results file; Jonathan's wording quoted where a summary would lose something)
+- **G1:** "Game.php is 352,725 B & 6545 lines. states.inc.php is 16,556 B & 333 lines. firstascent.action.php is 13,311 B & 342 lines. firstascent.js is 743,279 B & 13,552 lines." These are exactly the expected sizes and line counts.
+- **T1 (setup):** W chose Bold Brit and Z chose Sendy Jammer. Rack Up: Z took Chalk Bag and Stemming from the Spread and 3 from the deck (Long Runner, Palming and Chicken Wing); W took Chicken Wing and Mono Pocket from the Spread and 3 from the deck (Nuts, Heel Hook and Sloper). In each tab the player's own draw names the deck cards and the other player's says "3 Asset/s from the deck"; the spectator sees the counts. "Hand counts are 5 and 5. The Spread holds the same 4 cards in every tab."
+- **T2 (Z trades, then climbs P2):** "`debug_giveAssets(15)` is used by Z to climb P2. You didn't specify which log line to show, so I'm including them all from the step." Z's log, W's and S's all name Z: gains a Pain Tolerance Token; loses Palming from his hand; "Hecked up the sequence: IndianaScones1 chooses Try to smear both feet: Lose 1 Slab Card and gain 1 Pain Tolerance Token" (log text: the climbing card's name, from the log string `${climbing_card_for_log}: ${player_name} chooses …`, `Game.php:2262` at `dd39726`); "spends Toe Jam, Arm Bar, Mantle, 1 Water, and 1 Psych and climbs Dr. Rubo's Wild Ride"; "trades 3 Crack Assets and draws Harness from the Portaledge" (Z's tab; W and S see "draws 1 Gear Asset from the Portaledge"). "Z's hand had 3 fewer crack cards and 1 more gear card after the trade. I didn't get the number of gear cards in the portaledge before the trade, but afterwards there are 6. Z's board shows P2 and Z's climber on it."
+- **T3:** "W's climber is shown on P1 in all three tabs."
+- **T4 (Follow and Rerack, round 1):** W took Hand Jam and Cams from the Spread and Undercling from the deck (Z's and S's tabs: "1 Asset/s from the deck"); Z took Mantle, Stemming and Hand-Foot Match from the Spread, with no deck part, in all three tabs. "Hand counts after the draw are 6 and 6."
+- **T5:** "W's climber on X and P1 empty in all three tabs."
+- **T6 (Z uses Simul Climb):** Z's log (and W's and S's, which name Z): "IndianaScones1 uses Simul Climb and takes Hand-Fist Stack from the Spread and Undercling and Mono Pocket from the deck" (W and S see "2 Asset/s from the deck"). "Z's hand now has 3 more cards (9). The Spread shows the same 4 cards in the same slots all three tabs. The token moved to the used pile in all three tabs. After the draw, Z's turn continued normally, though once again a phantom card has ended up in #deck_draw_1 (for Z only). Stats are as expected." The phantom card is the finding below.
+- **T7 (Follow and Rerack, round 2):** Z took Toe Jam, Chicken Wing and Crimp, all from the deck (W and S: "IndianaScones1 takes 3 Asset/s from the deck"); W took Cams from the Spread and Edge and Harness from the deck (Z and S: "2 Asset/s from the deck").
+- **T8 (Z bails):** "Z has 3 water and 4 psych. Before the bail, Z's titlebar shows "Bail" rather than "Confirm"." The log, in all three tabs: "IndianaScones1 bails out. He loses 1 Water and 1 Psych and will not take any Assets during the next Rerack Phase". "Z has 2 water and 3 psych and Z is back on P2 in all three tabs. Z's turn ended and W's began."
+- **T9 (W rests):** "IndianaScones0 rested" in all three tabs. "Stats are as expected." (No numbers are given.)
+- **T10 (Follow and Rerack, round 3):** Z's bail in the Rerack, in all three tabs: "IndianaScones1 bailed out and does not gain any Assets during Rerack". "W's Rerack offered water, psych, and cards from the Portaledge, 5 total assets." W's log: "IndianaScones0 rests, gaining Undercling from the Portaledge and 3 Water and 1 Psych". "Round 4 starts with W to climb. All consoles will be saved so you can see any errors or warnings."
+- **What the file does not give** (so it is not recorded as seen): the Portaledge's Gear count before the trade (T2); the numbers for the stats checks of T6 and T9 ("as expected" only); any debug call other than `debug_giveAssets(15)` in T2 (the list's T2 and T6 call for `debug_giveAssets`, `debug_giveSummitBeta` and the F5s, and its "Before you start" asks for every debug call to be written down); and the arguments of the requests (the consoles don't show them).
+
+**The consoles** (`IndianaScones0.log`, `IndianaScones1.log`, `spectator.log`)
+- No line from the game's code other than the framework's own: in each tab, `firstascent constructor`, `utils constructor`, `Starting game setup`, `notifications subscriptions setup`, `Ending game setup`, and `onUpdateActionButtons`, `Entering state` and `Leaving state` messages. Besides them: the Permissions-Policy notices (`attribution-reporting`, `private-aggregation`, `join-ad-interest-group`, `run-ad-auction`, `browsing-topics`), the blocked `browser-update.org/update.min.js` request (`ERR_BLOCKED_BY_CLIENT`), the iframe sandbox notice, the table-view lines (`After first require`, `Dojo configuration`, `ebg.core.mainsite object created`, `Loaded translations`) and `Navigated to` lines. In the spectator's console, one more: Chrome's `[Violation] Added non-passive event listener to a scroll-blocking 'touchstart' event`, from BGA's own `main.js`.
+- No `error`, `Uncaught`, `[FA …]`, `undefined` or raw `${` line in any of the three (searched).
+- Reloads: `Starting game setup` appears 3 times in W's console, 4 in Z's and 3 in S's, so W and S were reloaded twice each and Z three times (the F5s that the list's debug steps call for).
+- State entries are the same in all three consoles: `drawAssets` 6 (two players, three draws), `nextDraw` 11, `climbingCard` 4 (the route's four climbs), `nextClimb` 6, `nextRound` 3, `resting` 1 (W's Rerack in T10), `characterSelection` 2, `nextCharacterSelect` 2, `matchingTechniques` 3, `flipPlayedAssets` 3, `flagPermanentAssets` 3, `discardAssets` 2; `climbOrRest` is 11 in W's and S's and 12 in Z's (one more entry, probably from a reload [inferred]).
+
+**The design discussion's readings, checked** (code lines at `dd39726`)
+1. **G1, sizes:** *agrees.* All four sizes and line counts equal the list's expected values.
+2. **`actConfirmCharacter` (T1, both players):** *agrees.* Both choices are in the logs of all three tabs, and both consoles show `characterSelection` twice.
+3. **`actConfirmAssets`, the draw (T1, T4, T7):** *agrees.* T4: Z's line in all three tabs has a Spread part and no deck part, so the deck count was 0 [inferred from the log; the request isn't in the consoles]. T7: Z's line has only a deck part (3 cards; W's and S's tabs say "3 Asset/s from the deck"), so both Spread arrays were empty [inferred, as above]. Both ran on the final code (G1's sizes). The smoke stop (stop A, S3) had already shown the deck-only request arrive without Spread arguments.
+4. **Simul Climb (T6):** *agrees, and the evidence is stronger than the reading says.* Z took 1 from the Spread and 2 from the deck (Hand-Fist Stack; Undercling and Mono Pocket), and Z's turn went on: `Game.php:1165–1167` returns without a state change only when `$simul_climb` is true, and the false path ends the turn (`:1160–1168`). The token moving to the used pile and the stat (85) both come from the `if ($simul_climb)` block (`:1101–1110`), which Jonathan saw too (the stat only as "as expected").
+5. **`actConfirmTrade` (T2):** *agrees.* The log names Z in all three tabs, and the hand changed as expected. The Portaledge's Gear count before the trade isn't in the file (only "afterwards there are 6").
+6. **`actConfirmBail` (T8):** *agrees.* The titlebar showed "Bail", Z's Water and Psych went from 3 and 4 to 2 and 3, and Z went back to P2 in all three tabs.
+7. **`actRest` (T9, T10):** *agrees, with two qualifications.* The log names W in all three tabs, and the `resting` state was entered once in each console, with W's Rerack offering 5 picks (T10), so the id was in the `rested` global (`stNextDraw`, `:5584`). (a) That check is loose: `in_array` and `array_search` (`:5584`, `:5586`) have no strict flag, so T10 shows the id was in the global, not that it is a string; the type is covered by the harness (the `rest` cases and the `strval` mutants). (b) For `times_rested` (87, `:2073`) the file says only "Stats are as expected", without the numbers the list asked for (1 for W, 0 for Z).
+8. **Commit 3, the names:** *agrees.* Every log line of the five actions (T1, T2, T4, T6, T7, T8, T9) names the player who acted, in all three tabs. W is IndianaScones0 and Z is IndianaScones1 throughout.
+9. **The consoles:** *agrees, with additions* (above): the spectator's `[Violation]` line, and the reload counts. None is from the game's code.
+10. **"Every step went as the list expected":** *agrees for what the file reports.* Every reported item matches the list's expected value; the gaps are the ones in "What the file does not give".
+11. **4.2, not run:** *agrees.* 14 states allow `actConfirmAssets` (14 `"actConfirmAssets"` entries in `states.inc.php`). It ran in state 10 (`drawAssets`: T1, T4, T7) and state 20 (`climbOrRest`: Simul Climb in T6); `actConfirmCharacter` in state 2 (`characterSelection`, T1). Simul Climb was not played in the other 12 states (Jonathan's decision of 2026-11-23), where the static checks cover the rename. The plan's "Done when" is met by play for states 2, 10 and 20, and by the harness and static checks for the other 12.
+12. **4.3, the finding:** *agrees, and the older record supports it.* See below.
+
+**The finding: a phantom card in `#deck_draw_1` after Simul Climb** (T6; recorded in `TODO.md`, in the existing entry "a card drawn twice on screen in a Portaledge draw for all players, and left in `#deck_draw_1`")
+- Jonathan's words: "After the draw, Z's turn continued normally, though once again a phantom card has ended up in #deck_draw_1 (for Z only)." No console showed an error.
+- It is a deck and Spread draw (`actConfirmAssets` with `simul_climb`), not a Portaledge draw. In the entry's E4 (P1.5's playtest, 2026-11-21, before any P1.6 change), the card left in `#deck_draw_1` was the one E3's Portaledge draw had duplicated, shown again at that player's next deck draw. On this table Z had drawn from the Portaledge in T2's trade before the Simul Climb, so it may be the same sequence [inferred, not traced: which card it was isn't recorded].
+- **Not caused by P1.6** [inferred], checked against the code: P1.6 changed only how `onConfirmSummitBetaSimulClimbAssets` builds and sends its request (`firstascent.js:5594–5621`; `:5608–5637` at `0062dd6`): arrays instead of comma-joined strings, `performAction` instead of `checkAction` and `ajaxcall`. The local arrays (`spread_to_draw`, `spread_slots`, `deck_to_draw`) are not used after the call. The animation is `notif_confirmYourAssets` (`:8068`, to `:8430`), which reads `notif.args` only (`simul_climb` at `:8072`, `deck_num`, `spread_card_ids`, `new_spread`, `new_cards`, `deck_assets_arr`, `player_id`) and lays the deck cards into the `#deck_draw_${i}` slots (`:8142`); the type rule keeps those arguments unchanged (the harness's 145 cases, session 1). Whether the legacy build shows it after Simul Climb is not checked; E3 and E4 are the only older sightings. No step is assigned yet.
+
+**What's next**
+- Jonathan: "commit docs": the `docs:` commit stages by explicit path `misc/docs/progress.md`, `misc/docs/MIGRATION_PLAN.md` and `misc/docs/TODO.md`; message `docs: P1.6 done (three code commits, playtest v2 results, closing docs)`. Then "push" sends the three code commits and the `docs:` commit to `origin/main`.
+- The next step is **P1.7**, `confirmRequirements` and `riskIt` (one shared parser for their seven arguments), with its own prompt. It applies the type rule and the `getPlayerNameById($activePlayerId)` step, as P1.6 did.
+- Still open: the phantom card (`TODO.md`, no step assigned); the empty trade list failing and B3's refusal not shown on Studio (both recorded in session 1's entry); P1.6's "existing tables still work" line not checked, by D12.
+
 ## 2026-11-24 (P1.6, Autowired actions, group 1: in progress, session 1)
 
 P1.6, session 1 of 2 (started 2026-11-23): **the five actions of group 1 are converted** (`confirmCharacter`, `confirmAssets`, `rest`, `confirmTrade`, `confirmBail`) and the change is in the working tree, **uncommitted and unstaged**, as the state after all three planned commits. The three code commits (`struct:` rename, `fix:` B3 for `rest`, `struct:` names) are session 2's job, after Jonathan's Studio playtest of list v2. This session wrote the change, a smoke stop (played by Jonathan), a harness with a mutation test, the three stacked diffs and their commit messages, and the playtest list. Nothing was deployed by this session, nothing is on Production, and `TODO.md` was not edited (no new finding). **Model and effort:** Sonnet 5.5, High (as Jonathan's prompt states).
@@ -342,7 +592,7 @@ Z is first in rounds 1 and 3, and W in round 2.
 
 **What's next**
 - Jonathan deploys the four files and plays list v2 (one table, 2 players and a spectator, 3 rounds), and sends the results and the three consoles.
-- Session 2: if a result shows a problem, adjust (a new versioned file, never an overwrite). Then the three code commits in this order, from the working tree and using `p1-6-msg-1.txt` to `-3.txt`: `struct:` the rename (all four files), `fix:` B3 for `rest` (`Game.php` and `firstascent.js`: `p1-6-b3.diff`), `struct:` the six names (`Game.php`: `p1-6-name.diff`); by P1.4's method, without touching the working tree: for each reviewed diff in order (`p1-6-rename.diff`, `p1-6-b3.diff`, `p1-6-name.diff`), `git apply --cached --check` and `git apply --cached`, a `cmp` of `git diff --cached --output=…` against that diff, and `git commit -F` with its message. After the last commit, HEAD's blobs equal the working tree's (`8206ead`, `6b169d4`, `6f0e741`, `7d8a01c`). Then the closing docs: the playtest result, `MIGRATION_PLAN.md`'s P1.6 status, `progress.md`.
+- Session 2: if a result shows a problem, adjust (a new versioned file, never an overwrite). Then the three code commits in this order, using `p1-6-msg-1.txt` to `-3.txt`: `struct:` the rename (all four files), `fix:` B3 for `rest` (`Game.php` and `firstascent.js`: `p1-6-b3.diff`), `struct:` the six names (`Game.php`: `p1-6-name.diff`); by P1.4's method, without touching the working tree: for each reviewed diff in order (`p1-6-rename.diff`, `p1-6-b3.diff`, `p1-6-name.diff`), `git apply --cached --check` and `git apply --cached`, a `cmp` of `git diff --cached --output=…` against that diff, and `git commit -F` with its message. After the last commit, HEAD's blobs equal the working tree's (`8206ead`, `6b169d4`, `6f0e741`, `7d8a01c`). Then the closing docs: the playtest result, `MIGRATION_PLAN.md`'s P1.6 status, `progress.md`.
 - Then P1.7 (`confirmRequirements`, `riskIt`), applying the type rule.
 
 ---
