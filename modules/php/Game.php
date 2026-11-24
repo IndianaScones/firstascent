@@ -14,6 +14,10 @@
 
 namespace Bga\Games\FirstAscent;
 
+use Bga\GameFramework\Actions\Types\IntArrayParam;
+use Bga\GameFramework\Actions\Types\IntParam;
+use Bga\GameFramework\Actions\Types\StringParam;
+
 
 class Game extends \Bga\GameFramework\Table
 {
@@ -886,8 +890,8 @@ class Game extends \Bga\GameFramework\Table
         (note: each method below must match an input method in firstascent.action.php)
     */
 
-    function confirmCharacter($character) {
-        $this->checkAction('confirmCharacter');
+    public function actConfirmCharacter(#[IntParam(min: 0)] int $character) {
+        $character = strval($character); // P1.6 type rule: action.php handed this method a string
         $player_id = $this->getActivePlayerId();
         $character_color = $this->characters[$character]['color'];
 
@@ -956,8 +960,15 @@ class Game extends \Bga\GameFramework\Table
     }
 
 
-    function confirmAssets($deck_assets=0, $spread_assets=[], $spread_slots = [], $simul_climb = false) {
-        $this->checkAction('confirmAssets');
+    public function actConfirmAssets(
+        #[IntParam(min: 0)] int $deck_assets = 0,
+        #[IntArrayParam] ?array $spread_assets = null,
+        #[IntArrayParam] ?array $spread_slots = null,
+        bool $simul_climb = false
+    ) {
+        // P1.6 type rule: action.php handed this method lists of strings, and an empty list for nothing sent
+        $spread_assets = array_map('strval', $spread_assets ?? []);
+        $spread_slots = array_map('strval', $spread_slots ?? []);
         $player_id = $this->getActivePlayerId();
         $player_name = $this->getActivePlayerName();
         $deck_assets = intval($deck_assets);
@@ -1944,8 +1955,7 @@ class Game extends \Bga\GameFramework\Table
         }
     }
 
-    function confirmBail() {
-        $this->checkAction('confirmBail');
+    public function actConfirmBail() {
         
         $player_id = $this->getActivePlayerId();
         $bailed_pitch = $this->getGlobalVariable('bailed_pitch', true);
@@ -1977,8 +1987,8 @@ class Game extends \Bga\GameFramework\Table
         $this->gamestate->nextState('nextClimb');
     }
 
-    function confirmTrade($traded_resources, $portaledge_to_draw) {
-        $this->checkAction('confirmTrade');
+    public function actConfirmTrade(#[IntArrayParam] array $traded_resources, #[StringParam(alphanum: true)] string $portaledge_to_draw) {
+        $traded_resources = array_map('strval', $traded_resources); // P1.6 type rule: action.php handed this method a list of strings
 
         $player_id = $this->getActivePlayerId();
         $type_arg_arr = [];
@@ -2053,8 +2063,7 @@ class Game extends \Bga\GameFramework\Table
         ]);
     }
 
-    function rest($player_id) {
-        $this->checkAction('rest');
+    public function actRest(#[StringParam(alphanum: true)] string $player_id) {
 
         $rested = $this->getGlobalVariable('rested', true);
         $rested[] = $player_id;

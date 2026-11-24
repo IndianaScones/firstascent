@@ -29,7 +29,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must choose a character'),
             "descriptionmyturn" => clienttranslate('${you} must choose a character'),
             "type" => "activeplayer",
-            "possibleactions" => array("selectCharacter", "confirmCharacter"),
+            "possibleactions" => array("selectCharacter", "actConfirmCharacter"),
             "transitions" => array("confirmCharacter" => 3, "zombiePass" => 3)
     ),
 
@@ -48,7 +48,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must draw a total of ${x_cards} Asset cards from the deck and The Spread'),
             "type" => "activeplayer",
             "args" => "argDrawAssets",
-            "possibleactions" => array("confirmAssets", "confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor", 
+            "possibleactions" => array("actConfirmAssets", "confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor", 
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextDraw" => 11, "nextClimb" => 25, "zombiePassDraw" => 11, "zombiePassClimb" => 25)
     ),
@@ -77,8 +77,8 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must choose a Pitch, Rest, or Trade Assets'),
             "type" => "activeplayer",
             "args" => "argClimbOrRest",
-            "possibleactions" => array("confirmRequirements", "riskIt", "confirmTrade", "rest", "confirmRerack", "confirmEnergyDrink",
-                                       "confirmAssets", "confirmBomberAnchor", "confirmAssetsForDiscard", "confirmPortaledge", "confirmBail"),
+            "possibleactions" => array("confirmRequirements", "riskIt", "actConfirmTrade", "actRest", "confirmRerack", "confirmEnergyDrink",
+                                       "actConfirmAssets", "confirmBomberAnchor", "confirmAssetsForDiscard", "confirmPortaledge", "actConfirmBail"),
             "transitions" => array("drawClimbingCard" => 21, "selectOpponent" => 23, "nextClimb" => 25, "addTokenToPitch" => 27, "riskSummitBeta" => 50,
                                    "crimperClimbingCards" => 60, "zombiePass" => 25)
     ),
@@ -88,7 +88,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} must resolve a Climbing card'),
             "descriptionmyturn" => clienttranslate('${you} must resolve a Climbing card'),
             "type" => "activeplayer",
-            "possibleactions" => array("confirmClimbingCardChoice", "passClimbingCard", "confirmRerack", "confirmEnergyDrink", "confirmAssets",
+            "possibleactions" => array("confirmClimbingCardChoice", "passClimbingCard", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets",
                                        "confirmBomberAnchor", "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "updateGameProgression" => true,
             "transitions" => array("discardAssets" => 22, "selectOpponent" => 23,  "selectPortaledge" => 24, 
@@ -103,7 +103,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${titlebar_message}',
             "type" => "activeplayer",
             "args" => "argDiscardAssets",
-            "possibleactions" => array("confirmAssetsForDiscard", "confirmRequirements", "confirmRerack", "confirmEnergyDrink", "confirmAssets",
+            "possibleactions" => array("confirmAssetsForDiscard", "confirmRequirements", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets",
                                        "confirmBomberAnchor", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("selectOpponent" => 23, "selectPortaledge" => 24, "nextClimb" => 25, 
                                    "stealFromAssetBoard" => 28, "chooseTechniqueToken" => 31, "drawAssets" => 10, "drawClimbingCard" => 21,
@@ -116,7 +116,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${titlebar_message}',
             "type" => "activeplayer",
             "args" => "argSelectOpponent",
-            "possibleactions" => array("confirmSelectedOpponent", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmSelectedOpponent", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("discardAssets" => 22, "nextClimb" => 25, "chooseTechniqueToken" => 31, "zombiePass" => 25, "selectPortaledge" => 24)
     ),
@@ -127,7 +127,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${portaledge_message}',
             "type" => "activeplayer",
             "args" => "argSelectPortaledge",
-            "possibleactions" => array("confirmPortaledge", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmPortaledge", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "undoClimbingCard"),
             "transitions" => array("confirmPortaledge" => 25, "nextClimb" => 25, "portaledgeAll" => 26, "zombiePassSolo" => 25, "zombiePassAll" => 26)
     ),
@@ -156,7 +156,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must select an Asset Token'),
             "type" => "activeplayer",
             "args" => "argAddTokenToPitch",
-            "possibleactions" => array("confirmAddTokenToPitch", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmAddTokenToPitch", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextClimb" => 25, "zombiePass" => 25)
     ),
@@ -167,7 +167,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${steal_message}',
             "type" => "activeplayer",
             "args" => "argStealFromAssetBoard",
-            "possibleactions" => array("confirmStealFromAssetBoard", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmStealFromAssetBoard", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextClimb" => 25, "zombiePass" => 25)
     ),
@@ -178,7 +178,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${add_to_board_message}',
             "type" => "activeplayer",
             "args" => "argAddAssetToAssetBoard",
-            "possibleactions" => array("confirmAssetToAssetBoard", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmAssetToAssetBoard", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextClimb" => 25, "zombiePass" => 25)
     ),
@@ -189,7 +189,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must select a Summit Beta token to keep'),
             "type" => "activeplayer",
             "args" => "argChooseSummitBetaToken",
-            "possibleactions" => array("confirmChooseSummitBetaToken", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmChooseSummitBetaToken", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextClimb" => 25, "zombiePass" => 25)
     ),
@@ -200,7 +200,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must select a Technique Token'),
             "type" => "activeplayer",
             "args" => "argChooseTechniqueToken",
-            "possibleactions" => array("confirmChooseTechniqueToken", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor",
+            "possibleactions" => array("confirmChooseTechniqueToken", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor",
                                        "confirmAssetsForDiscard", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("nextClimb" => 25, "techniqueOpponent" => 32, "zombiePassSolo" => 25, "zombiePassOpponent" => 32)
     ),
@@ -220,7 +220,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must choose ${rest_num} resources to take'),
             "type" => "activeplayer",
             "args" => "argResting",
-            "possibleactions" => array("confirmPortaledge", "confirmRerack", "confirmEnergyDrink", "confirmAssets", "confirmBomberAnchor", "confirmAssetsForDiscard"),
+            "possibleactions" => array("confirmPortaledge", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets", "confirmBomberAnchor", "confirmAssetsForDiscard"),
             "transitions" => array("nextDraw" => 11, "zombiePass" => 11)
     ),
 
@@ -276,7 +276,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} may use a Summit Beta Token'),
             "type" => "activeplayer",
             "possibleactions" => array("confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor", "confirmLuckyChalkbag", "confirmRequirements",
-                                       "confirmAssets", "confirmJesusPiece", "confirmRiskSummitBeta", "confirmAssetsForDiscard", "confirmPortaledge"),
+                                       "actConfirmAssets", "confirmJesusPiece", "confirmRiskSummitBeta", "confirmAssetsForDiscard", "confirmPortaledge"),
             "transitions" => array("climbOrRest" => 20, "drawClimbingCard" => 21, "selectOpponent" => 23, "selectPortaledge" => 24, "nextClimb" => 25,
                                    "addTokenToPitch" => 27, "zombiePass" => 25)
     ),
@@ -287,7 +287,7 @@ $machinestates = array(
            "descriptionmyturn" => clienttranslate('${you} must choose a Climbing Card'),
            "type" => "activeplayer",
            "possibleactions" => array("confirmCrimperClimbingCard", "undoClimbingCard", "confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor",
-                                      "confirmAssetsForDiscard", "confirmPortaledge", "confirmAssets"),
+                                      "confirmAssetsForDiscard", "confirmPortaledge", "actConfirmAssets"),
            "transitions" => array("climbingCard" => 21, "addTokenToPitch" => 27, "zombiePass" => 25)
     ),
 

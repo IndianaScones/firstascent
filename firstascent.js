@@ -3126,11 +3126,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.utils.removeOutsideClickListener();
             const character = $('selected_character').firstElementChild.id.slice(-2).replace(/^\D+/g, '');
 
-            if (this.checkAction('confirmCharacter')) {
-                this.ajaxcall("/firstascent/firstascent/confirmCharacter.html", { lock: true,
-                    character : character
-                }, this, function(result) {} );
-            }
+            this.bga.actions.performAction('actConfirmCharacter', { character : character });
         },
 
         onSelectAsset: function(evt) {
@@ -3232,13 +3228,13 @@ function (dojo, declare, aspect, BgaAutofit) {
         onConfirmAssets: function(evt) {
             dojo.stopEvent(evt);
 
-            let spread_to_draw = '';
-            let spread_slots = '';
+            const spread_to_draw = [];
+            const spread_slots = [];
             dojo.query('.selected_asset').forEach(ele => {
                 const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
-                spread_to_draw += `${asset_id},`;
+                spread_to_draw.push(asset_id);
                 const slot = ele.parentElement.id.slice(-1);
-                spread_slots += `${slot},`;
+                spread_slots.push(slot);
             });
 
             const draw_counter = $('draw_counter');
@@ -3247,13 +3243,12 @@ function (dojo, declare, aspect, BgaAutofit) {
             const deck_classes = $('asset_deck').classList;
             const deck_to_draw = Number(deck_classes[deck_classes.length - 1]) || 0;
 
-            if (this.checkAction('confirmAssets')) {
-                this.ajaxcall("/firstascent/firstascent/confirmAssets.html", { lock: true,
-                    spread_assets : spread_to_draw,
-                    spread_slots : spread_slots,
-                    deck_assets : deck_to_draw
-                }, this, function(result) {} );
-            }
+            this.bga.actions.performAction('actConfirmAssets', {
+                spread_assets : spread_to_draw,
+                spread_slots : spread_slots,
+                deck_assets : deck_to_draw,
+                simul_climb : false
+            });
         },
 
         onSelectPitch: function(evt) {
@@ -3587,9 +3582,7 @@ function (dojo, declare, aspect, BgaAutofit) {
             this.confirmationDialog('',
                 () => {
                     this.utils.clicksOn('hard_on');
-                    if (this.checkAction('confirmBail')) {
-                        this.ajaxcall("/firstascent/firstascent/confirmBail.html", { lock: true }, this, function(result) {} );
-                    }
+                    this.bga.actions.performAction('actConfirmBail');
                 },
                 () => { this.utils.clicksOn('hard_on'); }
             );
@@ -3639,11 +3632,7 @@ function (dojo, declare, aspect, BgaAutofit) {
                 () => {
                     this.utils.disableSummitBetaTokens();
                     this.utils.clicksOn('hard_on');
-                    if (this.checkAction('rest')) {
-                        this.ajaxcall("/firstascent/firstascent/rest.html", { lock: true,
-                            player_id : player_id
-                        }, this, function(result) {} );
-                    }
+                    this.bga.actions.performAction('actRest', { player_id : player_id });
                 },
                 () => { this.utils.clicksOn('hard_on'); }
             );
@@ -3909,22 +3898,20 @@ function (dojo, declare, aspect, BgaAutofit) {
                 }
             }
 
-            let traded_resources = '';
+            const traded_resources = [];
             this.selected_cards.forEach(ele => {
                 const id = ele.id.slice(-3).replace(/^\D+/g, '');
-                traded_resources += `${id},`;                
+                traded_resources.push(id);                
             });
             this.selected_cards = null;
 
             this.utils.clicksOn();
             this.utils.clicksOn('pitches');
 
-            if (this.checkAction('confirmTrade')) {
-                this.ajaxcall("/firstascent/firstascent/confirmTrade.html", { lock: true,
-                    traded_resources : traded_resources,
-                    portaledge_to_draw : portaledge_to_draw
-                }, this, function(result) {} );
-            }
+            this.bga.actions.performAction('actConfirmTrade', {
+                traded_resources : traded_resources,
+                portaledge_to_draw : portaledge_to_draw
+            });
         },
 
         onSelectResource: function(evt) {
@@ -5608,13 +5595,13 @@ function (dojo, declare, aspect, BgaAutofit) {
         onConfirmSummitBetaSimulClimbAssets: function (evt) {
             dojo.stopEvent(evt);
 
-            let spread_to_draw = '';
-            let spread_slots = '';
+            const spread_to_draw = [];
+            const spread_slots = [];
             dojo.query('.selected_asset').forEach((ele) => {
                 const asset_id = ele.id.slice(-3).replace(/^\D+/g, '');
-                spread_to_draw += `${asset_id},`;
+                spread_to_draw.push(asset_id);
                 const slot = ele.parentElement.id.slice(-1);
-                spread_slots += `${slot},`;
+                spread_slots.push(slot);
             });
 
             const deck_classes = $('asset_deck').classList;
@@ -5626,14 +5613,12 @@ function (dojo, declare, aspect, BgaAutofit) {
             for (const ele of this.simul_climb_handlers) { ele.onclick = null; }
             this.simul_climb_handlers = [];
 
-            if (this.checkAction('confirmAssets')) {
-                this.ajaxcall("/firstascent/firstascent/confirmAssets.html", { lock: true,
-                    spread_assets : spread_to_draw,
-                    spread_slots : spread_slots,
-                    deck_assets : deck_to_draw,
-                    simul_climb : true,
-                }, this, function(result) {} );
-            }
+            this.bga.actions.performAction('actConfirmAssets', {
+                spread_assets : spread_to_draw,
+                spread_slots : spread_slots,
+                deck_assets : deck_to_draw,
+                simul_climb : true
+            });
         },
 
         onSummitBetaBomberAnchor: function (evt) {

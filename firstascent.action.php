@@ -31,42 +31,6 @@
       }
   	} 
     
-    public function confirmCharacter() {
-        self::setAjaxMode();
-        $character = self::getArg("character", AT_posint, true);
-        $this->game->confirmCharacter($character);
-        self::ajaxResponse();
-    }
-
-    public function confirmAssets() {
-        self::setAjaxMode();
-        $deck_assets = self::getArg("deck_assets", AT_posint);
-        $spread_assets_raw = self::getArg("spread_assets", AT_numberlist);
-        $spread_slots_raw = self::getArg("spread_slots", AT_numberlist);
-        $simul_climb = self::getArg("simul_climb", AT_bool) ?? false;
-
-        if (substr($spread_assets_raw, -1) == ',') {
-            $spread_assets_raw = substr($spread_assets_raw, 0, -1);
-        }
-        if ($spread_assets_raw == '') {
-            $spread_assets = array();
-        } else {
-            $spread_assets = explode(',', $spread_assets_raw);
-        }
-
-        if (substr($spread_slots_raw, -1) == ',') {
-            $spread_slots_raw = substr($spread_slots_raw, 0, -1);
-        }
-        if ($spread_slots_raw == '') {
-            $spread_slots = array();
-        } else {
-            $spread_slots = explode(',', $spread_slots_raw);
-        }
-
-        $this->game->confirmAssets($deck_assets, $spread_assets, $spread_slots, $simul_climb);
-        self::ajaxResponse();
-    }
-
     public function confirmRequirements() {
         self::setAjaxMode();
         $requirements_raw = self::getArg("requirements", AT_numberlist);
@@ -174,27 +138,6 @@
         }
 
         $this->game->riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water);
-        self::ajaxResponse();
-    }
-
-    public function confirmBail() {
-        self::setAjaxMode();
-        $this->game->confirmBail();
-        self::ajaxResponse();
-    }
-
-    public function confirmTrade() {
-        self::setAjaxMode();
-
-        $traded_resources_raw = self::getArg("traded_resources", AT_numberlist);
-        if (substr($traded_resources_raw, -1) == ',') {
-            $traded_resources_raw = substr($traded_resources_raw, 0, -1);
-        }
-        $traded_resources = explode(',', $traded_resources_raw);
-
-        $portaledge_to_draw = self::getArg("portaledge_to_draw", AT_alphanum);
-
-        $this->game->confirmTrade($traded_resources, $portaledge_to_draw);
         self::ajaxResponse();
     }
 
@@ -328,15 +271,6 @@
         }
 
         $this->game->confirmPermanentAssets($player_id, $gained_assets);
-        self::ajaxResponse();
-    }
-
-    public function rest() {
-        self::setAjaxMode();
-
-        $player_id = self::getArg("player_id", AT_alphanum);
-
-        $this->game->rest($player_id);
         self::ajaxResponse();
     }
 
