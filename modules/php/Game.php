@@ -890,7 +890,7 @@ class Game extends \Bga\GameFramework\Table
         (note: each method below must match an input method in firstascent.action.php)
     */
 
-    public function actConfirmCharacter(#[IntParam(min: 0)] int $character) {
+    public function actConfirmCharacter(int $activePlayerId, #[IntParam(min: 0)] int $character) {
         $character = strval($character); // P1.6 type rule: action.php handed this method a string
         $player_id = $this->getActivePlayerId();
         $character_color = $this->characters[$character]['color'];
@@ -941,7 +941,7 @@ class Game extends \Bga\GameFramework\Table
         }        
 
         $this->bga->notify->all("confirmCharacter", clienttranslate('${player_name} chooses ${character}'), array(
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById($activePlayerId),
             'player_id' => $player_id,
             'character' => $this->characters[$character]['description'],
             'character_div' => "character_{$character}",
@@ -961,6 +961,7 @@ class Game extends \Bga\GameFramework\Table
 
 
     public function actConfirmAssets(
+        int $activePlayerId,
         #[IntParam(min: 0)] int $deck_assets = 0,
         #[IntArrayParam] ?array $spread_assets = null,
         #[IntArrayParam] ?array $spread_slots = null,
@@ -970,7 +971,7 @@ class Game extends \Bga\GameFramework\Table
         $spread_assets = array_map('strval', $spread_assets ?? []);
         $spread_slots = array_map('strval', $spread_slots ?? []);
         $player_id = $this->getActivePlayerId();
-        $player_name = $this->getActivePlayerName();
+        $player_name = $this->getPlayerNameById($activePlayerId);
         $deck_assets = intval($deck_assets);
         $rerack_1 = $this->getGlobalVariable('rerack_1', true);
         if (in_array($player_id, $rerack_1) && !$this->getGlobalVariable('climbing_card_info', true)) {
@@ -1955,7 +1956,7 @@ class Game extends \Bga\GameFramework\Table
         }
     }
 
-    public function actConfirmBail() {
+    public function actConfirmBail(int $activePlayerId) {
         
         $player_id = $this->getActivePlayerId();
         $bailed_pitch = $this->getGlobalVariable('bailed_pitch', true);
@@ -1978,7 +1979,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('pitch_sets', $pitch_sets);
 
         $this->bga->notify->all('confirmBail', clienttranslate('${player_name} bails out. He loses 1 Water and 1 Psych and will not take any Assets during the next Rerack Phase'), [
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById($activePlayerId),
             'player_id' => $player_id,
             'bailed_pitch' => $bailed_pitch[$player_id],
             'pitch_sets' => $pitch_sets,
@@ -1987,7 +1988,7 @@ class Game extends \Bga\GameFramework\Table
         $this->gamestate->nextState('nextClimb');
     }
 
-    public function actConfirmTrade(#[IntArrayParam] array $traded_resources, #[StringParam(alphanum: true)] string $portaledge_to_draw) {
+    public function actConfirmTrade(int $activePlayerId, #[IntArrayParam] array $traded_resources, #[StringParam(alphanum: true)] string $portaledge_to_draw) {
         $traded_resources = array_map('strval', $traded_resources); // P1.6 type rule: action.php handed this method a list of strings
 
         $player_id = $this->getActivePlayerId();
@@ -2030,7 +2031,7 @@ class Game extends \Bga\GameFramework\Table
         ];
 
         $this->bga->notify->all('confirmTradePublic', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws 1 ${drawn_for_log} Asset from the Portaledge'), [
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById($activePlayerId),
             'discard_for_log' => $discard_for_log,
             'drawn_for_log' => $drawn_for_log,
             'player_id' => $player_id,
@@ -2046,7 +2047,7 @@ class Game extends \Bga\GameFramework\Table
         ]);
 
         $this->bga->notify->player($player_id, 'confirmTradePrivate', clienttranslate('${player_name} trades 3 ${discard_for_log} Assets and draws ${drawn_private} from the Portaledge'), [
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById($activePlayerId),
             'discard_for_log' => $discard_for_log,
             'drawn_private' => $drawn_private,
             'player_resources' => $player_resources,
@@ -2072,7 +2073,7 @@ class Game extends \Bga\GameFramework\Table
         $this->bga->playerStats->inc('times_rested', 1, $player_id);
 
         $this->bga->notify->all('log_only', clienttranslate('${player_name} rested'), array(
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById($activePlayerId),
         ));
 
         $this->gamestate->nextState('nextClimb');
