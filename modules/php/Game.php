@@ -2063,7 +2063,8 @@ class Game extends \Bga\GameFramework\Table
         ]);
     }
 
-    public function actRest(#[StringParam(alphanum: true)] string $player_id) {
+    public function actRest(int $activePlayerId) {
+        $player_id = strval($activePlayerId); // P1.6 type rule: the client used to send this id, as a string
 
         $rested = $this->getGlobalVariable('rested', true);
         $rested[] = $player_id;

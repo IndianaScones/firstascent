@@ -3626,13 +3626,12 @@ function (dojo, declare, aspect, BgaAutofit) {
 
             this.utils.undoTrifecta();
 
-            const player_id = this.getActivePlayerId();
             this.utils.clicksOff('hard_off');
             this.confirmationDialog(_('You will not climb a Pitch this round.'),
                 () => {
                     this.utils.disableSummitBetaTokens();
                     this.utils.clicksOn('hard_on');
-                    this.bga.actions.performAction('actRest', { player_id : player_id });
+                    this.bga.actions.performAction('actRest');
                 },
                 () => { this.utils.clicksOn('hard_on'); }
             );
