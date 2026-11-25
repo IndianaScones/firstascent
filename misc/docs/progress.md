@@ -2,6 +2,67 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-24 (docs: playtest lists in PROCEDURES.md)
+
+A docs-only change, made in the P1.7 session after the P1.7 `docs:` commit `a6d7545` and before the push. **Model and effort:** Sonnet 5.5, High (as Jonathan's message states). No code, no deploy, nothing on Production, nothing pushed.
+
+**What was added.** A new section, "Playtest lists", in `misc/docs/PROCEDURES.md`, placed just before "## Commits" (the section's text is Jonathan's, in his message below; the only other change is one blank line after it). `PROCEDURES.md` is LF in the working copy, so the edit kept LF. It has five parts:
+- **Where the lists live and how they change:** each code-changing session writes `D:\Documents\BGA Studio\<step>-playtest-v1.md`; a change is a new version and earlier versions are kept; the approved lists to follow as models are `p1-5-playtest-v4.md`, `p1-5a-playtest-v3.md`, `p1-6-playtest-v2.md` and `p1-7-playtest-v3.md` (all four exist in that folder).
+- **Check the rules first:** a step is checked against `RULES.md` and `RULES_CHECK.md`; a code-versus-rules disagreement is a finding for Jonathan, never an expected result; the check is recorded in the `progress.md` entry with page numbers ("no rules finding" and the pages when nothing disagrees).
+- **What goes in:** only steps and report lines that can show a difference between the old and the new code; nothing the harness or another step already shows; no existing-table check (D12).
+- **Format and content:** the list's layout (short steps, a "Report" quote block, a "Before you start" block, no source references or reasoning), and the facts that recur in every list (who goes first, reverse character selection, the 2-player first draw of 5 cards, only 3 of 12 characters offered and `debug_setAvailableCharacters`, board positions versus pitch ids, F5 in the other tab after a debug call).
+- **Jonathan's results:** how they are read and recorded (both files; log lines by content; "as expected" without the numbers asked for as not seen; deviations quoted from his file; files by path and counts; a requested change is a new version, not a separate fill-in template).
+
+**Why.** These practices were settled over P1.4 to P1.7 (the lists, the reviews of the lists and the reading of the results), but they existed only in the design discussion's handoffs and in each step's prompt, so a new session had no way to learn them from the repo. Putting them in `PROCEDURES.md`, which every session reads first, makes them part of the working rules.
+
+**Checks.** The edit matched `## Commits` exactly once. `p1-7-procedures.diff` (in `D:\Documents\BGA Studio\`) adds lines only: the section and one blank line. The section's statements about the rules and the code (for example `RULES.md` p. 5, step 15, and `otherSideOf`) are Jonathan's and were not re-checked by this session. Nothing else changed: `TODO.md` and the code are untouched.
+
+**Jonathan's message to this session for this change, quoted in full**
+
+> One more docs change in this session, as its own commit, after the P1.7 docs commit and before the push. This widens the grant to two edits only: the insertion in misc/docs/PROCEDURES.md below, and a new entry at the top of misc/docs/progress.md for it. No other file changes.
+>
+> 1. misc/docs/PROCEDURES.md: replace the line "## Commits" (it occurs exactly once) with the section below, then a blank line, then "## Commits". Make the edit by exact match, keeping the file's line endings. Nothing else in the file changes.
+> 2. Write p1-7-procedures.diff (git diff --output=… before any --) and show its counts. Check that it only adds lines, and that the added lines are exactly the section and one blank line.
+> 3. misc/docs/progress.md: a new short entry at the top, titled with today's date and "(docs: playtest lists in PROCEDURES.md)". Say what was added and why: the playtest-list format and practices that P1.4 to P1.7 settled, which until now were only in design handoffs. Quote this message in full. Model and effort: Sonnet 5.5, High.
+> 4. Draft the commit message "docs: playtest lists in PROCEDURES.md (format, rules first, reading results)", then stop for my review. On my "commit docs", stage only misc/docs/PROCEDURES.md and misc/docs/progress.md, by explicit path, and commit them. Push only on my "push", which then sends all four commits.
+>
+> The section:
+>
+> ## Playtest lists
+> The session that makes a code change writes its playtest list, as `D:\Documents\BGA Studio\<step>-playtest-v1.md`. A change to a list is a new version (`-v2.md` and so on); earlier versions are kept. Approved lists to follow as models: `p1-5-playtest-v4.md`, `p1-5a-playtest-v3.md`, `p1-6-playtest-v2.md`, `p1-7-playtest-v3.md`.
+>
+> **Check the rules first.**
+> - Before writing a step, check what it asks the players to do against `misc/docs/RULES.md` and Jonathan's rulings in `misc/docs/RULES_CHECK.md`, not against the code alone. This covers who may climb where, turn order, setup counts, what a turn allows, costs, and the options a card offers.
+> - Where the code and the rules disagree, write a finding for Jonathan, never an expected result. Don't invent rules behaviour to make a step work.
+> - Record the check in the `progress.md` entry with page numbers. If nothing disagrees, write "no rules finding" and name the pages checked.
+>
+> **What goes in.**
+> - Every step must exercise something the old and the new code could do differently, or be needed to reach one. So must every report line. Leave out the rest, such as log lines or hand counts that can't show a difference.
+> - Leave out checks that the harness or another step already shows. No existing-table check: no table spans a deploy (D12).
+>
+> **Format.**
+> - Keep it simple and visually organized: each step is short instructions, one per line, then a "Report" quote block.
+> - No source references, line numbers, tags (such as [R], [C] or [S]), reasoning, or explanations of basic rules. Those go in the `progress.md` entry.
+> - "Before you start" holds the rules for the whole list: saving consoles, noting debug calls, what to do when a debug call is refused, the known problems not caused by the step, and a ready-made `SELECT … FROM stats` query when statistics are used.
+> - Write statistics as `name (id)`.
+> - At the top of each table, give a short role setup and a reminder to save each tab's console as a `.log` file before closing any tab.
+> - Put instructions that apply across rounds before round 1.
+>
+> **Content.**
+> - Name who goes first in each round. With 2 players, turn order alternates between rounds.
+> - Character selection runs in reverse order. Write the roles as: "W is the player asked to choose a character first. Z chooses second and is first in round 1."
+> - In a 2-player game the first draw is 5 cards for each player (`RULES.md` p. 5, Set Up: Player Area, step 15).
+> - Only 3 of the 12 characters are offered in a 2-player game. When a step needs a particular character, use `debug_setAvailableCharacters` before anyone chooses. Never let both sides of one mat be chosen (`otherSideOf` in `UtilTrait.php`).
+> - Every Pitch tile except The Trifecta is placed at random per table, so "P1" and "P2" in a list are board positions, not pitch ids.
+> - After a successful debug call, the list says to press F5 in the other tab. `debug_giveAssets`, for one, reloads only the caller's page.
+>
+> **Jonathan's results.**
+> - He reports step by step in a text file, with each tab's console as a `.log` file. Read both. Read log lines by content, not by their order.
+> - Record "as expected" without the numbers asked for as not seen.
+> - Record anything played differently from the list as a deviation, quoting his file.
+> - Record the files in the entry by path and counts.
+> - If he asks for a change to a list, write a new version in the same style. Don't make a separate fill-in template.
+
 ## 2026-11-24 (P1.7, Autowired actions, group 2: done)
 
 P1.7, session 2 of 2: **the two code commits are made and the playtest is recorded.** Session 1 (the "in progress" entry below) left the change in the working tree. This session edited no code: it applied the two reviewed diffs to the index, one at a time, and committed each with its approved v2 message; the working tree was never touched. Jonathan played list v3 on Studio on 2026-11-24 (one table, 2 players, 2 rounds); the result is as expected, with one deviation in T2 (below). Nothing was deployed by this session, nothing is on Production, nothing is pushed, and `TODO.md` was not edited (the playtest has no new finding). **Model and effort:** Sonnet 5.5, High (as Jonathan's prompt states).

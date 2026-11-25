@@ -22,6 +22,41 @@ UX and usability decisions belong to Jonathan and Garrett (the game's publisher)
 - The game is tested on BGA Studio, not locally.
 - After any code change, list specifically what Jonathan should playtest to verify it: the scenario to set up (phase, character, player count), the steps, and the expected result.
 
+## Playtest lists
+The session that makes a code change writes its playtest list, as `D:\Documents\BGA Studio\<step>-playtest-v1.md`. A change to a list is a new version (`-v2.md` and so on); earlier versions are kept. Approved lists to follow as models: `p1-5-playtest-v4.md`, `p1-5a-playtest-v3.md`, `p1-6-playtest-v2.md`, `p1-7-playtest-v3.md`.
+
+**Check the rules first.**
+- Before writing a step, check what it asks the players to do against `misc/docs/RULES.md` and Jonathan's rulings in `misc/docs/RULES_CHECK.md`, not against the code alone. This covers who may climb where, turn order, setup counts, what a turn allows, costs, and the options a card offers.
+- Where the code and the rules disagree, write a finding for Jonathan, never an expected result. Don't invent rules behaviour to make a step work.
+- Record the check in the `progress.md` entry with page numbers. If nothing disagrees, write "no rules finding" and name the pages checked.
+
+**What goes in.**
+- Every step must exercise something the old and the new code could do differently, or be needed to reach one. So must every report line. Leave out the rest, such as log lines or hand counts that can't show a difference.
+- Leave out checks that the harness or another step already shows. No existing-table check: no table spans a deploy (D12).
+
+**Format.**
+- Keep it simple and visually organized: each step is short instructions, one per line, then a "Report" quote block.
+- No source references, line numbers, tags (such as [R], [C] or [S]), reasoning, or explanations of basic rules. Those go in the `progress.md` entry.
+- "Before you start" holds the rules for the whole list: saving consoles, noting debug calls, what to do when a debug call is refused, the known problems not caused by the step, and a ready-made `SELECT … FROM stats` query when statistics are used.
+- Write statistics as `name (id)`.
+- At the top of each table, give a short role setup and a reminder to save each tab's console as a `.log` file before closing any tab.
+- Put instructions that apply across rounds before round 1.
+
+**Content.**
+- Name who goes first in each round. With 2 players, turn order alternates between rounds.
+- Character selection runs in reverse order. Write the roles as: "W is the player asked to choose a character first. Z chooses second and is first in round 1."
+- In a 2-player game the first draw is 5 cards for each player (`RULES.md` p. 5, Set Up: Player Area, step 15).
+- Only 3 of the 12 characters are offered in a 2-player game. When a step needs a particular character, use `debug_setAvailableCharacters` before anyone chooses. Never let both sides of one mat be chosen (`otherSideOf` in `UtilTrait.php`).
+- Every Pitch tile except The Trifecta is placed at random per table, so "P1" and "P2" in a list are board positions, not pitch ids.
+- After a successful debug call, the list says to press F5 in the other tab. `debug_giveAssets`, for one, reloads only the caller's page.
+
+**Jonathan's results.**
+- He reports step by step in a text file, with each tab's console as a `.log` file. Read both. Read log lines by content, not by their order.
+- Record "as expected" without the numbers asked for as not seen.
+- Record anything played differently from the list as a deviation, quoting his file.
+- Record the files in the entry by path and counts.
+- If he asks for a change to a list, write a new version in the same style. Don't make a separate fill-in template.
+
 ## Commits
 - Keep bug fixes and structural changes in separate commits. Never combine them.
 - Work in small, reviewable steps. Commit after each verified step.
