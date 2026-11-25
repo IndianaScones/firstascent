@@ -4103,10 +4103,10 @@ function (dojo, declare, aspect, BgaAutofit) {
         onConfirmRequirements: function(evt) {
             dojo.stopEvent(evt);
 
-            let selected_resources = '';
+            const selected_resources = [];
             dojo.query('.selected_resource').forEach(resource => {
                 const id = resource.id.slice(-3).replace(/^\D+/g, '');
-                selected_resources += `${id},`;
+                selected_resources.push(id);
             });
             let selected_tokens_arr = {'gear':0, 'face':0, 'crack':0, 'slab':0};
             dojo.query('.selected_token').forEach(token => {
@@ -4118,8 +4118,8 @@ function (dojo, declare, aspect, BgaAutofit) {
             dojo.query('.selected_gear_border').forEach(token => {
                 selected_tokens_arr['gear']++;
             })
-            let selected_tokens = ''
-            Object.values(selected_tokens_arr).forEach(num => { selected_tokens += num + ','; })
+            const selected_tokens = [];
+            Object.values(selected_tokens_arr).forEach(num => { selected_tokens.push(num); })
 
             // if guidebook is selected but no skill icon is selected, consider it unused and deselect it
             const sb_skills_wrapper = $('sb_skills_wrapper');
@@ -4135,13 +4135,13 @@ function (dojo, declare, aspect, BgaAutofit) {
                 });
             }
 
-            let selected_summit_betas = '';
+            const selected_summit_betas = [];
             dojo.query('#assets_wrap .summit_beta').forEach(token => {
 
                 if (token.classList.contains('selected_token')) {
                     const id = token.id.slice(-3).replace(/^\D+/g, '');
                     const type_arg = this.gamedatas.token_identifier[id];
-                    selected_summit_betas += `${type_arg},`;
+                    selected_summit_betas.push(type_arg);
                 }
             });
 
@@ -4153,28 +4153,12 @@ function (dojo, declare, aspect, BgaAutofit) {
                 trifecta_selections = this.utils.trifecta_selections[this.getActivePlayerId()];
             }
 
-            // Dirtbag
-            let dirtbag = document.querySelector('.dirtbag_converted') ? [true] : false;
-            if (dirtbag) {
-                const icon = document.querySelector('.dirtbag_converted');
-                const old_type = icon.classList[icon.classList.length - 1];
-                dirtbag.push(old_type);
-            }
-
             // Phil
             delete this.phil;
             const ignored = document.querySelector('.ignored');
             if (this.character_id === '8' && ignored && ignored.classList[0] === 'water_psych_border') {
                 const type = ignored.parentElement.classList[1].slice(0, -5);
                 this.pitch_requirements[type]--;
-            }
-
-            // Bionic Woman
-            let bionic_woman = document.querySelector('.bionic_woman_converted') ? [true] : false;
-            if (bionic_woman) {
-                const icon = document.querySelector('.bionic_woman_converted');
-                const old_type = icon.classList[icon.classList.length -1];
-                bionic_woman.push(old_type);
             }
 
             const selected_hex = dojo.query('.selected_pitch')[0].nextElementSibling;
@@ -4185,11 +4169,11 @@ function (dojo, declare, aspect, BgaAutofit) {
             const risk_it = $('risk_it_button') ? true : false;
             const extra_water = this.extra_water_requirements ? true : false;
 
-            let requirements_for_action = '';
-            for (let val of Object.values(this.pitch_requirements)) { requirements_for_action += `${String(val)},`; }
+            const requirements_for_action = [];
+            for (let val of Object.values(this.pitch_requirements)) { requirements_for_action.push(val); }
 
-            if (risk_it && this.checkAction('riskIt')) {
-                this.ajaxcall("/firstascent/firstascent/riskIt.html", { lock: true,
+            if (risk_it) {
+                this.bga.actions.performAction('actRiskIt', {
                     requirements : requirements_for_action,
                     selected_resources : selected_resources,
                     selected_tokens : selected_tokens,
@@ -4197,14 +4181,12 @@ function (dojo, declare, aspect, BgaAutofit) {
                     selected_hex : selected_hex_id,
                     selected_pitch : selected_pitch_id,
                     trifecta_selections : trifecta_selections,
-                    extra_water : extra_water,
-                    dirtbag : dirtbag,
-                    bionic_woman : bionic_woman,
-                }, this, function(result) {} );
+                    extra_water : extra_water
+                });
             }
 
-            else if (!risk_it && this.checkAction('confirmRequirements')) {
-                this.ajaxcall("/firstascent/firstascent/confirmRequirements.html", { lock: true,
+            else if (!risk_it) {
+                this.bga.actions.performAction('actConfirmRequirements', {
                     requirements : requirements_for_action,
                     selected_resources : selected_resources,
                     selected_tokens : selected_tokens,
@@ -4212,10 +4194,8 @@ function (dojo, declare, aspect, BgaAutofit) {
                     selected_hex : selected_hex_id,
                     selected_pitch : selected_pitch_id,
                     trifecta_selections : trifecta_selections,
-                    extra_water : extra_water,
-                    dirtbag : dirtbag,
-                    bionic_woman : bionic_woman,
-                }, this, function(result) {} );
+                    extra_water : extra_water
+                });
             }
         },
 

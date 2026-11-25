@@ -1168,9 +1168,67 @@ class Game extends \Bga\GameFramework\Table
         else { $this->gamestate->nextState('nextDraw'); }
     }
 
-    function confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
+    // P1.7: thin autowired entries in front of the private bodies confirmRequirements and riskIt. Both take the same
+    // arguments; requirementsEntryArgs rebuilds from them the eight values action.php used to pass to the bodies.
+    public function actConfirmRequirements(
+        #[IntArrayParam] array $requirements,
+        #[IntArrayParam] array $selected_tokens,
+        #[IntParam(min: 0)] int $selected_hex,
+        #[IntParam(min: 0)] int $selected_pitch,
+        bool $extra_water,
+        #[IntArrayParam] ?array $selected_resources = null,
+        #[IntArrayParam] ?array $selected_summit_betas = null,
+        string $trifecta_selections = '',
+    ) {
+        $this->confirmRequirements(...$this->requirementsEntryArgs($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_selections, $extra_water));
+    }
 
-        $this->checkAction('confirmRequirements');
+    public function actRiskIt(
+        #[IntArrayParam] array $requirements,
+        #[IntArrayParam] array $selected_tokens,
+        #[IntParam(min: 0)] int $selected_hex,
+        #[IntParam(min: 0)] int $selected_pitch,
+        bool $extra_water,
+        #[IntArrayParam] ?array $selected_resources = null,
+        #[IntArrayParam] ?array $selected_summit_betas = null,
+        string $trifecta_selections = '',
+    ) {
+        $this->riskIt(...$this->requirementsEntryArgs($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_selections, $extra_water));
+    }
+
+    // The type rule (P1.6): each value reaches the body with the type and value action.php gave it.
+    private function requirementsEntryArgs(array $requirements, ?array $selected_resources, array $selected_tokens, ?array $selected_summit_betas, int $selected_hex, int $selected_pitch, string $trifecta_selections, bool $extra_water): array {
+        // trifecta_selections can contain a space ("shaded roof"): plain string, checked with the legacy AT_alphanum rule
+        if (!preg_match('/^[0-9a-zA-Z_ ]*$/D', $trifecta_selections)) {
+            throw new \Bga\GameFramework\SystemException("Bad value for: trifecta_selections");
+        }
+        return [
+            [
+                'gear' => intval($requirements[0] ?? 0),
+                'face' => intval($requirements[1] ?? 0),
+                'crack' => intval($requirements[2] ?? 0),
+                'slab' => intval($requirements[3] ?? 0),
+                'any_skill' => intval($requirements[4] ?? 0),
+                'water' => intval($requirements[5] ?? 0),
+                'psych' => intval($requirements[6] ?? 0)
+            ],
+            array_map('strval', $selected_resources ?? []),
+            [
+                'gear' => intval($selected_tokens[0] ?? 0),
+                'face' => intval($selected_tokens[1] ?? 0),
+                'crack' => intval($selected_tokens[2] ?? 0),
+                'slab' => intval($selected_tokens[3] ?? 0)
+            ],
+            array_map('strval', $selected_summit_betas ?? []),
+            strval($selected_hex),
+            strval($selected_pitch),
+            explode(' ', $trifecta_selections),
+            $extra_water
+        ];
+    }
+
+    private function confirmRequirements($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
+
         $player_id = $this->getActivePlayerId();
         $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
         $players = $this->getGlobalVariable('player_names_and_colors', true);
@@ -1771,8 +1829,7 @@ class Game extends \Bga\GameFramework\Table
         }
     }
 
-    function riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
-        $this->checkAction('riskIt');
+    private function riskIt($requirements, $selected_resources, $selected_tokens, $selected_summit_betas, $selected_hex, $selected_pitch, $trifecta_arr, $extra_water) {
         $player_id = $this->getActivePlayerId();
         $character_id = $this->getGlobalVariable('player_names_and_colors', true)[$player_id]['character'];
         $resource_tracker = $this->getGlobalVariable('resource_tracker', true)[$player_id];

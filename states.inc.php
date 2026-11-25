@@ -77,7 +77,7 @@ $machinestates = array(
             "descriptionmyturn" => clienttranslate('${you} must choose a Pitch, Rest, or Trade Assets'),
             "type" => "activeplayer",
             "args" => "argClimbOrRest",
-            "possibleactions" => array("confirmRequirements", "riskIt", "actConfirmTrade", "actRest", "confirmRerack", "confirmEnergyDrink",
+            "possibleactions" => array("actConfirmRequirements", "actRiskIt", "actConfirmTrade", "actRest", "confirmRerack", "confirmEnergyDrink",
                                        "actConfirmAssets", "confirmBomberAnchor", "confirmAssetsForDiscard", "confirmPortaledge", "actConfirmBail"),
             "transitions" => array("drawClimbingCard" => 21, "selectOpponent" => 23, "nextClimb" => 25, "addTokenToPitch" => 27, "riskSummitBeta" => 50,
                                    "crimperClimbingCards" => 60, "zombiePass" => 25)
@@ -103,7 +103,7 @@ $machinestates = array(
             "descriptionmyturn" => '${you} ${titlebar_message}',
             "type" => "activeplayer",
             "args" => "argDiscardAssets",
-            "possibleactions" => array("confirmAssetsForDiscard", "confirmRequirements", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets",
+            "possibleactions" => array("confirmAssetsForDiscard", "actConfirmRequirements", "confirmRerack", "confirmEnergyDrink", "actConfirmAssets",
                                        "confirmBomberAnchor", "confirmPortaledge", "undoClimbingCard"),
             "transitions" => array("selectOpponent" => 23, "selectPortaledge" => 24, "nextClimb" => 25, 
                                    "stealFromAssetBoard" => 28, "chooseTechniqueToken" => 31, "drawAssets" => 10, "drawClimbingCard" => 21,
@@ -275,7 +275,7 @@ $machinestates = array(
             "description" => clienttranslate('${actplayer} may use a Summit Beta Token'),
             "descriptionmyturn" => clienttranslate('${you} may use a Summit Beta Token'),
             "type" => "activeplayer",
-            "possibleactions" => array("confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor", "confirmLuckyChalkbag", "confirmRequirements",
+            "possibleactions" => array("confirmRerack", "confirmEnergyDrink", "confirmBomberAnchor", "confirmLuckyChalkbag", "actConfirmRequirements",
                                        "actConfirmAssets", "confirmJesusPiece", "confirmRiskSummitBeta", "confirmAssetsForDiscard", "confirmPortaledge"),
             "transitions" => array("climbOrRest" => 20, "drawClimbingCard" => 21, "selectOpponent" => 23, "selectPortaledge" => 24, "nextClimb" => 25,
                                    "addTokenToPitch" => 27, "zombiePass" => 25)
