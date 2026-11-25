@@ -1696,7 +1696,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('bailed_pitch', $bailed_pitch);
 
         $this->bga->notify->all("confirmOpponentRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
-                'player_name' => $this->getActivePlayerName(),
+                'player_name' => $this->getPlayerNameById(intval($player_id)),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
                 'requirement_titles_for_log' => $requirement_titles_for_log,
@@ -1719,7 +1719,7 @@ class Game extends \Bga\GameFramework\Table
         ));
 
         $this->bga->notify->player($player_id, "confirmYourRequirements", clienttranslate('${player_name} ${tokens_for_log}spends ${requirement_titles_for_log} and climbs ${pitch_for_log}'), array(
-                'player_name' => $this->getActivePlayerName(),
+                'player_name' => $this->getPlayerNameById(intval($player_id)),
                 'board_assets' => $this->getGlobalVariable('board_assets', true),
                 'tokens_for_log' => $tokens_for_log,
                 'requirement_titles_for_log' => $requirement_titles_for_log,
@@ -1747,7 +1747,7 @@ class Game extends \Bga\GameFramework\Table
             $trifecta_log_message = [
                 'log' => clienttranslate('${player_name} climbs a ${exposure} ${type} Trifecta'),
                 'args' => [
-                    'player_name' => $this->getActivePlayerName(),
+                    'player_name' => $this->getPlayerNameById(intval($player_id)),
                     'exposure' => COMMON_TRANSLATIONS[strtoupper($trifecta_arr[0])],
                     'type' => COMMON_TRANSLATIONS[strtoupper($trifecta_arr[1])],
                     'i18n' => ['exposure', 'type']
@@ -1782,7 +1782,7 @@ class Game extends \Bga\GameFramework\Table
             $new_points_tokens = $this->getGlobalVariable('asset_board_token_tracker', true)[$player_id]['points_tokens'];
 
             $this->bga->notify->all("useSpiderStick", clienttranslate('${player_name} uses +Spider Stick(12)+ while climbing a 1 or 2 point Pitch and gains a 2-Point Token'), [
-                'player_name' => $this->getActivePlayerName(),
+                'player_name' => $this->getPlayerNameById(intval($player_id)),
                 'player_id' => $player_id,
                 'token_id' => array_search('12', $this->getGlobalVariable('token_identifier', true)),
                 'new_points_tokens' => $new_points_tokens,
@@ -1849,7 +1849,7 @@ class Game extends \Bga\GameFramework\Table
         $this->setGlobalVariable('risk_pitches', $risk_pitches);
         $this->bga->playerStats->inc("risky_climbs", 1, $player_id);
 
-        $player_name = $this->getActivePlayerName();
+        $player_name = $this->getPlayerNameById(intval($player_id));
         $pitch = $this->pitches[$selected_pitch]['description'];
         $formatted_pitch_title = ['{' . $pitch . '(' . $selected_pitch . ')}'];
         $pitch_for_log = $this->formatLogTitles($formatted_pitch_title);
@@ -1863,7 +1863,7 @@ class Game extends \Bga\GameFramework\Table
         ];
 
         $this->bga->notify->all("riskShowAssets", '${risk_log}', array(
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById(intval($player_id)),
             'player_id' => $player_id,
             'selected_resources' => $selected_resources,
             'risk_log' => $risk_log,
@@ -1936,7 +1936,7 @@ class Game extends \Bga\GameFramework\Table
         ));
 
         $this->bga->notify->all("log_only", $die_log, array(
-            'player_name' => $this->getActivePlayerName(),
+            'player_name' => $this->getPlayerNameById(intval($player_id)),
             'die_log' => $die_log,
         ));
 
