@@ -2,6 +2,276 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-24 (P1.7, Autowired actions, group 2: done)
+
+P1.7, session 2 of 2: **the two code commits are made and the playtest is recorded.** Session 1 (the "in progress" entry below) left the change in the working tree. This session edited no code: it applied the two reviewed diffs to the index, one at a time, and committed each with its approved v2 message; the working tree was never touched. Jonathan played list v3 on Studio on 2026-11-24 (one table, 2 players, 2 rounds); the result is as expected, with one deviation in T2 (below). Nothing was deployed by this session, nothing is on Production, nothing is pushed, and `TODO.md` was not edited (the playtest has no new finding). **Model and effort:** Sonnet 5.5, High (as Jonathan's prompt states).
+
+**Line numbers in this entry** are cited at HEAD `3bf93d3` (the second code commit) unless a version is given. P1.7 moved `Game.php`'s lines, so a line cited at `3c5691c` or `0bed4c5` is not the same line here.
+
+**State at the end of the session**
+- **HEAD:** `3bf93d3067c9385f68b729ebf511b7a38bcc0511`, parent `6ab72e62618563ab1ce853dc2914275575bd8e29`, then `0bed4c59a5746316e60a44404c7f6f86c558d347` (session 1's `docs:` commit). `origin/main` is still at `0bed4c5`: nothing pushed. The `docs:` commit that holds this entry goes on top of `3bf93d3`.
+- **Working tree and index:** clean and empty after commit 2 (`git status --short` empty). The four code files at HEAD are the blobs session 1 recorded: `Game.php` `5bdc24e81426989cfdfddea4c46756613f61f6fb`, `states.inc.php` `457b347d0b235b4650c0a6a748897c62efc6a626`, `firstascent.action.php` `d87962937dcfb12c48f5b43e86d73d21c3cfcf05`, `firstascent.js` `ebfc1dc886d261b7e346943bd360f9ba07aad01f`.
+- **Files outside the repo** (`D:\Documents\BGA Studio\`): `p1-7-staged-1.diff` (19,300 bytes) and `p1-7-staged-2.diff` (4,091 bytes), the staged diffs of the two commits; `p1-7-docs-closing.diff`, the docs diff of this entry; `p1-7-harness\p1-7-entry-closing.md` (this entry as written) and `p1-7-harness\p1-7-docs-closing.php` (the edit script). The playtest results are in `p1-7-playtest-v3-results\` (below). Session 1's files are as that entry lists them.
+
+**Start check** (read-only; nothing differed)
+- `git fetch origin` ran without error. HEAD was `0bed4c59a5746316e60a44404c7f6f86c558d347` (`docs: P1.7 in progress, session 1 (two actions converted in the working tree, smoke results, playtest list v3)`), parent `3c5691cf306c6a1fe1c1cdf0c525329571e5bd5b`, **level with `origin/main`**. Nothing staged; exactly the four files modified and nothing else in `git status --short`.
+- Working-tree blobs (`git hash-object`): `Game.php` `5bdc24e8…`, `states.inc.php` `457b347d…`, `firstascent.action.php` `d8796293…`, `firstascent.js` `ebfc1dc8…`: all as the prompt gave them.
+- The reviewed files in `D:\Documents\BGA Studio\`, SHA-256 and size, all as the prompt gave them: `p1-7-rename.diff` `77d3a282…` (19,300 bytes), `p1-7-name.diff` `80f139f3…` (4,091), `p1-7-all.diff` `963c1a43…` (23,250), `p1-7-msg-1-v2.txt` `d660ffbf…` (3,860), `p1-7-msg-2-v2.txt` `8ebe83cc…` (1,182), `p1-7-playtest-v3.md` `cd1c40af…` (5,065). The commits use the v2 messages; `p1-7-msg-1.txt` and `p1-7-msg-2.txt` are kept and not used.
+- The playtest folder `D:\Documents\BGA Studio\p1-7-playtest-v3-results\`, as the prompt gave it: `p1-7-playtest-v3-results.txt` (137 lines, 136 newlines and none after the last line, 4,891 bytes, `3c4d480d…`), `IndianaScones0.log` (232 lines, 13,884 bytes, `a9cba597…`), `IndianaScones1.log` (235 lines, 15,724 bytes, `671dcccc…`).
+- Report: all matched, so the session went on after the "commit the P1.7 code" go-ahead.
+
+**The two code commits** (Jonathan's "Commit the P1.7 code."; the method of P1.4 to P1.6: nothing touches the working tree)
+
+| # | Commit | Subject | Diff and message | Staged diff | `--stat` |
+|---|---|---|---|---|---|
+| 1 | `6ab72e62618563ab1ce853dc2914275575bd8e29` | `struct: autowired actions, group 2: confirmRequirements, riskIt (P1.7)` | `p1-7-rename.diff`, `p1-7-msg-1-v2.txt` | `p1-7-staged-1.diff`, 19,300 bytes, `cmp` **identical** | 4 files, 80 insertions, 153 deletions (`firstascent.action.php` 0/110, `firstascent.js` 16/36, `Game.php` 61/4, `states.inc.php` 3/3) |
+| 2 | `3bf93d3067c9385f68b729ebf511b7a38bcc0511` | `struct: the active player's name from getPlayerNameById in the two autowired actions (P1.7)` | `p1-7-name.diff`, `p1-7-msg-2-v2.txt` | `p1-7-staged-2.diff`, 4,091 bytes, `cmp` **identical** | 1 file (`modules/php/Game.php`), 7 insertions, 7 deletions |
+
+- For each: `git apply --cached --check` and `git apply --cached` both exited 0 with no whitespace warning; `git diff --cached --output=<staged diff file>`; `cmp` against the reviewed diff; `git commit -F <message>`; the HEAD blobs checked.
+- HEAD blobs after commit 1: `Game.php` `e475e87f2c0c34a10795de2a6634ac47bfa82161`, `states.inc.php` `457b347d…`, `firstascent.action.php` `d8796293…`, `firstascent.js` `ebfc1dc8…`. After commit 2: `Game.php` `5bdc24e81426989cfdfddea4c46756613f61f6fb`, the other three unchanged. All as the prompt's table gave them.
+- After commit 2, `git status --short` is empty. `git log --stat -2` showed exactly the two commits above with those stats. Jonathan checked both and confirmed the stats ("4 files, 80 insertions, 153 deletions; then 1 file, 7 insertions, 7 deletions").
+
+**The playtest record**
+
+List v3 (`p1-7-playtest-v3.md`), 2026-11-24, one table: 2 players and 2 rounds, table 1002409 in the consoles' URLs. IndianaScones0 (id 2369492) was Z, with Buff Boulderer. IndianaScones1 (id 2369493) was W, with Bold Brit. Jonathan's results: `D:\Documents\BGA Studio\p1-7-playtest-v3-results\p1-7-playtest-v3-results.txt` (137 lines, 4,891 bytes, CRLF); consoles `IndianaScones0.log` (232 lines, 13,884 bytes) and `IndianaScones1.log` (235 lines, 15,724 bytes) in the same folder.
+
+*The results, step by step* (the first line of each is what Jonathan's file says, summarised; his words are quoted where a summary would lose something)
+- **G1:** "modules/php/Game.php is 355,995 B & 6,602 lines, states.inc.php is 16,568 B & 333 lines, firstascent.action.php is 7,893 B & 232 lines, and firstascent.js is 742,178 B & 13,532 lines": all four as expected.
+- **T1:** IndianaScones0 was Z with Buff Boulderer, IndianaScones1 was W with Bold Brit (not Bionic Woman). No error in either tab.
+- **T2: `actRiskIt` in state 20.**
+  - The Pitch was Bee Sting Corner (pitch 18, on hex 4). Z was missing a Gear. Z's hand count before pressing Risk it was 5. Setup: see the deviation below.
+  - Log lines, the same set in both tabs (Jonathan's file lists them newest first), all naming IndianaScones0 (Z): "IndianaScones0 takes a risk in attempting Bee Sting Corner"; "Debug: the risk die is forced to 2 (riskIt)"; "IndianaScones0 rolls -2 Cards and will choose an opponent and give them 2 Asset Cards"; "IndianaScones0 gives Gaston and Toe Jam from his hand to IndianaScones1"; "IndianaScones0 spends Alpine Draws, Edge, 1 Water, and 1 Psych and climbs Bee Sting Corner".
+  - "Z's hand count after giving the two cards is 1. W's went from 5 to 7." "Z's climber and rope are right in both tabs."
+  - The request, URL in full as the file gives it: `https://studio.boardgamearena.com/1/firstascent/firstascent/actRiskIt.html?selected_hex=4&selected_pitch=18&trifecta_selections=&extra_water=false&lock=39976757-f39b-4633-8538-3476ab4f3e03&table=1002409&noerrortracking=true&testuser=2369492&requirements%5B%5D=2&requirements%5B%5D=0&requirements%5B%5D=0&requirements%5B%5D=1&requirements%5B%5D=0&requirements%5B%5D=1&requirements%5B%5D=1&selected_resources%5B%5D=172&selected_resources%5B%5D=201&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&dojo.preventCache=1795571518269`. The payload: `selected_hex` 4, `selected_pitch` 18, `trifecta_selections` (empty), `extra_water` false, the framework's `lock`, `table` 1002409, `noerrortracking` true, `testuser` 2369492, seven `requirements[]` (2, 0, 0, 1, 0, 1, 1), two `selected_resources[]` (172, 201), four `selected_tokens[]` (all 0), `dojo.preventCache`; no `selected_summit_betas`.
+  - "No errors or warnings in either console."
+- **T3:** "As expected."
+- **T4: `actConfirmRequirements` in state 20, on The Trifecta** (pitch 36, on hex 5).
+  - Jonathan tried `debug_giveAssets(22,23,15,16,1,8)` and the call was refused (see below).
+  - "I chose shaded crack..." Log lines, the same in both tabs and naming IndianaScones0 (Z): "IndianaScones0 climbs a Shaded Crack Trifecta"; "IndianaScones0 spends Smear, Cams, Arm Bar, Nuts, Undercling, Smear, 1 Water, and 1 Psych and climbs The Trifecta". "Z's climber and rope look correct in both tabs."
+  - The request, URL in full as the file gives it: `https://studio.boardgamearena.com/1/firstascent/firstascent/actConfirmRequirements.html?selected_hex=5&selected_pitch=36&trifecta_selections=shaded%20crack&extra_water=false&lock=4bd54d33-537f-448c-8f22-f1abf4ea147e&table=1002409&noerrortracking=true&testuser=2369492&requirements%5B%5D=2&requirements%5B%5D=1&requirements%5B%5D=1&requirements%5B%5D=1&requirements%5B%5D=1&requirements%5B%5D=1&requirements%5B%5D=1&selected_resources%5B%5D=119&selected_resources%5B%5D=144&selected_resources%5B%5D=148&selected_resources%5B%5D=142&selected_resources%5B%5D=108&selected_resources%5B%5D=187&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&selected_tokens%5B%5D=0&dojo.preventCache=1795572497091`. The payload: `selected_hex` 5, `selected_pitch` 36, `trifecta_selections` `shaded crack` (the space is `%20` in the URL), `extra_water` false, seven `requirements[]` (2, 1, 1, 1, 1, 1, 1), six `selected_resources[]` (119, 144, 148, 142, 108, 187), four `selected_tokens[]` (all 0); no `selected_summit_betas`.
+
+*What the playtest showed* (the design discussion's readings, each checked against the files and the code; where a check disagrees it says so)
+- **G1:** agrees. Four sizes and line counts as expected.
+- **T1:** agrees. No error in either console; Z took Buff Boulderer and W took Bold Brit.
+- **T2:** agrees.
+  - **The request.** Pitch 18 arrives as plain digits (`selected_pitch=18`), so session 1's leading-zero reading now holds for a two-digit pitch id too. Within this log it is the first two-digit pitch id in a request: the only `selected_pitch` value recorded in `progress.md` before this entry is 3 (the smoke), and P1.6's actions send no pitch. An empty `trifecta_selections` is sent as an empty value, as in the smoke; `requirements[]` has 7 values and `selected_tokens[]` 4; `selected_summit_betas` is absent (an empty array is omitted).
+  - **The Pitch.** `action.php`'s order is gear, face, crack, slab, any skill, water, psych (HEAD `0bed4c5`, `firstascent.action.php:34` onward). So the request's `2, 0, 0, 1, 0, 1, 1` is 2 Gear, 1 Slab, 1 Water and 1 Psych: three cards, and the request carries two (`172`, `201`), which agrees with Z being one Skill card short and with the log line "spends Alpine Draws, Edge, 1 Water, and 1 Psych". Hand counts agree: Z 5, then 2 played and 2 given, leaves 1; W 5 + 2 = 7.
+  - **The path.** Both consoles show `climbOrRest`, `selectOpponent`, `discardAssets`, `climbingCard`: states 20, 23, 22, then the climbing card. This is the face-2 path of session 1's entry, with no risk Summit Beta token (a token would have gone to `riskSummitBeta` instead). The climb completed in state 22: `confirmAssetsForDiscard` (`Game.php:2982`, with its own `checkAction` at `:2983`) calls `confirmRequirements(...$risked_requirements)` (`:3613`), the `risked_requirements` global that `actRiskIt` wrote. The body at `:1230` is `private`, and no `checkAction` occurs between `:1230` and `:1990`, so the body ran in state 22 without its inner check, as P1.7 intends.
+  - **`rollRiskDie('riskIt')`** (`Game.php:1873`): the kept use-case label; the log line "Debug: the risk die is forced to 2 (riskIt)" shows it, and shows that `debug_forceDie(2)` took effect.
+  - **`possibleactions`:** `actRiskIt` is in state 20 only (`states.inc.php:80`).
+- **T3:** agrees. Both consoles show `nextRound`, then `climbOrRest`, `nextClimb`, `climbOrRest`: round 2 started with W resting and Z to climb. Jonathan's file says only "As expected."
+- **T4:** agrees. The value with a space (`shaded%20crack`) passed the entry's check, was split into the exposure and the type, and the log line names "a Shaded Crack Trifecta" in both tabs. `actConfirmRequirements` is in states 20, 22 and 50 (`states.inc.php:80`, `:106`, `:278`); the climb was played in state 20. Both consoles end with `climbOrRest`, then `climbingCard`: Jonathan stopped there, as the list says. Requirements `2, 1, 1, 1, 1, 1, 1` are 2 Gear, 1 Face, 1 Crack, 1 Slab, 1 any skill, 1 Water and 1 Psych; the six resources and the log line agree.
+- **The consoles:** agree. No game error, no `[FA …]` warning and no raw `${...}` in either. The other lines are the framework's state messages, the Permissions-Policy notices, the blocked `browser-update.org` request, the iframe sandbox notice, the table-view lines and the reloads. `Starting game setup` appears 5 times in each console, which is 4 reloads each, and the state entries are the same in both (the sequences compared by script). The one extra pair of lines is in Z's console, the refused debug call of T4 (below). **One reading differs in part:** the design discussion put these two lines down to BGA's debug client and "not the game's code". The two console lines are logged by the debug client (the stack goes `triggerDebug`, `performAction`, `ajaxcall` in `ly_studio.js`, and the second line is an unhandled promise rejection with an empty message), but the message text is the game's own: a `VisibleSystemException` thrown by `debug_giveAssets` (`UtilTrait.php:1573`–`1574`), the debug function's own check. It is not a play path, and P1.7 doesn't touch it (`UtilTrait.php` is unchanged).
+
+*What Jonathan played differently from the list, and what his file doesn't give*
+- **T2, a deviation.** The list said to set Z's hand with `debug_giveAssets`, and to stop if neither bottom-row Pitch beside The Trifecta worked. Jonathan wrote: "Z has the necessary resources to climb both pitches adjacent to The Trifecta, so I went in to phpMyAdmin and manually moved a gear card from Z's hand back to the Asset Deck and added a crack card the same way, then refreshed both players' tabs. I also edited bga_globals->resource_tracker to reflect the change in hand cards." Jonathan accepts the deviation. The edit changed only where two cards were and the `resource_tracker` global, neither of which P1.7 touches; the client built the request from the edited state (Z short exactly one Gear, hand 5) and the climb completed. This is recorded as a deviation, not as a finding.
+- **T4, the refused debug call.** Jonathan wrote: "I tried `debug_giveAssets(22,23,15,16,1,8)` but got: Unexpected error: Asset card 1: 1 listed, but only 0 of its 4 copies are in the deck or the discard pile (elsewhere: hand of player 2369493, portaCrack, hand of player 2369493, portaCrack) (reference: GS1 25/11 02:59:50) so I had to change the 1 to a 2, which was accepted." This follows the list's rule for a refused call (another Crack card, 1–7), so it isn't a deviation.
+- **Not written down:** T1's `debug_setAvailableCharacters("12")` and T2's `debug_forceDie(2)`, which the list's "Before you start" asks Jonathan to note. Z took Buff Boulderer, and the "Debug: the risk die is forced to 2" log line shows the die was forced. Also T2's Summit Beta check: the state sequence is the path with no risk Summit Beta token.
+
+*Not played, as session 1's entry records:* the checkmark path (`riskIt` calling `confirmRequirements`, `Game.php:1946`), state 50, `extra_water` true, and the Dirtbag and Bionic Woman payload.
+
+**"Done when"** ("each listed action works in every state that allows it")
+- `actRiskIt` is allowed only in state 20 and was played there (T2).
+- `actConfirmRequirements` is allowed in states 20, 22 and 50 and was played in state 20 (T4).
+- In states 22 and 50 the client never sends it; these are the dead entries that P1.10 removes (the plan's "Dead entries left for P1.10"). What P1.7 changes there is the body, which now runs without its inner `checkAction`. In state 22 that was played: T2's climb completed there, through `confirmAssetsForDiscard`. In state 50 it is covered by the harness and the static checks.
+- **"Existing tables still work":** not checked, by D12 (no table spans a deploy in this project).
+- **Studio after:** playable.
+
+**Still open**
+- **Whether autowiring refuses undeclared arguments** (an old client's `dirtbag` and `bionic_woman`): still UNVERIFIED, because no request sent one (the client no longer builds them).
+- **The phantom card in `#deck_draw_1`** (`TODO.md`, the entry about the card drawn twice in a Portaledge draw; no step assigned). The playtest has no new finding.
+- **The dead `actConfirmRequirements` entries in states 22 and 50:** P1.10 removes them.
+
+**What's next:** P1.8, with its own prompt: `confirmClimbingCardChoice`, `passClimbingCard` (B3: it sends a player id), `undoClimbingCard`, `confirmCrimperClimbingCard`, `confirmAssetsForDiscard`, `confirmSelectedOpponent` and `confirmPortaledge`, plus `bespokeClimbingCard`'s `getActivePlayerName` call (`UtilTrait.php`; 1 of the 57 calls left after P1.7). It applies the type rule, the space rule for `trifecta_selections`-like values, and the `getPlayerNameById` step.
+
+**Jonathan's messages to this session, quoted in full** (his messages only: the prompt, "Commit the P1.7 code.", the message that sent this session on to §4 and §5, and the docs review. The start-check report above is mine and is not quoted.)
+
+*Message 1 (the prompt):*
+
+> # P1.7, session 2 of 2: the two code commits and the closing docs
+>
+> ## 1. The grant
+>
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`.
+>
+> This session closes **P1.7, "Autowired actions (group 2)"**. Session 1 left the whole change in the working tree, uncommitted. Its record is the `progress.md` entry "2026-11-24 (P1.7, Autowired actions, group 2: in progress, session 1)": read that entry first. I have played the Studio playtest on list v3.
+>
+> **This session edits no code.** It makes the two code commits from the two diffs I reviewed, records the playtest and writes the closing docs.
+>
+> Docs this session may edit:
+> - `misc/docs/progress.md`: a new "done" entry at the top (§5). Session 1's entry stays as it is.
+> - `misc/docs/MIGRATION_PLAN.md`: the "P1.7 status" line in the P1.6–P1.9 section only (§5). Its notes and the rest of the file stay as they are.
+> - `misc/docs/TODO.md`: not edited. The playtest has no new finding. If you find one, stop and report it before writing anything.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-7-`.
+>
+> **Git:**
+> - The two code commits are made on my "commit the P1.7 code", by the method in §3. The working tree is never touched.
+> - The `docs:` commit is made on my "commit docs", staged by explicit path.
+> - Push only on my "push".
+>
+> No deploy (I deploy), and nothing on the BGA Production site. No installs without my confirmation. Anything outside this grant needs my explicit go-ahead.
+>
+> **Working rules** (as in session 1):
+> - The working copy is CRLF and the index LF (`core.autocrlf` is on). Don't check out `dbmodel.sql`.
+> - Edit docs by script with exact-match checks (each old text must occur exactly once), keeping each file's line endings.
+> - `git diff`: put `--output=<file>` before any `--`, and never use a `>` redirect for a diff.
+> - Cite line numbers with the version they are at.
+>
+> ## 2. Start check (read-only)
+>
+> - `git fetch origin`. HEAD should be `0bed4c59a5746316e60a44404c7f6f86c558d347` (session 1's `docs:` commit, `docs: P1.7 in progress, session 1 (two actions converted in the working tree, smoke results, playtest list v3)`), with parent `3c5691cf306c6a1fe1c1cdf0c525329571e5bd5b`, level with `origin/main`. Report whether it is level.
+> - Nothing staged. Exactly four files modified, and nothing else in `git status --short`. Their working-tree blobs (`git hash-object`):
+>   - `modules/php/Game.php` `5bdc24e81426989cfdfddea4c46756613f61f6fb`
+>   - `states.inc.php` `457b347d0b235b4650c0a6a748897c62efc6a626`
+>   - `firstascent.action.php` `d87962937dcfb12c48f5b43e86d73d21c3cfcf05`
+>   - `firstascent.js` `ebfc1dc886d261b7e346943bd360f9ba07aad01f`
+> - The reviewed files in `D:\Documents\BGA Studio\` are unchanged (SHA-256):
+>   - `p1-7-rename.diff` `77d3a2823c5c63a2ddb82480a71301cf34816597602822921268ba43f6e096f8` (19,300 bytes)
+>   - `p1-7-name.diff` `80f139f3e66918b152c2d82ac85b0a1ad405bffda0d851903c28be4e2d507b9a` (4,091 bytes)
+>   - `p1-7-all.diff` `963c1a43ae768f41c4e78e12605ba01b3e5dff204c2211770367de75c5e1d111` (23,250 bytes)
+>   - `p1-7-msg-1-v2.txt` `d660ffbfbfb5354d672a9113700ddf66809a588230589ccbfd9c532ca7b1b729` (3,860 bytes)
+>   - `p1-7-msg-2-v2.txt` `8ebe83cc4163e927edbc46128b7dc344b30a51d61659868fb1d9386bf652354e` (1,182 bytes)
+>   - `p1-7-playtest-v3.md` `cd1c40af184ebee25b071faa46f9c7d099af137ff34e2d51fb7a306b390b0c67` (5,065 bytes)
+> - The commits use the **v2** messages. `p1-7-msg-1.txt` and `p1-7-msg-2.txt` are kept but not used.
+> - If anything differs, stop and report before doing anything else. Otherwise report the check and wait for my "commit the P1.7 code".
+>
+> ## 3. The two code commits (on my "commit the P1.7 code")
+>
+> This is the method of P1.4 to P1.6. The working tree is never touched. For each diff in order, with its message:
+>
+> | # | Diff | Message | Staged diff file |
+> |---|---|---|---|
+> | 1 | `p1-7-rename.diff` | `p1-7-msg-1-v2.txt` | `p1-7-staged-1.diff` |
+> | 2 | `p1-7-name.diff` | `p1-7-msg-2-v2.txt` | `p1-7-staged-2.diff` |
+>
+> For each one:
+> 1. Run `git apply --cached --check "<diff>"`, then `git apply --cached "<diff>"`.
+> 2. Run `git diff --cached --output="<staged diff file>"`, then `cmp` it against the reviewed diff. **They must be identical.**
+> 3. Run `git commit -F "<message>"`.
+> 4. Check the HEAD blobs (`git rev-parse HEAD:<path>`) against the table below.
+>
+> If any step fails or any check differs, stop and report. Don't retry another way. If `git apply` prints a whitespace warning, that isn't a failure: report the lines, check whether each was already in the lines it replaces at HEAD, and commit the diff as reviewed.
+>
+> | After | `Game.php` | `states.inc.php` | `firstascent.action.php` | `firstascent.js` |
+> |---|---|---|---|---|
+> | commit 1 | `e475e87f2c0c34a10795de2a6634ac47bfa82161` | `457b347d0b235b4650c0a6a748897c62efc6a626` | `d87962937dcfb12c48f5b43e86d73d21c3cfcf05` | `ebfc1dc886d261b7e346943bd360f9ba07aad01f` |
+> | commit 2 | `5bdc24e81426989cfdfddea4c46756613f61f6fb` | unchanged | unchanged | unchanged |
+>
+> After commit 2, `git status --short` must be empty. Report the two commit hashes and `git log --stat -2`.
+>
+> ## 4. The playtest record
+>
+> The playtest ran on list v3 (`p1-7-playtest-v3.md`) on 2026-11-24, on one table: 2 players and 2 rounds, table 1002409 in the consoles' URLs. IndianaScones0 (id 2369492) was Z, with Buff Boulderer. IndianaScones1 (id 2369493) was W, with Bold Brit.
+> - My results: `D:\Documents\BGA Studio\p1-7-playtest-v3-results\p1-7-playtest-v3-results.txt`. It has 137 lines (136 newlines, none after the last line), 4,891 bytes, CRLF, SHA-256 `3c4d480d994ec2ad477d603ba8b2983d7cfef36d51b6384e677a463a2e4bf580`.
+> - The consoles, in the same folder:
+>   - `IndianaScones0.log`: 232 lines, 13,884 bytes, SHA-256 `a9cba597647ce07be6767b008bfd8845884445021ff4f068d348472ab88f4e08`.
+>   - `IndianaScones1.log`: 235 lines, 15,724 bytes, SHA-256 `671dcccc21640731c4a5bab98064e15d13c052a0324d5c6ddccec35a751580a5`.
+> - If the folder isn't there, or a count or hash differs, ask me rather than search for it.
+>
+> Record the files in the entry by path and counts. Summarise each step's result from my file, and quote my wording where a summary would lose something. Quote both requests' URLs in full, as my file gives them.
+>
+> Below are the design discussion's readings. Check each against the files, and against the code where a reading cites it, rather than take it as given. Say where a check agrees and where it doesn't.
+>
+> **4.1 What passed**
+> - **G1:** all four sizes and line counts as expected.
+> - **T1:** no error in either tab. Z took Buff Boulderer, and W took Bold Brit, not Bionic Woman.
+> - **T2: `actRiskIt` in state 20.**
+>   - The Pitch was Bee Sting Corner (pitch 18, on hex 4), and Z was one Gear short. Z's hand was 5 before the Risk it press.
+>   - The request: `selected_hex=4`, `selected_pitch=18`, `trifecta_selections=` sent as an empty value, `extra_water=false`, 7 `requirements[]` (2, 0, 0, 1, 0, 1, 1), 2 `selected_resources[]` (172, 201), 4 `selected_tokens[]` (all 0), and no `selected_summit_betas`. Pitch 18 is the first two-digit pitch id in a request, and it arrives as plain digits. So the leading-zero reading of session 1's entry now holds for a two-digit pitch id too.
+>   - The log lines, read by content, are the same in both tabs, and all name Z (IndianaScones0):
+>     - the risk: "takes a risk in attempting Bee Sting Corner";
+>     - the forced die: "Debug: the risk die is forced to 2 (riskIt)", which also shows the kept `rollRiskDie('riskIt')` label (session 1's decision 2);
+>     - the die: "rolls -2 Cards and will choose an opponent and give them 2 Asset Cards";
+>     - the gift: "gives Gaston and Toe Jam from his hand to IndianaScones1";
+>     - the climb: "spends Alpine Draws, Edge, 1 Water, and 1 Psych and climbs Bee Sting Corner".
+>   - Hand counts: Z went from 5 to 1 (2 cards played, 2 given), and W from 5 to 7.
+>   - Z's climber and rope are on the Pitch in both tabs.
+>   - Both consoles show `climbOrRest`, then `selectOpponent`, then `discardAssets`, then `climbingCard`: states 20, 23 and 22. This is the face-2 path that session 1's entry describes, with no risk Summit Beta token. The climb completed in state 22. There `confirmAssetsForDiscard` calls the `confirmRequirements` body with the `risked_requirements` global that `actRiskIt` wrote. The body is now private and has no inner `checkAction`, and it ran in that state.
+> - **T3:** round 2 started with W, and Z was to climb. My file says only "As expected". Both consoles agree: `nextRound`, then `climbOrRest`, `nextClimb`, `climbOrRest`.
+> - **T4: `actConfirmRequirements` in state 20, on The Trifecta** (pitch 36, on hex 5).
+>   - I chose exposure shaded and type crack.
+>   - The request: `trifecta_selections=shaded%20crack`, with the space encoded as `%20`, and accepted. The rest: `selected_hex=5`, `selected_pitch=36`, `extra_water=false`, 7 `requirements[]` (2, 1, 1, 1, 1, 1, 1), 6 `selected_resources[]`, 4 `selected_tokens[]` (all 0), and no `selected_summit_betas`.
+>   - The log lines, the same in both tabs and naming Z: "IndianaScones0 climbs a Shaded Crack Trifecta" and "IndianaScones0 spends Smear, Cams, Arm Bar, Nuts, Undercling, Smear, 1 Water, and 1 Psych and climbs The Trifecta". The first line shows that the value with a space passed the entry's check and was split into the exposure and the type.
+>   - Z's climber and rope are on The Trifecta in both tabs. Both consoles end with `climbOrRest`, then `climbingCard`: I stopped there, as the list says.
+> - **The consoles:** no game error or warning in either.
+>   - The other lines are the framework's state messages, the Permissions-Policy notices, the blocked `browser-update.org` request, the sandbox notice, the table-view lines and the reloads.
+>   - `Starting game setup` appears 5 times in each console, which means 4 reloads each. The state entries are the same in both.
+>   - One more pair of lines is in Z's console: the refused debug call of T4 (§4.2), shown as "Unexpected error: Asset card 1: …" and "Uncaught (in promise) {message: '', args: null}". Both come from BGA's debug client (`ly_studio.js`, `triggerDebug`), not from the game's code.
+>
+> **4.2 What I played differently from the list, and what my file doesn't give**
+> - **T2, a deviation.** I didn't use `debug_giveAssets`. My words: "Z has the necessary resources to climb both pitches adjacent to The Trifecta, so I went in to phpMyAdmin and manually moved a gear card from Z's hand back to the Asset Deck and added a crack card the same way, then refreshed both players' tabs. I also edited bga_globals->resource_tracker to reflect the change in hand cards." The list said to stop if neither Pitch worked. I accept the deviation. The edit changed only where two cards were and the `resource_tracker` global, neither of which P1.7 touches. The client built the request from the edited state, and the climb completed. Record it as a deviation, with my words quoted.
+> - **T4, the refused debug call.** My words: "I tried `debug_giveAssets(22,23,15,16,1,8)` but got: Unexpected error: Asset card 1: 1 listed, but only 0 of its 4 copies are in the deck or the discard pile (elsewhere: hand of player 2369493, portaCrack, hand of player 2369493, portaCrack) (reference: GS1 25/11 02:59:50) so I had to change the 1 to a 2, which was accepted." This follows the list's rule for a refused call (another Crack card), so it isn't a deviation.
+> - **Not written down:**
+>   - T1's `debug_setAvailableCharacters("12")` and T2's `debug_forceDie(2)`, which the list's "Before you start" asks me to note. Z took Buff Boulderer, and the "Debug: the risk die is forced to 2" line shows that the die was forced.
+>   - T2's Summit Beta check. The state sequence is the path with no risk Summit Beta token.
+>
+> **4.3 Not played, and "Done when"**
+> - Not played, as session 1's entry records: the checkmark path, state 50, `extra_water` true, and the Dirtbag and Bionic Woman payload.
+> - The plan's "Done when" is "each listed action works in every state that allows it":
+>   - `actRiskIt` is allowed only in state 20, and was played there (T2).
+>   - `actConfirmRequirements` is allowed in states 20, 22 and 50, and was played in state 20 (T4).
+>   - In states 22 and 50 the client never sends it. These are the dead entries that P1.10 removes (the plan's note "Dead entries left for P1.10"). What P1.7 changes there is the body, which now runs without its inner `checkAction`. In state 22 that was played: T2's climb completed there. In state 50 it is covered by the harness and the static checks.
+> - "Existing tables still work": not checked, by D12.
+>
+> ## 5. The closing docs
+>
+> **`misc/docs/progress.md`:** a new entry at the top, titled "2026-11-24 (P1.7, Autowired actions, group 2: done)". If the session runs on a later day, use that day's date. The entry holds:
+> - the start check;
+> - the two commits: each step of §3, with its counts, hashes and `cmp` result;
+> - the playtest record of §4, with the deviation and the gaps of §4.2;
+> - **Still open:**
+>   - whether autowiring refuses undeclared arguments (an old client's `dirtbag` and `bionic_woman`), still UNVERIFIED, because no request sent one;
+>   - the phantom card in `#deck_draw_1` (`TODO.md`, no step assigned);
+>   - the dead `actConfirmRequirements` entries in states 22 and 50 (P1.10).
+> - **What's next:** P1.8, with its own prompt: `confirmClimbingCardChoice`, `passClimbingCard` (B3: it sends a player id), `undoClimbingCard`, `confirmCrimperClimbingCard`, `confirmAssetsForDiscard`, `confirmSelectedOpponent` and `confirmPortaledge`, plus `bespokeClimbingCard`'s `getActivePlayerName` call.
+> - My messages to you in this session, quoted in full, this one included.
+> - **Model and effort:** Sonnet 5.5, High, as this message states.
+>
+> **`misc/docs/MIGRATION_PLAN.md`:** change the "P1.7 status" line to done, with the date. Give:
+> - session 1's `docs:` commit `0bed4c5`, then the two code commit hashes with their subjects;
+> - the playtest: list v3, 2026-11-24, one table, as expected, with one deviation in T2 (`progress.md`, the "done" entry);
+> - the "Done when" reading of §4.3;
+> - "Existing tables still work": not checked, by D12;
+> - "Studio after: playable".
+>
+> Keep the line's smoke sentence and all of its notes as they are.
+>
+> **Then:**
+> 1. Write the raw docs diff, `p1-7-docs-closing.diff`, and show its counts.
+> 2. Draft the `docs:` commit message as text: `docs: P1.7 done (two code commits, playtest v3 results, closing docs)`, plus a short body if one is useful.
+> 3. Stop and wait for my docs review. On my "commit docs", stage only `misc/docs/progress.md` and `misc/docs/MIGRATION_PLAN.md`, by explicit path, and commit them. Push only on my "push".
+>
+> Finally, as always: update `misc/docs/progress.md` as above before the session ends.
+
+*Message 2:*
+
+> Commit the P1.7 code.
+>
+> Record this message in the entry, quoted in full.
+
+*Message 3:*
+
+> The commits are checked: both staged diffs are cmp-identical to the reviewed diffs, the HEAD blobs match the table, and the stats are as session 1 recorded (4 files, 80 insertions, 153 deletions; then 1 file, 7 insertions, 7 deletions). Go on to §4 and §5.
+>
+> On the quotes: "my messages" means only the messages I send you, which so far are the prompt, "Commit the P1.7 code." and this one. Your start-check report goes in the entry as the start check, not as a quoted message. Record this message in the entry, quoted in full.
+
+*Message 4 (docs review):*
+
+> Docs review. Record this message in the progress.md entry, quoted in full, as "Message 4 (docs review)", after message 3.
+>
+> The design discussion checked the docs diff. It applies cleanly to 0bed4c5's two docs (blobs 12bb8b3 and 3ee25cb), the quoted prompt is identical to the prompt file, and the lines cited at 3bf93d3 are right (Game.php 1230, 1873, 1946, 2982–2983 and 3613; UtilTrait.php 1573–1574). Both staged diffs have the reviewed diffs' SHA-256, and applied in order to 0bed4c5 they give the table's blobs. Your two corrections are right: the refused call's message text is debug_giveAssets's own VisibleSystemException, and pitch 18 is the first two-digit pitch id only among the requests recorded in progress.md. Keep both as written.
+>
+> Two edits, by exact match, keeping each file's line endings, before adding this message's quote:
+>
+> 1. misc/docs/progress.md: replace "(his messages only: the prompt, "Commit the P1.7 code." and the message that sent this session on to §4 and §5. The start-check report above is mine and is not quoted.)" with "(his messages only: the prompt, "Commit the P1.7 code.", the message that sent this session on to §4 and §5, and the docs review. The start-check report above is mine and is not quoted.)"
+>
+> 2. The commit message: write p1-7-docs-closing-msg-v2.txt (keep the first), with "Jonathan's three messages quoted in full" replaced by "Jonathan's four messages quoted in full". Nothing else in it changes.
+>
+> The entry's line saying the docs: commit goes on top of 3bf93d3 is right as it is. No other edit.
+>
+> Then write p1-7-docs-closing-v2.diff (don't overwrite the first) and check it against p1-7-docs-closing.diff: the only differences may be edit 1, this message's quote, and the index lines and hunk headers they change. Check the v2 message against the first the same way: the only difference may be edit 2. If so, commit docs with p1-7-docs-closing-msg-v2.txt, staging only misc/docs/progress.md and misc/docs/MIGRATION_PLAN.md by explicit path, and report the commit hash and git show --stat. If anything else differs, stop and report instead. Don't push yet: I have one more docs change for this session first.
+
 ## 2026-11-24 (P1.7, Autowired actions, group 2: in progress, session 1)
 
 P1.7, session 1 of 2: **the two actions of group 2 are converted** (`confirmRequirements` and `riskIt`) and the change is in the working tree, **uncommitted and unstaged**, as the state after both planned commits. The two code commits (`struct:` the rename, `struct:` the names) are session 2's job, after Jonathan's Studio playtest of list v3. This session wrote the change, a smoke stop (played by Jonathan, passed), a harness with a mutation test, the stacked diffs and their commit messages, and the playtest list. Nothing was deployed by this session, nothing is on Production, and `TODO.md` was not edited (no new finding). **Model and effort:** Sonnet 5.5, High (as Jonathan's prompt states).
