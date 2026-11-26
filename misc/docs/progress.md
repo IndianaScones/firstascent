@@ -2,6 +2,56 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-25 (laptop setup check)
+
+A review-only session. **Machine:** laptop (Windows 11, hostname `DESKTOP-PKRB865`, clone `C:\BGA Studio\firstascent`, work folder `C:\BGA Studio\`). **Model:** Sonnet 5.5. Nothing was edited except this entry: no code, no other doc, no commit, no push, no deploy, nothing on Studio or Production, no installs, no git config change, `.vscode/sftp.json` not touched, the private key not read (`ssh-add -l` only).
+
+**Results**
+
+| # | Check | Result | Evidence |
+|---|---|---|---|
+| 1 | git level and clean | PASS | `git fetch origin` ok. `HEAD` = `origin/main` = `10c9c21c5b2c786031545dd19f6342c34c026f35`. `git status --short` empty; nothing staged. |
+| 2 | Line endings | PASS, with notes | `core.autocrlf=true` (from `C:/Program Files/Git/etc/gitconfig`). `git ls-files --eol`: 97 files = 75 `i/lf w/crlf`, 21 `i/-text w/-text` (images), 1 `i/lf w/lf`. No `mixed`. The one text file not CRLF in the working copy is `dbmodel.sql`. |
+| 3 | Tools | PASS | git 2.56.1.windows.1 (the desktop's was 2.51.0 per the P1.8 handoff). PHP 8.4.28 (cli). OpenSSH_for_Windows_9.5p2, LibreSSL 3.8.2. `ssh-add -l` lists exactly one key: `256 SHA256:m8R4AD0gtMmAJnu4xEqKpXk2FjUL5g6OKWAY5ts0Fn4 jonat@MasterBlaster (ED25519)`. The `ssh-agent` service is Running, start type Automatic. |
+| 4 | `.vscode/sftp.json` | PASS, with a note | The file and the `.vscode` folder are absent. `git check-ignore -v` shows `.gitignore:1:.vscode/sftp.json`. **Note:** VS Code is installed (`C:\Users\Jonat\AppData\Local\Programs\Microsoft VS Code\bin\code.cmd`) with `natizyskunk.sftp-1.16.3`, so only the config is missing, not the editor. |
+| 5 | Machine-specific assumptions | PASS | No absolute path in `CLAUDE.md` or in `PROCEDURES.md` outside "Work folder and machines". The assumptions are listed below. |
+| 6 | Work folder | FAIL (one file) | The four named lists are present. `handoff.patch` is missing; its content is available as `p1-8-smoke-v2.diff` (below). |
+
+**Item 2: `dbmodel.sql`**
+- `PROCEDURES.md` has no "Don't check out `dbmodel.sql`" rule, and neither do `BGA_PITFALLS.md`, `DECISIONS.md` or `CLAUDE.md`. The rule is in `progress.md` only: Jonathan's prompts quoted at lines 199, 411 and 760 ("The working copy is CRLF and the index LF (`core.autocrlf` is on). Don't check out `dbmodel.sql`."), and the explanation in the P1.3 entry (line 3233): `dbmodel.sql` is LF in the working copy, `git diff` warns that LF "will be replaced by CRLF the next time Git touches it", so a checkout of that file would convert it, while staging and committing leave it alone. Line 3442 records "keep it LF".
+- This clone does not break the rule's assumption; it matches it. `dbmodel.sql` is `i/lf w/lf`: 2,130 bytes, 53 LF, 0 CR, and the index blob (`git cat-file -s :dbmodel.sql`) is also 2,130 bytes. A checkout, `restore`, `reset --hard` or a branch switch that rewrites it would turn it into CRLF (2,130 + 53 = 2,183 bytes, computed, not run) and it would no longer match the Studio size.
+- **Inference:** a fresh clone with `autocrlf=true` writes CRLF, yet `dbmodel.sql`'s modified time (21:00:47) is six minutes after the three other files compared (`CLAUDE.md`, `progress.md`, `states.inc.php`: 20:54:40), and `git reflog` shows only the clone. So the file was rewritten as LF after the clone; that is why it matches the desktop. A new clone on another machine would give CRLF and need the same fix.
+- **Note:** `CLAUDE.md` is `i/lf w/crlf` here. Earlier entries (lines 411 and 3073) say it was LF in the desktop's working copy. Edit-by-script steps must keep each file's endings as found on the machine they run on.
+
+**Item 5: assumptions outside "Work folder and machines"**
+
+| Where | Assumption | Holds here? |
+|---|---|---|
+| `CLAUDE.md`, file map (`.vscode/sftp.json` row) | Studio deploy through the VS Code SFTP extension (Natizyskunk), config untracked | Editor and extension yes; the config file no (item 4) |
+| same row | Key through the Windows OpenSSH agent | Yes: agent running, one key. Not tested against Studio (no connection made) |
+| `CLAUDE.md` (overview) | Tested on Studio, deployed over SFTP, not run locally | Yes; PHP 8.4 CLI is present for harnesses only |
+| `PROCEDURES.md`, "Installs and agreements" | `winget` and its agreement flags | Yes: `C:\Users\Jonat\AppData\Local\Microsoft\WindowsApps\winget.exe` |
+| `PROCEDURES.md`, "Current phase" | Tag `legacy-final` | Yes: tags here are `legacy-final`, `prod-alpha-2026-10-20`, `prod-alpha-2026-10-24` |
+| `PROCEDURES.md`, "Playtest lists" | Lists live in the work folder; four approved models | Yes (item 6) |
+
+`node` is not installed (as on the desktop, per the P1.8 handoff). `python` resolves only to the `WindowsApps` launcher; not checked further.
+
+**Item 6: work folder** (the latest entry above names no files; the P1.8 handoff `p1-8-handoff.md`, section 4, is the list for the next step, "What's next: P1.8")
+- Present: `p1-5-playtest-v4.md` (11,344 bytes), `p1-5a-playtest-v3.md` (7,348), `p1-6-playtest-v2.md` (6,047), `p1-7-playtest-v3.md` (5,065). Also present from the handoff's table: `p1-8-handoff.md`, `p1-8-smoke-v2.md`, `p1-8-smoke-v2.diff`, `p1-8-smoke-v1.md`, `p1-8-smoke.diff`, `p1-8-harness\` (with `state1\`, `state1-v1\`, the harness, the libs, the notes, the stage 1 results; `tmp\` absent, as the handoff says it is recreated), `p1-6-harness\`, `p1-7-harness\`, `p1-7-msg-1-v2.txt`, `p1-7-msg-2-v2.txt`, `p1-7-name.diff`, `p1-7-all.diff`, `p1-6-all.diff`, `p1-6-rename.diff`.
+- SHA-256 and sizes match the handoff for the four smoke files: `p1-8-smoke-v2.diff` 539 lines, 27,949 bytes, `8066e295…3180`; `p1-8-smoke.diff` 539 lines, 28,012 bytes, `17e79f5d…c9`; `p1-8-smoke-v2.md` 77 lines, 3,653 bytes; `p1-8-smoke-v1.md` 77 lines, 3,655 bytes.
+- **Missing: `handoff.patch`** (the handoff's table says "Needed on the laptop: Yes"). It is byte-identical to `p1-8-smoke-v2.diff` (the handoff gives the same SHA-256), and that file is here with the matching hash.
+- Not yet existing, as the handoff says: `state2\`, `scratch-repo`, `p1-8-playtest-v1.md`, `p1-8-rename.diff`, `p1-8-b3.diff`, `p1-8-name.diff`, `p1-8-all.diff`, `p1-8-msg-*.txt`.
+- Also noted: the working tree here is clean at `10c9c21`, so the P1.8 commit-1 change (a patch against `10c9c21`) is not applied on this machine.
+
+**Fixes needed (none made)**
+1. `handoff.patch`: copy `p1-8-smoke-v2.diff` to `C:\BGA Studio\handoff.patch`, or have the P1.8 prompt name `p1-8-smoke-v2.diff` instead. Needs Jonathan's go-ahead.
+2. `.vscode/sftp.json`: create it on the laptop only if deploys will run from here; it stays untracked and is not edited without Jonathan's go-ahead (`CLAUDE.md`).
+3. `dbmodel.sql`: keep it LF; don't check it out. Optional doc change for Jonathan to decide: the rule is only in `progress.md`, so a session that reads `PROCEDURES.md` first never sees it.
+
+**Why.** A fresh clone on the second machine had to be shown to match the desktop's setup before any step runs on it.
+
+**What's next:** P1.8 on this machine needs the two items above (fix 1, and applying the patch on a clean tree), then Jonathan's smoke results, as in `p1-8-handoff.md`.
+
 ## 2026-11-25 (docs: work folder for two machines)
 
 A docs-only change. **Machine:** desktop. **Model:** Sonnet 5.5. No code, no deploy, nothing on Studio or Production, no installs, nothing pushed. The four code files modified in the working tree before this session (`firstascent.action.php`, `firstascent.js`, `modules/php/Game.php`, `states.inc.php`) are untouched.
