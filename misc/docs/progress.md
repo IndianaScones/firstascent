@@ -2,6 +2,28 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-25 (docs: work folder for two machines)
+
+A docs-only change. **Machine:** desktop. **Model:** Sonnet 5.5. No code, no deploy, nothing on Studio or Production, no installs, nothing pushed. The four code files modified in the working tree before this session (`firstascent.action.php`, `firstascent.js`, `modules/php/Game.php`, `states.inc.php`) are untouched.
+
+**What changed.**
+- `misc/docs/PROCEDURES.md`: a new section, "Work folder and machines", placed just before "## Commits" (followed by one blank line). It defines the work folder as the folder that contains the clone, names it for each machine (desktop `D:\Documents\BGA Studio\`, laptop `C:\BGA Studio\`), and says that each session prompt names the machine, each new `progress.md` entry names its machine, and a step moved between machines mid-step travels as `handoff.patch` in the work folder.
+- `misc/docs/PROCEDURES.md`, "Playtest lists": the desktop path `D:\Documents\BGA Studio\<step>-playtest-v1.md` is now `<step>-playtest-v1.md` in the work folder. This was the only hit outside `progress.md` that Jonathan approved for rewording.
+- Left as they are, by Jonathan's decision: `MIGRATION_PLAN.md:639` (a desktop path that records where files were; history, and outside this session's grant), the plugin paths at `MIGRATION_PLAN.md:1757-1769`, the `sftp.exe` path at line 1773, and the "Python 3.13 ... no Node" line at line 1269. `CLAUDE.md` had no machine-specific path, so it is unchanged. Earlier `progress.md` entries are unchanged: their paths are history, desktop paths.
+
+**Why.** A second machine is being added, a Windows laptop with no D: drive and the clone at `C:\BGA Studio\firstascent`. The working rules named one fixed folder for files outside the repo, which does not hold there. Naming the work folder relative to the clone, and giving each machine's path once in `PROCEDURES.md`, lets the rest of the rules say "the work folder".
+
+**Checks.** The search of `CLAUDE.md` and `misc/docs/` (not `bga/`, not existing `progress.md` entries) found one hit to reword (`PROCEDURES.md:26`). The edit used exact-match checks: "## Commits" and the old playtest-list text each occurred exactly once. `PROCEDURES.md` is LF in the working copy and kept LF; `progress.md` is CRLF and this entry was written with CRLF.
+
+**Jonathan's section text, quoted in full**
+
+> ## Work folder and machines
+> Files outside the repo (diffs, playtest lists, handoff patches, scratch outputs) go in the work folder: the folder that contains the clone.
+> - Desktop: work folder `D:\Documents\BGA Studio\`, clone `D:\Documents\BGA Studio\firstascent`.
+> - Laptop: work folder `C:\BGA Studio\`, clone `C:\BGA Studio\firstascent`.
+>
+> Each session prompt starts by naming the machine. Each new `progress.md` entry names the machine it ran on. Paths in earlier entries are desktop paths unless the entry says otherwise. A step moved between machines mid-step travels as `handoff.patch` in the work folder, and the prompt of the session that picks it up says so.
+
 ## 2026-11-24 (docs: playtest lists in PROCEDURES.md)
 
 A docs-only change, made in the P1.7 session after the P1.7 `docs:` commit `a6d7545` and before the push. **Model and effort:** Sonnet 5.5, High (as Jonathan's message states). No code, no deploy, nothing on Production, nothing pushed.

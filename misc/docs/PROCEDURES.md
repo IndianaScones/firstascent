@@ -23,7 +23,7 @@ UX and usability decisions belong to Jonathan and Garrett (the game's publisher)
 - After any code change, list specifically what Jonathan should playtest to verify it: the scenario to set up (phase, character, player count), the steps, and the expected result.
 
 ## Playtest lists
-The session that makes a code change writes its playtest list, as `D:\Documents\BGA Studio\<step>-playtest-v1.md`. A change to a list is a new version (`-v2.md` and so on); earlier versions are kept. Approved lists to follow as models: `p1-5-playtest-v4.md`, `p1-5a-playtest-v3.md`, `p1-6-playtest-v2.md`, `p1-7-playtest-v3.md`.
+The session that makes a code change writes its playtest list, as `<step>-playtest-v1.md` in the work folder. A change to a list is a new version (`-v2.md` and so on); earlier versions are kept. Approved lists to follow as models: `p1-5-playtest-v4.md`, `p1-5a-playtest-v3.md`, `p1-6-playtest-v2.md`, `p1-7-playtest-v3.md`.
 
 **Check the rules first.**
 - Before writing a step, check what it asks the players to do against `misc/docs/RULES.md` and Jonathan's rulings in `misc/docs/RULES_CHECK.md`, not against the code alone. This covers who may climb where, turn order, setup counts, what a turn allows, costs, and the options a card offers.
@@ -56,6 +56,13 @@ The session that makes a code change writes its playtest list, as `D:\Documents\
 - Record anything played differently from the list as a deviation, quoting his file.
 - Record the files in the entry by path and counts.
 - If he asks for a change to a list, write a new version in the same style. Don't make a separate fill-in template.
+
+## Work folder and machines
+Files outside the repo (diffs, playtest lists, handoff patches, scratch outputs) go in the work folder: the folder that contains the clone.
+- Desktop: work folder `D:\Documents\BGA Studio\`, clone `D:\Documents\BGA Studio\firstascent`.
+- Laptop: work folder `C:\BGA Studio\`, clone `C:\BGA Studio\firstascent`.
+
+Each session prompt starts by naming the machine. Each new `progress.md` entry names the machine it ran on. Paths in earlier entries are desktop paths unless the entry says otherwise. A step moved between machines mid-step travels as `handoff.patch` in the work folder, and the prompt of the session that picks it up says so.
 
 ## Commits
 - Keep bug fixes and structural changes in separate commits. Never combine them.
