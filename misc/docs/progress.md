@@ -2,6 +2,837 @@
 
 Running log of what was done each session and what's next. Newest entry first. See `PROCEDURES.md`.
 
+## 2026-11-26 (P1.8, Autowired actions, group 3: in progress, session 1)
+
+P1.8, session 1 of 2: **the seven actions of group 3 are converted** (`confirmClimbingCardChoice`, `passClimbingCard`, `undoClimbingCard`, `confirmCrimperClimbingCard`, `confirmAssetsForDiscard`, `confirmSelectedOpponent`, `confirmPortaledge`) and the change is in the working tree, **uncommitted and unstaged**, as the state after all three planned commits. The three code commits (`struct:` the rename, `fix:` B3 for `passClimbingCard`, `struct:` the names) are session 2's job, after Jonathan's Studio playtest of list v2. This session wrote the change, a smoke stop (played by Jonathan, passed), a harness with a mutation test, a script that checks the names, the stacked diffs and their commit messages, and the playtest list. Nothing was deployed by this session, nothing is on Production, and `TODO.md` was not edited (no new finding). **Model and effort:** Sonnet 5.5, High (as Jonathan's prompts state).
+
+**Machines.** Session 1 ran on two machines, under "Work folder and machines" in `PROCEDURES.md` (commit `10c9c21`):
+- **Desktop**, from the start of session 1 (2026-11-24 evening) to stop A: the start check, the reading, commit 1's change (the v2 smoke build), harness stage 1, the smoke list. Work folder `D:\Documents\BGA Studio\`. That desktop session is closed.
+- **Laptop**, from the pickup on 2026-11-25 (this entry's session): the pickup start check, Jonathan's smoke results, commits 2 and 3's states, harness stages 2 and 3, the diffs and messages, the playtest list, this entry. Work folder `C:\BGA Studio\`, clone `C:\BGA Studio\firstascent`. **Paths in this entry are laptop paths** (`C:\BGA Studio\`), except where it quotes the desktop record.
+
+**The move.** The step travelled as `handoff.patch` in the work folder: a copy of `p1-8-smoke-v2.diff` (`git diff HEAD --binary`, 539 lines, 27,949 bytes, SHA-256 `8066e2956c4ae74e59c05b2871f05caf59ab3c2aa122c534fd316760d4133180`), applied on the laptop on a clean tree. A fresh `git diff HEAD --binary` export after applying it has the same hash (`C:\BGA Studio\p1-8-harness\laptop-start.diff`, written by this session's start check). `p1-8-handoff.md` (written by the desktop docs session) is the record of session 1 up to stop A. **HEAD changed twice during the session, docs only:** `519c3e0` (at the start) → `10c9c21` (`docs: work folder for two machines`) → `229cd5a` (`docs: laptop setup check (review-only)`). The code lines cited by the session 1 prompt are at `519c3e0`; the commits since touch only `PROCEDURES.md` and `progress.md`, so the line numbers still hold for every code file.
+
+**Line numbers in this entry.** `Game.php`, `firstascent.js`, `states.inc.php` and `UtilTrait.php` lines are cited **at `519c3e0`** (the same code as HEAD `229cd5a`) unless a version is given. File sizes are CRLF bytes (the working copy), and "editor lines" are what WinSCP shows: the newline count, plus 1 for the files without a final newline (`Game.php`, `UtilTrait.php`, `firstascent.js`).
+
+**State at the end of the session**
+- **HEAD:** `229cd5aaae6d11643050c880559ffd31ebcc940f` (`docs: laptop setup check (review-only)`), parent `10c9c21`, level with `origin/main`. The `docs:` commit that holds this entry goes on top of it.
+- **Staged:** nothing. **Unstaged:** `modules/php/Game.php`, `modules/php/UtilTrait.php`, `states.inc.php`, `firstascent.action.php`, `firstascent.js`. `modules/utils.js` is unchanged (blob `8a0a442…`). `dbmodel.sql` is LF, 2,130 bytes, untouched.
+- **Final blobs** (`git hash-object`, LF-normalised) and sizes, which the design discussion reproduced in its own fresh clone (below):
+
+  | File | Blob (HEAD → after commit 1 → after commit 2 → final) | CRLF bytes | Newlines | Editor lines |
+  |---|---|---|---|---|
+  | `modules/php/Game.php` | `5bdc24e…` → `d65316f…` → `73f785e…` → `01da169…` | 359,509 | 6,646 | 6,647 |
+  | `modules/php/UtilTrait.php` | `f6b68a8…` → (same) → (same) → `881d21a…` | 79,738 | 1,594 | 1,595 |
+  | `states.inc.php` | `457b347…` → `c603b7f…` | 16,697 | 333 | 333 |
+  | `firstascent.action.php` | `d879629…` → `1dcc71b…` | 5,255 | 157 | 157 |
+  | `firstascent.js` | `ebfc1dc…` → `6d618df…` → `f860f13…` (unchanged by commit 3) | 740,901 | 13,511 | 13,512 |
+
+  After commit 1 (the smoke build) `Game.php` was 358,786 bytes (6,645 newlines) and `firstascent.js` 740,974 (13,513). After commit 2: `Game.php` 358,872 (6,646 newlines), `firstascent.js` 740,901 (13,511). `UtilTrait.php` grows by 32 bytes (`$this->getActivePlayerName()` is 28 characters, its replacement 60).
+- **Expected sizes on Studio after Jonathan's deploy** (G1 of list v2, five files): `Game.php` 359,509 bytes, 6,647 lines; `UtilTrait.php` 79,738 bytes, 1,595 lines; `states.inc.php` 16,697 bytes, 333 lines; `firstascent.action.php` 5,255 bytes, 157 lines; `firstascent.js` 740,901 bytes, 13,512 lines. (At stop A Jonathan read the four smoke-build sizes, all as expected: 358,786 / 6,646, 16,697 / 333, 5,255 / 157 and 740,974 / 13,514. The final `Game.php` is 723 bytes longer than the smoke build's and `firstascent.js` 73 bytes shorter: commits 2 and 3.)
+- **Files outside the repo** (`C:\BGA Studio\`): `handoff.patch`, `p1-8-handoff.md`, `p1-8-smoke.diff`, `p1-8-smoke-v1.md`, `p1-8-smoke-v2.diff`, `p1-8-smoke-v2.md`, `p1-8-smoke-v2-results\` (Jonathan's results and consoles; `p1-8-smoke-v2-results.zip` is his), `p1-8-rename.diff`, `p1-8-b3.diff`, `p1-8-name.diff`, `p1-8-all.diff`, `p1-8-msg-1.txt`, `p1-8-msg-2.txt`, `p1-8-msg-2-v2.txt`, `p1-8-msg-3.txt`, `p1-8-playtest-v1.md`, `p1-8-playtest-v2.md`, and `p1-8-harness\`: the edit scripts `p1-8-stage-a.php` and `-a2` (commit 1, desktop; a record, never rerun), `p1-8-stage-b.php` (commit 2) and `p1-8-stage-c.php` (commit 3), `p1-8-edit-lib.php`; the harness `p1-8-harness.php` (with `p1-8-harness-v1-desktop.php` and `p1-8-harness-v2-laptop-stage2-fix.php`, its earlier versions) and `p1-8-lib.php`; the names check `p1-8-names-check.php`; the tokenizer counter `p1-8-count.php`; the card lister `p1-8-cards.php`; the result files `p1-8-harness-results-stage1.txt`, `-stage1-v2.txt`, `-stage1-laptop.txt`, `-stage1-current.txt`, `-stage1-final.txt`, `-stage2.txt`, `-stage2-final.txt`, `-stage3.txt`, `-stage3-final.txt`; the snapshots `state1`, `state1-v1` (the v1 smoke build), `state2`; `scratch-repo`, `apply-check`, `apply-check-staged.diff`, `laptop-start.diff`, `p1-8-notes.md`, `tmp\`. Also in the work folder, not P1.8's: `handoff-check.patch` (a copy of `handoff.patch`, same size) and `laptop-setup-progress.diff` (the diff of the 229cd5a entry).
+
+**The deploys and the banners** (as Jonathan reports; this session deployed nothing)
+- **Smoke build (the four files of commit 1's change), deployed from the desktop on the evening of 2026-11-25, after BGA's maintenance:** no red banner on the project page or on a table (Jonathan's report in the laptop pickup prompt). He then played the smoke (below).
+- **Final build (list v2's G1, five files):** not deployed yet. Its report asks for the sizes of all five and for any red banner, with its full text.
+- **BGA's announcement of 2026-11-25, as Jonathan reports it from BGA's developer Discord** (not checked by this session): Studio's SFTP moved to `sftp.studio.boardgamearena.com`, port 22. The SFTP folder is now only a workspace. Only the game bundle reaches the game server, after a security scan. The bundle is, at the root, `firstascent.js`/`.css`, `firstascent_firstascent.tpl`, `*.php`, `dbmodel.sql` and the gameinfos, gameoptions, gamepreferences and stats `.json`/`.jsonc` files; in `modules/`, `.php`, `.js` and `.css`; in `img/`, `sounds/` and `fonts/`, media only. The scan refuses system commands, `eval`, any file access (`file_get_contents`, `fopen`, `scandir` and so on), network calls and "hidden function calls". A refused file keeps its previous version on the server, and a red banner on the game table and the project page names the file, the rule and the line.
+- **What follows for this step** (Jonathan's reasoning in the pickup prompt, §5): a file's size in the workspace proves only the workspace copy, not what the server runs, so every list from now on asks for any red banner. `UtilTrait.php`, which commit 3 changes (line 744), has not been uploaded since the maintenance as far as he knows. It holds `debug_frameworkCheck` (`UtilTrait.php:1308–1331`), which calls `ReflectionClass::getFileName()` and `is_file()`; the scan may refuse that [inferred]. A refused `UtilTrait.php` would leave the old file on the server, and the line-744 change couldn't be seen in play. Per his instruction, nothing outside the grant was changed to avoid a refusal, no new kind of call was added to the code, and `debug_frameworkCheck` is untouched. If the file is refused, the results will say so and he decides what follows. **No docs about the SFTP move or the scan in this step** (a later docs change does that).
+
+**This session's grant and Jonathan's decisions** are §1 and §3 of message 1 below (quoted in full), with the changes in the laptop pickup prompt's §3: every `D:\Documents\BGA Studio\` becomes `C:\BGA Studio\`; each file keeps its line endings as found on this machine (here `CLAUDE.md` is CRLF in the working copy, not LF; P1.8 doesn't edit it; `dbmodel.sql` is LF, and it is not checked out, restored or reset); the scratch clone and the stacked diffs are built on HEAD `229cd5a`; session 2 applies the commits on top of the HEAD it finds. Model and effort unchanged.
+
+**Status of each decision and item at the end of this session**
+
+| Part | Status |
+|---|---|
+| §1 The grant (files, docs, git, working rules, model and effort) | Used: all five files (`UtilTrait.php` for commit 3's one line only), the work-folder and harness rules, the docs of §10. The `docs:` commit is made on "commit docs" and pushed on "push" |
+| §2 Read first | Used |
+| §3 decision 1 (one step, stop rule) | Used: no stop condition met, at the reading, at commit 2 or at commit 3 |
+| §3 decision 2 (two shapes) | Used |
+| §3 decision 3 (all 43 `possibleactions` renames) | Used |
+| §3 decision 4 (type rule) | Used |
+| §3 decision 5 (space rule, widened to underscores) | Used; it is also the rule for P1.9 (plan notes) |
+| §3 decision 6 (`opponent_id`: no other validation) | Used (nothing added) |
+| §3 decision 7 (three code commits, in order) | The three states are in the working tree. The commits are session 2's |
+| §3 decision 8 (the names) | Used: the 39 calls and `bespokeClimbingCard`'s line, each checked (below) |
+| §3 decision 9 (no replay check; confirm from the diff) | Used (below) |
+| §3 decision 10 (no existing-table check) | Standing |
+| §3 decision 11 (smoke stop A) | Used; passed |
+| §3 decision 12 (testing; Bomber Anchor not played) | Harness stages 1–3, the static checks, the smoke and the names check: used. The final Studio table: Jonathan's, list v2 |
+| §4 Facts to recheck | Used (below) |
+| §5.1–§5.3, §6 | Used |
+| §7 Harness and static checks | Used, all three stages (below) |
+| §8 Diffs and messages | Used (below) |
+| §9 Stop B (playtest list) | Written; reviewed by Jonathan (below) |
+| §10 The docs | This entry and the plan's "P1.8 status" |
+| Laptop prompt §4 (start check), §6 (report and wait; harness before commit 2), §7 (G1 five files, banner line), §8 (this entry's additions) | Used |
+| Stop A review, message 2: the three v2 changes; "record the slip"; the `jesus_piece` rule | Used |
+| Smoke results, message 4 | Used: `jesus_piece` is absent, so no client fix; the rest read (below) |
+| Stop B review, message 5, points 1–7 | Used (below) |
+| Docs review, message 6 | Used |
+
+**The slip (Jonathan: "Record the slip in the entry")** (desktop). The first run of the stage A script wrote `Game.php`, `states.inc.php` and `firstascent.action.php` before failing on a whitespace-only line of the JS text (the editor strips such lines). The three files were restored with `git checkout -- <the three files>` (nothing else had changed), the script was fixed (the marker `@@WS16@@` stands for a whitespace-only line of 16 spaces) and rerun cleanly. Jonathan approved the restore in his stop A review.
+
+**The start checks**
+- **Desktop (the start of session 1, at `519c3e0`):** every blob, size and newline count in §5.1 matched; no stop condition met (`p1-8-handoff.md` §1).
+- **Laptop (the pickup, 2026-11-25), read-only, at HEAD `229cd5a`:** HEAD level with `origin/main`; `git diff --name-only 519c3e0 HEAD` lists only `misc/docs/PROCEDURES.md` and `misc/docs/progress.md`; `git status --short` shows exactly the four modified files, nothing staged, nothing untracked; the working tree's `git diff HEAD --binary` hashes to `8066E295…3180`; the four blobs, CRLF bytes and editor lines are the pickup prompt's (`Game.php` `d65316f` 358,786 / 6,646; `states.inc.php` `c603b7f` 16,697 / 333; `firstascent.action.php` `1dcc71b` 5,255 / 157; `firstascent.js` `6d618df` 740,974 / 13,514); `UtilTrait.php` `f6b68a8…` 79,706 bytes and `modules/utils.js` `8a0a442…` unchanged; `dbmodel.sql` LF, 2,130 bytes. Tools: PHP 8.4.28, git 2.56.1, `core.autocrlf=true`. A search for `D:\` found it only in `p1-8-handoff.md` itself (where it quotes the session 1 prompt and explains the path rule), in no harness script, snapshot or other `p1-8-*` file. The work folder held what the pickup prompt lists, plus `handoff-check.patch` and `laptop-setup-progress.diff`, and `p1-8-harness\` without `tmp\`.
+
+**The §4 facts: where they agree and disagree.** The desktop session rechecked every fact of §4 at `519c3e0` and found them right; nothing in them changed the change (`p1-8-handoff.md` §1; the reading is below). This session recounted what could be recounted: the tokenizer counts at HEAD (`Game.php`: `getActivePlayerName` 56, `getPlayerNameById` 13, `getActivePlayerId` 29, `checkAction` 18; `UtilTrait.php`: 1, 0, 3) and `ajaxcall(` 18 and `performAction(` 8 in `firstascent.js` are the harness's checks at every stage and pass. The two items §4 left UNVERIFIED:
+- **What `performAction` does with an `undefined` value:** settled by the smoke: it omits the key (S3's first request has no `jesus_piece`). No client fix.
+- **Whether autowiring refuses undeclared arguments** (F3): **still UNVERIFIED.** No request sends one.
+- Also still UNVERIFIED (F2): a `jesus_piece` that is present, through `?string`; the smoke covered only the absent case. Jonathan: left to the harness, no extra step in the playtest.
+
+**The §5.2 reading** (desktop; `C:\BGA Studio\p1-8-harness\p1-8-notes.md`; lines at `519c3e0`)
+
+Client payloads:
+- `choice` (`firstascent.js:4390`): `.selected_choice`'s `classList[1]`; the template (`firstascent_firstascent.tpl:341–342`) gives `choice a` / `choice b`, so `'a'` or `'b'` (the server uses `$choice . '_args'`).
+- `card_id` (`:4391`): the parent element's id `climbing_card_<ID>`, `.slice(-3).replace(/^\D+/g,'')`: digits, no padding (database ids).
+- `card_type` (`:4392`): `this.gamedatas.climbing_card_identifier[card_id]`, strings from the database (`Game.php:341–346`).
+- `jesus_piece` (`:4393`): `this.jesus_piece_requirements`, assigned only at `:6177` (`'jesus_party'` for card 49 option a or in `selectOpponent`, else `'true'`) and deleted at `:6390` and `:13052`; otherwise `undefined`.
+- `confirmAssetsForDiscard` (`:4537–4558`): hand and board ids as `id,id` with no trailing comma (sliced), `''` if none; `tucked_card_types`: the types joined by a space (`'gear face'`), from the id's `slice(-14,-9)`: gear, face, crack or slab; `tucked_card_nums`: the `innerHTML` of `.tucked_draw_num` (> 0), joined by commas and sliced.
+- `confirmSelectedOpponent` (`:4585–4587`): `opponent_id` is `'jesus_piece'` if `jesus_piece_requirements === 'true'`, else the `.selected_opponent` button's id, the player id (`${player.id}`, `:2647`); `jesus_party` is a bool.
+- `confirmPortaledge` (`:4744–4759`): four counts (`Number(...) || 0`) each followed by a comma; in `resting`, two more (the `innerText` of `#rest_water_draw_num` and `#rest_psych_draw_num`, initialised to 0 at `:1991–1992`) with no comma after them. The other `portaledge_to_draw` strings (`:3888`, `:5784`) feed `confirmTrade` (P1.6) and `confirmBomberAnchor` (P1.9).
+- `passClimbingCard` (`:5190`): `this.getActivePlayerId()`. `undoClimbingCard`: no payload. `confirmCrimperClimbingCard` (`:6735–6736`): the ids of the `.drawn_climbing` elements, same slice.
+
+The form each value takes, and why: `card_id` and `card_type` are posints, so `#[IntParam(min: 0)] int` turned back into strings with `strval` (decision 4); `choice`, `chosen_id` and `discard_id` are digit or letter strings, so `#[StringParam(alphanum: true)]`; `hand_card_ids`, `board_card_ids` and `tucked_card_nums` are number lists, `#[IntArrayParam]`, optional because the client omits an empty one, and rebuilt as the comma-joined raw strings `action.php` passed; `portaledge_to_draw` is a list, required (the client always sends at least four values, zeros included), rebuilt as the trimmed and exploded list of strings; `jesus_party` is a bool; the three values that can contain a space or an underscore (`tucked_card_types`, `opponent_id`, `jesus_piece`) are plain strings with the decision 5 check; `jesus_piece` is optional (`?string = null`) because the client sets it only for a Jesus Piece and the body tests `if ($jesus_piece)`.
+
+States the client sends each action from (buttons in `onUpdateActionButtons`, `:2572–2870`): `confirmClimbingCardChoice`, `passClimbingCard` (`pass_button`, `utils.js:3098`), `confirmSelectedOpponent` and `confirmCrimperClimbingCard` from 21, 21, 23 and 60 only; `confirmAssetsForDiscard` from 22 only; `confirmPortaledge` from 24 and 33 (`resting`); `undoClimbingCard` from 10, 21 (the Cool-Headed Crimper only, `:2626`), 22, 23, 24, 27, 28, 29, 30 and 31 (the button is also re-added by `utils.js:926` and `firstascent.js:4931`; `utils.js` needs no change). Every allowing state is `activeplayer` (checked by script).
+
+**The 43 `possibleactions` entries: 17 live, 26 dead (left for P1.10).** `confirmClimbingCardChoice` (state 21), `passClimbingCard` (21), `confirmSelectedOpponent` (23) and `confirmCrimperClimbingCard` (60) are live in their one state each; `confirmAssetsForDiscard` is live in 22 and dead in the other 13 (10, 20, 21, 23, 24, 27, 28, 29, 30, 31, 33, 50, 60); `confirmPortaledge` is live in 24 and 33 and dead in the other 12 (10, 20, 21, 22, 23, 27, 28, 29, 30, 31, 50, 60); `undoClimbingCard` is live in 10 states and dead in 60. The dead ones exist only for the inner `checkAction` of the Bomber Anchor and risk-it paths.
+
+**How the playtest reaches each action** (the reading's last item, with the debug functions): `debug_stackClimbingDeck` puts a climbing card on top (the first listed ends on top; it takes cards from the deck or the discard pile, not from the display), `debug_stackAssetDeck` stacks the Asset deck, `debug_giveAssets` gives exact cards, `debug_setAvailableCharacters` offers the characters (only 3 of the 12 in a 2-player game; the two sides of a mat are ids 1+2, 3+4, … `otherSideOf`). The climbing cards are listed in `material.inc.php` (`$this->climbing_cards`, 70 cards, with each option's `a_args`/`b_args`); card 25 (Partner has a meltdown, option A: give 2 cards, gain a Summit Beta) goes 21 → 23 → 22 (the smoke); card 53 (Whipper) option B (give 2 cards, draw 1 from the Portaledge) goes 21 → 23 → 22 → 24 (the playtest); card 14 (Rope sheath is cut) has no fulfillable option for a player with no Gear when the others' boards hold none (the playtest's Pass); the Cool-Headed Crimper (character 10) goes to state 60 after each climb (`Game.php:1798–1809`).
+
+**The change** (`Game.php` lines at the final working tree unless a version is given)
+
+*Commit 1 (`struct:`, the rename; the smoke build)*
+- **Direct entries (P1.6's shape)** for the five bodies with no internal caller: `actConfirmClimbingCardChoice`, `actPassClimbingCard`, `actUndoClimbingCard`, `actConfirmCrimperClimbingCard` and `actConfirmSelectedOpponent` are the bodies renamed, public, with typed parameters and without the inner `checkAction`. The conversions go at the top of the method:
+  - `actConfirmClimbingCardChoice(#[StringParam(alphanum: true)] string $choice, #[IntParam(min: 0)] int $card_id, #[IntParam(min: 0)] int $card_type, ?string $jesus_piece = null)`: `strval` of the two ints, and the decision 5 check of `jesus_piece` when it is not `null`;
+  - `actConfirmSelectedOpponent(string $opponent_id, bool $jesus_party)`: the decision 5 check of `opponent_id`;
+  - `actConfirmCrimperClimbingCard(#[StringParam(alphanum: true)] string $chosen_id, #[StringParam(alphanum: true)] string $discard_id)`;
+  - `actUndoClimbingCard()`: no parameters;
+  - `actPassClimbingCard(#[StringParam(alphanum: true)] string $player_id)` in this commit, as P1.6's `actRest` did.
+- **Thin entries (P1.7's shape)** for `confirmAssetsForDiscard` and `confirmPortaledge`, which `confirmBomberAnchor` calls at `Game.php:4843` and `:4844` (HEAD): public `actConfirmAssetsForDiscard(#[IntArrayParam] ?array $hand_card_ids = null, #[IntArrayParam] ?array $board_card_ids = null, string $tucked_card_types = '', #[IntArrayParam] ?array $tucked_card_nums = null)` and `actConfirmPortaledge(#[IntArrayParam] array $portaledge_to_draw)`, each one statement calling its private helper (`assetsForDiscardEntryArgs`, `portaledgeEntryArgs`) and the body. **The raw-string rebuild:** `confirmAssetsForDiscard` received the raw strings, not exploded lists (`action.php:46–56`), so its helper returns `implode(',', $x ?? [])` for the three lists (`implode` turns the ints into strings itself; Jonathan's stop A review dropped an `array_map('strval', …)` that did nothing) and `$tucked_card_types` as it came, after the decision 5 check; `confirmPortaledge` received the trimmed and exploded list, so its helper returns `[array_map('strval', $portaledge_to_draw)]`. The bodies keep their names and parameters, become `private` and lose their inner `checkAction` (`:2983`, `:4027` at HEAD). `confirmBomberAnchor` is byte-identical to HEAD (its own `checkAction('confirmBomberAnchor')` and its two call lines).
+- **`states.inc.php`:** the 43 `possibleactions` entries renamed (state 21: 2; `undoClimbingCard` 11 states; state 60: 1; state 23: 1; `confirmAssetsForDiscard` and `confirmPortaledge` 14 states each). State 24's **transition** named `confirmPortaledge`, the notification names `confirmPortaledge`, `confirmCrimperClimbingCard`, `confirmAssetsForDiscardPrivate`/`Public` and `confirmPortaledgeOpponent`, and the use-case label `rollRiskDie('confirmClimbingCardChoice')` are not actions and are unchanged.
+- **`firstascent.action.php`:** the seven methods deleted (5,255 bytes left).
+- **`firstascent.js`:** the seven handlers (`onConfirmClimbingCardChoice`, `onConfirmAssetsForDiscard`, `onConfirmOpponent`, `onConfirmPortaledge`, `onPassClimbingCard`, `onUndoClimbingCard`, `onConfirmCrimperClimbingCard`) move from `checkAction` + `ajaxcall` to `this.bga.actions.performAction('actX', …)`, sending arrays instead of comma-joined strings. 54 lines removed and 34 added in all across the seven; `ajaxcall(` 18 → 11, `performAction(` 8 → 15. No local became unused (checked by script).
+
+*Commit 2 (`fix:` B3 for `passClimbingCard`)* — `p1-8-stage-b.php`. `actPassClimbingCard(int $activePlayerId)` with `$player_id = strval($activePlayerId); // P1.8 type rule, B3: the client used to send this id, as a string` on entry, as `actRest` does. The body stores the id in the `rerack_1` global, which other code reads and writes (`Game.php:976–981`, `:1970–1972`, and `stNextDraw` at `:5668–5677`, with an id from `activeNextPlayer()`; about a dozen places write to it, per Jonathan's message 5), so the same string as before is stored. The client's call becomes `performAction('actPassClimbingCard')` with no payload. Two edits: 3 lines added and 4 removed (`p1-8-b3.diff`).
+
+*Commit 3 (`struct:` the names)* — `p1-8-stage-c.php`. The 39 `getActivePlayerName()` calls in the bodies (13 in `actConfirmClimbingCardChoice`, 13 in `confirmAssetsForDiscard`, 9 in `actConfirmSelectedOpponent`, 2 in `confirmPortaledge`, 1 in `actPassClimbingCard`, 1 in `actConfirmCrimperClimbingCard`) plus 1 in `bespokeClimbingCard` (`UtilTrait.php:744`). `getPlayerNameById(intval($player_id))` in the four bodies that set `$player_id = $this->getActivePlayerId()` near their top (`:2153`, `:3020`, `:3657`, `:4075`, final lines) and never assign it again; `getPlayerNameById($activePlayerId)` in `actPassClimbingCard`; `getPlayerNameById(intval($this->getActivePlayerId()))` in `actConfirmCrimperClimbingCard` (which never sets `$player_id`) and in `bespokeClimbingCard` (no signature change; its `$player_id` parameter is overwritten by the loops at `:727` and `:740` before that line, so it isn't used). This differs from the plan's proposal at `MIGRATION_PLAN.md:688` (that `confirmClimbingCardChoice` pass the name in), which was marked inferred and isn't part of any step; line 688 is not edited.
+- **The check that each call names the same player** (decision 8; F4). Besides the desktop's reading, `p1-8-names-check.php` (tokenizer and block structure: if/else chains and `switch` cases are exclusive, a `return`, `throw`, `exit` or `break` after a call ends its path, loops are flagged) takes every `getActivePlayerName()` call in the seven bodies and in `bespokeClimbingCard`, and every call of a "changer": a method that calls `nextState`, `changeActivePlayer`, `activeNextPlayer`, `activePrevPlayer`, a multi-active call, `jumpToState`, `setPrivateState` or `undoRestorePoint`, directly or through another method (39 such methods). **All 40 calls: none can run after a changer.** Positive controls: three mutated copies of HEAD's `Game.php` (a name call after the last `nextState` of `passClimbingCard`; one after `nextState('discardAssets')` in the choice body; the `break` removed after case 19's `nextState` so that it falls through to a case that names the player) are each flagged. `bespokeClimbingCard` has no changer call, and its caller runs it before the `nextState('nextClimb')` that follows. `confirmAssetsForDiscard` is also reached from `confirmBomberAnchor` (P1.9), but it sets `$player_id` itself, so the name is the same there. **No call could name a different player, so no stop.**
+- **Tokenizer counts after commit 3** (harness stage 3, as §4 expected): `Game.php` `getActivePlayerName` 17 (14 in P1.9's actions, 3 in P2's state functions), `getPlayerNameById` 52, `getActivePlayerId` 30, `checkAction` 11; `UtilTrait.php` 0, 1, 4, 0; `firstascent.js` `ajaxcall(` 11, `performAction(` 15. After commit 1 the counts were 56 / 13 / 29 / 11 and 1 / 0 / 3 / 0.
+
+**F13: the replay check, confirmed from the diff** (decision 9). The harness shows the values reaching each body are `===` identical to what `action.php` passed, so nothing derived from them changes. Commit 2 changes only a stored id's source (the same string). Commit 3 changes only the `player_name` argument's source: `p1-8-name.diff` has 40 removed and 40 added lines, and replacing each of the three new forms by `$this->getActivePlayerName()` in the added lines gives exactly the removed lines. No other notification argument changes.
+
+**The smoke (stop A), played by Jonathan 2026-11-26** (list `p1-8-smoke-v2.md`; results `C:\BGA Studio\p1-8-smoke-v2-results\`: `p1-8-smoke-v2-results.txt` 75 lines, 2,632 bytes; `IndianaScones0.log` (W, The Dirtbag) 464 lines, 15,679 bytes; `IndianaScones1.log` (Z, The Overstoker) 179 lines, 9,340 bytes; table 1019860). Jonathan's message 4: "Stop A reviewed: the smoke passed."
+- **G1:** `Game.php` 358,786 bytes and 6,646 lines; `states.inc.php` 16,697 and 333; `firstascent.action.php` 5,255 and 157; `firstascent.js` 740,974 and 13,514. **Match** the expected sizes of the stop A report.
+- **S1–S2:** Z (The Overstoker) climbed Half-a-finger and drew Partner has a meltdown (card 25). After S2, Z's hand was 3 and W's 5. No errors or warnings.
+- **S3, first request** (Z's tab): `actConfirmClimbingCardChoice.html?choice=a&card_id=42&card_type=25&lock=…&table=1019860&noerrortracking=true&testuser=2369493&dojo.preventCache=…`: **no `jesus_piece` key at all.** This settles F1: `performAction` omits an undefined value, so the body never sees the text "undefined". No client fix.
+- **Second request:** `actConfirmSelectedOpponent.html?opponent_id=2369492&jesus_party=false&lock=…` (W's id).
+- **Third request:** `actConfirmAssetsForDiscard.html?tucked_card_types=&lock=…&hand_card_ids%5B%5D=98&hand_card_ids%5B%5D=103&dojo.preventCache=…`: `tucked_card_types` empty, not omitted; `board_card_ids` and `tucked_card_nums` omitted; an int array arrives as `name[]=…`, as in P1.6.
+- **State sequence** in both consoles (read by this session from the `Entering state` lines, after each tab's reload): `climbOrRest`, `climbingCard`, `selectOpponent`, `discardAssets`, `nextClimb`, `climbOrRest` (states 20, 21, 23, 22, 25, 20).
+- **Log lines**, both tabs, all naming Z (IndianaScones1): spends Smear, Stemming and 2 Water and climbs Half-a-finger; Partner has a meltdown: chooses Console them (option a); gives Palming and Hand-Foot Match to IndianaScones0; gains a Summit Beta token (Jumar in Z's tab). Then it is W's turn.
+- **Hand counts after S3** were not reported. Both tabs' log lines name the two cards given, and the notification ran without error. Recorded that way.
+- **Consoles:** no game error or warning. The only lines besides the app's own are the Permissions-Policy header notices, the iframe sandbox notice, one blocked browser-update.org request, and `Uncaught (in promise) NotAllowedError: play() failed` lines from `ly_studio.js`; Jonathan: these come from BGA's sound being blocked by the browser's autoplay rule, not from the game.
+
+**The harness** (`C:\BGA Studio\p1-8-harness\p1-8-harness.php`; run from the repo root: `php ../p1-8-harness/p1-8-harness.php <stage> [nomutants]`)
+- **Old side:** HEAD's `firstascent.action.php`, loaded as it is, on the legacy `getArg` stub, with a recorder for `$this->game`. **New side:** for the thin entries, the entries and helpers cut out with the tokenizer, with recorder bodies; for the direct entries, the values the body works with after the entry's conversion. Each comparison checks the method name and the values with `===`, keys, order and types included. Stage 1 reads `state1\`, stage 2 reads `state2\`, stage 3 reads the working tree.
+- **Part 1: 1,729 comparisons at each stage, none differs**: `confirmClimbingCardChoice` 440, `confirmAssetsForDiscard` 406, `confirmSelectedOpponent` 162, `confirmPortaledge` 410, `passClimbingCard` 155, `undoClimbingCard` 1, `confirmCrimperClimbingCard` 155. The cases: every value empty, absent (where the framework omits it), one item and several; single-, two- and three-digit ids; every tucked type alone and several together; `jesus_piece` absent, `'true'` and `'jesus_party'`; `opponent_id` as ids of different lengths and as `jesus_piece`; `jesus_party` true and false; `portaledge_to_draw` in both client forms (four counts with a trailing comma, six without), zeros included; `passClimbingCard` with ids of different lengths against the client's id (stage 1) and against `strval($activePlayerId)` (stages 2 and 3); `undoClimbingCard` with no arguments; seeded joint cases.
+- **The check of decision 5**, for each value it covers: accepted values are split or passed correctly, and a hyphen, comma, quotes, `<`, `é`, a tab, `.`, `;`, and a final or a leading newline are each refused with exactly `Bad value for: <name>`. **The signatures**, by reflection, as the prompt gives them; the entries public, the helpers and thin bodies private; `confirmBomberAnchor` not made non-public.
+- **Static checks** (by stage: **166 checks at stage 1, 169 at stage 2, 179 at stage 3; 0 failed at each**, the mutation lines included): `states.inc.php` equals HEAD with the 43 renames and nothing else, state by state, with state 24's transition key unchanged; `action.php` equals HEAD with exactly the seven methods cut out; each body equals HEAD's body with only the expected changes (the `checkAction` line, the conversion block, the names at stage 3); outside the changed methods `Game.php` equals HEAD (blank lines aside); the order is entry, helper, body for the thin pairs; `confirmBomberAnchor` is byte-identical to HEAD, with its own `checkAction` and its two call lines; the notification names and the `rollRiskDie('confirmClimbingCardChoice')` label are unchanged; every `act*` name in `possibleactions` is a method of `Game.php`; the tokenizer counts; `modules/utils.js` is unchanged (blob `8a0a442d…`); in the client, everything outside the seven handlers equals HEAD, each handler equals HEAD's with exactly the expected edits, one `performAction` per action, each payload holds exactly the entry's declared keys, no `player_id` is left in `onPassClimbingCard` at stages 2 and 3, and no local became unused; the files are pure CRLF. **At stages 1 and 2, `UtilTrait.php` is equal to HEAD. At stage 3 the check "`UtilTrait.php` differs from HEAD in exactly one line" reports `(1)`, then "line 744: the one change is the name call" and "`bespokeClimbingCard`: signature unchanged, one new call" pass.**
+- **Mutation test** (the working source is mutated in memory; each mutant must make part 1, the check of decision 5 or the signatures fail): **52 mutants, all killed, at each of the three stages, and the unmutated control passes.** **50 are the same at every stage:** `confirmClimbingCardChoice`, 14 (`card_id` and `card_type` without `strval`; `card_id` taken from `card_type`; `jesus_piece` default `''` and `'0'`; its check removed, without `D`, without the underscore, without the space, allowing a hyphen, with another message, and applied to `null`; the `choice` attribute removed; `card_id`'s `min` changed); `confirmAssetsForDiscard`, 19 (the three separators; the three `implode`s replaced by a list; the three `?? []` dropped; hand and board swapped; types and nums swapped; the types exploded; the types check removed, without `D`, without the space, allowing a comma, with another message; the types default changed; the hand default not `null`); `confirmSelectedOpponent`, 6 (the check removed, without `D`, without the underscore; `opponent_id` cast to int; `jesus_party` negated; another message); `confirmPortaledge`, 7 (without `strval`; sliced to four; reversed; not wrapped, so the list is spread; the entry calling the assets body and the reverse; the attribute removed); `confirmCrimperClimbingCard`, 2 (an attribute removed; `discard_id` cast to int); `undoClimbingCard`, 2 (a parameter added; made private). **The other 2 depend on the stage:** at stage 1, `pass: id from a constant` and `pass: attribute removed` (the stage 1 entry takes the client's id); at stages 2 and 3, `B3: pass without strval` (the dropped `strval`) and `B3: pass with intval`, **both killed (155 failing comparisons each)**. The two B3 mutants replace the two stage 1 pass mutants, which is why the count is 52 at all three stages.
+- **Harness edits, laptop** (the harness is in the work folder; both edits are in place, with the earlier versions kept). (1) When stage 2 first ran, the two B3 mutants failed as "not unique": their search text `$player_id = strval($activePlayerId);` also occurs in `actRest`. The search and replacement now end with `// P1.8` (the comment that is on the P1.8 line only). The difference between `p1-8-harness-v1-desktop.php` and the harness after this edit is these two lines. (2) When stage 1 was rerun after commit 3, it failed two `UtilTrait.php` checks ("unchanged" and the tokenizer counts), because stages 1 and 2 read `UtilTrait.php` from the repo's working tree, which by then held commit 3's line; it now reads HEAD's version at stages 1 and 2 (3 lines changed; the version before it is `p1-8-harness-v2-laptop-stage2-fix.php`). At stages 1 and 2 the check that UtilTrait.php equals HEAD is therefore true by construction; what shows that commits 1 and 2 leave UtilTrait.php alone is that p1-8-rename.diff and p1-8-b3.diff don't touch it, which the design discussion checked in its replay. Jonathan accepted the harness fix (message 6, point 1): it changed only the harness, the earlier versions are kept, and the reruns are line for line identical. **Rerun with the current harness, all three stages give 166 / 169 / 179 checks, 0 failed, 52 mutants killed, and their result files are line-for-line identical** to `p1-8-harness-results-stage1-laptop.txt` (stage 1, run on the laptop before commit 2, and equal to the desktop's `-stage1-v2.txt` line for line; the bytes differ only by line endings), `-stage2.txt` and `-stage3.txt`. The finals are `-stage1-final.txt`, `-stage2-final.txt` and `-stage3-final.txt`.
+- `php -l` on `Game.php`, `UtilTrait.php`, `states.inc.php` and `firstascent.action.php`: no syntax errors, after every edit. `php misc/tests/technique_matching.php modules/php/Game.php`: all checks passed after every edit.
+
+**The diffs and the commit messages** (written to `C:\BGA Studio\`; the stacked diffs were built in a scratch clone, `p1-8-harness\scratch-repo`, one commit per state, so the real repo's object store is untouched; applied in order to a fresh clone (`apply-check`) the three give a staged diff identical to `p1-8-all.diff` byte for byte, `fc /b` and SHA-256; the design discussion did the same on a fresh fetch of `229cd5a`):
+
+| File | Lines | Bytes | SHA-256 | `index` lines | `--stat` |
+|---|---|---|---|---|---|
+| `p1-8-smoke-v2.diff` (stop A, build v2, played) = `p1-8-rename.diff` (against HEAD) | 539 | 27,949 | `8066e2956c4ae74e59c05b2871f05caf59ab3c2aa122c534fd316760d4133180` | action.php `d879629..1dcc71b`; js `ebfc1dc..6d618df`; Game.php `5bdc24e..d65316f`; states `457b347..c603b7f` | 4 files, 113 insertions, 162 deletions |
+| `p1-8-b3.diff` (against the rename) | 29 | 1,173 | `5946ff460a13cfe60acef2901b32a2e39551ce6a280177c437cbff7ade17c5c1` | js `6d618df..f860f13`; Game.php `d65316f..73f785e` | 2 files, 3 insertions, 4 deletions |
+| `p1-8-name.diff` (against the B3 state) | 368 | 25,821 | `71e7c4f191f3936de9dc8b917bd64670a1a69dfd7801d3fce4b09ec7f0665b14` | Game.php `73f785e..01da169`; UtilTrait.php `f6b68a8..881d21a` | 2 files, 40 insertions, 40 deletions |
+| `p1-8-all.diff` (`git diff HEAD`) | 897 | 53,374 | `cc5118e66293883e2251b167e9f602ee70d3da1692be70df4ad31e329e758f8c` | action.php `d879629..1dcc71b`; js `ebfc1dc..f860f13`; Game.php `5bdc24e..01da169`; UtilTrait.php `f6b68a8..881d21a`; states `457b347..c603b7f` | 5 files, 152 insertions, 202 deletions |
+
+(Line counts are newlines; the diffs are LF.) `git diff HEAD` of the real working tree has the same bytes as `p1-8-all.diff`. The desktop's `p1-8-smoke.diff` (v1, 28,012 bytes, `17e79f5d…`) and `p1-8-smoke-v1.md` are kept; v2 differs from v1 only by the removed `array_map('strval', …)` inside the three `implode`s and the lines it changes.
+
+The messages (LF; each ends with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`; subjects as the session 1 prompt's §8 gives them; the subject of message 3, `struct: the active player's name from getPlayerNameById in six autowired actions and bespokeClimbingCard (P1.8)`, is the prompt's, word for word):
+- `p1-8-msg-1.txt`: 85 lines, 5,258 bytes, SHA-256 `abc3bf1c06640958d8c88cf42751ae91dd087e7cf7ec6fafd4c3deec277487e2`.
+- **`p1-8-msg-2-v2.txt`** (for session 2): 17 lines, 858 bytes, SHA-256 `0b31b86a663b664571d07c18b0701b8a78404ff2afc5fcca014e4c8c5f713c0a`. **`p1-8-msg-2.txt`** (v1, kept, not to be used; it is the message of the scratch clone's commit 2): 19 lines, 1,010 bytes, `875f7599340a7d219368726df462be52e8bd4f48d73aeacd17afe0d4d53c246d`. v2 replaces v1's second paragraph (Jonathan's message 5, point 3) with: "The id is converted on entry with strval, as actRest does, so the rerack_1 global stores the same string as before, as the type rule of the previous commit requires." The reason: `stNextDraw` also reads `rerack_1`, with an id from `activeNextPlayer()` (`Game.php:5668–5677`), and about a dozen other places write to it, so v1's sentence about the code that reads and writes the same list wasn't accurate. Checked with `diff`: **only that paragraph differs.**
+- `p1-8-msg-3.txt`: 35 lines, 2,087 bytes, `465bffdd43af91af9be0de69c92994a41622e419432a012ddc74f8c06a79e06f`.
+
+**Stop B review by the design discussion (Jonathan's message 5, point 1), recorded.** It replayed `p1-8-rename.diff`, `p1-8-b3.diff` and `p1-8-name.diff` on a fresh fetch of `229cd5a`: they apply in order, and the result is byte-identical to `p1-8-all.diff`. The SHA-256 values match the table above, and `p1-8-rename.diff` is `8066e295…3180`, the v2 smoke diff. The five blobs (`Game.php` `01da169`, `UtilTrait.php` `881d21a`, `states.inc.php` `c603b7f`, `firstascent.action.php` `1dcc71b`, `firstascent.js` `f860f13`) give the five G1 sizes and editor lines. The tokenizer counts match §4 of the session 1 prompt. The name diff changes the 40 calls and nothing else, with `UtilTrait.php` changed only at line 744. `php -l` passes.
+
+**Not played, and why** (as proposed at stop B; the Jesus Piece item was added by Jonathan's message 5, point 6)
+- **The Bomber Anchor path** (decision 12): the only change there is the removed inner `checkAction`, which the static checks show (`confirmBomberAnchor` is byte-identical, its two call lines are there, and each private body is called twice: from its entry and from `confirmBomberAnchor`). The plan's P1.9 runs T26 on that path.
+- **The other allowing states** (`actUndoClimbingCard` in 9 states other than 21): met by the harness and the static checks.
+- **The dead entries** (26 of the 43): for P1.10.
+- **A `jesus_piece` that is present** (F2), and **undeclared arguments** (F3): UNVERIFIED, left to the harness (F2) and to nothing (F3).
+- **The Jesus Piece line in `bespokeClimbingCard`** (`UtilTrait.php:744`, climbing cards 55 and 68), which nothing in the list reaches. On Studio, only G1's banner check shows whether `UtilTrait.php` was accepted.
+
+**The rules check** (list v1 and v2): **no rules finding.** The route follows `RULES.md` p. 5 (Rack Up: 5 cards for each of two players, from The Spread and/or the deck), p. 6 (the three phases), p. 7 (the first Pitch is in the bottom row; resting skips the turn and gives Assets in the Rerack; the climbing card is drawn after the climb), p. 8 (a card with no fulfillable option: "only draw 1 Card in the Rerack Phase"; a player must choose the option they can fulfill; "Lose the Card from your hand … if you don't have the Card in your hand, lose it from your Asset Board"; "Gain Asset Cards: Choose a Card from The Portaledge and add it to your hand"), p. 9 (movement: no climbing a Pitch another Climber is on) and p. 15 (the Cool-headed Crimper: "After climbing each Pitch, draw 2 Climbing Cards and choose 1 to resolve. Discard the other"). Rope sheath is cut (card 14: A take 1 Gear Card from another player's Asset Board; B lose 1 Gear Card, gain a Precision Token) has no fulfillable option for a player with no Gear on a table where the other board holds none, as p. 8 requires. `RULES.md` has no climbing card texts, so the options come from `material.inc.php`. `RULES_CHECK.md` holds no ruling on these paths (its R-2, a Rerack bug after a bail, concerns a bail, not a pass). Undo Climbing Card is not in the rules (an implementation feature).
+
+**The playtest list.** Final version **v2** (`C:\BGA Studio\p1-8-playtest-v2.md`, 140 lines, 6,486 bytes, SHA-256 `7d48afa79f4988b46e58035502a9120280ebee8864e45b259cb240fc219b6373`); v1 (141 lines, 6,394 bytes, `41ba751ba75c0a5be107b2309622fc40bd092c4ac7cdf3fa76a8db3be2b71180`) is kept. v1 → v2 (Jonathan's message 5, point 4): the Table section's repeated "Save both consoles" line is deleted; S2 now reads "Z chooses a bottom-row Pitch that needs no Gear and no more Water and Psych than Z has" and "If Z lacks a Face, Crack or Slab card the Pitch needs: `debug_giveAssets(Z, "…")` with those cards only, never Gear"; the heading "Between the rounds" is "End of round 1 and Rerack" and S5's title "S5. W rests, then the Rerack"; S5's Report starts with W's Confirm for the 5 resources (the request); S6's Report asks for "W's hand count after the climb, before W chooses the Whipper option". Checked with `diff`: **only these edits and the title differ.**
+
+**Two points about the playtest, both approved by Jonathan (message 5, point 5)**
+- **Undo and Pass are played on the same climbing card** (Rope sheath is cut), not each on its own card as the playtest scope in §9 of the session 1 prompt said. Undo in state 21 is offered only to the Cool-Headed Crimper (`firstascent.js:2626`) and returns to state 60, because the savepoint is taken in the climb (`Game.php:1807`). So this is the shortest route to both. (The BGA doc's `undoSavepoint` text says the save is made after the transaction, so the saved state is the one after `nextState('crimperClimbingCards')`; this session reasoned that and no earlier playtest played Undo Climbing Card. List step S3 says to stop if Z doesn't see the two cards.)
+- **Character 10 is in the offered set** (`debug_setAvailableCharacters("10,3,1")`), because `confirmCrimperClimbingCard` needs it.
+
+The list's route, for the record: round 1, Z (Cool-Headed Crimper, a stacked no-Gear hand) climbs a bottom-row Pitch that needs no Gear, with `debug_stackClimbingDeck("14,10")`; at state 60 chooses Rope sheath is cut (`actConfirmCrimperClimbingCard`), presses Undo in state 21 (`actUndoClimbingCard`, back to state 60), chooses it again, and passes (`actPassClimbingCard`: W's board is empty, Z has no Gear). W (The Dirtbag) rests and, in the Rerack, takes 5 resources (`actConfirmPortaledge` from state 33, `resting`, the six-value form). Round 2, W climbs with `debug_stackClimbingDeck("53")` and resolves Whipper's second option: `actConfirmClimbingCardChoice` (21), `actConfirmSelectedOpponent` (23), `actConfirmAssetsForDiscard` (22), `actConfirmPortaledge` (24). So all seven actions are played, each with its Network request asked for, and `actConfirmPortaledge` in both of its live states (33 and 24), in two rounds.
+
+**What session 2 does**
+1. After Jonathan's Studio playtest of list v2 (G1 first: the five files' sizes and any red banner), make the three code commits on top of the HEAD it finds, from `p1-8-rename.diff`, `p1-8-b3.diff` and `p1-8-name.diff` (the diffs are against `229cd5a`; the code files are unchanged since, and the `docs:` commit of this entry touches only docs), with `p1-8-msg-1.txt`, `p1-8-msg-2-v2.txt` and `p1-8-msg-3.txt`, and check each staged diff against the diff it came from.
+2. Closing docs: the status of P1.8 in `MIGRATION_PLAN.md`, a "done" entry in `progress.md` with Jonathan's playtest results, and `TODO.md` only for new findings.
+3. If `UtilTrait.php` is refused by the scan, Jonathan decides what follows.
+
+**The playtest list v2**, in full:
+
+~~~~markdown
+# P1.8 playtest list v2
+
+## Before you start
+
+- Save each tab's console (Z and W) from the start of the table, as .log files, before closing any tab.
+- Open the browser's Network tab in **both** tabs (Z and W) and keep it open, with "Preserve log" ticked.
+- Write down every debug call you make, any refused debug call, and any save you restore.
+- If a `debug_giveAssets` call is refused because a card isn't in the deck, use another card of the same kind. Crack is 1–7, Slab 8–14, Face 15–21, Gear 22–37.
+- After a successful debug call, press F5 in the other tab before acting in it.
+- Decline every Permanent Asset token offered.
+- On the whole table, report any console error, any `[FA …]` warning, any raw `${...}` in the log, and any error banner (copy its full text).
+
+Known problems, not caused by P1.8:
+- A card drawn twice on screen after a Portaledge draw, and left in `#deck_draw_1` (it can show again at the next deck draw).
+- The Portaledge refill animation's first step is oversized.
+
+---
+
+## G1. Deploy
+
+- Deploy `modules/php/Game.php`, `modules/php/UtilTrait.php`, `states.inc.php`, `firstascent.action.php` and `firstascent.js`.
+
+> **Report**
+> - Sizes on Studio:
+>   - `Game.php` 359,509 bytes, 6,647 lines
+>   - `UtilTrait.php` 79,738 bytes, 1,595 lines
+>   - `states.inc.php` 16,697 bytes, 333 lines
+>   - `firstascent.action.php` 5,255 bytes, 157 lines
+>   - `firstascent.js` 740,901 bytes, 13,512 lines
+> - Any red banner on the project page and on the table, with its full text (file, rule, line). If there is one, stop before S1.
+
+---
+
+## Table (2 players, 2 rounds)
+
+W is the player asked to choose a character first. Z chooses second and is first in round 1. Write down who is who.
+
+Z is first in round 1, and W in round 2.
+
+**The route**
+- Round 1: Z climbs a Pitch with no Gear in it, chooses one of two climbing cards, undoes that choice, chooses again, and passes. W rests.
+- Round 2: W climbs and resolves a climbing card that goes through all four of its steps.
+
+### S1. Setup
+- Create the table.
+- Before anyone chooses a character: `debug_setAvailableCharacters("10,3,1")`. Press F5 in the other tab.
+- W picks **The Dirtbag** and confirms. Z picks **Cool-Headed Crimper** and confirms.
+- Before Z takes any card: `debug_stackAssetDeck("1,2,8,9,15")`. Press F5 in W's tab.
+- Rack Up: Z takes 5 cards, **all from the deck** (none from The Spread), and confirms. Then W takes 5 cards, in any mix, and confirms.
+
+> **Report**
+> - Z's 5 cards, by name.
+> - Any error, in either tab.
+
+---
+
+### Round 1 (Z first)
+
+### S2. Z climbs and chooses a climbing card
+- `debug_stackClimbingDeck("14,10")`. Press F5 in W's tab.
+- Z chooses a bottom-row Pitch that needs no Gear and no more Water and Psych than Z has. Don't pick The Trifecta.
+  - If no bottom-row Pitch fits, stop here and say which ones needed Gear, and what Z lacked on the others.
+- If Z lacks a Face, Crack or Slab card the Pitch needs: `debug_giveAssets(Z, "…")` with those cards only, never Gear. Press F5 in W's tab. Write down the call.
+- Z selects the Pitch, and pays each requirement with a card or resource of its own kind:
+  - no Permanent tokens,
+  - no Summit Beta,
+  - no Water or Psych substitutes,
+  - no Trifecta box.
+- Z confirms the climb.
+- Z sees two climbing cards. Z selects **Rope sheath is cut** and presses Confirm.
+
+> **Report**
+> - The Pitch climbed.
+> - The two climbing cards Z saw.
+> - **The Network tab, Z's tab: the request of the Confirm press.** Copy its URL and its form data exactly.
+> - The log line for the choice, in both tabs. Does it name Z?
+> - Z's hand count.
+> - Any error.
+
+### S3. Z undoes the choice
+- Z presses "Undo Climbing Card".
+
+> **Report**
+> - **The Network tab, Z's tab: the request of the Undo press.** Copy its URL and its form data exactly.
+> - What Z sees now: the two climbing cards, or something else. If it is something else, stop here.
+> - Any error, in either tab.
+
+### S4. Z chooses again and passes
+- Z selects **Rope sheath is cut** again and presses Confirm.
+- Z presses Pass. If there is no Pass button, stop here and say what the two options show.
+
+> **Report**
+> - **The Network tab, Z's tab: the request of the Pass press.** Copy its URL and its form data exactly.
+> - The log line for the pass, in both tabs. Does it name Z?
+> - The state at the end: whose turn it is.
+> - Any error, in either tab.
+
+---
+
+### End of round 1 and Rerack
+
+### S5. W rests, then the Rerack
+- W presses Rest and confirms.
+- Follow Phase: decline any tokens offered.
+- Rerack: Z draws as many cards as the game allows, in any mix of The Spread and the deck. W takes 2 Water, 2 Psych and 1 card from the Portaledge (if a cap stops a Water or Psych, take it as a card instead).
+- Round 2 starts with W.
+
+> **Report**
+> - **The Network tab, W's tab: the request of W's Confirm for the 5 resources.** Copy its URL and its form data exactly.
+> - How many cards the game let Z draw.
+> - Round 2 starts, and W is to climb.
+> - Any error.
+
+---
+
+### Round 2 (W first)
+
+### S6. W climbs and resolves a climbing card
+- `debug_stackClimbingDeck("53")`. Press F5 in Z's tab.
+- W selects a bottom-row Pitch that nobody is on. Don't pick The Trifecta. Read what it needs.
+- `debug_giveAssets(W, "…")`: every card the Pitch needs that W doesn't hold, and at least 2 more cards of any kind. Press F5 in Z's tab. Write down the call and W's hand count after.
+- W must have the Water and Psych the Pitch needs. If not, choose another bottom-row Pitch. If none works, stop here and say why.
+- W selects the Pitch, and pays each requirement with a card or resource of its own kind:
+  - no Permanent tokens,
+  - no Summit Beta,
+  - no Water or Psych substitutes,
+  - no Trifecta box.
+- W confirms the climb.
+- W selects the second option of **Whipper** (give another player 2 Cards, draw 1 Card from The Portaledge) and presses Confirm.
+- W selects Z as the opponent and presses Confirm.
+- W selects any 2 cards from the hand and presses Confirm.
+- W selects 1 card from The Portaledge, any, and presses Confirm.
+
+> **Report**
+> - The Pitch climbed. W's hand count after the climb, before W chooses the Whipper option.
+> - **The Network tab, W's tab: the request of each of the four Confirm presses.** Copy each URL and its form data exactly.
+> - The log lines of the four presses, in both tabs. All name W.
+> - W's hand count and Z's hand count after the last Confirm.
+> - The state at the end: whose turn it is.
+> - Both consoles: any error or warning.
+~~~~
+
+**Jonathan's messages to this session, quoted in full** (only his; none of this session's reports or of the handoff session's). Messages 1 and 2 are taken from `p1-8-handoff.md`'s §2.1 and §2.2 as sent to the desktop session; message 3 is the laptop pickup prompt; messages 4, 5 and 6 are his smoke results, his stop B review and his docs review. His messages to the desktop docs session (`p1-8-handoff.md` §2.3) belong to the `10c9c21` entry.
+
+**Message 1: the session 1 prompt** (2026-11-25 05:55 UTC; the grant is its §1, his decisions its §3)
+
+> # P1.8, session 1 of 2: autowired actions, group 3
+>
+> ## 1. The grant
+>
+> You're working in the First Ascent repo, a Board Game Arena game being migrated from BGA's legacy framework to the current one. The phase is "migration" (`misc/docs/PROCEDURES.md`): code changes are made only as steps of `misc/docs/MIGRATION_PLAN.md`, one step per session.
+>
+> This session runs **P1.8, "Autowired actions (group 3)"** (`MIGRATION_PLAN.md`, "P1.6–P1.9 Autowired actions"). This is session 1 of 2. It **may change code** in these five files only, and only as §5 describes:
+> - `modules/php/Game.php`
+> - `modules/php/UtilTrait.php`: one line only, in commit 3 (§3, decision 8)
+> - `states.inc.php`
+> - `firstascent.action.php`
+> - `firstascent.js`
+>
+> `modules/utils.js`, `material.inc.php` and `_ide_helper.php` are read only. The plan's "Files (each step)" line lists four files; `UtilTrait.php` is P1.8's addition, and the P1.8 notes say so (§10).
+>
+> Docs this session may edit:
+> - `misc/docs/progress.md`: a new entry at the top (§10).
+> - `misc/docs/MIGRATION_PLAN.md`, in the "P1.6–P1.9 Autowired actions" section only: a new "P1.8 status" line and its notes (§10). Nothing else in the file.
+> - `misc/docs/TODO.md`: only to record a new finding, in an existing entry if one fits. Nothing else in the file.
+>
+> Files outside the repo go in `D:\Documents\BGA Studio\`, with names starting `p1-8-`. Put scripts, the harness and the scratch clone in `D:\Documents\BGA Studio\p1-8-harness\`. You may read, and copy from, `D:\Documents\BGA Studio\p1-6-harness\` and `D:\Documents\BGA Studio\p1-7-harness\`; don't change anything in them.
+>
+> **Git:**
+> - No code is committed in this session. At the end, the whole change (all three commits' worth) is in the working tree, uncommitted, with nothing staged. Session 2 makes the three code commits after my Studio playtest.
+> - The only commit is the `docs:` commit of §10. Stage it by explicit path, make it on my "commit docs", and push it on my "push".
+>
+> No deploy (I deploy), and nothing on the BGA Production site. No installs without my confirmation (PHP 8.4 CLI is available; node is not). Anything outside this grant needs my explicit go-ahead.
+>
+> **Model and effort:** this session runs on Sonnet 5.5 at High effort. Record both in the entry.
+>
+> **Working rules:**
+> - The working copy is CRLF and the index LF (`core.autocrlf` is on). `CLAUDE.md` and `dbmodel.sql` are LF in the working copy. Don't check out `dbmodel.sql`.
+> - Edit files by script with exact-match checks (each old text must occur exactly once), keeping each file's line endings.
+> - `git diff`: put `--output=<file>` before any `--`, and never use a `>` redirect for a diff.
+> - Cite line numbers with the version they are at. Lines in this prompt are at HEAD `519c3e0`.
+> - Count calls with PHP's tokenizer (`token_get_all`), not `grep -c`.
+> - Tag what you haven't seen as UNVERIFIED and what you reasoned as [inferred].
+> - After every PHP edit, run `php -l` on the changed PHP files and `php misc/tests/technique_matching.php modules/php/Game.php` (232,352 cases plus the named ones).
+>
+> ## 2. Read first
+>
+> - `misc/docs/progress.md`: the two P1.7 entries ("in progress, session 1" and "done") and P1.6's "in progress, session 1" entry. P1.8 follows their method: the thin-entry shape (P1.7), the direct-entry shape and the B3 `fix:` (P1.6), the type rule, the harness, the static checks and the stacked diffs.
+> - `misc/docs/MIGRATION_PLAN.md`, "P1.6–P1.9 Autowired actions": the shared shape, the type-rule note under P1.6's status, P1.7's notes, "Done when" and "Playtest".
+> - `misc/docs/PROCEDURES.md`, "Playtest lists": the standard for the smoke list and the playtest list.
+> - The framework docs: `misc/docs/bga/current/game-files/Main game logic_ Game.php - Board Game Arena.md` (autowired actions, the parameter attributes, the magic `$activePlayerId`) and the Game.js doc's `performAction` section in the same folder.
+>
+> ## 3. My decisions for P1.8
+>
+> 1. **One step, with a stop rule.** All seven actions are converted in this step. Before writing any code, §5.2's reading is done. If any value cannot be rebuilt, from typed parameters, exactly as `action.php` handed it to `Game.php` (types included), stop and report. We would then split the step.
+> 2. **Two shapes.**
+>    - **Direct entries (P1.6's shape)** for the five bodies with no internal caller: `confirmClimbingCardChoice`, `passClimbingCard`, `undoClimbingCard`, `confirmCrimperClimbingCard` and `confirmSelectedOpponent` become public `actConfirmClimbingCardChoice`, `actPassClimbingCard`, `actUndoClimbingCard`, `actConfirmCrimperClimbingCard` and `actConfirmSelectedOpponent`. Their inner `$this->checkAction(...)` lines are removed, and any type conversion goes at the top of the method.
+>    - **Thin entries (P1.7's shape)** for `confirmAssetsForDiscard` and `confirmPortaledge`, which `confirmBomberAnchor` calls at `Game.php:4843` and `:4844`. A new public `actConfirmAssetsForDiscard` and `actConfirmPortaledge` each take typed parameters and call a private helper that rebuilds exactly the values `action.php` passed, in the same order, then call the body with them. The bodies keep their names and parameters, become `private`, and lose their inner `checkAction` (`:2983`, `:4027`). `confirmBomberAnchor` runs its own `checkAction('confirmBomberAnchor')` first (`:4824`), and it stays as it is, byte for byte, with its two call lines. It is P1.9's action.
+> 3. **`possibleactions`: every entry of the seven is renamed**, 43 in all (states at `519c3e0`, from `states.inc.php`):
+>    - `confirmClimbingCardChoice` and `passClimbingCard`: state 21;
+>    - `undoClimbingCard`: 11 states (10, 21, 22, 23, 24, 27, 28, 29, 30, 31, 60);
+>    - `confirmCrimperClimbingCard`: state 60;
+>    - `confirmSelectedOpponent`: state 23;
+>    - `confirmAssetsForDiscard` and `confirmPortaledge`: 14 states each (10, 20–24, 27–31, 33, 50, 60).
+>
+>    It's a pure rename. State 24's **transition** named `confirmPortaledge` is not an action and stays. Neither do the notification names `confirmPortaledge`, `confirmCrimperClimbingCard`, `confirmAssetsForDiscardPrivate`/`Public` and `confirmPortaledgeOpponent`, nor the use-case label `rollRiskDie('confirmClimbingCardChoice')` (`:2500`). The states from which the client never sends an action are dead entries, left for P1.10 (§5.2 finds them).
+> 4. **The type rule applies** (the plan's type-rule note): each value reaches the body with exactly the type and value `action.php` gave it. Here:
+>    - `AT_posint` (`card_id`, `card_type`) → `#[IntParam(min: 0)] int`, turned back into a string with `strval`;
+>    - `AT_numberlist` → `#[IntArrayParam]`, rebuilt as `action.php` gave it:
+>      - **`confirmAssetsForDiscard` received the raw strings**, not exploded (`firstascent.action.php:46–56`). So its helper rebuilds the exact string the client sent, comma-joined: `implode(',', array_map('strval', $x ?? []))` is the expected form, if §5.2's reading confirms that the client never sends a trailing comma or a padded number;
+>      - **`confirmPortaledge` received the trimmed and exploded list** (`:67–83`), so it gets `array_map('strval', $x ?? [])`;
+>    - `AT_bool` (`jesus_party`) → `bool`;
+>    - `AT_alphanum` → `#[StringParam(alphanum: true)] string`, passed as it arrives, except under decision 5;
+>    - a value the client may leave out becomes an optional parameter whose default gives what `action.php` gave for a missing argument (`getArg` without `$mandatory` returned `null` [inferred from the legacy doc; check it there]);
+>    - no validation `action.php` didn't make.
+> 5. **The space rule, widened to underscores.** P1.7's rule: a value that can contain a space is a plain `string`, checked on entry with `'/^[0-9a-zA-Z_ ]*$/D'` (the legacy `AT_alphanum` rule plus `D`) and refused with `throw new \Bga\GameFramework\SystemException("Bad value for: <name>");`. For P1.8 the same applies to **any value that can contain a space or an underscore**, because the framework's `alphanum` pattern is unknown and `StringParam` also has an `alphanum_dash` option, which suggests that plain `alphanum` refuses `_` [inferred]. The values I know of:
+>    - `tucked_card_types`: the client joins the types with spaces (`firstascent.js:4549–4557`);
+>    - `opponent_id`: a player id, or the string `jesus_piece` (`:4585`);
+>    - `jesus_piece`: `this.jesus_piece_requirements`, which is set only to `'true'` or `'jesus_party'` (`:6177`) and may be undefined. A value that may be absent keeps the default of decision 4, and the check applies only when it's present.
+>
+>    §5.2 checks `choice`, `chosen_id` and `discard_id` the same way. Any other value goes through `#[StringParam(alphanum: true)]` as decision 4 says.
+> 6. **`opponent_id` gets no other validation.** It's the chosen opponent's id, not the actor's, so it isn't one of B3's inputs (the plan's shared shape lists `rest`, `passClimbingCard` and `confirmPermanentAssets`). By D7, checking it against `$args` belongs to the slice that owns climbing cards.
+> 7. **Three code commits**, in this order:
+>    1. `struct:` the rename: the seven entries, the two private bodies and their helpers, the 43 renames in `states.inc.php`, the seven `action.php` methods deleted, and the seven client call sites moved to `this.bga.actions.performAction('actX', …)`, sending arrays instead of comma-joined strings. In this commit, `actPassClimbingCard` still takes the client's id, as P1.6's `actRest` did: `#[StringParam(alphanum: true)] string $player_id`.
+>    2. `fix:` B3 for `passClimbingCard`: `actPassClimbingCard(int $activePlayerId)` with `$player_id = strval($activePlayerId);` on entry, as `actRest` does (`Game.php:2125`). The body stores the id in the `rerack_1` global, and `:976–981` and `:1970–1972` read and write the same list, so it must stay a string. The client stops sending `player_id` (`firstascent.js:5189–5191`).
+>    3. `struct:` the names (decision 8).
+> 8. **The names (commit 3).** The 39 `getActivePlayerName()` calls in these bodies (13 in `confirmClimbingCardChoice`, 13 in `confirmAssetsForDiscard`, 9 in `confirmSelectedOpponent`, 2 in `confirmPortaledge`, 1 in `passClimbingCard`, 1 in `confirmCrimperClimbingCard`), plus 1 in `bespokeClimbingCard`:
+>    - `passClimbingCard`: `$this->getPlayerNameById($activePlayerId)`, since the entry is its only way in.
+>    - `confirmClimbingCardChoice`, `confirmAssetsForDiscard`, `confirmSelectedOpponent` and `confirmPortaledge`: `$this->getPlayerNameById(intval($player_id))`, as in P1.7. Each sets `$player_id = $this->getActivePlayerId()` near its top (`:2142`, `:2985`, `:3619`, `:4028`).
+>    - `confirmCrimperClimbingCard` never sets `$player_id`. Its one call (`:5162`) becomes `$this->getPlayerNameById(intval($this->getActivePlayerId()))`.
+>    - **`bespokeClimbingCard` (`UtilTrait.php:744`)** becomes `$this->getPlayerNameById(intval($this->getActivePlayerId()))`, with no signature change. Its `$player_id` parameter is overwritten by the loops at `:727` and `:740` before that line, so don't use it. This differs from the plan's proposal at `MIGRATION_PLAN.md:688` (that `confirmClimbingCardChoice` pass the name in), which was marked inferred and isn't part of any step. Don't edit line 688; the P1.8 notes record the decision.
+>    - **Before replacing any call, check that it names the same player** `getActivePlayerName()` did. That means no change of the active player between the `$player_id` assignment and the call: look for `nextState` (whose next state's action may run straightaway), `changeActivePlayer`, `activeNextPlayer` and multiple-active transitions. `confirmClimbingCardChoice` has several `nextState` calls. If any call could name a different player, stop and report before editing it.
+> 9. **No replay check (F13):** with the type rule, no notification's arguments change. The harness shows it for the values the bodies receive; confirm it from the diff, as P1.7 did.
+> 10. **No existing-table check** (D12, plan §2.4): no table spans a deploy in this project.
+> 11. **A smoke stop (stop A)** after commit 1's change, before commits 2 and 3 (§6).
+> 12. **Testing:** the harness with mutants, the static checks, the smoke stop, and one Studio table on the final code (§9). **The Bomber Anchor path isn't played.** The only change there is the removed inner `checkAction`, which the static checks show, and the plan's P1.9 runs T26 on that path.
+>
+> ## 4. Facts gathered by the design discussion (recheck them)
+>
+> These were read at `519c3e0`, not run. Check each, and say in the entry where you agree and where you don't.
+>
+> - **`action.php`** (`firstascent.action.php`):
+>   - `confirmClimbingCardChoice` `:34`: `choice` alphanum, `card_id` posint, `card_type` posint, `jesus_piece` alphanum.
+>   - `confirmAssetsForDiscard` `:46`: `hand_card_ids`, `board_card_ids` and `tucked_card_nums` numberlist, `tucked_card_types` alphanum, all passed raw.
+>   - `confirmSelectedOpponent` `:58`: `opponent_id` alphanum, `jesus_party` bool.
+>   - `confirmPortaledge` `:67`: `portaledge_to_draw` numberlist; one trailing comma cut, `''` gives `[]`, otherwise exploded.
+>   - `passClimbingCard` `:136`: `player_id` alphanum.
+>   - `undoClimbingCard` `:145`: no arguments.
+>   - `confirmCrimperClimbingCard` `:222`: `chosen_id` and `discard_id` alphanum.
+> - **The bodies** (`modules/php/Game.php`): `confirmClimbingCardChoice` `:2139`, `confirmAssetsForDiscard` `:2982`, `confirmSelectedOpponent` `:3617`, `confirmPortaledge` `:4026`, `undoClimbingCard` `:4686`, `passClimbingCard` `:4693`, `confirmCrimperClimbingCard` `:5144`. Each starts with its own `checkAction`. The only internal callers of any of the seven are `:4843–4844`, in `confirmBomberAnchor`.
+> - **How `confirmAssetsForDiscard` parses its strings:** `!empty(...) ? explode(',', ...) : array()` for the hand and board ids, `explode(' ', ...)` for `tucked_card_types`, and `explode(',', ...)` for `tucked_card_nums`, then `array_combine`. Note that `!empty('0')` is false. `confirmBomberAnchor` passes a raw `$discard_ids` string and `[]` for the other three.
+> - **`confirmSelectedOpponent`** compares `$opponent_id === 'jesus_piece'` and indexes `player_names_and_colors` with it, so it must stay a string.
+> - **`confirmClimbingCardChoice`** tests `if ($jesus_piece)` several times, so an absent value and a present string behave differently.
+> - **The client** (`firstascent.js`): one `checkAction` + `ajaxcall` site per action, at `:4395` (choice), `:4562` (assets for discard), `:4600` (opponent), `:4765` (Portaledge), `:5188` (pass), `:5200` (undo) and `:6738` (Crimper).
+>   - The hand and board ids and the tucked nums are built with a trailing comma, which is then sliced off (`:4537–4558`).
+>   - `portaledge_to_draw` is four counts, each followed by a comma; in `resting`, two more values follow, with no comma after them (`:4744–4759`). Other strings of the same name are built at `:3888` and `:5784`; §5.2 says which call each one feeds.
+>   - The card ids come from element ids via `.slice(-3).replace(/^\D+/g, '')`.
+>   - `opponent_id` is a button id, `${player.id}` (`:2647`, `:5115`), or `jesus_piece`.
+>   - The Undo button is created in several states (`firstascent.js:2592`–`:2808`, `:4931`, and `modules/utils.js:926`), all calling `onUndoClimbingCard`. `utils.js` needs no change [read].
+> - **Tokenizer counts at `519c3e0`:**
+>   - `Game.php`: `getActivePlayerName` 56, `getPlayerNameById` 13, `getActivePlayerId` 29, `checkAction` 18.
+>   - `UtilTrait.php`: `getActivePlayerName` 1 (in `bespokeClimbingCard`), `getActivePlayerId` 3.
+>   - In `firstascent.js`, by `grep -o`: `ajaxcall(` 18, `performAction(` 8.
+> - **Expected after commit 3:**
+>   - `Game.php`: `getActivePlayerName` 17 (14 in P1.9's actions, 3 in P2's state functions), `getPlayerNameById` 52, `getActivePlayerId` 30, `checkAction` 11.
+>   - `UtilTrait.php`: `getActivePlayerName` 0, `getPlayerNameById` 1, `getActivePlayerId` 4.
+>   - `firstascent.js`: `ajaxcall(` 11, `performAction(` 15.
+>
+>   If a count differs, explain why before going on.
+> - **Every allowing state is `activeplayer`** [read], so the magic `$activePlayerId` is the actor in state 21.
+> - **What Studio showed in P1.6 and P1.7:** an empty string is sent as an empty value, and an empty array is omitted; ids arrive as plain digits, single- and two-digit; a space in a string arrives as `%20` and is decoded. **Still UNVERIFIED:** whether autowiring refuses undeclared arguments, and what `performAction` does with an `undefined` value (the legacy `ajaxcall` dropped it [inferred]; check the Game.js doc).
+>
+> ## 5. Start check, the reading, and the change
+>
+> ### 5.1 Start check (read-only)
+>
+> - `git fetch origin`. HEAD should be `519c3e018ecbdf72c9134c139b7a223256a29d10` (`docs: playtest lists in PROCEDURES.md (format, rules first, reading results)`), with parent `a6d7545`, level with `origin/main`. Nothing staged, and the working tree clean.
+> - The working-tree blobs (`git hash-object`) and CRLF sizes (newline counts):
+>
+>   | File | Blob | CRLF bytes | Newlines |
+>   |---|---|---|---|
+>   | `modules/php/Game.php` | `5bdc24e81426989cfdfddea4c46756613f61f6fb` | 355,995 | 6,601 (no final newline) |
+>   | `modules/php/UtilTrait.php` | `f6b68a818f64916a783805dd872c32006da90abc` | 79,706 | 1,594 (no final newline) |
+>   | `states.inc.php` | `457b347d0b235b4650c0a6a748897c62efc6a626` | 16,568 | 333 |
+>   | `firstascent.action.php` | `d87962937dcfb12c48f5b43e86d73d21c3cfcf05` | 7,893 | 232 |
+>   | `firstascent.js` | `ebfc1dc886d261b7e346943bd360f9ba07aad01f` | 742,178 | 13,531 (no final newline) |
+>   | `modules/utils.js` | `8a0a442d06ef3208228a803a269d853ee3b52a87` | 229,085 | 4,986 (no final newline) |
+>
+> - If anything differs, stop and report. Otherwise go on to §5.2 without waiting.
+>
+> ### 5.2 The reading (before any code; decision 1's stop rule)
+>
+> Read the code, and record the results in the entry with line numbers:
+> - For each of the seven, the client's payload: what each value can be, where it's built, whether it can be empty, absent or `undefined`, and whether it can contain a space, an underscore, a leading zero or a trailing comma. Follow each value to where it's set, as far as needed: `jesus_piece_requirements` everywhere it's assigned or cleared; the element ids behind `card_id`, `chosen_id`, `discard_id` and the hand and board ids; `choice`'s class names; and the tucked types' and counts' source.
+> - For each value, the form the entry will take (decision 4 or decision 5) and why.
+> - From which states the client actually sends each action. Use the state checks around the call sites and the places where the buttons are made. List the rest as dead entries for P1.10, as P1.7 did.
+> - How the playtest can reach each action's usual state on Studio, with `debug_stackClimbingDeck` (`UtilTrait.php:983`), `debug_giveSummitBeta` (`:1036`) and the other debug functions: which climbing cards (by type arg, from `material.inc.php`) and which options.
+>
+> **Stop and report**, before writing code, if:
+> - any value can't be rebuilt exactly (decision 1);
+> - the client sends a value that no form of decision 4 or 5 reproduces;
+> - or a fact in §4 is wrong in a way that changes the change.
+>
+> Otherwise go on.
+>
+> ### 5.3 The change
+>
+> Make the change as §3 describes, one commit's worth at a time:
+> 1. Write commit 1's state. Keep a snapshot of it in `p1-8-harness\state1\`. Then stop A (§6).
+> 2. After my stop A review, write commit 2's state (snapshot in `state2\`), then commit 3's.
+> 3. Keep everything outside the seven methods, their helpers, `bespokeClimbingCard`'s one line, the 43 `possibleactions` entries, the seven `action.php` methods and the seven client handlers byte-identical to HEAD.
+> 4. If a handler's local becomes unused after the move to `performAction`, remove it and say so. Change nothing else in the handlers.
+>
+> ## 6. Stop A (the smoke)
+>
+> After commit 1's change:
+> - Write `p1-8-smoke.diff` (`git diff HEAD`) and a smoke list, `p1-8-smoke-v1.md`, following `PROCEDURES.md`'s "Playtest lists". Make it short: one table with 2 players, and a G1 deploy step with the five files' expected sizes and editor lines.
+> - The smoke should play `actConfirmClimbingCardChoice` without a Jesus Piece. Its report should include the request, so that it shows what happens to `jesus_piece` when it isn't set. If one climbing card option goes through `selectOpponent` and `discardAssets`, use it, so that `actConfirmSelectedOpponent` and `actConfirmAssetsForDiscard` (with its rebuilt strings) run too. Choose the card with `debug_stackClimbingDeck`, checked against `RULES.md` first.
+> - Report §5.1, §5.2's results, the change so far, and the smoke list, then wait. I'll review, deploy and play it, and send my results and the consoles.
+>
+> ## 7. The harness and the static checks
+>
+> Build them on P1.6's and P1.7's (copy what fits from their folders):
+> - **Old side:** HEAD's `firstascent.action.php`, loaded as it is (`git show`), on the legacy `getArg` stub, with a recorder for `$this->game`.
+> - **New side:**
+>   - For the thin entries, as P1.7 did: the entries and helpers cut out with the tokenizer, with recorder bodies.
+>   - For the direct entries, as P1.6 did: the values the body works with after the entry's conversion.
+>   - Each compares the method name and the values with `===`, keys, order and types included.
+>   - The harness runs at each commit state (stages 1, 2 and 3).
+> - **Cases.**
+>   - Every value empty, absent (where the framework omits it), one item and several.
+>   - Single-, two- and three-digit ids.
+>   - Every tucked type alone and several together.
+>   - `jesus_piece` absent, `'true'` and `'jesus_party'`.
+>   - `opponent_id` as ids of different lengths and as `jesus_piece`.
+>   - `jesus_party` true and false.
+>   - `portaledge_to_draw` in both client forms, four counts with a trailing comma and six without, including zeros.
+>   - `passClimbingCard` with ids of different lengths, both against the client's id (stage 1) and against `strval($activePlayerId)` (stages 2 and 3).
+>   - `undoClimbingCard` with no arguments.
+>   - Seeded joint cases.
+> - **The check of decision 5,** for each value it covers: accepted values split or passed correctly, and a hyphen, comma, quotes, `<`, `é`, a tab, `.`, `;`, and a final or leading newline each refused, with exactly `Bad value for: <name>`.
+> - **The signatures,** by reflection.
+> - **Static checks** in the manner of P1.7's, at each stage, including:
+>   - `states.inc.php` equals HEAD with the 43 renames and nothing else (state by state, only `possibleactions` differs), and state 24's transition key is unchanged;
+>   - `action.php` equals HEAD with exactly the seven methods cut out;
+>   - each body equals HEAD's body with only the expected changes;
+>   - outside the changed methods, `Game.php` equals HEAD;
+>   - `confirmBomberAnchor` is byte-identical to HEAD;
+>   - `UtilTrait.php` differs from HEAD only at stage 3, in exactly the one line;
+>   - the notification names and the `rollRiskDie('confirmClimbingCardChoice')` label are unchanged;
+>   - the tokenizer counts of §4;
+>   - every `act*` name in `possibleactions` is a method of `Game.php`;
+>   - `modules/utils.js` is unchanged;
+>   - the client outside the seven handlers equals HEAD, with each handler's removed and added lines as expected, one `performAction` per action, each payload holding exactly the entry's declared keys, and no `player_id` left in `onPassClimbingCard` at stages 2 and 3;
+>   - the five files are pure CRLF.
+> - **Mutation test:** one mutant or more per conversion (a dropped `strval`, `implode` or `?? []`, a swapped pair of arguments, a wrong separator, a changed default, the check of decision 5 removed or loosened, `D` dropped, the B3 `strval` dropped). Each must be killed, and the unmutated control must pass.
+>
+> ## 8. The diffs and the commit messages
+>
+> Build the stacked diffs in a scratch clone (`p1-8-harness\scratch-repo`), one commit per state, so the real repo's object store is untouched. Then check that applying them in order to a fresh clone (`apply-check`) gives a staged diff identical to `p1-8-all.diff` byte for byte.
+>
+> - `p1-8-rename.diff` (against HEAD), `p1-8-b3.diff` (against the rename), `p1-8-name.diff` (against the B3 state), `p1-8-all.diff` (`git diff HEAD`).
+> - `p1-8-msg-1.txt`, `p1-8-msg-2.txt`, `p1-8-msg-3.txt` (LF, each ending with `Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>`), with these subjects:
+>   1. `struct: autowired actions, group 3: confirmClimbingCardChoice, passClimbingCard, undoClimbingCard, confirmCrimperClimbingCard, confirmAssetsForDiscard, confirmSelectedOpponent, confirmPortaledge (P1.8)`
+>   2. `fix: passClimbingCard takes the active player's id from the framework, not the client (P1.8, B3)`
+>   3. `struct: the active player's name from getPlayerNameById in six autowired actions and bespokeClimbingCard (P1.8)`
+> - Give each file's lines, bytes, SHA-256, `index` lines and `--stat`, in a table like P1.7's.
+>
+> ## 9. Stop B (the playtest list)
+>
+> Write `p1-8-playtest-v1.md`, following `PROCEDURES.md`'s "Playtest lists". Check the rules first, as it says.
+> - **One table, 2 players, no spectator.** No notification's arguments change, so a spectator can't show a difference.
+> - **Each of the seven played once, on the final code,** from a state the client sends it from, as §5.2 found:
+>   - `actConfirmClimbingCardChoice`, `actPassClimbingCard` and `actUndoClimbingCard` in `climbingCard` (21), each on its own climbing card;
+>   - `actConfirmAssetsForDiscard` in `discardAssets` (22);
+>   - `actConfirmSelectedOpponent` in `selectOpponent` (23);
+>   - `actConfirmPortaledge` in `selectPortaledge` (24);
+>   - `actConfirmCrimperClimbingCard` in `crimperClimbingCards` (60).
+>
+>   Reach them with `debug_stackClimbingDeck` and the other debug functions. The reports ask for each request's URL in full.
+> - **Don't add a step only to send a value with a space or an underscore.** P1.7 showed a space's transport, and the harness covers the check. If an action's path sends such a value anyway, ask for the request.
+> - **Not played, to be recorded in the entry:**
+>   - the Bomber Anchor path (decision 12);
+>   - the other allowing states, met by the harness and the static checks;
+>   - the dead entries, for P1.10.
+>
+> Report the harness results, the diffs and messages, the list and the rules check, then wait for my review. Changes to any of them are new versioned files, never overwrites.
+>
+> ## 10. The docs (on my approval of stop B)
+>
+> **`misc/docs/progress.md`:** a new entry at the top, titled "2026-11-25 (P1.8, Autowired actions, group 3: in progress, session 1)". If the session runs on another day, use that day's date. Model it on P1.7's session 1 entry:
+> - the state at the end, with the final blobs and the expected Studio sizes;
+> - this grant (§1), quoted;
+> - my decisions (§3);
+> - the status of each item;
+> - the start check and §5.2's reading;
+> - the change;
+> - the smoke and what it showed;
+> - the harness, with its counts;
+> - the diffs and messages;
+> - what wasn't played, and why;
+> - the rules check, with page numbers;
+> - the playtest list, in full;
+> - what session 2 does;
+> - my messages to this session, quoted in full. Quote only mine, not your own reports.
+>
+> **`misc/docs/MIGRATION_PLAN.md`:** a new "P1.8 status" line, in progress, with its notes, after P1.7's. The notes cover:
+> - the shapes (decision 2);
+> - the raw-string rebuild for `confirmAssetsForDiscard`;
+> - the space rule widened to underscores (decision 5), as the rule for P1.9 too;
+> - the names, including `bespokeClimbingCard`'s form and that it differs from the proposal at line 688;
+> - `UtilTrait.php` added to this step's files;
+> - the dead entries left for P1.10;
+> - the counts after P1.8.
+>
+> Commit the docs on my "commit docs", staged by explicit path, and push on my "push".
+>
+> Then update `misc/docs/progress.md` as above.
+
+**Message 2: the stop A review** (2026-11-25 06:22 UTC)
+
+> Stop A review. The smoke build is right: I replayed p1-8-smoke.diff on 519c3e0 and the SHA-256, the four blobs, the sizes and the newline counts all match yours. The 43 renames, the counts, the two helpers against action.php's parsing, and your dead-entry reading (26 dead, 17 live) all check out.
+>
+> Three changes before I deploy. Make them as a v2 build, keeping v1's files:
+>
+> 1. In assetsForDiscardEntryArgs, drop the array_map('strval', ...) inside the three implode calls, so each is implode(',', $x ?? []). As you found, implode turns the ints into strings anyway, so the strval does nothing and no mutant can kill it. Update the harness, rerun stage 1, and say which mutants changed.
+>
+> 2. Smoke S1: keep debug_setAvailableCharacters("1,3,5") and the named characters only if a character's ability can change what S2 or S3 does. If you keep them, give me the reason in one line. If not, remove the call and its F5, and let W and Z pick any character.
+>
+> 3. Smoke S2's report: remove "and the two options as shown". The card's name is enough.
+>
+> Write p1-8-smoke-v2.diff and p1-8-smoke-v2.md. Check that v2's diff differs from v1's only by the edit of point 1 and the index lines and hunk headers it changes, and that the list differs only by points 2 and 3 and the new G1 sizes. Report the new sizes, editor lines and SHA-256 values, then wait for my smoke results.
+>
+> Your other choices are approved: the required and optional parameters as you have them, and the restore of your own three files after the script slip. Record the slip in the entry.
+>
+> If S3's request shows jesus_piece sent as "undefined" (or as any value at all), stop and propose the client fix before writing commit 2. If it's absent, nothing changes. A jesus_piece that is present is left to the harness: no extra step in the playtest for it.
+>
+> Record this message in the entry, quoted in full, as one of my messages.
+
+**Message 3: the laptop pickup prompt** (2026-11-25)
+
+> P1.8, session 1 of 2, continued on the laptop: autowired actions, group 3
+> Machine: laptop. Repo C:\BGA Studio\firstascent, work folder C:\BGA Studio\ (misc/docs/PROCEDURES.md, "Work folder and machines", commit 10c9c21).
+> 1. Pickup note
+> This session continues P1.8 session 1. The step moved from the desktop partway through session 1, at stop A, the smoke stop after commit 1's change. The desktop's P1.8 session is closed and won't be used again. The step travels as handoff.patch, as "Work folder and machines" says.
+> Where things stand tonight (2026-11-25), from my checks:
+> HEAD is 229cd5a (docs: laptop setup check (review-only), only misc/docs/progress.md). Its parent is 10c9c21 (docs: work folder for two machines), whose parent is 519c3e0. HEAD is pushed and level with origin/main.
+> The working tree holds commit 1's change only (the "v2 smoke build"), applied from C:\BGA Studio\handoff.patch. That file is a copy of p1-8-smoke-v2.diff, SHA-256 8066E2956C4AE74E59C05B2871F05CAF59AB3C2AA122C534FD316760D4133180.
+> A fresh git diff --binary export after applying it has the same hash.
+> git status --short shows exactly firstascent.action.php, firstascent.js, modules/php/Game.php and states.inc.php modified. Nothing is staged, and nothing is untracked.
+> The four sizes match G1 of p1-8-smoke-v2.md.
+> Commits 2 and 3 (the B3 fix: and the names) are not written yet.
+> dbmodel.sql is LF in the working copy, 2,130 bytes, as on the desktop.
+> Tools: PHP 8.4.28, git 2.56.1, Windows OpenSSH 9.5p2. VS Code isn't used here, and there is no .vscode/sftp.json. I deploy with WinSCP to sftp.studio.boardgamearena.com, port 22.
+> The work folder holds:
+> p1-8-handoff.md;
+> p1-8-smoke.diff, p1-8-smoke-v1.md, p1-8-smoke-v2.diff and p1-8-smoke-v2.md;
+> p1-8-harness\, without tmp\;
+> the four model playtest lists;
+> the P1.6 and P1.7 models and harnesses.
+> The handoff session found no absolute D:\ path in the p1-8 files or the harness. The harness runs from the repo root and finds ../p1-8-harness/.
+> Studio holds the v2 smoke build, deployed from the desktop this evening, after BGA's maintenance (§5). There's no red banner on the project page or on a table.
+> The smoke (p1-8-smoke-v2.md) isn't played yet. I'll play it after this session has started and reported.
+> Decision 5 of the session 1 prompt (the space rule widened to underscores) is accepted.
+> 2. Read first
+> C:\BGA Studio\p1-8-handoff.md, first and in full. It quotes my go-aheads and the session 1 prompt in full, says which are in force, and lists the open findings. It's the record of session 1 so far. Where it and this prompt differ, this prompt wins; say where they differ.
+> Its §5 "Suggested first checks" are replaced by §4 here. Its harness run comes later, at §6 step 4.
+> Its stage A scripts (p1-8-stage-a.php, p1-8-stage-a2.php) are a record only. Don't run them again.
+> misc/docs/PROCEDURES.md: "Work folder and machines" and "Playtest lists".
+> misc/docs/progress.md: the two newest entries, "laptop setup check" (229cd5a) and "docs: work folder for two machines" (10c9c21).
+> 3. The grant
+> The grant of the session 1 prompt (its §1, quoted in the handoff) carries over unchanged, with these changes only:
+> Paths: every D:\Documents\BGA Studio\ becomes C:\BGA Studio\. The harness, its scripts and the scratch clone stay in C:\BGA Studio\p1-8-harness\.
+> Line endings: keep each file's endings as you find them on this machine. Here CLAUDE.md is CRLF in the working copy (the 229cd5a entry), not LF as the session 1 prompt says; P1.8 doesn't edit it.
+> dbmodel.sql is LF. Don't check it out, restore it, reset it, or switch branches: any of these would rewrite it as CRLF.
+> HEAD: the code lines cited in the session 1 prompt are at 519c3e0. The commits since touch only misc/docs/PROCEDURES.md and misc/docs/progress.md, so those line numbers still hold for every code file (the start check confirms it).
+> The scratch clone and the stacked diffs are built on HEAD 229cd5a, or on whatever HEAD is when you build them (check it then).
+> Session 2 applies the commits on top of the HEAD it finds.
+> The model and effort stay the same: Sonnet 5.5 at High.
+> 4. Start check (read-only)
+> git fetch origin. HEAD should be 229cd5aaae6d11643050c880559ffd31ebcc940f, level with origin/main.
+> git diff --name-only 519c3e0 HEAD should list only misc/docs/PROCEDURES.md and misc/docs/progress.md.
+> git status --short should show exactly the four files above as modified, nothing staged and nothing untracked.
+> The working tree's diff: git diff HEAD --binary --output="C:\\BGA Studio\\p1-8-harness\\laptop-start.diff", then its SHA-256. It should be 8066E2956C4AE74E59C05B2871F05CAF59AB3C2AA122C534FD316760D4133180 (case doesn't matter).
+> The four files' blobs (git hash-object), CRLF bytes and newline counts:
+> File
+> Blob begins
+> CRLF bytes
+> Editor lines
+> modules/php/Game.php
+> d65316f
+> 358,786
+> 6,646
+> states.inc.php
+> c603b7f
+> 16,697
+> 333
+> firstascent.action.php
+> 1dcc71b
+> 5,255
+> 157
+> firstascent.js
+> 6d618df
+> 740,974
+> 13,514
+> These are unchanged from HEAD: modules/php/UtilTrait.php, blob f6b68a818f64916a783805dd872c32006da90abc, 79,706 CRLF bytes; modules/utils.js, blob 8a0a442d06ef3208228a803a269d853ee3b52a87. dbmodel.sql is LF, 2,130 bytes.
+> The work folder holds the files listed in §1. A search of p1-8-harness\ and the p1-8-* files finds no D:\ path.
+> If anything differs, stop and report. Don't fix it.
+> 5. BGA's announcement: what changes for this step
+> From my message, quoting BGA's developer Discord (2026-11-25). You can't check this; record it as my report:
+> Studio's SFTP moved to sftp.studio.boardgamearena.com, port 22.
+> The SFTP folder is now only a workspace. Only the game bundle reaches the game server, after a security scan. The bundle is:
+> at the root: firstascent.js/.css, firstascent_firstascent.tpl, *.php, dbmodel.sql, and the gameinfos, gameoptions, gamepreferences and stats .json/.jsonc files;
+> in modules/: .php, .js and .css;
+> in img/, sounds/ and fonts/: media only.
+> The scan refuses system commands, eval, any file access (file_get_contents, fopen, scandir and so on), network calls, and "hidden function calls". A refused file keeps its previous version on the server. A red banner on the game table and the project page names the file, the rule and the line.
+> Tonight's deploy of the v2 smoke build (the four files) gave no banner, so those four passed the scan as they are.
+> What that changes:
+> G1's sizes prove only the workspace copy, not what the server runs. Every list from now on asks, in G1's report, for any red banner on the project page and on the table, with its full text (file, rule, line). If a banner names a file, I stop before playing.
+> modules/php/UtilTrait.php is the risk. Commit 3 changes it (line 744), and as far as I know it hasn't been uploaded since the maintenance. It holds debug_frameworkCheck (:1308–1331), which calls ReflectionClass::getFileName() and is_file(), and the scan may refuse that [inferred]. A refused UtilTrait.php would leave the old file on the server, and the line-744 change can't be seen in play. So:
+> the playtest list's G1 deploys five files, UtilTrait.php included, and asks for the banner line;
+> don't change debug_frameworkCheck, or anything else outside the grant, to avoid a refusal. If it's refused, the results will say so, and you report it. I decide what follows.
+> Add no new kind of call to the code. No file access, no eval, no variable or string-built calls, beyond what tonight's build already has (it passed).
+> No docs about the SFTP move or the scan in this step. Don't edit CLAUDE.md, BGA_PITFALLS.md, or MIGRATION_PLAN.md beyond the P1.8 status line and notes, and add nothing to TODO.md about it. A later docs change does that. The progress.md entry records what P1.8 saw: each deploy's banner result, as I report it.
+> 6. What this session does
+> The start check (§4) and the reading (§2).
+> Report, then wait for my smoke results. The report covers:
+> the start check's results;
+> the go-aheads in force and the open findings, as you read them in the handoff;
+> anything in the handoff that differs from this prompt.
+> Before my results: no harness run, no code change, no doc edit and no commit.
+> When my results arrive, read my report and the consoles as PROCEDURES.md's "Playtest lists" says:
+> jesus_piece first, in S3's first request. If it's sent at all (as undefined or as any value), stop and propose the client fix. Write no code.
+> Then the rest:
+> the action name in each of the three URLs;
+> what each request sends;
+> the state sequence (21, 23, then 22);
+> the log lines naming Z;
+> the hand counts and the Summit Beta token;
+> G1's sizes and the banner line.
+> Report your reading.
+> Before writing commit 2, run the stage 1 harness once on this machine and compare it with p1-8-harness-results-stage1-v2.txt. The results should be the same: 1,729 comparisons, 166 checks, 52 mutants killed, the control passing. If anything differs other than paths and times, stop and report.
+> Then go on from step 2 of the session 1 prompt's §5.3 (commit 2, then commit 3), through §7, §8 and §9 (stop B), with §7 below. Go on only if my results message says to; otherwise wait.
+> 7. Stop B: additions to the session 1 prompt's §9
+> G1 of p1-8-playtest-v1.md deploys five files: modules/php/Game.php, modules/php/UtilTrait.php, states.inc.php, firstascent.action.php and firstascent.js. List each file's expected size and editor lines.
+> G1's report adds the banner line:
+>  Any red banner on the project page and on the table, with its full text (file, rule, line). If there is one, stop before S1.
+>  Add the line after the sizes. Everything else in §9 is unchanged.
+> 8. The docs: additions to the session 1 prompt's §10
+> Machines. The entry is titled with the day it's written. It names both machines:
+>  Machine: desktop (from the start of session 1 to stop A, the v2 smoke build), then laptop (from this pickup).
+>  It records the move: handoff.patch and its hash, this session's start check, and the HEAD changes during the session (519c3e0 → 10c9c21 → 229cd5a, docs only).
+> Quotes. The entry quotes my messages to session 1 in full, and only mine:
+> the session 1 prompt and the stop A review, taken from p1-8-handoff.md's §2.1 and §2.2 as sent. Its §2.3 holds my messages to the desktop docs session; they belong to the 10c9c21 entry, not to P1.8's;
+> this prompt;
+> my messages to this session.
+> Don't quote your own reports or the handoff session's.
+> The deploys. For each deploy in the step, the entry records the banner result as I report it, and the scan facts of §5 as my report from BGA's Discord.
+> Paths in the entry are laptop paths (C:\BGA Studio\), except where it quotes the desktop record.
+> The rest of §10 is unchanged: the "P1.8 status" line and notes in MIGRATION_PLAN.md, the docs: commit on my "commit docs", staged by explicit path, and the push on my "push".
+> Then update misc/docs/progress.md as §10 and this section say.
+
+**Message 4: the smoke results** (2026-11-26)
+
+> Stop A reviewed: the smoke passed. Record this message in the progress.md entry, quoted in full.
+>
+> 1. My results are in C:\BGA Studio\p1-8-smoke-v2-results\: p1-8-smoke-v2-results.txt and the consoles IndianaScones0.log and IndianaScones1.log. Put them in the entry by path, with lines and bytes as you count them. On that table IndianaScones0 was W (The Dirtbag) and IndianaScones1 was Z (The Overstoker).
+>
+> 2. What the smoke showed, to record in the entry:
+>    - G1: Game.php 358,786 bytes, 6,646 lines; states.inc.php 16,697, 333; firstascent.action.php 5,255, 157; firstascent.js 740,974, 13,514. Check these against the expected sizes in your stop A report and say in the entry whether they match. If any differs, stop and report before step 3.
+>    - S1–S2: Z climbed Half-a-finger and drew Partner has a meltdown (card 25). After S2, Z's hand was 3 and W's 5.
+>    - S3, first request: actConfirmClimbingCardChoice.html?choice=a&card_id=42&card_type=25&… with no jesus_piece key at all. This settles F1: performAction omits an undefined value, so the body never sees the text "undefined". No client fix is needed.
+>    - Second request: actConfirmSelectedOpponent.html?opponent_id=2369492&jesus_party=false&… (W's id).
+>    - Third request: actConfirmAssetsForDiscard.html?tucked_card_types=&…&hand_card_ids[]=98&hand_card_ids[]=103 (URL-encoded brackets in the original; table 1019860). board_card_ids and tucked_card_nums were omitted. An int array arrives as name[]=…, as in P1.6.
+>    - The state sequence in both consoles: climbOrRest, climbingCard, selectOpponent, discardAssets, nextClimb, climbOrRest (states 20, 21, 23, 22, 25, 20).
+>    - The log lines name Z (IndianaScones1) in both tabs: Console them (option a), Palming and Hand-Foot Match given to IndianaScones0, and a Summit Beta token (Jumar in Z's tab). It is then W's turn.
+>    - Hands after S3 were not reported. Both tabs' log lines name the two cards given, and the notification ran without error. Record it that way.
+>    - Consoles: no game error or warning. The only lines besides the app's own are the Permissions-Policy header notices, the iframe sandbox notice, one blocked browser-update.org request, and "Uncaught (in promise) NotAllowedError: play() failed" lines from ly_studio.js. Those come from BGA's sound being blocked by the browser's autoplay rule, not from the game.
+>
+> 3. Rerun the stage 1 harness on the laptop and compare it with p1-8-harness-results-stage1-v2.txt. It must give 166 checks with 0 failed, 1,729 comparisons and 52 mutants killed. If it matches, record that in the entry and go ahead with commit 2, commit 3 and the rest of the prompt through stop B. If anything differs, stop and report.
+
+**Message 5: the stop B review** (2026-11-26)
+
+> Stop B reviewed. Record this message in the progress.md entry, quoted in full.
+>
+> 1. The design discussion replayed your diffs on a fresh fetch of 229cd5a. p1-8-rename.diff, p1-8-b3.diff and p1-8-name.diff apply in order, and the result is byte-identical to p1-8-all.diff. The SHA-256 values match your table; p1-8-rename.diff is 8066e295…3180, the v2 smoke diff. The five blobs (Game.php 01da169, UtilTrait.php 881d21a, states.inc.php c603b7f, firstascent.action.php 1dcc71b, firstascent.js f860f13) give your five G1 sizes and editor lines. The tokenizer counts match §4 of the session 1 prompt. The name diff changes the 40 calls and nothing else, with UtilTrait.php changed only at line 744. php -l passes. Record this in the entry.
+>
+> 2. Answer these in your next report. If an answer shows a problem, stop there and report.
+>    - The mutants: you report 52 killed at all three stages. List which mutants make up the 52 at each stage, and say whether the two B3 mutants (a dropped strval among them) are killed at stages 2 and 3. If they were added for stage 2, explain why the count didn't change.
+>    - Stage 3's static checks: do they report that UtilTrait.php differs from HEAD in exactly one line (744)?
+>    - You fixed p1-8-harness.php in place after the laptop's stage 1 run. Rerun stage 1 with the current harness and compare it with p1-8-harness-results-stage1-laptop.txt. In the entry, give the difference between p1-8-harness-v1-desktop.php and p1-8-harness.php.
+>    - "All checks passed except two Studio sizes that differ from the stop A report": I read this as Game.php and firstascent.js, which commits 2 and 3 change, so nothing failed. Confirm, and don't record it as an exception.
+>    - Message 3's subject: quote the subject §8 of the session 1 prompt gives for it and the subject you used, and say what differs.
+>
+> 3. Message 2: write p1-8-msg-2-v2.txt and keep v1. Replace its second paragraph:
+>
+>    The id is converted on entry with strval, as actRest does, so the rerack_1
+>    global keeps storing strings: the code that reads and writes the same list
+>    (Game.php:976-981 and :1970-1972) gets its ids from getActivePlayerId(), which
+>    returns strings. The type rule of the previous commit keeps the value exactly
+>    as before.
+>
+>    with:
+>
+>    The id is converted on entry with strval, as actRest does, so the rerack_1
+>    global stores the same string as before, as the type rule of the previous
+>    commit requires.
+>
+>    Reason: stNextDraw also reads rerack_1, with an id from activeNextPlayer() (Game.php:5668-5677), and about a dozen other places write to it, so the old sentence wasn't accurate. Check v2 against v1: only this paragraph may differ.
+>
+> 4. The playtest list: write p1-8-playtest-v2.md and keep v1. Make these edits:
+>    a. Table section: delete the line "Save both consoles (Z and W) as .log files before closing any tab." It repeats a line in "Before you start".
+>    b. S2: replace the Pitch line, its sub-line and the debug_giveAssets line with:
+>       - Z chooses a bottom-row Pitch that needs no Gear and no more Water and Psych than Z has. Don't pick The Trifecta.
+>         - If no bottom-row Pitch fits, stop here and say which ones needed Gear, and what Z lacked on the others.
+>       - If Z lacks a Face, Crack or Slab card the Pitch needs: `debug_giveAssets(Z, "…")` with those cards only, never Gear. Press F5 in W's tab. Write down the call.
+>    c. Rename the heading "Between the rounds" to "End of round 1 and Rerack", and S5's title to "S5. W rests, then the Rerack". W's Rest is W's round-1 turn.
+>    d. S5's Report: add, as its first line:
+>       - **The Network tab, W's tab: the request of W's Confirm for the 5 resources.** Copy its URL and its form data exactly.
+>    e. S6's Report: replace "W's hand count before the first Confirm." with "W's hand count after the climb, before W chooses the Whipper option."
+>    Check v2 against v1: only these edits and the title may differ.
+>
+> 5. Record two points about the playtest in the entry, both approved:
+>    - Undo and Pass are played on the same climbing card (Rope sheath is cut), not each on its own card as the playtest scope in §9 of the session 1 prompt said. Undo in state 21 is offered only to the Cool-Headed Crimper (firstascent.js:2626) and returns to state 60, because the savepoint is taken in the climb (Game.php:1807). So this is the shortest route to both.
+>    - Character 10 is in the offered set, because confirmCrimperClimbingCard needs it.
+>
+> 6. Add to the entry's unplayed items: the Jesus Piece line in bespokeClimbingCard (UtilTrait.php:744, cards 55 and 68), which nothing in the list reaches. On Studio, only G1's banner check shows whether UtilTrait.php was accepted.
+>
+> 7. Then write the docs (§10 of the session 1 prompt and §8 of the laptop prompt), using p1-8-msg-2-v2.txt and p1-8-playtest-v2.md. Don't commit. Report the docs diff, the v2 checks and your answers to point 2, then stop for "commit docs".
+
+**Message 6: the docs review** (2026-11-26)
+
+> Docs reviewed. Record this message in the progress.md entry as message 6, quoted in full, after message 5, and add a row for it to the status table ("Docs review, message 6: Used").
+>
+> 1. The harness fix you made without stopping is accepted. It changed only the harness, the earlier version is kept, and the reruns are line for line identical. Record that, and add this sentence after edit (2) in "Harness edits, laptop": "At stages 1 and 2 the check that UtilTrait.php equals HEAD is therefore true by construction; what shows that commits 1 and 2 leave UtilTrait.php alone is that p1-8-rename.diff and p1-8-b3.diff don't touch it, which the design discussion checked in its replay."
+>
+> 2. The smoke was played on 2026-11-26, not 2026-11-25 (my results files are dated 2026-11-26). Two edits:
+>    - MIGRATION_PLAN.md, the P1.8 status line: "**Smoke (stop A):** passed on 2026-11-25," becomes "**Smoke (stop A):** passed on 2026-11-26,".
+>    - progress.md: "**The smoke (stop A), played by Jonathan 2026-11-25**" becomes "**The smoke (stop A), played by Jonathan 2026-11-26**".
+>
+> 3. List v2 plays actConfirmPortaledge in state 33: S5 asks for W's Confirm for the 5 resources (resting, the six-value form). Four edits:
+>    - progress.md, "Not played, and why": in the bullet "The other allowing states", delete ", and `actConfirmPortaledge` in state 33, `resting`", and delete the whole bullet that begins "**`actConfirmPortaledge` in `resting` (state 33)**".
+>    - progress.md, the route paragraph: "W (The Dirtbag) rests." becomes "W (The Dirtbag) rests and, in the Rerack, takes 5 resources (`actConfirmPortaledge` from state 33, `resting`, the six-value form)."
+>    - The same paragraph: "So all seven actions are played, three with the Network request asked for, in two rounds." becomes "So all seven actions are played, each with its Network request asked for, and `actConfirmPortaledge` in both of its live states (33 and 24), in two rounds."
+>    - MIGRATION_PLAN.md, the P1.8 status line: after "(state 21, one climbing card, Rope sheath is cut)", insert "; in the Rerack, W's rest through `actConfirmPortaledge` (state 33, `resting`, the six-value form)".
+>
+> 4. Make the edits by exact match, keeping each file's CRLF endings. Write p1-8-docs-v2.diff and keep p1-8-docs.diff. Check v2 against v1: the only differences may be the edits above, this message's quote and its status row. Report v2's lines, bytes and SHA-256 and the check, then stop for "commit docs".
+
 ## 2026-11-25 (laptop setup check)
 
 A review-only session. **Machine:** laptop (Windows 11, hostname `DESKTOP-PKRB865`, clone `C:\BGA Studio\firstascent`, work folder `C:\BGA Studio\`). **Model:** Sonnet 5.5. Nothing was edited except this entry: no code, no other doc, no commit, no push, no deploy, nothing on Studio or Production, no installs, no git config change, `.vscode/sftp.json` not touched, the private key not read (`ssh-add -l` only).
